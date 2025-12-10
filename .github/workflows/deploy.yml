@@ -31,9 +31,10 @@ jobs:
         run: |
           mkdir -p public/config
           cat > public/config/github-token.js << 'EOF'
-          const GITHUB_TOKEN = '${{ secrets.TASK_MANAGER_TOKEN }}';
+          const GITHUB_TOKEN = '${{ secrets.GH_TOKEN }}';
+          const GH_TOKEN = GITHUB_TOKEN;
           if (typeof module !== 'undefined' && module.exports) {
-            module.exports = { GITHUB_TOKEN };
+            module.exports = { GH_TOKEN, GITHUB_TOKEN };
           }
           EOF
 
