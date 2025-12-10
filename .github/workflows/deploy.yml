@@ -1,0 +1,117 @@
+name: Deploy GitHub Task Manager
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Run Tests
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Run validation tests
+        run: npm run test:validate
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    name: Build and Deploy
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Create token config for deployment
+        run: |
+          echo "const GITHUB_TOKEN = '${{ secrets.TASK_MANAGER_TOKEN }}';" > public/config/github-token.js
+          echo "if (typeof module !== 'undefined' && module.exports) { module.exports = { GITHUB_TOKEN }; }" >> public/config/github-token.js
+
+      - name: Validate tasks.json
+        run: |
+          node -e "
+            const fs = require('fs');
+            const tasks = JSON.parse(fs.readFileSync('public/tasks.json', 'utf8'));
+            if (!tasks.project || !tasks.tasks) {
+              console.error('Invalid tasks.json structure');
+              process.exit(1);
+            }
+            console.log('✓ tasks.json is valid');
+            console.log('  Project:', tasks.project.name);
+            console.log('  Tasks:', tasks.tasks.length);
+          "
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'public'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  sync-tasks:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    name: Sync Tasks to Repository
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.TASK_MANAGER_TOKEN }}
+
+      - name: Check for task updates
+        id: check
+        run: |
+          if git diff --quiet HEAD~1 public/tasks.json 2>/dev/null; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit task updates
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          git config user.name "GitHub Task Manager Bot"
+          git config user.email "bot@github-task-manager.local"
+          
+          # Validate and format tasks.json
+          node -e "
+            const fs = require('fs');
+            const tasks = JSON.parse(fs.readFileSync('public/tasks.json', 'utf8'));
+            fs.writeFileSync('public/tasks.json', JSON.stringify(tasks, null, 2));
+          "
+          
+          git add public/tasks.json
+          git diff --staged --quiet || git commit -m 'chore: sync task updates [skip ci]'
+          git push

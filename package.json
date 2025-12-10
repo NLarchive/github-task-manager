@@ -1,0 +1,38 @@
+{
+  "name": "github-task-manager",
+  "version": "1.0.0",
+  "description": "Collaborative task management system integrated with GitHub for public collaboration",
+  "main": "public/scripts/task-manager-app.js",
+  "scripts": {
+    "start": "npx serve public -l 3000",
+    "test": "node tests/run-tests.js",
+    "test:validate": "node tests/validate-schema.js",
+    "test:watch": "node tests/run-tests.js --watch",
+    "lint": "eslint public/scripts/*.js public/config/*.js",
+    "format": "prettier --write \"public/**/*.{js,css,html,json}\"",
+    "validate": "node tests/validate-schema.js",
+    "deploy": "gh-pages -d public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nlarchive/github-task-manager.git"
+  },
+  "keywords": [
+    "task-manager",
+    "github",
+    "project-management",
+    "collaboration"
+  ],
+  "author": "nlarchive",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nlarchive/github-task-manager/issues"
+  },
+  "homepage": "https://nlarchive.github.io/github-task-manager",
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "gh-pages": "^6.1.0",
+    "prettier": "^3.2.0",
+    "serve": "^14.2.0"
+  }
+}

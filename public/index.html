@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Task Manager</title>
+    <link rel="stylesheet" href="styles/task-manager.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📋 GitHub Task Manager</h1>
+            <p class="header-subtitle">Collaborative Task Management - Connected to GitHub Repository</p>
+            <div class="auth-section">
+                <div id="authStatus" class="auth-status">
+                    <span id="repoInfo">Repository: Loading...</span>
+                </div>
+            </div>
+        </header>
+
+        <main>
+
+            <div id="taskManager" class="task-manager">
+                <!-- User Section -->
+                <section class="user-section">
+                    <div class="user-info">
+                        <label for="userName">Your Name (for task updates):</label>
+                        <input type="text" id="userName" placeholder="Enter your name (optional)" />
+                        <small>Your name will appear when you create or update tasks</small>
+                    </div>
+                </section>
+
+                <section class="controls">
+                    <button onclick="showAddTaskModal()" class="btn-primary">+ Add New Task</button>
+                    <button onclick="loadTasks()" class="btn-secondary">🔄 Refresh</button>
+                    <button onclick="exportToCSV()" class="btn-secondary">📥 Export CSV</button>
+                    <div class="filter-section">
+                        <select id="filterStatus" onchange="app.filterTasks()">
+                            <option value="all">All Tasks</option>
+                            <option value="Not Started">Not Started</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="On Hold">On Hold</option>
+                            <option value="Blocked">Blocked</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Pending Review">Pending Review</option>
+                        </select>
+                        <select id="filterPriority" onchange="app.filterTasks()">
+                            <option value="all">All Priorities</option>
+                            <option value="Critical">Critical</option>
+                            <option value="High">High</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Low">Low</option>
+                        </select>
+                    </div>
+                </section>
+
+                <section class="stats">
+                    <div class="stat-card">
+                        <h3>Total Tasks</h3>
+                        <p id="totalTasks">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Not Started</h3>
+                        <p id="todoTasks">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>In Progress</h3>
+                        <p id="inProgressTasks">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Completed</h3>
+                        <p id="doneTasks">0</p>
+                    </div>
+                </section>
+
+                <section class="tasks-section">
+                    <div id="tasksList" class="tasks-list"></div>
+                    <div id="emptyState" class="empty-state" style="display: none;">
+                        <p>No tasks found. Click "Add New Task" to get started, or import a template above!</p>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Task Modal -->
+        <div id="taskModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2 id="modalTitle">Add New Task</h2>
+                <div id="validationMessages" class="validation-messages"></div>
+                <form id="taskForm">
+                    <input type="hidden" id="taskId" />
+
+                    <div class="form-group">
+                        <label for="taskName" class="required-field">Task Name *</label>
+                        <input type="text" id="taskName" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taskDescription">Description *</label>
+                        <textarea id="taskDescription" rows="4" required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taskStatus" class="required-field">Status *</label>
+                            <select id="taskStatus" required>
+                                <option value="Not Started">Not Started</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="On Hold">On Hold</option>
+                                <option value="Blocked">Blocked</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Cancelled">Cancelled</option>
+                                <option value="Pending Review">Pending Review</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="taskPriority" class="required-field">Priority *</label>
+                            <select id="taskPriority" required>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                                <option value="Critical">Critical</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taskStartDate">Start Date *</label>
+                            <input type="date" id="taskStartDate" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="taskEndDate">End Date *</label>
+                            <input type="date" id="taskEndDate" required />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taskEstimatedHours">Estimated Hours *</label>
+                            <input type="number" id="taskEstimatedHours" min="0" step="0.5" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="taskActualHours">Actual Hours</label>
+                            <input type="number" id="taskActualHours" min="0" step="0.5" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taskProgress">Progress (%)</label>
+                            <input type="number" id="taskProgress" min="0" max="100" value="0" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="taskCategory">Category *</label>
+                            <select id="taskCategory" required>
+                                <option value="">Select Category</option>
+                                <option value="Project Setup">Project Setup</option>
+                                <option value="Backend Development">Backend Development</option>
+                                <option value="Frontend Development">Frontend Development</option>
+                                <option value="Testing">Testing</option>
+                                <option value="Deployment">Deployment</option>
+                                <option value="Documentation">Documentation</option>
+                                <option value="Retrospective">Retrospective</option>
+                                <option value="Bug Fix">Bug Fix</option>
+                                <option value="Feature">Feature</option>
+                                <option value="Maintenance">Maintenance</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taskTags">Tags (comma-separated)</label>
+                        <input type="text" id="taskTags" placeholder="frontend, api, critical" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="parentTaskId">Parent Task ID (for subtasks)</label>
+                        <input type="number" id="parentTaskId" min="0" placeholder="Leave empty for top-level tasks" />
+                        <small style="color: var(--text-secondary);">Leave empty if this is not a subtask</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taskDependencies">Task Dependencies</label>
+                        <textarea id="taskDependencies" placeholder="Task ID: Dependency Type (FS/SS/FF/SF)&#10;Example: 1: FS, 2: SS" rows="3"></textarea>
+                        <small style="color: var(--text-secondary);">Format: taskId: dependencyType (FS=Finish-to-Start, SS=Start-to-Start, FF=Finish-to-Finish, SF=Start-to-Finish)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taskAssignedWorkers">Assigned Workers</label>
+                        <input type="text" id="taskAssignedWorkers" placeholder="Name or email address" />
+                        <small style="color: var(--text-secondary);">Enter names/emails separated by commas</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="taskCriticalPath" />
+                            Critical Path Task
+                            <span class="automation-indicator">AUTO</span>
+                        </label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" onclick="closeModal()" class="btn-secondary">Cancel</button>
+                        <button type="submit" class="btn-primary">Save Task</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+            <div class="spinner"></div>
+            <p>Processing...</p>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="toast"></div>
+    </div>
+
+    <!-- Load Components -->
+    <script src="config/github-token.js"></script>
+    <script src="config/template-config.js"></script>
+    <script src="scripts/template-validator.js"></script>
+    <script src="scripts/template-automation.js"></script>
+    <script src="tasksDB/task-database.js"></script>
+    <script src="scripts/task-manager-app.js"></script>
+</body>
+</html>
