@@ -10,9 +10,9 @@ const path = require('path');
 // Read and evaluate the config file, handling browser-specific code
 let configContent = fs.readFileSync(path.join(__dirname, '../public/config/template-config.js'), 'utf8');
 
-// Replace the browser-specific GITHUB_TOKEN check
+// Replace the browser-specific GH_TOKEN check
 configContent = configContent.replace(
-  /TOKEN: \(typeof GITHUB_TOKEN !== 'undefined' \? GITHUB_TOKEN : ''\)/,
+  /TOKEN: \(typeof GH_TOKEN !== 'undefined' \? GH_TOKEN : ''\)/,
   "TOKEN: ''"
 );
 

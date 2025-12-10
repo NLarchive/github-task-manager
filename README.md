@@ -36,7 +36,7 @@ Simply visit the deployed site and start managing tasks:
    
    Create `public/config/github-token.local.js`:
    ```javascript
-   const GITHUB_TOKEN = 'your_github_personal_access_token';
+   const GH_TOKEN = 'your_github_personal_access_token';
    ```
 
 4. **Run locally**
@@ -119,7 +119,7 @@ github-task-manager/
 
 Create `public/config/github-token.local.js` (gitignored):
 ```javascript
-const GITHUB_TOKEN = 'ghp_your_token_here';
+const GH_TOKEN = 'ghp_your_token_here';
 ```
 
 ## 🧪 Testing

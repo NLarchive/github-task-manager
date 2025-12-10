@@ -186,7 +186,7 @@ const TEMPLATE_CONFIG = {
     OWNER: 'nlarchive',
     REPO: 'github-task-manager',
     // Token is loaded from github-token.js (gitignored) or environment
-    TOKEN: (typeof GITHUB_TOKEN !== 'undefined' ? GITHUB_TOKEN : ''),
+    TOKEN: (typeof GH_TOKEN !== 'undefined' ? GH_TOKEN : ''),
     BRANCH: 'main',
     TASKS_FILE: 'tasks.json'
   },

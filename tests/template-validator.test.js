@@ -9,7 +9,7 @@ const path = require('path');
 // Load config
 let configContent = fs.readFileSync(path.join(__dirname, '../public/config/template-config.js'), 'utf8');
 configContent = configContent.replace(
-  /TOKEN: \(typeof GITHUB_TOKEN !== 'undefined' \? GITHUB_TOKEN : ''\)/,
+  /TOKEN: \(typeof GH_TOKEN !== 'undefined' \? GH_TOKEN : ''\)/,
   "TOKEN: ''"
 );
 const getConfig = new Function(configContent + '\nreturn TEMPLATE_CONFIG;');

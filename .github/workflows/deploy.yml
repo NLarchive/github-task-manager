@@ -50,8 +50,8 @@ jobs:
 
       - name: Create token config for deployment
         run: |
-          echo "const GITHUB_TOKEN = '${{ secrets.TASK_MANAGER_TOKEN }}';" > public/config/github-token.js
-          echo "if (typeof module !== 'undefined' && module.exports) { module.exports = { GITHUB_TOKEN }; }" >> public/config/github-token.js
+          echo "const GH_TOKEN = '${{ secrets.TASK_MANAGER_TOKEN }}';" > public/config/github-token.js
+          echo "if (typeof module !== 'undefined' && module.exports) { module.exports = { GH_TOKEN }; }" >> public/config/github-token.js
 
       - name: Validate tasks.json
         run: |

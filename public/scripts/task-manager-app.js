@@ -69,7 +69,7 @@ class TaskManagerApp {
                 <ul>
                     <li><code>REACT_APP_GITHUB_OWNER</code></li>
                     <li><code>REACT_APP_GITHUB_REPO</code></li>
-                    <li><code>REACT_APP_GITHUB_TOKEN</code></li>
+                    <li><code>REACT_APP_GH_TOKEN</code></li>
                     <li><code>REACT_APP_GITHUB_BRANCH</code> (optional, defaults to 'main')</li>
                 </ul>
                 <p>Check GitHub Actions secrets and deployment configuration.</p>

@@ -63,9 +63,9 @@ async function main() {
   // Create local token file
   const tokenContent = `// GitHub Token Configuration (Local Development)
 // ⚠️ THIS FILE IS GITIGNORED - DO NOT COMMIT
-const GITHUB_TOKEN = '${token}';
+const GH_TOKEN = '${token}';
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { GITHUB_TOKEN };
+  module.exports = { GH_TOKEN };
 }
 `;
 
