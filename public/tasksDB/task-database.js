@@ -29,7 +29,9 @@ class TaskDatabase {
       // Try to load from GitHub API first
       try {
         const { content } = await this.githubApi.getFileContent('tasks.json');
-        this.tasks = JSON.parse(content || '[]');
+        const data = JSON.parse(content || '{}');
+        // Handle both full project structure and flat tasks array
+        this.tasks = data.tasks || (Array.isArray(data) ? data : []);
       } catch (apiError) {
         // Fallback to local tasks.json file if API fails
         console.warn('GitHub API failed, attempting to load local tasks.json:', apiError.message);
@@ -47,6 +49,12 @@ class TaskDatabase {
           console.error('Failed to load local tasks.json:', fetchError);
           this.tasks = [];
         }
+      }
+
+      // Ensure this.tasks is always an array
+      if (!Array.isArray(this.tasks)) {
+        console.warn('Tasks is not an array, converting to empty array');
+        this.tasks = [];
       }
 
       // Validate loaded tasks
@@ -79,7 +87,52 @@ class TaskDatabase {
         throw new Error(`Validation failed: ${errors.join(', ')}`);
       }
 
-      const content = JSON.stringify(this.tasks, null, 2);
+      // Save with full project structure to match tasks.json format
+      const fullData = {
+        project: {
+          name: "GitHub Task Manager - Web Application",
+          description: "Build a collaborative task management system integrated with GitHub, enabling public users to manage tasks through a modern web UI with automatic task ID generation and template-based task creation.",
+          start_date: "2025-12-08",
+          end_date: "2026-02-28",
+          status: "In Progress",
+          budget: 15000
+        },
+        categories: [
+          { "name": "Project Setup", "parent_category_name": null },
+          { "name": "Backend Development", "parent_category_name": null },
+          { "name": "Frontend Development", "parent_category_name": null },
+          { "name": "Testing", "parent_category_name": null },
+          { "name": "Deployment", "parent_category_name": null },
+          { "name": "Documentation", "parent_category_name": null },
+          { "name": "Retrospective", "parent_category_name": null }
+        ],
+        workers: [
+          {
+            "name": "Public User",
+            "email": "public@example.com",
+            "role": "Collaborator",
+            "skills": ["Task Management", "GitHub"],
+            "hourly_rate": 0.0
+          },
+          {
+            "name": "Developer",
+            "email": "dev@example.com",
+            "role": "Full Stack Developer",
+            "skills": ["JavaScript", "React", "Node.js", "GitHub API"],
+            "hourly_rate": 75.0
+          },
+          {
+            "name": "QA Tester",
+            "email": "qa@example.com",
+            "role": "Quality Assurance",
+            "skills": ["Testing", "GitHub"],
+            "hourly_rate": 50.0
+          }
+        ],
+        tasks: this.tasks
+      };
+
+      const content = JSON.stringify(fullData, null, 2);
       const { sha } = await this.githubApi.getFileContent('tasks.json');
       await this.githubApi.updateFile('tasks.json', content, message, sha);
 
