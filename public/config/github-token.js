@@ -16,9 +16,9 @@
 
 // Replace with your actual GitHub Personal Access Token
 // Generate at: https://github.com/settings/tokens
-const GH_TOKEN = '';
+const GH_TOKEN = typeof GITHUB_TOKEN !== 'undefined' ? GITHUB_TOKEN : '';
 
 // DO NOT MODIFY BELOW THIS LINE
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { GH_TOKEN };
+  module.exports = { GH_TOKEN, GITHUB_TOKEN };
 }
