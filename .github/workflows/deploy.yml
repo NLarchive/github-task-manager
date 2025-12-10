@@ -27,6 +27,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Sync tasks.json to public folder
+        run: |
+          cp tasks.json public/tasks.json
+
       - name: Create GitHub token config
         run: |
           mkdir -p public/config

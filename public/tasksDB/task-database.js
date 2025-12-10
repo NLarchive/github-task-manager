@@ -23,11 +23,31 @@ class TaskDatabase {
     }
   }
 
-  // Load tasks from GitHub
+  // Load tasks from GitHub or fallback to local file
   async loadTasks() {
     try {
-      const { content } = await this.githubApi.getFileContent('tasks.json');
-      this.tasks = JSON.parse(content || '[]');
+      // Try to load from GitHub API first
+      try {
+        const { content } = await this.githubApi.getFileContent('tasks.json');
+        this.tasks = JSON.parse(content || '[]');
+      } catch (apiError) {
+        // Fallback to local tasks.json file if API fails
+        console.warn('GitHub API failed, attempting to load local tasks.json:', apiError.message);
+        try {
+          const response = await fetch('/tasks.json');
+          if (response.ok) {
+            const data = await response.json();
+            // Handle both full project structure and flat tasks array
+            this.tasks = data.tasks || (Array.isArray(data) ? data : []);
+          } else {
+            console.warn('Local tasks.json not found, using empty array');
+            this.tasks = [];
+          }
+        } catch (fetchError) {
+          console.error('Failed to load local tasks.json:', fetchError);
+          this.tasks = [];
+        }
+      }
 
       // Validate loaded tasks
       const invalidTasks = [];
