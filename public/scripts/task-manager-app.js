@@ -262,18 +262,24 @@ class TaskManagerApp {
         event.preventDefault();
 
         const formData = this.getFormData();
-        const validation = this.validator.validate(formData, 'task');
+        const isNewTask = !formData.task_id;
 
-        if (!validation.isValid) {
-            this.showValidationMessages(validation.errors, validation.warnings);
-            return;
+        // For new tasks, skip pre-validation since automation will populate required fields
+        // Validation happens after createTask with the fully populated task
+        if (!isNewTask) {
+            // For existing tasks, validate before updating
+            const validation = this.validator.validate(formData, 'task');
+            if (!validation.isValid) {
+                this.showValidationMessages(validation.errors, validation.warnings);
+                return;
+            }
         }
 
         this.clearValidationMessages();
 
-        const result = formData.task_id
-            ? this.database.updateTask(formData.task_id, formData)
-            : this.database.createTask(formData, this.currentUser);
+        const result = isNewTask
+            ? this.database.createTask(formData, this.currentUser)
+            : this.database.updateTask(formData.task_id, formData);
 
         if (!result.success) {
             this.showValidationMessages(result.errors || [result.error], []);
