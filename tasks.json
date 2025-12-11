@@ -1684,6 +1684,33 @@
       "completed_date": null,
       "comments": [],
       "attachments": []
+    },
+    {
+      "task_id": 60,
+      "task_name": "Playwright E2E Test Task",
+      "description": "Testing automated task creation",
+      "status": "In Progress",
+      "priority": "High",
+      "start_date": "2025-12-11",
+      "end_date": "2025-12-12",
+      "progress_percentage": 0,
+      "estimated_hours": 4,
+      "actual_hours": 0,
+      "category_name": "Testing",
+      "tags": [
+        "playwright",
+        "automation",
+        "test"
+      ],
+      "is_critical_path": false,
+      "assigned_workers": [],
+      "parent_task_id": null,
+      "dependencies": [],
+      "creator_id": "Playwright Test User",
+      "created_date": "2025-12-11T16:18:15.854Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": []
     }
   ]
 }
