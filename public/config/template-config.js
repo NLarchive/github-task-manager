@@ -180,16 +180,17 @@ const TEMPLATE_CONFIG = {
   },
 
   // GitHub Configuration (Pre-configured for public collaboration)
-  // For nlarchive/github-task-manager repository
+  // For NLarchive/github-task-manager repository
   GITHUB: {
     // Owner and repo are fixed for this deployment
-    OWNER: 'nlarchive',
+    OWNER: 'NLarchive',
     REPO: 'github-task-manager',
     // Token is loaded from github-token.js (gitignored) or environment
     // For GitHub Pages, we can load public repos without token
     TOKEN: (typeof GH_TOKEN !== 'undefined' ? GH_TOKEN : 'public-access'),
     BRANCH: 'main',
     TASKS_FILE: 'tasksDB/tasks.json',
+    BASE_PATH: '/github-task-manager',
     // Allow app to work in read-only mode for public repos
     ALLOW_PUBLIC_READ: true
   },

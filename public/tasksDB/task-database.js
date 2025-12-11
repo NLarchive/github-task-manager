@@ -28,21 +28,29 @@ class TaskDatabase {
     try {
       // Try to load from GitHub API first
       try {
-        const { content } = await this.githubApi.getFileContent(this.githubApi.config.TASKS_FILE);
+        const tasksFile = TEMPLATE_CONFIG.GITHUB.TASKS_FILE;
+        console.log('Loading tasks from GitHub API with file path:', tasksFile);
+        const { content } = await this.githubApi.getFileContent(tasksFile);
         const data = JSON.parse(content || '{}');
         // Handle both full project structure and flat tasks array
         this.tasks = data.tasks || (Array.isArray(data) ? data : []);
+        console.log('Successfully loaded', this.tasks.length, 'tasks from GitHub API');
       } catch (apiError) {
         // Fallback to local tasks.json file if API fails
-        console.warn('GitHub API failed, attempting to load local tasks.json:', apiError.message);
+        console.warn('GitHub API failed, attempting local fallback:', apiError.message);
         try {
-          const response = await fetch(`/${this.githubApi.config.TASKS_FILE}`);
+          const basePath = TEMPLATE_CONFIG.GITHUB.BASE_PATH || '';
+          const tasksFile = TEMPLATE_CONFIG.GITHUB.TASKS_FILE;
+          const fetchUrl = basePath ? `${basePath}/${tasksFile}` : `/${tasksFile}`;
+          console.log('Attempting local fetch from URL:', fetchUrl);
+          const response = await fetch(fetchUrl);
           if (response.ok) {
             const data = await response.json();
             // Handle both full project structure and flat tasks array
             this.tasks = data.tasks || (Array.isArray(data) ? data : []);
+            console.log('Successfully loaded', this.tasks.length, 'tasks from local file');
           } else {
-            console.warn('Local tasks.json not found, using empty array');
+            console.warn('Local tasks file not found (404), using empty array');
             this.tasks = [];
           }
         } catch (fetchError) {
@@ -133,8 +141,9 @@ class TaskDatabase {
       };
 
       const content = JSON.stringify(fullData, null, 2);
-      const { sha } = await this.githubApi.getFileContent(this.githubApi.config.TASKS_FILE);
-      await this.githubApi.updateFile(this.githubApi.config.TASKS_FILE, content, message, sha);
+      const tasksFile = TEMPLATE_CONFIG.GITHUB.TASKS_FILE;
+      const { sha } = await this.githubApi.getFileContent(tasksFile);
+      await this.githubApi.updateFile(tasksFile, content, message, sha);
 
       return { success: true };
     } catch (error) {
