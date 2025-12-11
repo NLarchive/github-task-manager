@@ -142,9 +142,9 @@ class TaskManagerApp {
         emptyState.style.display = 'none';
         tasksList.innerHTML = this.filteredTasks.map(task => `
             <div class="task-card" onclick="app.editTask('${task.task_id || task.id}')">
-                <div class="task-header">
+                <div class="task-header" onclick="app.editTask('${task.task_id || task.id}')">
                     <div>
-                        <div class="task-title">${this.escapeHtml(task.task_name || task.title)}</div>
+                        <h3 class="task-title">${this.escapeHtml(task.task_name || task.title)}</h3>
                         <div class="task-meta">
                             <span class="badge badge-status-${(task.status || '').replace(/ /g, '-').toLowerCase()}">${(task.status || '').replace(/-/g, ' ')}</span>
                             <span class="badge badge-priority-${task.priority || 'medium'}">${task.priority || 'medium'}</span>
@@ -216,11 +216,27 @@ class TaskManagerApp {
 
     editTask(taskId) {
         const task = this.database.getTask(taskId);
-        if (!task) return;
+        if (!task) {
+            console.error('Task not found:', taskId);
+            return;
+        }
+
+        const modal = document.getElementById('taskModal');
+        if (!modal) {
+            console.error('Modal element not found!');
+            return;
+        }
 
         document.getElementById('modalTitle').textContent = 'Edit Task';
         this.populateFormWithTask(task);
-        document.getElementById('taskModal').style.display = 'block';
+        modal.style.display = 'block';
+        
+        // Force visibility check
+        setTimeout(() => {
+            if (modal.offsetParent === null) {
+                modal.style.display = 'block';
+            }
+        }, 100);
     }
 
     populateFormWithDefaults() {
@@ -465,15 +481,39 @@ class TaskManagerApp {
 
     // Export Functions
     exportToCSV() {
-        const csv = this.database.exportToCSV();
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `tasks-${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-        window.URL.revokeObjectURL(url);
-        this.showToast('Tasks exported to CSV', 'success');
+        try {
+            if (!this.database) {
+                this.showToast('Database not initialized', 'error');
+                return;
+            }
+            
+            const csv = this.database.exportToCSV();
+            if (!csv) {
+                this.showToast('No tasks to export', 'warning');
+                return;
+            }
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `tasks-${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            // Append to body, click, and remove
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Revoke URL to free memory
+            setTimeout(() => URL.revokeObjectURL(url), 100);
+            
+            this.showToast('Tasks exported successfully!', 'success');
+        } catch (error) {
+            console.error('Export failed:', error);
+            this.showToast('Export failed: ' + error.message, 'error');
+        }
     }
 
     // Validation UI
