@@ -9,7 +9,7 @@ public\tasksDB\task-database.js
 
 current project structure;
 """
-.github\workflows
+.github
 node_modules
 public
 public\config
@@ -35,6 +35,8 @@ tests\artifacts
 tests\e2e
 tests\e2e\crud-operations.spec.js
 tests\e2e\test-scenarios.md
+tests\playwright-report
+tests\test-results
 tests\unit
 tests\unit\task-database.test.js
 tests\unit\template-automation.test.js

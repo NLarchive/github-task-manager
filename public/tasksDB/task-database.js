@@ -28,7 +28,7 @@ class TaskDatabase {
     try {
       // Try to load from GitHub API first
       try {
-        const { content } = await this.githubApi.getFileContent('tasks.json');
+        const { content } = await this.githubApi.getFileContent(this.githubApi.config.TASKS_FILE);
         const data = JSON.parse(content || '{}');
         // Handle both full project structure and flat tasks array
         this.tasks = data.tasks || (Array.isArray(data) ? data : []);
@@ -36,7 +36,7 @@ class TaskDatabase {
         // Fallback to local tasks.json file if API fails
         console.warn('GitHub API failed, attempting to load local tasks.json:', apiError.message);
         try {
-          const response = await fetch('/tasks.json');
+          const response = await fetch(`/${this.githubApi.config.TASKS_FILE}`);
           if (response.ok) {
             const data = await response.json();
             // Handle both full project structure and flat tasks array
@@ -133,8 +133,8 @@ class TaskDatabase {
       };
 
       const content = JSON.stringify(fullData, null, 2);
-      const { sha } = await this.githubApi.getFileContent('tasks.json');
-      await this.githubApi.updateFile('tasks.json', content, message, sha);
+      const { sha } = await this.githubApi.getFileContent(this.githubApi.config.TASKS_FILE);
+      await this.githubApi.updateFile(this.githubApi.config.TASKS_FILE, content, message, sha);
 
       return { success: true };
     } catch (error) {
