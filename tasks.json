@@ -761,6 +761,29 @@
       "completed_date": null,
       "comments": [],
       "attachments": []
+    },
+    {
+      "task_id": 23,
+      "task_name": "Stat Test Task",
+      "description": "Test",
+      "status": "Not Started",
+      "priority": "Medium",
+      "start_date": "2025-12-12",
+      "end_date": "2025-12-13",
+      "progress_percentage": 0,
+      "estimated_hours": 8,
+      "actual_hours": 0,
+      "category_name": "Testing",
+      "tags": [],
+      "is_critical_path": false,
+      "assigned_workers": [],
+      "parent_task_id": null,
+      "dependencies": [],
+      "creator_id": "system@example.com",
+      "created_date": "2025-12-11T15:11:39.586Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": []
     }
   ]
 }
