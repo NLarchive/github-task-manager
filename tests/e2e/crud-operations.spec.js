@@ -40,8 +40,9 @@ test.describe('GitHub Task Manager - Create Task', () => {
     // Wait for success message
     await page.waitForSelector('text=Tasks saved successfully', { timeout: TIMEOUT });
     
-    // Verify new task appears in list
-    await expect(page.locator('text=Playwright E2E Test Task')).toBeVisible();
+    // Verify new task appears in list (check that we have at least one with this name)
+    const taskTitles = await page.locator('.task-title').filter({ hasText: 'Playwright E2E Test Task' });
+    await expect(taskTitles.first()).toBeVisible();
     
     // Verify task ID was auto-generated (should be next sequential ID)
     const taskCards = await page.locator('[class*="task-card"]').count();
@@ -216,7 +217,7 @@ test.describe('GitHub Task Manager - Refresh & Persistence', () => {
   });
 
   test('should persist data after refresh', async ({ page }) => {
-    // Get initial task count
+    // Get initial task count (may be > 0 on live site)
     const initialCount = await page.textContent('[id="totalTasks"]');
     
     // Click refresh button
@@ -225,7 +226,7 @@ test.describe('GitHub Task Manager - Refresh & Persistence', () => {
     // Wait for loading to complete
     await page.waitForSelector('text=Tasks loaded successfully', { timeout: TIMEOUT });
     
-    // Verify task count remained the same
+    // Verify task count remained the same (persistence test)
     const finalCount = await page.textContent('[id="totalTasks"]');
     expect(finalCount).toBe(initialCount);
   });

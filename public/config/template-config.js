@@ -186,9 +186,12 @@ const TEMPLATE_CONFIG = {
     OWNER: 'nlarchive',
     REPO: 'github-task-manager',
     // Token is loaded from github-token.js (gitignored) or environment
-    TOKEN: (typeof GH_TOKEN !== 'undefined' ? GH_TOKEN : ''),
+    // For GitHub Pages, we can load public repos without token
+    TOKEN: (typeof GH_TOKEN !== 'undefined' ? GH_TOKEN : 'public-access'),
     BRANCH: 'main',
-    TASKS_FILE: 'tasks.json'
+    TASKS_FILE: 'tasks.json',
+    // Allow app to work in read-only mode for public repos
+    ALLOW_PUBLIC_READ: true
   },
 
   // Categories available for tasks

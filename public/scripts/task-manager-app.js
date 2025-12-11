@@ -57,7 +57,8 @@ class TaskManagerApp {
     }
 
     isConfigured() {
-        return this.config.owner && this.config.repo && this.config.token;
+        // For GitHub Pages deployment, we can use public repos without auth token
+        return this.config.owner && this.config.repo;
     }
 
     showConfigError() {
@@ -195,11 +196,22 @@ class TaskManagerApp {
 
     // Modal Functions
     showAddTaskModal() {
+        const modal = document.getElementById('taskModal');
+        if (!modal) {
+            console.error('Modal element not found!');
+            return;
+        }
         document.getElementById('modalTitle').textContent = 'Add New Task';
         document.getElementById('taskForm').reset();
         document.getElementById('taskId').value = '';
         this.populateFormWithDefaults();
-        document.getElementById('taskModal').style.display = 'block';
+        modal.style.display = 'block';
+        // Force visibility check
+        setTimeout(() => {
+            if (modal.offsetParent === null) {
+                modal.style.display = 'block';
+            }
+        }, 100);
     }
 
     editTask(taskId) {
@@ -254,8 +266,15 @@ class TaskManagerApp {
     }
 
     closeModal() {
-        document.getElementById('taskModal').style.display = 'none';
+        const modal = document.getElementById('taskModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
         this.clearValidationMessages();
+        const form = document.getElementById('taskForm');
+        if (form) {
+            form.reset();
+        }
     }
 
     async saveTask(event) {
@@ -542,10 +561,14 @@ class GitHubAPI {
     async request(endpoint, method = 'GET', body = null) {
         const url = `https://api.github.com${endpoint}`;
         const headers = {
-            'Authorization': `token ${this.config.token}`,
             'Accept': 'application/vnd.github.v3+json',
             'Content-Type': 'application/json'
         };
+
+        // Only add auth header if we have a real token (not 'public-access')
+        if (this.config.token && this.config.token !== 'public-access') {
+            headers['Authorization'] = `token ${this.config.token}`;
+        }
 
         const options = { method, headers };
         if (body) {
