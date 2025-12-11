@@ -4,6 +4,8 @@ package-lock.json
 
 # Token files - NEVER COMMIT THESE
 public/config/github-token.local.js
+public/config/github-token.js
+config/github-token.local.js
 *.token
 *.secret
 
@@ -20,6 +22,7 @@ Thumbs.db
 # Build
 dist/
 build/
+tests/artifacts/
 
 # Logs
 *.log
@@ -32,4 +35,4 @@ coverage/
 .env
 .env.local
 .env.*.local
-.playwright-mcp
+tools/

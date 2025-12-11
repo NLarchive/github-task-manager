@@ -8,7 +8,8 @@ const fs = require('fs');
 const path = require('path');
 
 // Read and evaluate the config file, handling browser-specific code
-let configContent = fs.readFileSync(path.join(__dirname, '../public/config/template-config.js'), 'utf8');
+const configPath = path.join(__dirname, '../../public/config/template-config.js');
+let configContent = fs.readFileSync(configPath, 'utf8');
 
 // Replace the browser-specific GH_TOKEN check
 configContent = configContent.replace(

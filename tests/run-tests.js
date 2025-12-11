@@ -119,7 +119,7 @@ const testFiles = [
 ];
 
 testFiles.forEach(file => {
-  const testPath = path.join(__dirname, file);
+  const testPath = path.join(__dirname, 'unit', file);
   if (fs.existsSync(testPath)) {
     require(testPath);
   } else {

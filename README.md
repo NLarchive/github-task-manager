@@ -66,7 +66,7 @@ cd github-task-manager
 npm install
 
 # Setup GitHub token (local development)
-cp public/config/github-token.js public/config/github-token.local.js
+cp config/github-token.js config/github-token.local.js
 # Edit github-token.local.js and add your GitHub token
 
 # Run tests
@@ -685,7 +685,7 @@ github-task-manager/
 
 ### Local Development
 
-Create `public/config/github-token.local.js` (gitignored):
+Create `config/github-token.local.js` (gitignored):
 ```javascript
 const GH_TOKEN = 'ghp_your_token_here';
 ```

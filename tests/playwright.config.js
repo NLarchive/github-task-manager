@@ -20,7 +20,9 @@ import { defineConfig, devices } from '@playwright/test';
  */
 
 export default defineConfig({
-  testDir: './tests/playwright',
+  testDir: './e2e',
+  testMatch: '**/*.spec.js',
+  outputDir: './artifacts',
   
   // Test timeout
   timeout: 30000,
@@ -62,13 +64,13 @@ export default defineConfig({
   ],
   
   // WebServer configuration (optional - for local testing)
-  webServer: {
-    // Uncomment to serve locally during tests
-    // command: 'python -m http.server 8000',
-    // port: 8000,
-    // timeout: 120 * 1000,
-    // reuseExistingServer: !process.env.CI,
-  },
+  // webServer: {
+  //   // Uncomment to serve locally during tests
+  //   // command: 'python -m http.server 8000',
+  //   // port: 8000,
+  //   // timeout: 120 * 1000,
+  //   // reuseExistingServer: !process.env.CI,
+  // },
   
   // Projects - Browser configurations
   projects: [
