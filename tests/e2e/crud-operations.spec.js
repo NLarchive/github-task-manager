@@ -298,11 +298,11 @@ test.describe('GitHub Task Manager - Statistics', () => {
   });
 
   test('should display task statistics', async ({ page }) => {
-    // Verify all stat cards are visible
-    await expect(page.locator('text=Total Tasks')).toBeVisible();
-    await expect(page.locator('text=Not Started')).toBeVisible();
-    await expect(page.locator('text=In Progress')).toBeVisible();
-    await expect(page.locator('text=Completed')).toBeVisible();
+    // Verify all stat cards are visible by checking their headings
+    await expect(page.locator('.stat-card h3:has-text("Total Tasks")')).toBeVisible();
+    await expect(page.locator('.stat-card h3:has-text("Not Started")')).toBeVisible();
+    await expect(page.locator('.stat-card h3:has-text("In Progress")')).toBeVisible();
+    await expect(page.locator('.stat-card h3:has-text("Completed")')).toBeVisible();
   });
 
   test('should update statistics after creating task', async ({ page }) => {
@@ -396,8 +396,8 @@ test.describe('GitHub Task Manager - UI/UX', () => {
     const modal = page.locator('[id="taskModal"]');
     await expect(modal).toBeVisible();
     
-    // Verify modal title
-    await expect(page.locator('text=Add New Task')).toBeVisible();
+    // Verify modal title specifically in modal
+    await expect(page.locator('#modalTitle')).toHaveText('Add New Task');
   });
 
   test('should display task cards with key information', async ({ page }) => {
