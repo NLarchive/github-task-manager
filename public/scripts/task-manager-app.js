@@ -716,6 +716,7 @@ class TaskManagerApp {
                 <div class="task-actions" onclick="event.stopPropagation()">
                     <button class="btn-secondary" onclick="app.editTask('${task.task_id || task.id}')">Edit</button>
                     <button class="btn-danger" onclick="app.deleteTask('${task.task_id || task.id}')">Delete</button>
+                    <button class="btn-secondary" onclick="app.openHistoryModal('${task.task_id || task.id}')">📜 History</button>
                     ${this.getLinkedIssue(task) ? `<a class="btn-secondary" href="${this.getLinkedIssue(task).url}" target="_blank" rel="noopener">Open Issue</a>` : `<button class="btn-secondary" onclick="app.createIssueForTask('${task.task_id || task.id}')">Create Issue</button>`}
                 </div>
             </div>
@@ -1659,7 +1660,123 @@ class GitHubAPI {
         }
         return await this.request(`/repos/${this.config.owner}/${this.config.repo}/issues`, 'POST', payload);
     }
-}
+
+    // History timeline methods
+    async openHistoryModal(taskId) {
+        const task = this.database.getTask(taskId);
+        if (!task) {
+            this.showToast('Task not found', 'error');
+            return;
+        }
+
+        const modal = document.getElementById('historyModal');
+        if (!modal) return;
+
+        const title = document.getElementById('historyModalTitle');
+        if (title) title.textContent = `📜 History: Task #${taskId} - ${task.task_name}`;
+
+        modal.style.display = 'block';
+        await this.loadTaskHistory(taskId);
+    }
+
+    closeHistoryModal() {
+        const modal = document.getElementById('historyModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    async loadTaskHistory(taskId) {
+        try {
+            const projectId = this.currentProject || 'github-task-manager';
+            const workerUrl = this.database.getWorkerUrl();
+            const timeline = document.getElementById('historyTimeline');
+            if (!timeline) return;
+
+            timeline.innerHTML = '<div class="history-item"><p style="color: var(--text-secondary);">Loading history...</p></div>';
+
+            if (!workerUrl) {
+                timeline.innerHTML = '<div class="history-empty">Worker URL not configured. History tracking disabled.</div>';
+                return;
+            }
+
+            const res = await fetch(`${workerUrl}/api/history/task?project=${projectId}&taskId=${taskId}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!res.ok) {
+                timeline.innerHTML = '<div class="history-empty">Failed to load task history.</div>';
+                console.error('History load error:', res.status);
+                return;
+            }
+
+            const data = await res.json();
+            const items = data.items || [];
+
+            if (items.length === 0) {
+                timeline.innerHTML = '<div class="history-empty">No changes recorded for this task yet.</div>';
+                return;
+            }
+
+            // Sort by timestamp descending (newest first)
+            items.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            timeline.innerHTML = items.map(item => this.renderHistoryItem(item)).join('');
+        } catch (e) {
+            console.error('Error loading history:', e);
+            const timeline = document.getElementById('historyTimeline');
+            if (timeline) {
+                timeline.innerHTML = `<div class="history-empty">Error: ${e.message}</div>`;
+            }
+        }
+    }
+
+    renderHistoryItem(item) {
+        const date = new Date(item.timestamp);
+        const dateStr = date.toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+
+        let actionBadge = item.action.replace(/([A-Z])/g, ' $1').trim();
+        const actionClass = item.action;
+
+        // Build the field change display
+        let fieldContent = '';
+        if (item.action === 'createTask') {
+            fieldContent = '<div class="history-item-field"><span class="history-item-field-name">Task Created</span></div>';
+        } else if (item.action === 'deleteTask') {
+            fieldContent = '<div class="history-item-field"><span class="history-item-field-name">Task Deleted</span></div>';
+        } else if (item.action === 'updateTask' && item.field) {
+            const before = item.beforeValue ? this.escapeHtml(String(item.beforeValue).substring(0, 50)) : '(empty)';
+            const after = item.afterValue ? this.escapeHtml(String(item.afterValue).substring(0, 50)) : '(empty)';
+            fieldContent = `
+                <div class="history-item-field">
+                    <span class="history-item-field-name">${this.escapeHtml(item.field)}</span>
+                    <div class="history-item-change">
+                        <span class="history-value-before" title="${this.escapeHtml(String(item.beforeValue))}">${before}</span>
+                        <span style="color: var(--text-secondary);">→</span>
+                        <span class="history-value-after" title="${this.escapeHtml(String(item.afterValue))}">${after}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="history-item">
+                <div class="history-item-header">
+                    <span class="history-item-action ${actionClass}">${actionBadge}</span>
+                    <span class="history-item-timestamp">${dateStr}</span>
+                </div>
+                ${fieldContent}
+                ${item.actor ? `<div style="font-size: 0.85em; color: var(--text-secondary); margin-top: 4px;">by ${this.escapeHtml(item.actor)}</div>` : ''}
+            </div>
+        `;
+    }
+
 
 // Initialize the application
 const app = new TaskManagerApp();
