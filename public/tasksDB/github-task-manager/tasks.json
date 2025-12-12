@@ -47,6 +47,42 @@
     {
       "name": "Maintenance",
       "parent_category_name": null
+    },
+    {
+      "name": "Discovery",
+      "parent_category_name": null
+    },
+    {
+      "name": "Exploration",
+      "parent_category_name": null
+    },
+    {
+      "name": "Design",
+      "parent_category_name": null
+    },
+    {
+      "name": "Validation",
+      "parent_category_name": null
+    },
+    {
+      "name": "Implementation",
+      "parent_category_name": null
+    },
+    {
+      "name": "Research",
+      "parent_category_name": null
+    },
+    {
+      "name": "UX",
+      "parent_category_name": null
+    },
+    {
+      "name": "Content",
+      "parent_category_name": null
+    },
+    {
+      "name": "Analytics",
+      "parent_category_name": null
     }
   ],
   "workers": [
@@ -369,7 +405,7 @@
       "start_date": "2025-12-20",
       "end_date": "2025-12-22",
       "priority": "Medium",
-      "status": "In Progress",
+      "status": "Not Started",
       "progress_percentage": 20,
       "estimated_hours": 6,
       "actual_hours": 1,
@@ -382,9 +418,9 @@
       "category_name": "Documentation",
       "assigned_workers": [
         {
-          "name": "Developer",
+          "name": "dev@example.com",
           "email": "dev@example.com",
-          "role": "Full Stack Developer"
+          "role": "Collaborator"
         }
       ],
       "parent_task_id": null,
@@ -658,9 +694,19 @@
       "estimated_hours": 3,
       "actual_hours": 3,
       "is_critical_path": true,
-      "tags": ["security", "authentication", "ux"],
+      "tags": [
+        "security",
+        "authentication",
+        "ux"
+      ],
       "category_name": "Feature",
-      "assigned_workers": [{ "name": "Developer", "email": "dev@example.com", "role": "Full Stack Developer" }],
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer"
+        }
+      ],
       "parent_task_id": null,
       "creator_id": "system@example.com",
       "created_date": "2025-12-11T21:00:00Z",
@@ -681,16 +727,33 @@
       "estimated_hours": 6,
       "actual_hours": 6,
       "is_critical_path": true,
-      "tags": ["visualization", "timeline", "dashboard", "ux"],
+      "tags": [
+        "visualization",
+        "timeline",
+        "dashboard",
+        "ux"
+      ],
       "category_name": "Feature",
-      "assigned_workers": [{ "name": "Developer", "email": "dev@example.com", "role": "Full Stack Developer" }],
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer"
+        }
+      ],
       "parent_task_id": null,
       "creator_id": "system@example.com",
       "created_date": "2025-12-11T21:00:00Z",
       "completed_date": "2025-12-11T23:10:00Z",
       "comments": [],
       "attachments": [],
-      "dependencies": [{ "predecessor_task_id": 16, "type": "FS", "lag_days": 0 }]
+      "dependencies": [
+        {
+          "predecessor_task_id": 16,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ]
     },
     {
       "task_id": 18,
@@ -704,16 +767,33 @@
       "estimated_hours": 8,
       "actual_hours": 8,
       "is_critical_path": true,
-      "tags": ["github", "issues", "sync", "integration"],
+      "tags": [
+        "github",
+        "issues",
+        "sync",
+        "integration"
+      ],
       "category_name": "Feature",
-      "assigned_workers": [{ "name": "Developer", "email": "dev@example.com", "role": "Full Stack Developer" }],
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer"
+        }
+      ],
       "parent_task_id": null,
       "creator_id": "system@example.com",
       "created_date": "2025-12-11T21:00:00Z",
       "completed_date": "2025-12-11T23:25:00Z",
       "comments": [],
       "attachments": [],
-      "dependencies": [{ "predecessor_task_id": 17, "type": "FS", "lag_days": 0 }]
+      "dependencies": [
+        {
+          "predecessor_task_id": 17,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ]
     },
     {
       "task_id": 19,
@@ -727,16 +807,32 @@
       "estimated_hours": 4,
       "actual_hours": 4,
       "is_critical_path": false,
-      "tags": ["testing", "playwright", "e2e"],
+      "tags": [
+        "testing",
+        "playwright",
+        "e2e"
+      ],
       "category_name": "Testing",
-      "assigned_workers": [{ "name": "QA Tester", "email": "qa@example.com", "role": "Quality Assurance" }],
+      "assigned_workers": [
+        {
+          "name": "QA Tester",
+          "email": "qa@example.com",
+          "role": "Quality Assurance"
+        }
+      ],
       "parent_task_id": null,
       "creator_id": "system@example.com",
       "created_date": "2025-12-11T21:00:00Z",
       "completed_date": "2025-12-11T23:35:00Z",
       "comments": [],
       "attachments": [],
-      "dependencies": [{ "predecessor_task_id": 16, "type": "SS", "lag_days": 0 }]
+      "dependencies": [
+        {
+          "predecessor_task_id": 16,
+          "type": "SS",
+          "lag_days": 0
+        }
+      ]
     }
   ]
 }
