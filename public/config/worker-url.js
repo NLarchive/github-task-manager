@@ -5,3 +5,8 @@
 if (typeof GH_WORKER_URL === 'undefined') {
   var GH_WORKER_URL = '';
 }
+
+// Backwards/alias support
+if (typeof GITHUB_WORKER_URL === 'undefined') {
+  var GITHUB_WORKER_URL = GH_WORKER_URL;
+}

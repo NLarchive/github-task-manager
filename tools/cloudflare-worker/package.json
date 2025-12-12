@@ -1,0 +1,16 @@
+{
+  "name": "github-task-manager-worker",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker for secure GitHub API writes",
+  "type": "module",
+  "main": "worker.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node --test worker.test.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "wrangler": "^3.65.0"
+  }
+}

@@ -997,6 +997,54 @@ button {
     font-size: 12px;
 }
 
+/* History */
+.history-list {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    max-height: 55vh;
+    overflow-y: auto;
+}
+
+.history-item {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    background: var(--background);
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-item summary {
+    cursor: pointer;
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+}
+
+.history-title {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.history-meta {
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+.history-changes {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    background: var(--background-secondary);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+    white-space: pre-wrap;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .form-row {

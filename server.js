@@ -238,8 +238,16 @@ function createServer({ publicDir, tasksDbDir }) {
       }
 
       // Static serving (special-case tasksDB to come from tasksDbDir)
-      const serveRoot = pathname.startsWith('/tasksDB/') ? tasksDbDir : publicDir;
-      const effectivePath = pathname === '/' ? '/index.html' : pathname;
+      let serveRoot = publicDir;
+      let effectivePath = pathname === '/' ? '/index.html' : pathname;
+      
+      if (pathname.startsWith('/tasksDB/')) {
+        serveRoot = tasksDbDir;
+        // Remove the /tasksDB/ prefix since we're serving from tasksDbDir
+        effectivePath = pathname.replace(/^\/tasksDB/, '');
+        if (!effectivePath) effectivePath = '/';
+      }
+      
       const filePath = safeJoin(serveRoot, effectivePath);
       if (!filePath) {
         res.writeHead(400);

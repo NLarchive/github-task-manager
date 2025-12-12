@@ -40,6 +40,7 @@
                     <button onclick="loadTasks()" class="btn-secondary">🔄 Refresh</button>
                     <button onclick="exportToCSV()" class="btn-secondary">📥 Export CSV</button>
                     <button type="button" onclick="app.openIssuesSyncModal()" class="btn-secondary" data-testid="sync-issues">🐙 Sync Issues</button>
+                    <button type="button" onclick="app.openHistoryModal()" class="btn-secondary" data-testid="open-history">🕘 History</button>
                     <div class="view-toggle" role="group" aria-label="View mode">
                         <button type="button" id="viewListBtn" onclick="app.setViewMode('list')" class="btn-secondary active" data-testid="view-list">📋 List</button>
                         <button type="button" id="viewTimelineBtn" onclick="app.setViewMode('timeline')" class="btn-secondary" data-testid="view-timeline">📅 Timeline</button>
@@ -327,15 +328,6 @@
             </div>
         </div>
 
-        <!-- Task History Modal -->
-        <div id="historyModal" class="modal">
-            <div class="modal-content" style="max-width: 800px;">
-                <span class="close" onclick="app.closeHistoryModal()">&times;</span>
-                <h2 id="historyModalTitle">📜 Task History</h2>
-                <div id="historyTimeline" class="history-timeline" style="padding: 14px 0;"></div>
-            </div>
-        </div>
-
         <!-- GitHub Issues Sync Modal -->
         <div id="issuesModal" class="modal">
             <div class="modal-content" style="max-width: 720px;">
@@ -360,6 +352,27 @@
                         Note: This is a client-side integration; public issue reads may be rate-limited without a token.
                     </small>
                 </div>
+            </div>
+        </div>
+
+        <!-- History Modal -->
+        <div id="historyModal" class="modal">
+            <div class="modal-content" style="max-width: 920px;">
+                <span class="close" onclick="app.closeHistoryModal()">&times;</span>
+                <h2>🕘 Change History</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 14px;">
+                    Audit trail for task changes in the selected project.
+                    <br><small>Tip: Expand an item to see full field-level changes.</small>
+                </p>
+
+                <div class="issues-toolbar">
+                    <button type="button" class="btn-secondary" onclick="app.refreshHistory()">🔄 Refresh History</button>
+                    <input type="text" id="historyTaskIdFilter" placeholder="Filter by Task ID (optional)" style="flex: 1; min-width: 220px;" />
+                    <button type="button" class="btn-primary" onclick="app.applyHistoryFilter()">Apply</button>
+                </div>
+
+                <div id="historyStatus" class="validation-messages" style="display: none;"></div>
+                <div id="historyList" class="history-list" data-testid="history-list"></div>
             </div>
         </div>
 

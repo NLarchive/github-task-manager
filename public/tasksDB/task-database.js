@@ -48,6 +48,20 @@ class TaskDatabase {
     this.currentProject = null;
     this.categories = null;
     this.workers = null;
+    this.actor = '';
+  }
+
+  resolveActor() {
+    try {
+      if (this.actor && String(this.actor).trim()) return String(this.actor).trim();
+      if (typeof localStorage !== 'undefined') {
+        const v = localStorage.getItem('taskManagerUserName');
+        if (v && String(v).trim()) return String(v).trim();
+      }
+    } catch {
+      // ignore
+    }
+    return '';
   }
 
   isLocalDevHost() {
@@ -488,6 +502,8 @@ class TaskDatabase {
     const fullData = this.buildFullData(this.tasks);
     const content = JSON.stringify(fullData, null, 2);
 
+    const actor = this.resolveActor();
+
     // Save tasks.json
     const jsonResponse = await fetch(`${workerUrl}/api/tasks`, {
       method: 'PUT',
@@ -497,7 +513,8 @@ class TaskDatabase {
         accessPassword,
         filePath: tasksFile,
         content,
-        message
+        message,
+        actor
       })
     });
 
@@ -517,7 +534,8 @@ class TaskDatabase {
         accessPassword,
         filePath: tasksCsvFile,
         content: csvContent,
-        message: `${message} (csv)`
+        message: `${message} (csv)`,
+        actor
       })
     });
 
@@ -535,7 +553,8 @@ class TaskDatabase {
             accessPassword,
             filePath: `${stateDir}/${filename}`,
             content: stateContent,
-            message: `${message} (state)`
+            message: `${message} (state)`,
+            actor
           })
         });
       }
@@ -835,72 +854,6 @@ class TaskDatabase {
     return result;
   }
 
-  // Record a task change event in history
-  async recordTaskChange(taskId, action, field, beforeValue, afterValue, actor = 'User') {
-    try {
-      const projectId = resolveActiveProjectId();
-      const accessPassword = this.getSessionAccessPassword();
-      
-      // Try to append via Worker if available
-      const workerUrl = this.getWorkerUrl();
-      if (workerUrl && accessPassword) {
-        const payload = {
-          projectId,
-          taskId: String(taskId),
-          action,
-          field: field || '',
-          beforeValue: beforeValue === undefined ? '' : String(beforeValue),
-          afterValue: afterValue === undefined ? '' : String(afterValue),
-          actor,
-          accessPassword
-        };
-        
-        try {
-          const res = await fetch(`${workerUrl}/api/history/append`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          
-          if (res.ok) {
-            console.log(`[History] Recorded: ${action} task ${taskId} field ${field}`);
-            return true;
-          } else {
-            const err = await res.json().catch(() => ({}));
-            console.error('[History] Append failed:', err);
-            return false;
-          }
-        } catch (e) {
-          console.error('[History] Worker error:', e.message);
-          return false;
-        }
-      }
-    } catch (e) {
-      console.error('[History] Error recording change:', e);
-      return false;
-    }
-  }
-
-  getWorkerUrl() {
-    try {
-      if (typeof window !== 'undefined' && window.GITHUB_WORKER_URL) return window.GITHUB_WORKER_URL;
-      if (typeof globalThis !== 'undefined' && globalThis.GITHUB_WORKER_URL) return globalThis.GITHUB_WORKER_URL;
-      // eslint-disable-next-line no-undef
-      if (typeof GITHUB_WORKER_URL !== 'undefined') return GITHUB_WORKER_URL;
-    } catch (e) {}
-    return '';
-  }
-
-  getSessionAccessPassword() {
-    try {
-      const projectId = resolveActiveProjectId();
-      const key = `taskManagerAccessPassword:${projectId}`;
-      return sessionStorage.getItem(key) || '';
-    } catch (e) {
-      return '';
-    }
-  }
-
   // CRUD operations
   createTask(taskData, creatorId = null) {
     const task = this.automation.autoPopulateTask(taskData, { tasks: this.tasks }, creatorId);
@@ -911,10 +864,6 @@ class TaskDatabase {
     }
 
     this.tasks.push(task);
-    
-    // Record creation in history
-    this.recordTaskChange(task.task_id, 'createTask', '*', '', JSON.stringify(task), 'System');
-    
     return { success: true, task };
   }
 
@@ -925,21 +874,13 @@ class TaskDatabase {
       return { success: false, error: 'Task not found' };
     }
 
-    const oldTask = this.tasks[taskIndex];
-    const updatedTask = { ...oldTask, ...updates };
+    const updatedTask = { ...this.tasks[taskIndex], ...updates };
     // Never allow task_id to be changed (or coerced to string) through updates
-    updatedTask.task_id = oldTask.task_id;
+    updatedTask.task_id = this.tasks[taskIndex].task_id;
     const validation = this.validator.validate(updatedTask, 'task');
 
     if (!validation.isValid) {
       return { success: false, errors: validation.errors };
-    }
-
-    // Record changes per field
-    for (const [field, newValue] of Object.entries(updates)) {
-      if (field !== 'task_id' && oldTask[field] !== newValue) {
-        this.recordTaskChange(id, 'updateTask', field, oldTask[field], newValue, 'User');
-      }
     }
 
     this.tasks[taskIndex] = updatedTask;
@@ -954,10 +895,6 @@ class TaskDatabase {
     }
 
     const deletedTask = this.tasks.splice(taskIndex, 1)[0];
-    
-    // Record deletion in history
-    this.recordTaskChange(id, 'deleteTask', '*', JSON.stringify(deletedTask), '', 'User');
-    
     return { success: true, task: deletedTask };
   }
 
