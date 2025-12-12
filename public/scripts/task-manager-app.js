@@ -14,6 +14,11 @@ class TaskManagerApp {
         this.tasks = [];
         this.filteredTasks = [];
         this.currentUser = null;
+        
+        // Password protection state
+        this.isAuthenticated = false;
+        this.authExpiry = null;
+        this.pendingAction = null; // Store action to execute after password verification
     }
 
     // Initialize the application
@@ -24,6 +29,7 @@ class TaskManagerApp {
         this.setupEventListeners();
         this.setupStatCardFilters();
         this.loadUserName();
+        this.updateAccessIndicator(); // Initialize access indicator
 
         // Setup GitHub API with pre-configured settings
         if (this.isConfigured()) {
@@ -72,6 +78,164 @@ class TaskManagerApp {
     saveUserName(name) {
         this.currentUser = name;
         localStorage.setItem('taskManagerUserName', name);
+    }
+
+    // Password Protection Methods
+    getAccessConfig() {
+        const templateConfig = window.TEMPLATE_CONFIG || TEMPLATE_CONFIG;
+        return templateConfig.ACCESS || { PASSWORD: '', PUBLIC_READ: true, SESSION_DURATION: 30 };
+    }
+
+    isPasswordProtected() {
+        const accessConfig = this.getAccessConfig();
+        return accessConfig.PASSWORD && accessConfig.PASSWORD.length > 0;
+    }
+
+    checkAuth() {
+        // If no password configured, allow all actions
+        if (!this.isPasswordProtected()) {
+            return true;
+        }
+        
+        // Check if authenticated and session is still valid
+        if (this.isAuthenticated && this.authExpiry) {
+            if (Date.now() < this.authExpiry) {
+                return true;
+            }
+            // Session expired
+            this.isAuthenticated = false;
+            this.authExpiry = null;
+        }
+        
+        // Check localStorage for persisted session
+        const storedAuth = localStorage.getItem('taskManagerAuth');
+        if (storedAuth) {
+            const { expiry } = JSON.parse(storedAuth);
+            if (expiry && Date.now() < expiry) {
+                this.isAuthenticated = true;
+                this.authExpiry = expiry;
+                return true;
+            }
+            // Clear expired session
+            localStorage.removeItem('taskManagerAuth');
+        }
+        
+        return false;
+    }
+
+    requireAuth(action, ...args) {
+        // Check if already authenticated
+        if (this.checkAuth()) {
+            // Execute action immediately
+            action.apply(this, args);
+            return;
+        }
+        
+        // Store pending action and show password modal
+        this.pendingAction = { action, args };
+        this.showPasswordModal();
+    }
+
+    showPasswordModal() {
+        const modal = document.getElementById('passwordModal');
+        if (modal) {
+            modal.style.display = 'block';
+            document.getElementById('accessPassword').value = '';
+            document.getElementById('accessPassword').focus();
+            document.getElementById('passwordError').style.display = 'none';
+        }
+    }
+
+    closePasswordModal() {
+        const modal = document.getElementById('passwordModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        this.pendingAction = null;
+    }
+
+    verifyPassword(event) {
+        event.preventDefault();
+        
+        const passwordInput = document.getElementById('accessPassword');
+        const errorDiv = document.getElementById('passwordError');
+        const enteredPassword = passwordInput.value;
+        const accessConfig = this.getAccessConfig();
+        
+        if (enteredPassword === accessConfig.PASSWORD) {
+            // Password correct - set authentication
+            const sessionDuration = (accessConfig.SESSION_DURATION || 30) * 60 * 1000; // Convert to ms
+            this.authExpiry = Date.now() + sessionDuration;
+            this.isAuthenticated = true;
+            
+            // Persist to localStorage
+            localStorage.setItem('taskManagerAuth', JSON.stringify({
+                expiry: this.authExpiry
+            }));
+            
+            // Store pending action before closing modal (which clears it)
+            const pendingAction = this.pendingAction;
+            
+            // Close modal and update UI
+            this.closePasswordModal();
+            this.updateAccessIndicator();
+            this.showToast('🔓 Access granted!', 'success');
+            
+            // Execute pending action if any
+            if (pendingAction) {
+                const { action, args } = pendingAction;
+                action.apply(this, args);
+            }
+        } else {
+            // Wrong password
+            errorDiv.innerHTML = '<span style="color: var(--danger-color);">❌ Incorrect password. Please try again.</span>';
+            errorDiv.style.display = 'block';
+            passwordInput.value = '';
+            passwordInput.focus();
+        }
+        
+        return false;
+    }
+
+    logout() {
+        this.isAuthenticated = false;
+        this.authExpiry = null;
+        localStorage.removeItem('taskManagerAuth');
+        this.updateAccessIndicator();
+        this.showToast('🔒 Logged out', 'info');
+    }
+
+    updateAccessIndicator() {
+        const indicator = document.getElementById('accessIndicator');
+        if (!indicator) return;
+        
+        // Hide indicator if no password configured
+        if (!this.isPasswordProtected()) {
+            indicator.style.display = 'none';
+            return;
+        }
+        
+        indicator.style.display = 'flex';
+        
+        if (this.checkAuth()) {
+            indicator.className = 'auth-indicator unlocked';
+            indicator.innerHTML = '🔓 <span>Unlocked</span>';
+            indicator.title = 'Click to lock';
+        } else {
+            indicator.className = 'auth-indicator locked';
+            indicator.innerHTML = '🔒 <span>Read-Only</span>';
+            indicator.title = 'Click to unlock for editing';
+        }
+    }
+
+    toggleAuthIndicator() {
+        if (this.checkAuth()) {
+            // Already authenticated - log out
+            this.logout();
+        } else {
+            // Not authenticated - show password modal to unlock
+            this.showPasswordModal();
+        }
     }
 
     isConfigured() {
@@ -251,8 +415,17 @@ class TaskManagerApp {
         this.setActiveStatCard(statusFilter);
     }
 
-    // Modal Functions
+    // Modal Functions (with password protection)
     showAddTaskModal() {
+        // Require password for adding tasks
+        if (this.isPasswordProtected()) {
+            this.requireAuth(this._showAddTaskModal);
+        } else {
+            this._showAddTaskModal();
+        }
+    }
+
+    _showAddTaskModal() {
         const modal = document.getElementById('taskModal');
         if (!modal) {
             console.error('Modal element not found!');
@@ -272,6 +445,15 @@ class TaskManagerApp {
     }
 
     editTask(taskId) {
+        // Require password for editing tasks
+        if (this.isPasswordProtected()) {
+            this.requireAuth(this._editTask, taskId);
+        } else {
+            this._editTask(taskId);
+        }
+    }
+
+    _editTask(taskId) {
         const task = this.database.getTask(taskId);
         if (!task) {
             console.error('Task not found:', taskId);
@@ -472,6 +654,15 @@ class TaskManagerApp {
     }
 
     async deleteTask(taskId) {
+        // Require password for deleting tasks
+        if (this.isPasswordProtected()) {
+            this.requireAuth(this._deleteTask, taskId);
+        } else {
+            this._deleteTask(taskId);
+        }
+    }
+
+    async _deleteTask(taskId) {
         if (!confirm('Are you sure you want to delete this task?')) return;
 
         const result = this.database.deleteTask(taskId);
@@ -729,3 +920,5 @@ function showAddTaskModal() { app.showAddTaskModal(); }
 function closeModal() { app.closeModal(); }
 function exportToCSV() { app.exportToCSV(); }
 function loadTasks() { app.loadTasks(); }
+function closePasswordModal() { app.closePasswordModal(); }
+function verifyPassword(event) { return app.verifyPassword(event); }
