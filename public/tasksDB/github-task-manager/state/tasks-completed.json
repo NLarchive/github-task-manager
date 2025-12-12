@@ -1,6 +1,6 @@
 {
   "status": "Completed",
-  "generated_at": "2025-12-12T01:39:11.338Z",
+  "generated_at": "2025-12-12T13:37:00.181Z",
   "tasks": [
     {
       "task_id": 1,
@@ -451,7 +451,7 @@
     {
       "task_id": 16,
       "task_name": "Add Password Protection for Modifications",
-      "description": "Implement a simple password gate for all modification actions (create, edit, delete tasks). Users can view tasks and dashboard freely, but must enter a shared password before making changes. Password stored securely in config, verified client-side with hash comparison.",
+      "description": "Implement a simple password gate for all modification actions (create, edit, delete tasks). Users can view tasks and dashboard freely, but must enter a shared password before making changes. GitHub Pages uses a repo Secret injected at deploy time; local dev is unlocked by default.",
       "start_date": "2025-12-11",
       "end_date": "2025-12-12",
       "priority": "High",
