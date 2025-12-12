@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import os from 'os';
 
 /**
  * Playwright Configuration for GitHub Task Manager
@@ -23,6 +24,9 @@ export default defineConfig({
   testDir: './e2e',
   testMatch: '**/*.spec.js',
   outputDir: './artifacts',
+
+  // Allow tests within a file to run in parallel when safe
+  fullyParallel: true,
   
   // Test timeout
   timeout: 30000,
@@ -38,7 +42,10 @@ export default defineConfig({
   // Fail on console errors
   use: {
     // Base URL for all tests
-    baseURL: 'https://nlarchive.github.io/github-task-manager/',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000/',
+
+    // Required for download assertions (CSV export)
+    acceptDownloads: true,
     
     // Collect trace on failure
     trace: 'on-first-retry',
@@ -58,19 +65,23 @@ export default defineConfig({
   // Reporter configuration
   reporter: [
     ['html', { outputFolder: 'playwright-report' }],
-    ['json', { outputFile: 'tests\test-results\test-results.json' }],
-    ['junit', { outputFile: 'tests\test-results\test-results.xml' }],
+    ['json', { outputFile: 'test-results/test-results.json' }],
+    ['junit', { outputFile: 'test-results/test-results.xml' }],
     ['list']
   ],
   
-  // WebServer configuration (optional - for local testing)
-  // webServer: {
-  //   // Uncomment to serve locally during tests
-  //   // command: 'python -m http.server 8000',
-  //   // port: 8000,
-  //   // timeout: 120 * 1000,
-  //   // reuseExistingServer: !process.env.CI,
-  // },
+  webServer: process.env.PLAYWRIGHT_BASE_URL
+    ? undefined
+    : {
+        command: 'cd .. && node server.js',
+        port: 3000,
+        timeout: 120 * 1000,
+        reuseExistingServer: !process.env.CI,
+        env: {
+          // Prevent E2E from mutating repo data under /public/tasksDB
+          TASKS_DB_DIR: 'test-results/tasksDB-e2e'
+        },
+      },
   
   // Projects - Browser configurations
   projects: [
@@ -110,6 +121,6 @@ export default defineConfig({
   // Retry failed tests
   retries: process.env.CI ? 2 : 0,
   
-  // Workers for parallel execution
-  workers: process.env.CI ? 1 : undefined,
+  // Workers for parallel execution (cap locally to avoid overloading)
+  workers: process.env.CI ? 1 : Math.min(4, os.cpus().length),
 });

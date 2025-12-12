@@ -18,8 +18,8 @@ const colors = {
 console.log(`${colors.blue}📋 Schema Validation${colors.reset}`);
 console.log('='.repeat(50));
 
-// Load tasks.json
-const tasksPath = path.join(__dirname, '../public/tasks.json');
+// Load tasks database JSON (deployed under /public)
+const tasksPath = path.join(__dirname, '../../public/tasksDB/tasks.json');
 let tasks;
 
 try {

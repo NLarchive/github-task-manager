@@ -4,9 +4,10 @@
   "description": "Collaborative task management system integrated with GitHub for public collaboration",
   "main": "public/scripts/task-manager-app.js",
   "scripts": {
-    "start": "npx serve public -l 3000",
+    "start": "node server.js",
+    "start:static": "npx serve public -l 3000",
     "test": "node tests/run-tests.js",
-    "test:validate": "node tests/validate-schema.js",
+    "test:validate": "node tests/unit/validate-schema.js",
     "test:watch": "node tests/run-tests.js --watch",
     "test:playwright": "playwright test --config=tests/playwright.config.js",
     "test:playwright:ui": "playwright test --ui --config=tests/playwright.config.js",
@@ -14,9 +15,11 @@
     "test:playwright:debug": "playwright test --debug --config=tests/playwright.config.js",
     "test:playwright:report": "playwright test --reporter=html --config=tests/playwright.config.js && npx playwright show-report",
     "test:all": "npm run test && npm run test:validate && npm run test:playwright",
+    "tasks:archive-root": "node tools/scripts/archive-root-tasks.js",
+    "tasks:generate-state": "node tools/scripts/generate-state-files.js",
     "lint": "eslint public/scripts/*.js public/config/*.js",
     "format": "prettier --write \"public/**/*.{js,css,html,json}\"",
-    "validate": "node tests/validate-schema.js",
+    "validate": "node tests/unit/validate-schema.js",
     "deploy": "gh-pages -d public"
   },
   "repository": {

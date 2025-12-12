@@ -15,6 +15,9 @@ configContent = configContent.replace(
 const getConfig = new Function(configContent + '\nreturn TEMPLATE_CONFIG;');
 const TEMPLATE_CONFIG = getConfig();
 
+// Make available to code evaluated via new Function() (TaskDatabase.resolveTemplateConfig())
+globalThis.TEMPLATE_CONFIG = TEMPLATE_CONFIG;
+
 // Load validator
 const validatorContent = fs.readFileSync(path.join(__dirname, '../../public/scripts/template-validator.js'), 'utf8');
 const getValidator = new Function('TEMPLATE_CONFIG', validatorContent + '\nreturn TemplateValidator;');
@@ -104,6 +107,31 @@ describe('Task CRUD Operations', () => {
     expect(task.task_name).toBe('Task 1');
   });
 
+  it('should get task by string ID', () => {
+    const mockApi = new MockGitHubAPI();
+    const db = new TaskDatabase(mockApi);
+    
+    db.createTask({
+      task_name: 'Task 1',
+      description: 'First task',
+      start_date: '2025-12-10',
+      end_date: '2025-12-15',
+      priority: 'High',
+      status: 'Not Started',
+      estimated_hours: 8,
+      category_name: 'Testing'
+    });
+    
+    // Verify ID is number
+    const task = db.getTask(1);
+    expect(typeof task.task_id).toBe('number');
+
+    // Retrieve using string
+    const retrieved = db.getTask('1');
+    expect(retrieved).toBeTruthy();
+    expect(retrieved.task_id).toBe(1);
+  });
+
   it('should update task properties', () => {
     const mockApi = new MockGitHubAPI();
     const db = new TaskDatabase(mockApi);
@@ -127,6 +155,30 @@ describe('Task CRUD Operations', () => {
     expect(result.success).toBeTruthy();
     expect(result.task.task_name).toBe('Updated Name');
     expect(result.task.status).toBe('In Progress');
+  });
+
+  it('should update task using string ID', () => {
+    const mockApi = new MockGitHubAPI();
+    const db = new TaskDatabase(mockApi);
+    
+    db.createTask({
+      task_name: 'Original Name',
+      description: 'Original',
+      start_date: '2025-12-10',
+      end_date: '2025-12-15',
+      priority: 'Medium',
+      status: 'Not Started',
+      estimated_hours: 8,
+      category_name: 'Testing'
+    });
+    
+    const result = db.updateTask('1', { 
+      task_name: 'Updated Name',
+      status: 'In Progress' 
+    });
+    
+    expect(result.success).toBeTruthy();
+    expect(result.task.task_name).toBe('Updated Name');
   });
 
   it('should delete task by ID', () => {
@@ -248,5 +300,124 @@ describe('Statistics Generation', () => {
     const stats = db.getStatistics();
     expect(stats.total_tasks).toBe(2);
     expect(stats.total_estimated_hours).toBe(15);
+  });
+});
+
+describe('TaskDatabase Persistence', () => {
+  it('should save both tasks.json and tasks.csv', async () => {
+    // Force GitHub persistence path for this test
+    const previousToken = TEMPLATE_CONFIG.GITHUB.TOKEN;
+    TEMPLATE_CONFIG.GITHUB.TOKEN = 'unit-test-token';
+
+    const mockApi = new MockGitHubAPI();
+    const db = new TaskDatabase(mockApi);
+
+    const created = db.createTask({
+      task_name: 'Persist Test Task',
+      description: 'Verify JSON+CSV persistence',
+      start_date: '2025-12-11',
+      end_date: '2025-12-12',
+      priority: 'Medium',
+      status: 'Not Started',
+      estimated_hours: 1,
+      category_name: 'Testing'
+    }, 'dev@example.com');
+
+    expect(created.success).toBeTruthy();
+
+    const result = await db.saveTasks('Test save');
+    expect(result.success).toBeTruthy();
+
+    expect(mockApi.files['public/tasksDB/tasks.json']).toBeTruthy();
+    expect(mockApi.files['public/tasksDB/tasks.csv']).toBeTruthy();
+
+    // Restore token
+    TEMPLATE_CONFIG.GITHUB.TOKEN = previousToken;
+  });
+
+  it('should refuse saving when duplicate task_id exists', async () => {
+    const mockApi = new MockGitHubAPI();
+    const db = new TaskDatabase(mockApi);
+
+    db.tasks = [
+      {
+        task_id: 1,
+        task_name: 'Dup A',
+        description: 'A',
+        start_date: '2025-12-11',
+        end_date: '2025-12-12',
+        priority: 'Medium',
+        status: 'Not Started',
+        progress_percentage: 0,
+        estimated_hours: 1,
+        actual_hours: 0,
+        is_critical_path: false,
+        category_name: 'Testing',
+        parent_task_id: null,
+        creator_id: 'dev@example.com',
+        created_date: '2025-12-11T00:00:00Z',
+        completed_date: null,
+        tags: [],
+        assigned_workers: [],
+        dependencies: [],
+        comments: [],
+        attachments: []
+      },
+      {
+        task_id: 1,
+        task_name: 'Dup B',
+        description: 'B',
+        start_date: '2025-12-11',
+        end_date: '2025-12-12',
+        priority: 'Medium',
+        status: 'Not Started',
+        progress_percentage: 0,
+        estimated_hours: 1,
+        actual_hours: 0,
+        is_critical_path: false,
+        category_name: 'Testing',
+        parent_task_id: null,
+        creator_id: 'dev@example.com',
+        created_date: '2025-12-11T00:00:00Z',
+        completed_date: null,
+        tags: [],
+        assigned_workers: [],
+        dependencies: [],
+        comments: [],
+        attachments: []
+      }
+    ];
+
+    const result = await db.saveTasks('Should fail');
+    expect(result.success).toBeFalsy();
+    expect(result.error).toContain('Duplicate task_id');
+  });
+
+  it('should not allow updateTask to change task_id type/value', () => {
+    const mockApi = new MockGitHubAPI();
+    const db = new TaskDatabase(mockApi);
+
+    const created = db.createTask({
+      task_name: 'Task A',
+      description: 'A',
+      start_date: '2025-12-10',
+      end_date: '2025-12-11',
+      priority: 'Medium',
+      status: 'Not Started',
+      estimated_hours: 1,
+      category_name: 'Testing'
+    });
+
+    expect(created.success).toBeTruthy();
+    expect(typeof created.task.task_id).toBe('number');
+
+    const updated = db.updateTask(created.task.task_id, {
+      task_id: String(created.task.task_id),
+      description: 'Updated'
+    });
+
+    expect(updated.success).toBeTruthy();
+    expect(typeof updated.task.task_id).toBe('number');
+    expect(updated.task.task_id).toBe(created.task.task_id);
   });
 });

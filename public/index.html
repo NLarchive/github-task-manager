@@ -56,19 +56,19 @@
                 </section>
 
                 <section class="stats">
-                    <div class="stat-card">
+                    <div class="stat-card" data-status="all" data-testid="stat-total" role="button" tabindex="0" aria-label="Filter: All Tasks">
                         <h3>Total Tasks</h3>
                         <p id="totalTasks">0</p>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" data-status="Not Started" data-testid="stat-not-started" role="button" tabindex="0" aria-label="Filter: Not Started">
                         <h3>Not Started</h3>
                         <p id="todoTasks">0</p>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" data-status="In Progress" data-testid="stat-in-progress" role="button" tabindex="0" aria-label="Filter: In Progress">
                         <h3>In Progress</h3>
                         <p id="inProgressTasks">0</p>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" data-status="Completed" data-testid="stat-completed" role="button" tabindex="0" aria-label="Filter: Completed">
                         <h3>Completed</h3>
                         <p id="doneTasks">0</p>
                     </div>
@@ -202,8 +202,31 @@
                         <label>
                             <input type="checkbox" id="taskCriticalPath" />
                             Critical Path Task
-                            <span class="automation-indicator">AUTO</span>
                         </label>
+                    </div>
+
+                    <!-- Automatic Fields Section -->
+                    <div class="automatic-fields-section">
+                        <h3>Automatic Fields</h3>
+                        <div class="automatic-fields-grid">
+                            <div class="form-group">
+                                <label>Task ID</label>
+                                <div id="displayTaskId" class="readonly-field">--</div>
+                            </div>
+                            <div class="form-group">
+                                <label>Created Date</label>
+                                <div id="displayCreatedDate" class="readonly-field">--</div>
+                            </div>
+                            <div class="form-group">
+                                <label>Creator ID</label>
+                                <div id="displayCreatorId" class="readonly-field">--</div>
+                            </div>
+                            <div class="form-group">
+                                <label>Completed Date</label>
+                                <div id="displayCompletedDate" class="readonly-field">--</div>
+                            </div>
+                        </div>
+                        <small style="color: var(--text-secondary);">These fields are automatically managed and cannot be edited manually.</small>
                     </div>
 
                     <div class="form-actions">
@@ -225,6 +248,7 @@
     </div>
 
     <!-- Load Components -->
+    <script src="config/github-token.local.js"></script>
     <script src="config/github-token.js"></script>
     <script src="config/template-config.js"></script>
     <script src="scripts/template-validator.js"></script>

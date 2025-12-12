@@ -175,11 +175,72 @@ Filters combine - select status AND priority to narrow results.
 
 ### Data Persistence
 
-All changes automatically save to GitHub:
-- Changes made on the website → Saved to repository in real-time
-- Refresh page → Latest data reloaded from GitHub
-- Multiple users → See updates from other collaborators
-- Complete history → GitHub tracks all commits
+The app supports **dual-mode persistence** that works seamlessly whether deployed or running locally:
+
+#### GitHub Mode (Deployed)
+When a valid GitHub token is available:
+- All changes save to GitHub repository in real-time
+- Both `tasks.json` and `tasks.csv` are updated on each save
+- Automatic fallback to localStorage if GitHub API fails
+- Changes visible to all users accessing the live site
+- Complete version history in Git commits
+
+#### Local Storage Mode (Local Development)
+When no GitHub token is available:
+- Changes save to browser's localStorage automatically
+- No network authentication required
+- Perfect for local development and offline work
+- Persists across page refreshes within same browser
+- Data stored as JSON + CSV in browser
+
+#### How It Works
+1. **On Save**:
+   - Check for valid GitHub token
+   - If token exists → save to GitHub (with localStorage backup)
+   - If no token → save to localStorage only
+   - Show user which mode was used ("Tasks saved to GitHub" or "Tasks saved locally")
+
+2. **On Load**:
+   - Check localStorage first (fastest, local data)
+   - If empty, try GitHub API (production data)
+   - If API fails, try fetching static JSON file
+   - Always fall back gracefully to empty task list
+
+3. **Failover Handling**:
+   - GitHub API errors → automatically save locally as fallback
+   - No network → works offline with localStorage
+   - Multiple sources → user always has access to tasks
+
+#### Local Development with GitHub Token
+
+If you want to test GitHub integration locally:
+
+1. Create a GitHub Personal Access Token:
+   - Go to https://github.com/settings/tokens
+   - Create token with `repo` scope
+   
+2. Add token to `public/config/github-token.local.js`:
+   ```javascript
+   // github-token.local.js (gitignored)
+   const GITHUB_TOKEN = 'your_token_here';
+   ```
+
+3. The app will:
+   - Use your token for local development
+   - Fall back to localStorage if token is invalid
+   - Still save everything locally as backup
+
+#### Data Sync Between Modes
+
+Tasks saved locally can be manually copied to GitHub:
+- Export tasks as CSV from UI
+- Commit to GitHub manually
+- Or implement CI/CD to sync periodically
+
+Tasks saved to GitHub automatically sync when:
+- Page is refreshed
+- User revisits the site
+- localStorage is cleared (forces GitHub load)
 
 ## Task Properties Explained 📋
 

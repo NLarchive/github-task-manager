@@ -1,8 +1,20 @@
 import { test, expect } from '@playwright/test';
 
 // Test configuration
-const BASE_URL = 'https://nlarchive.github.io/github-task-manager/';
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000/';
 const TIMEOUT = 5000;
+
+async function waitForAppReady(page) {
+  await page.waitForSelector('[id="totalTasks"]', { timeout: TIMEOUT });
+  await page.waitForFunction(() => {
+    const list = document.getElementById('tasksList');
+    const empty = document.getElementById('emptyState');
+    if (!list || !empty) return false;
+    const hasTasks = (list.children && list.children.length > 0);
+    const emptyVisible = (empty.style && empty.style.display !== 'none');
+    return hasTasks || emptyVisible;
+  }, { timeout: 30000 });
+}
 
 test.describe('GitHub Task Manager - Create Task', () => {
   test.beforeEach(async ({ page }) => {
@@ -10,7 +22,7 @@ test.describe('GitHub Task Manager - Create Task', () => {
     await page.goto(BASE_URL);
     
     // Wait for page to load and display tasks
-    await page.waitForSelector('[id="totalTasks"]', { timeout: TIMEOUT });
+    await waitForAppReady(page);
     
     // Set user name for task attribution
     await page.fill('[id="userName"]', 'Playwright Test User');
@@ -86,7 +98,44 @@ test.describe('GitHub Task Manager - Create Task', () => {
 test.describe('GitHub Task Manager - Edit Task', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(BASE_URL);
-    await page.waitForSelector('[id="totalTasks"]', { timeout: TIMEOUT });
+    await waitForAppReady(page);
+  });
+
+  test('should allow editing the same task again after saving (no Task not found)', async ({ page }) => {
+    const consoleErrors = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
+    await page.waitForSelector('[class*="task-card"]');
+
+    const editButtons = page.locator('button:has-text("Edit")');
+    await expect(editButtons.first()).toBeVisible();
+
+    // Open edit modal
+    await editButtons.first().click();
+    await page.waitForSelector('[id="taskModal"]');
+
+    // Capture the current task id shown in the modal (read-only field)
+    const firstTaskId = (await page.locator('[id="displayTaskId"]').innerText()).trim();
+    expect(firstTaskId).not.toBe('--');
+
+    // Make a small edit and save
+    await page.fill('[id="taskDescription"]', `Edited by Playwright at ${Date.now()}`);
+    await page.click('button:has-text("Save Task")');
+    await page.waitForSelector('text=Tasks saved successfully', { timeout: TIMEOUT });
+
+    // Re-open edit modal for the same card again
+    await editButtons.first().click();
+    await page.waitForSelector('[id="taskModal"]');
+
+    // Ensure the same task_id is still displayed (not corrupted to string mismatch)
+    const secondTaskId = (await page.locator('[id="displayTaskId"]').innerText()).trim();
+    expect(secondTaskId).toBe(firstTaskId);
+
+    // Ensure we didn't hit the regression
+    const taskNotFound = consoleErrors.some(t => t.includes('Task not found'));
+    expect(taskNotFound).toBeFalsy();
   });
 
   test('should edit existing task', async ({ page }) => {
@@ -106,8 +155,38 @@ test.describe('GitHub Task Manager - Edit Task', () => {
       expect(taskName.length).toBeGreaterThan(0);
       
       // Close modal
-      await page.click('text=Cancel');
+      await page.click('button:has-text("Cancel")');
     }
+  });
+
+  test('should open edit modal when clicking task card', async ({ page }) => {
+    // Create a specific task to test with
+    await page.click('button:has-text("+ Add New Task")');
+    await page.waitForSelector('[id="taskModal"]');
+    await page.fill('[id="taskName"]', 'Click Test Task');
+    await page.fill('[id="taskDescription"]', 'Testing click interaction');
+    await page.selectOption('[id="taskStatus"]', 'Not Started');
+    await page.selectOption('[id="taskPriority"]', 'Medium');
+    await page.fill('[id="taskStartDate"]', '2025-12-11');
+    await page.fill('[id="taskEndDate"]', '2025-12-12');
+    await page.fill('[id="taskEstimatedHours"]', '2');
+    await page.selectOption('[id="taskCategory"]', 'Testing');
+    await page.click('button:has-text("Save Task")');
+    await page.waitForSelector('text=Tasks saved successfully');
+
+    // Find the task card
+    const taskCard = page.locator('.task-card').filter({ hasText: 'Click Test Task' }).first();
+    
+    // Click the card (which triggers editTask with string ID from onclick)
+    await taskCard.click();
+    
+    // Verify modal opens with correct task
+    await page.waitForSelector('[id="taskModal"]');
+    const taskName = await page.inputValue('[id="taskName"]');
+    expect(taskName).toBe('Click Test Task');
+    
+    // Close modal
+    await page.click('button:has-text("Cancel")');
   });
 
   test('should prepopulate edit form with task data', async ({ page }) => {
@@ -133,7 +212,7 @@ test.describe('GitHub Task Manager - Edit Task', () => {
 test.describe('GitHub Task Manager - Delete Task', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(BASE_URL);
-    await page.waitForSelector('[id="totalTasks"]', { timeout: TIMEOUT });
+    await waitForAppReady(page);
   });
 
   test('should delete task with confirmation', async ({ page }) => {
@@ -163,7 +242,20 @@ test.describe('GitHub Task Manager - Delete Task', () => {
 test.describe('GitHub Task Manager - Filter & Search', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(BASE_URL);
-    await page.waitForSelector('[id="totalTasks"]', { timeout: TIMEOUT });
+    await waitForAppReady(page);
+  });
+
+  test('should filter tasks by clicking stat cards', async ({ page }) => {
+    const notStartedCount = parseInt(((await page.textContent('[id="todoTasks"]')) || '0').trim(), 10) || 0;
+
+    await page.getByTestId('stat-not-started').click();
+    await expect(page.locator('[id="filterStatus"]')).toHaveValue('Not Started');
+
+    const notStartedCards = await page.locator('.task-card').count();
+    expect(notStartedCards).toBe(notStartedCount);
+
+    await page.getByTestId('stat-total').click();
+    await expect(page.locator('[id="filterStatus"]')).toHaveValue('all');
   });
 
   test('should filter tasks by status', async ({ page }) => {
@@ -213,11 +305,12 @@ test.describe('GitHub Task Manager - Filter & Search', () => {
 test.describe('GitHub Task Manager - Refresh & Persistence', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(BASE_URL);
-    await page.waitForSelector('[id="totalTasks"]', { timeout: TIMEOUT });
+    await waitForAppReady(page);
   });
 
   test('should persist data after refresh', async ({ page }) => {
-    // Get initial task count (may be > 0 on live site)
+    // Get initial task count after tasks are loaded
+    await waitForAppReady(page);
     const initialCount = await page.textContent('[id="totalTasks"]');
     
     // Click refresh button
@@ -225,6 +318,7 @@ test.describe('GitHub Task Manager - Refresh & Persistence', () => {
     
     // Wait for loading to complete
     await page.waitForSelector('text=Tasks loaded successfully', { timeout: TIMEOUT });
+    await waitForAppReady(page);
     
     // Verify task count remained the same (persistence test)
     const finalCount = await page.textContent('[id="totalTasks"]');
@@ -259,12 +353,12 @@ test.describe('GitHub Task Manager - Refresh & Persistence', () => {
 test.describe('GitHub Task Manager - CSV Export', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(BASE_URL);
-    await page.waitForSelector('[id="totalTasks"]', { timeout: TIMEOUT });
+    await waitForAppReady(page);
   });
 
   test('should export tasks to CSV', async ({ page, context }) => {
     // Listen for download event
-    const downloadPromise = context.waitForEvent('download');
+    const downloadPromise = page.waitForEvent('download');
     
     // Click export button
     await page.click('button:has-text("📥 Export CSV")');
@@ -278,7 +372,7 @@ test.describe('GitHub Task Manager - CSV Export', () => {
 
   test('should include all task fields in export', async ({ page, context }) => {
     // Listen for download
-    const downloadPromise = context.waitForEvent('download');
+    const downloadPromise = page.waitForEvent('download');
     
     // Click export
     await page.click('button:has-text("📥 Export CSV")');
@@ -295,7 +389,7 @@ test.describe('GitHub Task Manager - CSV Export', () => {
 test.describe('GitHub Task Manager - Statistics', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(BASE_URL);
-    await page.waitForSelector('[id="totalTasks"]', { timeout: TIMEOUT });
+    await waitForAppReady(page);
   });
 
   test('should display task statistics', async ({ page }) => {
@@ -344,7 +438,7 @@ test.describe('GitHub Task Manager - Statistics', () => {
 test.describe('GitHub Task Manager - UI/UX', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(BASE_URL);
-    await page.waitForSelector('[id="totalTasks"]', { timeout: TIMEOUT });
+    await waitForAppReady(page);
   });
 
   test('should display header with repository info', async ({ page }) => {

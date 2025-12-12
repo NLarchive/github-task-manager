@@ -3,18 +3,12 @@
 
 class TaskManagerApp {
     constructor() {
-        // Use pre-configured GitHub settings from template-config
-        this.config = {
-            owner: TEMPLATE_CONFIG.GITHUB.OWNER,
-            repo: TEMPLATE_CONFIG.GITHUB.REPO,
-            token: TEMPLATE_CONFIG.GITHUB.TOKEN,
-            branch: TEMPLATE_CONFIG.GITHUB.BRANCH,
-            tasksFile: TEMPLATE_CONFIG.GITHUB.TASKS_FILE
-        };
+        // Defer config loading until initialize() to ensure TEMPLATE_CONFIG is available
+        this.config = null;
 
         this.database = null;
-        this.validator = new TemplateValidator();
-        this.automation = new TemplateAutomation();
+        this.validator = null;
+        this.automation = null;
         this.githubApi = null;
 
         this.tasks = [];
@@ -24,7 +18,11 @@ class TaskManagerApp {
 
     // Initialize the application
     async initialize() {
+        // Load config now that all scripts should be loaded
+        this.loadConfig();
+
         this.setupEventListeners();
+        this.setupStatCardFilters();
         this.loadUserName();
 
         // Setup GitHub API with pre-configured settings
@@ -37,6 +35,26 @@ class TaskManagerApp {
             console.error('GitHub configuration missing. Please check TEMPLATE_CONFIG.GITHUB settings.');
             this.showConfigError();
         }
+    }
+
+    loadConfig() {
+        // Use pre-configured GitHub settings from template-config
+        const templateConfig = window.TEMPLATE_CONFIG || TEMPLATE_CONFIG;
+        if (!templateConfig || !templateConfig.GITHUB) {
+            throw new Error('TEMPLATE_CONFIG.GITHUB not available. Check script loading order.');
+        }
+
+        this.config = {
+            owner: templateConfig.GITHUB.OWNER,
+            repo: templateConfig.GITHUB.REPO,
+            token: templateConfig.GITHUB.TOKEN,
+            branch: templateConfig.GITHUB.BRANCH,
+            tasksFile: templateConfig.GITHUB.TASKS_FILE
+        };
+
+        // Initialize components with config
+        this.validator = new TemplateValidator(templateConfig);
+        this.automation = new TemplateAutomation(templateConfig);
     }
 
     // User Management
@@ -118,8 +136,11 @@ class TaskManagerApp {
 
         this.showLoading();
         try {
-            await this.database.saveTasks();
-            this.showToast('Tasks saved successfully', 'success');
+            const result = await this.database.saveTasks();
+            const source = result.source === 'github'
+                ? 'to GitHub'
+                : (result.source === 'local-disk' ? 'locally (disk)' : 'locally');
+            this.showToast(`Tasks saved successfully ${source}`, 'success');
         } catch (error) {
             console.error('Error saving tasks:', error);
             this.showToast('Error saving tasks: ' + error.message, 'error');
@@ -182,6 +203,41 @@ class TaskManagerApp {
         document.getElementById('doneTasks').textContent = (stats.tasks_by_status && stats.tasks_by_status['Completed']) || 0;
     }
 
+    setActiveStatCard(statusValue) {
+        const cards = Array.from(document.querySelectorAll('.stat-card[data-status]'));
+        cards.forEach(card => card.classList.remove('active'));
+        const match = cards.find(card => (card.dataset.status || '') === (statusValue || 'all'));
+        if (match) match.classList.add('active');
+    }
+
+    setupStatCardFilters() {
+        const cards = Array.from(document.querySelectorAll('.stat-card[data-status]'));
+        if (cards.length === 0) return;
+
+        const activate = (status) => {
+            const filterStatus = document.getElementById('filterStatus');
+            if (!filterStatus) return;
+
+            const nextStatus = status || 'all';
+            const isSame = filterStatus.value === nextStatus;
+            filterStatus.value = isSame ? 'all' : nextStatus;
+            this.filterTasks();
+        };
+
+        cards.forEach(card => {
+            card.addEventListener('click', () => activate(card.dataset.status));
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    activate(card.dataset.status);
+                }
+            });
+        });
+
+        const current = document.getElementById('filterStatus')?.value || 'all';
+        this.setActiveStatCard(current);
+    }
+
     filterTasks() {
         const statusFilter = document.getElementById('filterStatus').value;
         const priorityFilter = document.getElementById('filterPriority').value;
@@ -192,6 +248,7 @@ class TaskManagerApp {
         });
 
         this.renderTasks();
+        this.setActiveStatCard(statusFilter);
     }
 
     // Modal Functions
@@ -245,6 +302,12 @@ class TaskManagerApp {
         document.getElementById('taskPriority').value = this.automation.config.DEFAULTS.TASK.priority;
         document.getElementById('taskProgress').value = this.automation.config.DEFAULTS.TASK.progress_percentage;
         document.getElementById('taskEstimatedHours').value = 8; // Default 1 day
+
+        // Clear automatic fields for new tasks
+        document.getElementById('displayTaskId').textContent = '--';
+        document.getElementById('displayCreatedDate').textContent = '--';
+        document.getElementById('displayCreatorId').textContent = '--';
+        document.getElementById('displayCompletedDate').textContent = '--';
     }
 
     populateFormWithTask(task) {
@@ -279,6 +342,12 @@ class TaskManagerApp {
         } else {
             document.getElementById('taskDependencies').value = '';
         }
+
+        // Populate automatic fields
+        document.getElementById('displayTaskId').textContent = task.task_id || task.id || '--';
+        document.getElementById('displayCreatedDate').textContent = task.created_date ? new Date(task.created_date).toLocaleString() : '--';
+        document.getElementById('displayCreatorId').textContent = task.creator_id || '--';
+        document.getElementById('displayCompletedDate').textContent = task.completed_date ? new Date(task.completed_date).toLocaleString() : '--';
     }
 
     closeModal() {
@@ -314,7 +383,7 @@ class TaskManagerApp {
 
         const result = isNewTask
             ? this.database.createTask(formData, this.currentUser)
-            : this.database.updateTask(formData.task_id, formData);
+            : this.database.updateTask(formData.task_id, { ...formData, task_id: undefined });
 
         if (!result.success) {
             this.showValidationMessages(result.errors || [result.error], []);
@@ -343,8 +412,11 @@ class TaskManagerApp {
         const depsText = document.getElementById('taskDependencies').value.trim();
         const dependencies = this.parseDependencies(depsText);
 
+        const rawTaskId = (document.getElementById('taskId').value || '').trim();
+        const parsedTaskId = rawTaskId ? parseInt(rawTaskId, 10) : null;
+
         return {
-            task_id: document.getElementById('taskId').value || null,
+            task_id: Number.isFinite(parsedTaskId) ? parsedTaskId : null,
             task_name: document.getElementById('taskName').value.trim(),
             description: document.getElementById('taskDescription').value.trim(),
             status: document.getElementById('taskStatus').value,
@@ -359,12 +431,7 @@ class TaskManagerApp {
             is_critical_path: document.getElementById('taskCriticalPath')?.checked || false,
             assigned_workers: this.parseAssignedWorkers(document.getElementById('taskAssignedWorkers').value),
             parent_task_id: this.parseParentTaskId(document.getElementById('parentTaskId').value),
-            dependencies: dependencies,
-            creator_id: this.currentUser || this.automation.config.AUTOMATION.DEFAULT_CREATOR_ID,
-            created_date: new Date().toISOString(),
-            completed_date: null,
-            comments: [],
-            attachments: []
+            dependencies: dependencies
         };
     }
 
@@ -629,7 +696,7 @@ class GitHubAPI {
             const content = atob(data.content);
             return { content, sha: data.sha };
         } catch (error) {
-            if (error.message.includes('404')) {
+            if (error.message.includes('Not Found')) {
                 return { content: '[]', sha: null };
             }
             throw error;

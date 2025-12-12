@@ -1,47 +1,6 @@
 {
-  "project": {
-    "name": "GitHub Task Manager - Web Application",
-    "description": "Build a collaborative task management system integrated with GitHub, enabling public users to manage tasks through a modern web UI with automatic task ID generation and template-based task creation.",
-    "start_date": "2025-12-08",
-    "end_date": "2026-02-28",
-    "status": "In Progress",
-    "budget": 15000
-  },
-  "categories": [
-    { "name": "Project Setup", "parent_category_name": null },
-    { "name": "Backend Development", "parent_category_name": null },
-    { "name": "Frontend Development", "parent_category_name": null },
-    { "name": "Testing", "parent_category_name": null },
-    { "name": "Deployment", "parent_category_name": null },
-    { "name": "Documentation", "parent_category_name": null },
-    { "name": "Retrospective", "parent_category_name": null },
-    { "name": "Bug Fix", "parent_category_name": null },
-    { "name": "Feature", "parent_category_name": null },
-    { "name": "Maintenance", "parent_category_name": null }
-  ],
-  "workers": [
-    {
-      "name": "Public User",
-      "email": "public@example.com",
-      "role": "Collaborator",
-      "skills": ["Task Management", "GitHub"],
-      "hourly_rate": 0.0
-    },
-    {
-      "name": "Developer",
-      "email": "dev@example.com",
-      "role": "Full Stack Developer",
-      "skills": ["JavaScript", "React", "Node.js", "GitHub API"],
-      "hourly_rate": 75.0
-    },
-    {
-      "name": "QA Tester",
-      "email": "qa@example.com",
-      "role": "Quality Assurance",
-      "skills": ["Testing", "GitHub"],
-      "hourly_rate": 50.0
-    }
-  ],
+  "status": "Completed",
+  "generated_at": "2025-12-11T23:54:45.986Z",
   "tasks": [
     {
       "task_id": 1,
@@ -55,16 +14,34 @@
       "estimated_hours": 4,
       "actual_hours": 4,
       "is_critical_path": true,
-      "tags": ["frontend", "authentication", "setup"],
+      "tags": [
+        "frontend",
+        "authentication",
+        "setup"
+      ],
       "category_name": "Frontend Development",
-      "assigned_workers": [{ "name": "Developer", "email": "dev@example.com", "role": "Full Stack Developer" }],
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer"
+        }
+      ],
       "parent_task_id": null,
       "creator_id": "system@example.com",
       "created_date": "2025-12-10T09:00:00Z",
       "completed_date": "2025-12-10T16:00:00Z",
       "comments": [
-        { "author": "public@example.com", "timestamp": "2025-12-10T14:00:00Z", "text": "Need to ensure this works with GitHub Actions secrets" },
-        { "author": "dev@example.com", "timestamp": "2025-12-10T16:00:00Z", "text": "Completed - Token is now loaded from github-token.js which is gitignored. For production, GitHub Actions injects the token from secrets." }
+        {
+          "author": "public@example.com",
+          "timestamp": "2025-12-10T14:00:00Z",
+          "text": "Need to ensure this works with GitHub Actions secrets"
+        },
+        {
+          "author": "dev@example.com",
+          "timestamp": "2025-12-10T16:00:00Z",
+          "text": "Completed - Token is now loaded from github-token.js which is gitignored. For production, GitHub Actions injects the token from secrets."
+        }
       ],
       "attachments": [],
       "dependencies": []
@@ -81,16 +58,32 @@
       "estimated_hours": 8,
       "actual_hours": 6,
       "is_critical_path": true,
-      "tags": ["frontend", "forms", "validation"],
+      "tags": [
+        "frontend",
+        "forms",
+        "validation"
+      ],
       "category_name": "Frontend Development",
-      "assigned_workers": [{ "name": "Developer", "email": "dev@example.com", "role": "Full Stack Developer" }],
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer"
+        }
+      ],
       "parent_task_id": null,
       "creator_id": "system@example.com",
       "created_date": "2025-12-10T09:00:00Z",
       "completed_date": null,
       "comments": [],
       "attachments": [],
-      "dependencies": [{ "predecessor_task_id": 1, "type": "FS", "lag_days": 0 }]
+      "dependencies": [
+        {
+          "predecessor_task_id": 1,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ]
     },
     {
       "task_id": 3,
@@ -104,16 +97,32 @@
       "estimated_hours": 6,
       "actual_hours": 5,
       "is_critical_path": true,
-      "tags": ["backend", "automation", "templates"],
+      "tags": [
+        "backend",
+        "automation",
+        "templates"
+      ],
       "category_name": "Backend Development",
-      "assigned_workers": [{ "name": "Developer", "email": "dev@example.com", "role": "Full Stack Developer" }],
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer"
+        }
+      ],
       "parent_task_id": null,
       "creator_id": "system@example.com",
       "created_date": "2025-12-10T09:00:00Z",
       "completed_date": null,
       "comments": [],
       "attachments": [],
-      "dependencies": [{ "predecessor_task_id": 2, "type": "SS", "lag_days": 0 }]
+      "dependencies": [
+        {
+          "predecessor_task_id": 2,
+          "type": "SS",
+          "lag_days": 0
+        }
+      ]
     },
     {
       "task_id": 4,
@@ -127,16 +136,32 @@
       "estimated_hours": 8,
       "actual_hours": 8,
       "is_critical_path": false,
-      "tags": ["frontend", "hierarchy", "subtasks"],
+      "tags": [
+        "frontend",
+        "hierarchy",
+        "subtasks"
+      ],
       "category_name": "Frontend Development",
-      "assigned_workers": [{ "name": "Developer", "email": "dev@example.com", "role": "Full Stack Developer" }],
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer"
+        }
+      ],
       "parent_task_id": null,
       "creator_id": "system@example.com",
       "created_date": "2025-12-10T09:00:00Z",
       "completed_date": "2025-12-11T16:00:00Z",
       "comments": [],
       "attachments": [],
-      "dependencies": [{ "predecessor_task_id": 2, "type": "FS", "lag_days": 1 }]
+      "dependencies": [
+        {
+          "predecessor_task_id": 2,
+          "type": "FS",
+          "lag_days": 1
+        }
+      ]
     },
     {
       "task_id": 5,
@@ -150,16 +175,32 @@
       "estimated_hours": 10,
       "actual_hours": 10,
       "is_critical_path": true,
-      "tags": ["frontend", "dependencies", "project-management"],
+      "tags": [
+        "frontend",
+        "dependencies",
+        "project-management"
+      ],
       "category_name": "Frontend Development",
-      "assigned_workers": [{ "name": "Developer", "email": "dev@example.com", "role": "Full Stack Developer" }],
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer"
+        }
+      ],
       "parent_task_id": null,
       "creator_id": "system@example.com",
       "created_date": "2025-12-10T09:00:00Z",
       "completed_date": "2025-12-11T16:00:00Z",
       "comments": [],
       "attachments": [],
-      "dependencies": [{ "predecessor_task_id": 3, "type": "FS", "lag_days": 0 }]
+      "dependencies": [
+        {
+          "predecessor_task_id": 3,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ]
     },
     {
       "task_id": 6,
@@ -173,16 +214,32 @@
       "estimated_hours": 12,
       "actual_hours": 12,
       "is_critical_path": true,
-      "tags": ["frontend", "collaboration", "ux"],
+      "tags": [
+        "frontend",
+        "collaboration",
+        "ux"
+      ],
       "category_name": "Frontend Development",
-      "assigned_workers": [{ "name": "Developer", "email": "dev@example.com", "role": "Full Stack Developer" }],
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer"
+        }
+      ],
       "parent_task_id": null,
       "creator_id": "system@example.com",
       "created_date": "2025-12-10T09:00:00Z",
       "completed_date": "2025-12-11T16:00:00Z",
       "comments": [],
       "attachments": [],
-      "dependencies": [{ "predecessor_task_id": 2, "type": "FS", "lag_days": 0 }]
+      "dependencies": [
+        {
+          "predecessor_task_id": 2,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ]
     },
     {
       "task_id": 7,
@@ -196,39 +253,32 @@
       "estimated_hours": 8,
       "actual_hours": 6,
       "is_critical_path": false,
-      "tags": ["testing", "qa", "validation"],
+      "tags": [
+        "testing",
+        "qa",
+        "validation"
+      ],
       "category_name": "Testing",
-      "assigned_workers": [{ "name": "QA Tester", "email": "qa@example.com", "role": "Quality Assurance" }],
+      "assigned_workers": [
+        {
+          "name": "QA Tester",
+          "email": "qa@example.com",
+          "role": "Quality Assurance"
+        }
+      ],
       "parent_task_id": null,
       "creator_id": "system@example.com",
       "created_date": "2025-12-10T09:00:00Z",
       "completed_date": null,
       "comments": [],
       "attachments": [],
-      "dependencies": [{ "predecessor_task_id": 3, "type": "FS", "lag_days": 0 }]
-    },
-    {
-      "task_id": 8,
-      "task_name": "Update Documentation & README",
-      "description": "Create comprehensive documentation for public users on how to use the task manager. Include examples of creating tasks, managing dependencies, setting status, and collaborating. Add developer setup guide for GitHub Pages deployment.",
-      "start_date": "2025-12-20",
-      "end_date": "2025-12-22",
-      "priority": "Medium",
-      "status": "In Progress",
-      "progress_percentage": 20,
-      "estimated_hours": 6,
-      "actual_hours": 1,
-      "is_critical_path": false,
-      "tags": ["documentation", "guides", "user-manual"],
-      "category_name": "Documentation",
-      "assigned_workers": [{ "name": "Developer", "email": "dev@example.com", "role": "Full Stack Developer" }],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-10T09:00:00Z",
-      "completed_date": null,
-      "comments": [],
-      "attachments": [],
-      "dependencies": [{ "predecessor_task_id": 6, "type": "FS", "lag_days": 0 }]
+      "dependencies": [
+        {
+          "predecessor_task_id": 3,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ]
     },
     {
       "task_id": 9,
@@ -242,39 +292,32 @@
       "estimated_hours": 6,
       "actual_hours": 5,
       "is_critical_path": true,
-      "tags": ["deployment", "ci-cd", "github-actions"],
+      "tags": [
+        "deployment",
+        "ci-cd",
+        "github-actions"
+      ],
       "category_name": "Deployment",
-      "assigned_workers": [{ "name": "Developer", "email": "dev@example.com", "role": "Full Stack Developer" }],
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer"
+        }
+      ],
       "parent_task_id": null,
       "creator_id": "system@example.com",
       "created_date": "2025-12-10T09:00:00Z",
       "completed_date": "2025-12-23T18:00:00Z",
       "comments": [],
       "attachments": [],
-      "dependencies": [{ "predecessor_task_id": 7, "type": "FS", "lag_days": 0 }]
-    },
-    {
-      "task_id": 10,
-      "task_name": "Project Retrospective",
-      "description": "Conduct project retrospective to review what went well, what could be improved, and lessons learned. Document findings and create improvement tasks for next iteration.",
-      "start_date": "2025-12-24",
-      "end_date": "2025-12-26",
-      "priority": "Medium",
-      "status": "Not Started",
-      "progress_percentage": 0,
-      "estimated_hours": 4,
-      "actual_hours": 0,
-      "is_critical_path": false,
-      "tags": ["retrospective", "process-improvement", "team"],
-      "category_name": "Retrospective",
-      "assigned_workers": [{ "name": "Public User", "email": "public@example.com", "role": "Collaborator" }],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-10T09:00:00Z",
-      "completed_date": null,
-      "comments": [],
-      "attachments": [],
-      "dependencies": [{ "predecessor_task_id": 9, "type": "FS", "lag_days": 0 }]
+      "dependencies": [
+        {
+          "predecessor_task_id": 7,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ]
     },
     {
       "task_id": 11,
@@ -288,9 +331,19 @@
       "estimated_hours": 3,
       "actual_hours": 3,
       "is_critical_path": true,
-      "tags": ["bugfix", "playwright", "devx"],
+      "tags": [
+        "bugfix",
+        "playwright",
+        "devx"
+      ],
       "category_name": "Testing",
-      "assigned_workers": [{ "name": "Developer", "email": "dev@example.com", "role": "Full Stack Developer" }],
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer"
+        }
+      ],
       "parent_task_id": null,
       "creator_id": "system@example.com",
       "created_date": "2025-12-11T17:30:00Z",
@@ -311,9 +364,18 @@
       "estimated_hours": 1,
       "actual_hours": 1,
       "is_critical_path": false,
-      "tags": ["data", "reporting"],
+      "tags": [
+        "data",
+        "reporting"
+      ],
       "category_name": "Maintenance",
-      "assigned_workers": [{ "name": "Developer", "email": "dev@example.com", "role": "Full Stack Developer" }],
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer"
+        }
+      ],
       "parent_task_id": null,
       "creator_id": "system@example.com",
       "created_date": "2025-12-11T18:00:00Z",
@@ -321,29 +383,6 @@
       "comments": [],
       "attachments": [],
       "dependencies": []
-    },
-    {
-      "task_id": 13,
-      "task_name": "Review Public Token Strategy",
-      "description": "Confirm the intended security model for public collaboration (token injection, permissions/scoping, abuse prevention). Document the approach and constraints in README/tools docs.",
-      "start_date": "2025-12-12",
-      "end_date": "2025-12-13",
-      "priority": "High",
-      "status": "In Progress",
-      "progress_percentage": 50,
-      "estimated_hours": 2,
-      "actual_hours": 1,
-      "is_critical_path": true,
-      "tags": ["security", "documentation"],
-      "category_name": "Documentation",
-      "assigned_workers": [{ "name": "Developer", "email": "dev@example.com", "role": "Full Stack Developer" }],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-11T18:00:00Z",
-      "completed_date": null,
-      "comments": [],
-      "attachments": [],
-      "dependencies": [{ "predecessor_task_id": 11, "type": "FS", "lag_days": 0 }]
     },
     {
       "task_id": 14,
@@ -357,9 +396,18 @@
       "estimated_hours": 1,
       "actual_hours": 1,
       "is_critical_path": false,
-      "tags": ["data", "history"],
+      "tags": [
+        "data",
+        "history"
+      ],
       "category_name": "Maintenance",
-      "assigned_workers": [{ "name": "Developer", "email": "dev@example.com", "role": "Full Stack Developer" }],
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer"
+        }
+      ],
       "parent_task_id": null,
       "creator_id": "system@example.com",
       "created_date": "2025-12-11T20:00:00Z",
@@ -380,9 +428,18 @@
       "estimated_hours": 2,
       "actual_hours": 2,
       "is_critical_path": false,
-      "tags": ["ux", "filters"],
+      "tags": [
+        "ux",
+        "filters"
+      ],
       "category_name": "Feature",
-      "assigned_workers": [{ "name": "Developer", "email": "dev@example.com", "role": "Full Stack Developer" }],
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer"
+        }
+      ],
       "parent_task_id": null,
       "creator_id": "system@example.com",
       "created_date": "2025-12-11T20:00:00Z",

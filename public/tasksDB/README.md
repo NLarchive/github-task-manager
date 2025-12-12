@@ -23,6 +23,11 @@ This directory contains the task database in both JSON and CSV formats, managed 
   - Compatible with Excel, Google Sheets, and other spreadsheet tools
   - Task summary for quick reference
 
+### history/
+- **Format**: JSON/CSV snapshots
+- **Purpose**: Immutable archives of older task databases (e.g., legacy repo-root `tasks.json`)
+- **Usage**: Not loaded by the app at runtime; kept for audit/history and potential future migration
+
 ## Data Synchronization
 
 Both files represent the same project state:

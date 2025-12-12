@@ -1,6 +1,21 @@
 // Task Database Component
 // Handles task storage, retrieval, and synchronization with GitHub
 
+function resolveTemplateConfig() {
+  if (typeof window !== 'undefined' && window.TEMPLATE_CONFIG) return window.TEMPLATE_CONFIG;
+  if (typeof globalThis !== 'undefined' && globalThis.TEMPLATE_CONFIG) return globalThis.TEMPLATE_CONFIG;
+  // eslint-disable-next-line no-undef
+  if (typeof TEMPLATE_CONFIG !== 'undefined') return TEMPLATE_CONFIG;
+  return null;
+}
+
+function hasValidGitHubToken() {
+  const templateConfig = resolveTemplateConfig();
+  if (!templateConfig || !templateConfig.GITHUB) return false;
+  const token = templateConfig.GITHUB.TOKEN;
+  return typeof token === 'string' && token.trim().length > 0;
+}
+
 class TaskDatabase {
   constructor(githubApi, validator = new TemplateValidator(), automation = new TemplateAutomation()) {
     this.githubApi = githubApi;
@@ -9,6 +24,144 @@ class TaskDatabase {
     this.tasks = [];
     this.templates = [];
     this.currentProject = null;
+    this.categories = null;
+    this.workers = null;
+  }
+
+  isLocalDevHost() {
+    try {
+      if (typeof window === 'undefined' || !window.location) return false;
+      const host = (window.location.hostname || '').toLowerCase();
+      return host === 'localhost' || host === '127.0.0.1';
+    } catch {
+      return false;
+    }
+  }
+
+  buildFullData(tasks = this.tasks) {
+    const templateConfig = resolveTemplateConfig();
+    const categoriesFromConfig = templateConfig && Array.isArray(templateConfig.CATEGORIES)
+      ? templateConfig.CATEGORIES.map(name => ({ name, parent_category_name: null }))
+      : null;
+
+    return {
+      project: this.currentProject || {
+        name: "GitHub Task Manager - Web Application",
+        description: "Build a collaborative task management system integrated with GitHub, enabling public users to manage tasks through a modern web UI with automatic task ID generation and template-based task creation.",
+        start_date: "2025-12-08",
+        end_date: "2026-02-28",
+        status: "In Progress",
+        budget: 15000
+      },
+      categories: this.categories || categoriesFromConfig || [
+        { "name": "Project Setup", "parent_category_name": null },
+        { "name": "Backend Development", "parent_category_name": null },
+        { "name": "Frontend Development", "parent_category_name": null },
+        { "name": "Testing", "parent_category_name": null },
+        { "name": "Deployment", "parent_category_name": null },
+        { "name": "Documentation", "parent_category_name": null },
+        { "name": "Retrospective", "parent_category_name": null },
+        { "name": "Bug Fix", "parent_category_name": null },
+        { "name": "Feature", "parent_category_name": null },
+        { "name": "Maintenance", "parent_category_name": null }
+      ],
+      workers: this.workers || [
+        {
+          "name": "Public User",
+          "email": "public@example.com",
+          "role": "Collaborator",
+          "skills": ["Task Management", "GitHub"],
+          "hourly_rate": 0.0
+        },
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer",
+          "skills": ["JavaScript", "React", "Node.js", "GitHub API"],
+          "hourly_rate": 75.0
+        },
+        {
+          "name": "QA Tester",
+          "email": "qa@example.com",
+          "role": "Quality Assurance",
+          "skills": ["Testing", "GitHub"],
+          "hourly_rate": 50.0
+        }
+      ],
+      tasks: tasks
+    };
+  }
+
+  generateStateFiles(tasks = this.tasks) {
+    const now = new Date().toISOString();
+    const byStatus = {};
+    (tasks || []).forEach(task => {
+      const status = (task && task.status) ? String(task.status) : 'Unknown';
+      byStatus[status] = byStatus[status] || [];
+      byStatus[status].push(task);
+    });
+
+    const summary = {
+      generated_at: now,
+      total_tasks: (tasks || []).length,
+      counts_by_status: Object.fromEntries(Object.entries(byStatus).map(([k, v]) => [k, v.length])),
+      tasks_by_status: byStatus
+    };
+
+    const makeStatusPayload = (status) => ({
+      status,
+      generated_at: now,
+      tasks: byStatus[status] || []
+    });
+
+    return {
+      'tasks-by-status.json': JSON.stringify(summary, null, 2),
+      'tasks-not-started.json': JSON.stringify(makeStatusPayload('Not Started'), null, 2),
+      'tasks-in-progress.json': JSON.stringify(makeStatusPayload('In Progress'), null, 2),
+      'tasks-completed.json': JSON.stringify(makeStatusPayload('Completed'), null, 2)
+    };
+  }
+
+  async saveTasksLocalDisk(message = 'Update tasks') {
+    // Block saving if duplicates exist
+    const duplicateIds = this.getDuplicateTaskIds(this.tasks);
+    if (duplicateIds.length > 0) {
+      throw new Error(`Duplicate task_id detected: ${duplicateIds.join(', ')}`);
+    }
+
+    // Validate all tasks before saving
+    const validationResults = this.tasks.map(task => this.validator.validate(task, 'task'));
+    const hasErrors = validationResults.some(result => !result.isValid);
+    if (hasErrors) {
+      const errors = validationResults.flatMap(result => result.errors);
+      throw new Error(`Validation failed: ${errors.join(', ')}`);
+    }
+
+    if (typeof fetch !== 'function') {
+      throw new Error('Local disk API not available (fetch missing)');
+    }
+
+    const fullData = this.buildFullData(this.tasks);
+    const res = await fetch('/api/tasks', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(fullData)
+    });
+
+    if (!res.ok) {
+      let msg = `HTTP ${res.status}`;
+      try {
+        const data = await res.json();
+        if (data && data.error) msg = data.error;
+      } catch {
+        // ignore
+      }
+      throw new Error(`Local disk save failed: ${msg}`);
+    }
+
+    // Also keep localStorage as a backup
+    this.saveTasksLocal(message);
+    return { success: true, source: 'local-disk' };
   }
 
   // Initialize database
@@ -23,41 +176,87 @@ class TaskDatabase {
     }
   }
 
-  // Load tasks from GitHub or fallback to local file
+  // Load tasks from localStorage, GitHub, or local file
   async loadTasks() {
     try {
-      // Try to load from GitHub API first
-      try {
-        const tasksFile = TEMPLATE_CONFIG.GITHUB.TASKS_FILE;
-        console.log('Loading tasks from GitHub API with file path:', tasksFile);
-        const { content } = await this.githubApi.getFileContent(tasksFile);
-        const data = JSON.parse(content || '{}');
-        // Handle both full project structure and flat tasks array
-        this.tasks = data.tasks || (Array.isArray(data) ? data : []);
-        console.log('Successfully loaded', this.tasks.length, 'tasks from GitHub API');
-      } catch (apiError) {
-        // Fallback to local tasks.json file if API fails
-        console.warn('GitHub API failed, attempting local fallback:', apiError.message);
+      let loadedTasks = null;
+
+      // Try to load from localStorage first (local development)
+      if (typeof window !== 'undefined' && window.localStorage) {
         try {
-          const basePath = TEMPLATE_CONFIG.GITHUB.BASE_PATH || '';
-          const tasksFile = TEMPLATE_CONFIG.GITHUB.TASKS_FILE;
+          const storageKey = 'taskManagerData';
+          const stored = window.localStorage.getItem(storageKey);
+          if (stored) {
+            const storageData = JSON.parse(stored);
+            if (storageData && storageData.json && storageData.json.tasks) {
+              this.currentProject = storageData.json.project || this.currentProject;
+              this.categories = storageData.json.categories || this.categories;
+              this.workers = storageData.json.workers || this.workers;
+              loadedTasks = storageData.json.tasks;
+              console.log('Loaded', loadedTasks.length, 'tasks from localStorage (last saved:', storageData.lastSaved, ')');
+            }
+          }
+        } catch (storageError) {
+          console.warn('Could not load from localStorage:', storageError);
+        }
+      }
+
+      // If no localStorage data, try GitHub API
+      if (!loadedTasks) {
+        try {
+          if (hasValidGitHubToken()) {
+            const templateConfig = resolveTemplateConfig();
+            const tasksFile = (templateConfig && templateConfig.GITHUB && templateConfig.GITHUB.TASKS_FILE)
+              ? templateConfig.GITHUB.TASKS_FILE
+              : 'public/tasksDB/tasks.json';
+            console.log('Loading tasks from GitHub API with file path:', tasksFile);
+            const { content } = await this.githubApi.getFileContent(tasksFile);
+            const data = JSON.parse(content || '{}');
+            loadedTasks = data.tasks || (Array.isArray(data) ? data : []);
+            console.log('Successfully loaded', loadedTasks.length, 'tasks from GitHub API');
+          } else {
+            console.log('No valid GitHub token, skipping GitHub API load');
+          }
+        } catch (apiError) {
+          console.warn('GitHub API failed:', apiError.message);
+        }
+      }
+
+      // If GitHub API failed, try local static file
+      if (!loadedTasks) {
+        try {
+          const templateConfig = resolveTemplateConfig();
+          const basePath = (templateConfig && templateConfig.GITHUB && templateConfig.GITHUB.BASE_PATH)
+            ? templateConfig.GITHUB.BASE_PATH
+            : '';
+          let tasksFile = (templateConfig && templateConfig.GITHUB && templateConfig.GITHUB.TASKS_FILE)
+            ? templateConfig.GITHUB.TASKS_FILE
+            : 'public/tasksDB/tasks.json';
+          
+          // For local fetch, strip 'public/' prefix since /public is the root
+          tasksFile = tasksFile.replace(/^public\//i, '');
+          
           const fetchUrl = basePath ? `${basePath}/${tasksFile}` : `/${tasksFile}`;
           console.log('Attempting local fetch from URL:', fetchUrl);
           const response = await fetch(fetchUrl);
           if (response.ok) {
             const data = await response.json();
-            // Handle both full project structure and flat tasks array
-            this.tasks = data.tasks || (Array.isArray(data) ? data : []);
-            console.log('Successfully loaded', this.tasks.length, 'tasks from local file');
+            this.currentProject = data.project || this.currentProject;
+            this.categories = data.categories || this.categories;
+            this.workers = data.workers || this.workers;
+            loadedTasks = data.tasks || (Array.isArray(data) ? data : []);
+            console.log('Successfully loaded', loadedTasks.length, 'tasks from local file');
           } else {
             console.warn('Local tasks file not found (404), using empty array');
-            this.tasks = [];
+            loadedTasks = [];
           }
         } catch (fetchError) {
           console.error('Failed to load local tasks.json:', fetchError);
-          this.tasks = [];
+          loadedTasks = [];
         }
       }
+
+      this.tasks = loadedTasks || [];
 
       // Ensure this.tasks is always an array
       if (!Array.isArray(this.tasks)) {
@@ -83,9 +282,70 @@ class TaskDatabase {
     }
   }
 
-  // Save tasks to GitHub
-  async saveTasks(message = 'Update tasks') {
+  getDuplicateTaskIds(tasks = this.tasks) {
+    const seen = new Set();
+    const duplicates = new Set();
+    tasks.forEach(task => {
+      const id = task && task.task_id;
+      if (typeof id !== 'number') return;
+      if (seen.has(id)) duplicates.add(id);
+      seen.add(id);
+    });
+    return Array.from(duplicates).sort((a, b) => a - b);
+  }
+
+  escapeCsvValue(value) {
+    if (value === null || value === undefined) return '';
+    const str = String(value);
+    if (str.includes('"')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    if (str.includes(',') || str.includes('\n') || str.includes('\r')) {
+      return `"${str}"`;
+    }
+    return str;
+  }
+
+  // Persisted reporting CSV (kept in repo alongside tasks.json)
+  generatePersistedCSV(tasks = this.tasks) {
+    const fields = [
+      'task_id',
+      'task_name',
+      'description',
+      'start_date',
+      'end_date',
+      'priority',
+      'status',
+      'progress_percentage',
+      'estimated_hours',
+      'actual_hours',
+      'is_critical_path',
+      'category_name',
+      'parent_task_id',
+      'creator_id',
+      'created_date',
+      'completed_date'
+    ];
+
+    const header = fields.join(',');
+    const rows = (tasks || []).map(task => {
+      return fields
+        .map(field => this.escapeCsvValue(task ? task[field] : ''))
+        .join(',');
+    });
+
+    return [header, ...rows].join('\n') + '\n';
+  }
+
+  // Save tasks locally (browser localStorage)
+  saveTasksLocal(message = 'Update tasks') {
     try {
+      // Block saving if duplicates exist
+      const duplicateIds = this.getDuplicateTaskIds(this.tasks);
+      if (duplicateIds.length > 0) {
+        throw new Error(`Duplicate task_id detected: ${duplicateIds.join(', ')}`);
+      }
+
       // Validate all tasks before saving
       const validationResults = this.tasks.map(task => this.validator.validate(task, 'task'));
       const hasErrors = validationResults.some(result => !result.isValid);
@@ -95,60 +355,117 @@ class TaskDatabase {
         throw new Error(`Validation failed: ${errors.join(', ')}`);
       }
 
-      // Save with full project structure to match tasks.json format
-      const fullData = {
-        project: {
-          name: "GitHub Task Manager - Web Application",
-          description: "Build a collaborative task management system integrated with GitHub, enabling public users to manage tasks through a modern web UI with automatic task ID generation and template-based task creation.",
-          start_date: "2025-12-08",
-          end_date: "2026-02-28",
-          status: "In Progress",
-          budget: 15000
-        },
-        categories: [
-          { "name": "Project Setup", "parent_category_name": null },
-          { "name": "Backend Development", "parent_category_name": null },
-          { "name": "Frontend Development", "parent_category_name": null },
-          { "name": "Testing", "parent_category_name": null },
-          { "name": "Deployment", "parent_category_name": null },
-          { "name": "Documentation", "parent_category_name": null },
-          { "name": "Retrospective", "parent_category_name": null }
-        ],
-        workers: [
-          {
-            "name": "Public User",
-            "email": "public@example.com",
-            "role": "Collaborator",
-            "skills": ["Task Management", "GitHub"],
-            "hourly_rate": 0.0
-          },
-          {
-            "name": "Developer",
-            "email": "dev@example.com",
-            "role": "Full Stack Developer",
-            "skills": ["JavaScript", "React", "Node.js", "GitHub API"],
-            "hourly_rate": 75.0
-          },
-          {
-            "name": "QA Tester",
-            "email": "qa@example.com",
-            "role": "Quality Assurance",
-            "skills": ["Testing", "GitHub"],
-            "hourly_rate": 50.0
-          }
-        ],
-        tasks: this.tasks
-      };
+      // Save full data structure to localStorage
+      const fullData = this.buildFullData(this.tasks);
 
       const content = JSON.stringify(fullData, null, 2);
-      const tasksFile = TEMPLATE_CONFIG.GITHUB.TASKS_FILE;
-      const { sha } = await this.githubApi.getFileContent(tasksFile);
-      await this.githubApi.updateFile(tasksFile, content, message, sha);
+      const csvContent = this.generatePersistedCSV(this.tasks);
 
-      return { success: true };
+      // Store in localStorage with timestamp
+      if (typeof window !== 'undefined' && window.localStorage) {
+        try {
+          const storageKey = 'taskManagerData';
+          const storageData = {
+            version: '1.0',
+            lastSaved: new Date().toISOString(),
+            message: message,
+            json: fullData,
+            csv: csvContent
+          };
+          window.localStorage.setItem(storageKey, JSON.stringify(storageData));
+          console.log('Tasks saved to local storage');
+        } catch (storageError) {
+          console.warn('Could not save to localStorage:', storageError);
+        }
+      }
+
+      return { success: true, source: 'local' };
     } catch (error) {
-      console.error('Error saving tasks:', error);
+      console.error('Error saving tasks locally:', error);
       return { success: false, error: error.message };
+    }
+  }
+
+  // Save tasks to GitHub
+  async saveTasks(message = 'Update tasks') {
+    try {
+      // Block saving if duplicates exist (prevents corrupting tasks.csv and tasks.json)
+      // Do this BEFORE choosing GitHub vs local persistence so behavior is consistent.
+      const duplicateIds = this.getDuplicateTaskIds(this.tasks);
+      if (duplicateIds.length > 0) {
+        return { success: false, error: `Duplicate task_id detected: ${duplicateIds.join(', ')}` };
+      }
+
+      // Validate all tasks before saving
+      const validationResults = this.tasks.map(task => this.validator.validate(task, 'task'));
+      const hasErrors = validationResults.some(result => !result.isValid);
+      if (hasErrors) {
+        const errors = validationResults.flatMap(result => result.errors);
+        return { success: false, error: `Validation failed: ${errors.join(', ')}` };
+      }
+
+      // Check if we have a valid GitHub token
+      if (!hasValidGitHubToken()) {
+        // If running locally with the dev server, persist to disk so clearing cache doesn't lose data.
+        if (this.isLocalDevHost()) {
+          try {
+            return await this.saveTasksLocalDisk(message);
+          } catch (diskError) {
+            console.warn('Local disk save not available, falling back to local storage:', diskError.message);
+          }
+        }
+
+        console.warn('No valid GitHub token available, falling back to local storage');
+        return this.saveTasksLocal(message);
+      }
+
+      // Save with full project structure to match tasks.json format
+      const fullData = this.buildFullData(this.tasks);
+
+      const content = JSON.stringify(fullData, null, 2);
+      const templateConfig = resolveTemplateConfig();
+      const tasksFile = (templateConfig && templateConfig.GITHUB && templateConfig.GITHUB.TASKS_FILE)
+        ? templateConfig.GITHUB.TASKS_FILE
+        : 'public/tasksDB/tasks.json';
+
+      // Persist JSON
+      const { sha: tasksSha } = await this.githubApi.getFileContent(tasksFile);
+      await this.githubApi.updateFile(tasksFile, content, message, tasksSha);
+
+      // Persist CSV alongside JSON
+      const tasksCsvFile = tasksFile.endsWith('.json') ? tasksFile.replace(/\.json$/i, '.csv') : 'tasksDB/tasks.csv';
+      const csvContent = this.generatePersistedCSV(this.tasks);
+      const { sha: csvSha } = await this.githubApi.getFileContent(tasksCsvFile);
+      await this.githubApi.updateFile(tasksCsvFile, csvContent, `${message} (csv)`, csvSha);
+
+      // Persist LLM-friendly state files by status (optional but useful)
+      try {
+        const stateFiles = this.generateStateFiles(this.tasks);
+        const baseDir = tasksFile.replace(/\/[^\/]+$/, '');
+        const stateDir = `${baseDir}/state`;
+        for (const [filename, stateContent] of Object.entries(stateFiles)) {
+          const path = `${stateDir}/${filename}`;
+          const { sha } = await this.githubApi.getFileContent(path);
+          await this.githubApi.updateFile(path, stateContent, `${message} (state)`, sha);
+        }
+      } catch (stateError) {
+        console.warn('Could not persist state files:', stateError.message);
+      }
+
+      // Also save locally as backup
+      this.saveTasksLocal(message);
+
+      return { success: true, source: 'github' };
+    } catch (error) {
+      console.error('Error saving tasks to GitHub:', error);
+      // Fallback to local storage on GitHub API failure
+      console.log('Attempting to save to local storage as fallback...');
+      try {
+        return this.saveTasksLocal(message);
+      } catch (fallbackError) {
+        console.error('Fallback to local storage also failed:', fallbackError);
+        return { success: false, error: error.message };
+      }
     }
   }
 
@@ -399,12 +716,15 @@ class TaskDatabase {
   }
 
   updateTask(taskId, updates) {
-    const taskIndex = this.tasks.findIndex(t => t.task_id === taskId);
+    const id = typeof taskId === 'string' ? parseInt(taskId, 10) : taskId;
+    const taskIndex = this.tasks.findIndex(t => t.task_id === id);
     if (taskIndex === -1) {
       return { success: false, error: 'Task not found' };
     }
 
     const updatedTask = { ...this.tasks[taskIndex], ...updates };
+    // Never allow task_id to be changed (or coerced to string) through updates
+    updatedTask.task_id = this.tasks[taskIndex].task_id;
     const validation = this.validator.validate(updatedTask, 'task');
 
     if (!validation.isValid) {
@@ -416,7 +736,8 @@ class TaskDatabase {
   }
 
   deleteTask(taskId) {
-    const taskIndex = this.tasks.findIndex(t => t.task_id === taskId);
+    const id = typeof taskId === 'string' ? parseInt(taskId, 10) : taskId;
+    const taskIndex = this.tasks.findIndex(t => t.task_id === id);
     if (taskIndex === -1) {
       return { success: false, error: 'Task not found' };
     }
@@ -426,7 +747,8 @@ class TaskDatabase {
   }
 
   getTask(taskId) {
-    return this.tasks.find(t => t.task_id === taskId);
+    const id = typeof taskId === 'string' ? parseInt(taskId, 10) : taskId;
+    return this.tasks.find(t => t.task_id === id);
   }
 
   getTasks(filters = {}) {

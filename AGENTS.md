@@ -1,11 +1,12 @@
 use the next files to track and update the project state:
 
 """
-public\tasksDB\README.md
 public\tasksDB\tasks.json
 public\tasksDB\tasks.csv
-public\tasksDB\task-database.js
 """,
+
+frecuently update the project trough the ui "public\index.html", levarage the testing of the ui trough the task development and updates, not direct files modifications to leverage the lieve testing development,
+
 
 current project structure;
 """

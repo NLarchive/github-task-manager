@@ -183,14 +183,18 @@ const TEMPLATE_CONFIG = {
   // For NLarchive/github-task-manager repository
   GITHUB: {
     // Owner and repo are fixed for this deployment
-    OWNER: 'NLarchive',
+    OWNER: 'nlarchive',
     REPO: 'github-task-manager',
     // Token is loaded from github-token.js (gitignored) or environment
-    // For GitHub Pages, we can load public repos without token
-    TOKEN: (typeof GH_TOKEN !== 'undefined' ? GH_TOKEN : 'public-access'),
+    // For GitHub Pages, public repos can be read without a token
+    TOKEN: (typeof GH_TOKEN !== 'undefined' ? GH_TOKEN : ''),
     BRANCH: 'main',
-    TASKS_FILE: 'tasksDB/tasks.json',
-    BASE_PATH: '/github-task-manager',
+    // Deployed with `gh-pages -d public`, so data must live under /public
+    TASKS_FILE: 'public/tasksDB/tasks.json',
+    // Use GitHub Pages base path only when actually hosted under it
+    BASE_PATH: (typeof window !== 'undefined' && window.location && window.location.pathname.startsWith('/github-task-manager'))
+      ? '/github-task-manager'
+      : '',
     // Allow app to work in read-only mode for public repos
     ALLOW_PUBLIC_READ: true
   },
@@ -213,4 +217,9 @@ const TEMPLATE_CONFIG = {
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = TEMPLATE_CONFIG;
+}
+
+// Make available globally for browser environment
+if (typeof window !== 'undefined') {
+  window.TEMPLATE_CONFIG = TEMPLATE_CONFIG;
 }
