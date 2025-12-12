@@ -67,7 +67,7 @@
       "end_date": "2025-12-16",
       "priority": "Critical",
       "status": "In Progress",
-      "progress_percentage": 1,
+      "progress_percentage": 2,
       "estimated_hours": 3,
       "actual_hours": 0,
       "is_critical_path": true,
