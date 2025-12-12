@@ -1,45 +1,5 @@
 {
   "status": "Not Started",
-  "generated_at": "2025-12-11T23:54:45.986Z",
-  "tasks": [
-    {
-      "task_id": 10,
-      "task_name": "Project Retrospective",
-      "description": "Conduct project retrospective to review what went well, what could be improved, and lessons learned. Document findings and create improvement tasks for next iteration.",
-      "start_date": "2025-12-24",
-      "end_date": "2025-12-26",
-      "priority": "Medium",
-      "status": "Not Started",
-      "progress_percentage": 0,
-      "estimated_hours": 4,
-      "actual_hours": 0,
-      "is_critical_path": false,
-      "tags": [
-        "retrospective",
-        "process-improvement",
-        "team"
-      ],
-      "category_name": "Retrospective",
-      "assigned_workers": [
-        {
-          "name": "Public User",
-          "email": "public@example.com",
-          "role": "Collaborator"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-10T09:00:00Z",
-      "completed_date": null,
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 9,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ]
-    }
-  ]
+  "generated_at": "2025-12-12T00:24:28.386Z",
+  "tasks": []
 }
