@@ -19,7 +19,9 @@ console.log(`${colors.blue}📋 Schema Validation${colors.reset}`);
 console.log('='.repeat(50));
 
 // Load tasks database JSON (deployed under /public)
-const tasksPath = path.join(__dirname, '../../public/tasksDB/tasks.json');
+const projectId = (process.argv[2] || process.env.PROJECT_ID || 'github-task-manager')
+  .replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
+const tasksPath = path.join(__dirname, '../../public/tasksDB', projectId, 'tasks.json');
 let tasks;
 
 try {

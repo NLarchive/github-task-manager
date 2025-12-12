@@ -203,8 +203,23 @@ const TEMPLATE_CONFIG = {
     // For GitHub Pages, public repos can be read without a token
     TOKEN: (typeof GH_TOKEN !== 'undefined' ? GH_TOKEN : ''),
     BRANCH: 'main',
-    // Deployed with `gh-pages -d public`, so data must live under /public
-    TASKS_FILE: 'public/tasksDB/tasks.json',
+    // Multi-project TasksDB
+    // Each project lives under: public/tasksDB/<projectId>/{tasks.json,tasks.csv,state/,history/}
+    TASKS_ROOT: 'public/tasksDB',
+    DEFAULT_PROJECT_ID: 'github-task-manager',
+    // App can set this at runtime (UI selector). If empty, DEFAULT_PROJECT_ID is used.
+    ACTIVE_PROJECT_ID: '',
+    PROJECTS: [
+      { id: 'github-task-manager', label: 'GitHub Task Manager' },
+      { id: 'ai-career-roadmap', label: 'AI Career Roadmap (learn.deeplearning.ai)' }
+    ],
+    getTasksFile(projectId) {
+      const id = (projectId || this.ACTIVE_PROJECT_ID || this.DEFAULT_PROJECT_ID || '').trim();
+      const safeId = id.replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
+      return `${this.TASKS_ROOT}/${safeId}/tasks.json`;
+    },
+    // Default tasks file (app may override at runtime)
+    TASKS_FILE: 'public/tasksDB/github-task-manager/tasks.json',
     // Use GitHub Pages base path only when actually hosted under it
     BASE_PATH: (typeof window !== 'undefined' && window.location && window.location.pathname.startsWith('/github-task-manager'))
       ? '/github-task-manager'
@@ -224,7 +239,18 @@ const TEMPLATE_CONFIG = {
     "Retrospective",
     "Bug Fix",
     "Feature",
-    "Maintenance"
+    "Maintenance",
+
+    // Product / research categories (used by additional projects)
+    "Discovery",
+    "Exploration",
+    "Design",
+    "Validation",
+    "Implementation",
+    "Research",
+    "UX",
+    "Content",
+    "Analytics"
   ]
 };
 

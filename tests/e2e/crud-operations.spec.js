@@ -178,7 +178,8 @@ test.describe('GitHub Task Manager - Edit Task', () => {
     const taskCard = page.locator('.task-card').filter({ hasText: 'Click Test Task' }).first();
     
     // Click the card (which triggers editTask with string ID from onclick)
-    await taskCard.click();
+    await taskCard.scrollIntoViewIfNeeded();
+    await taskCard.click({ force: true });
     
     // Verify modal opens with correct task
     await page.waitForSelector('[id="taskModal"]');

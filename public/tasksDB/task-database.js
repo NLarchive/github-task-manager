@@ -16,6 +16,28 @@ function hasValidGitHubToken() {
   return typeof token === 'string' && token.trim().length > 0;
 }
 
+function resolveActiveProjectId() {
+  const templateConfig = resolveTemplateConfig();
+  const gh = templateConfig && templateConfig.GITHUB ? templateConfig.GITHUB : null;
+
+  const active = (gh && (gh.ACTIVE_PROJECT_ID || gh.DEFAULT_PROJECT_ID)) ? String(gh.ACTIVE_PROJECT_ID || gh.DEFAULT_PROJECT_ID) : '';
+  const fromActive = active.trim();
+  if (fromActive) return fromActive;
+
+  // Best-effort: infer from TASKS_FILE (public/tasksDB/<projectId>/tasks.json)
+  const tasksFile = (gh && gh.TASKS_FILE) ? String(gh.TASKS_FILE) : '';
+  const match = tasksFile.match(/tasksDB\/([^\/]+)\/(?:tasks\.(?:json|csv))/i);
+  if (match && match[1]) return match[1];
+
+  return 'github-task-manager';
+}
+
+function getProjectScopedStorageKey() {
+  const projectId = resolveActiveProjectId();
+  const safe = String(projectId || '').replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
+  return `taskManagerData:${safe}`;
+}
+
 class TaskDatabase {
   constructor(githubApi, validator = new TemplateValidator(), automation = new TemplateAutomation()) {
     this.githubApi = githubApi;
@@ -142,7 +164,9 @@ class TaskDatabase {
     }
 
     const fullData = this.buildFullData(this.tasks);
-    const res = await fetch('/api/tasks', {
+    const projectId = resolveActiveProjectId();
+    const safeProject = String(projectId || '').replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
+    const res = await fetch(`/api/tasks?project=${encodeURIComponent(safeProject)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(fullData)
@@ -184,7 +208,7 @@ class TaskDatabase {
       // Try to load from localStorage first (local development)
       if (typeof window !== 'undefined' && window.localStorage) {
         try {
-          const storageKey = 'taskManagerData';
+          const storageKey = getProjectScopedStorageKey();
           const stored = window.localStorage.getItem(storageKey);
           if (stored) {
             const storageData = JSON.parse(stored);
@@ -193,7 +217,7 @@ class TaskDatabase {
               this.categories = storageData.json.categories || this.categories;
               this.workers = storageData.json.workers || this.workers;
               loadedTasks = storageData.json.tasks;
-              console.log('Loaded', loadedTasks.length, 'tasks from localStorage (last saved:', storageData.lastSaved, ')');
+              console.log('Loaded', loadedTasks.length, 'tasks from localStorage (project:', resolveActiveProjectId(), ', last saved:', storageData.lastSaved, ')');
             }
           }
         } catch (storageError) {
@@ -206,9 +230,10 @@ class TaskDatabase {
         try {
           if (hasValidGitHubToken()) {
             const templateConfig = resolveTemplateConfig();
-            const tasksFile = (templateConfig && templateConfig.GITHUB && templateConfig.GITHUB.TASKS_FILE)
-              ? templateConfig.GITHUB.TASKS_FILE
-              : 'public/tasksDB/tasks.json';
+            const gh = (templateConfig && templateConfig.GITHUB) ? templateConfig.GITHUB : null;
+            const tasksFile = (gh && typeof gh.getTasksFile === 'function')
+              ? gh.getTasksFile(resolveActiveProjectId())
+              : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/github-task-manager/tasks.json');
             console.log('Loading tasks from GitHub API with file path:', tasksFile);
             const { content } = await this.githubApi.getFileContent(tasksFile);
             const data = JSON.parse(content || '{}');
@@ -229,9 +254,10 @@ class TaskDatabase {
           const basePath = (templateConfig && templateConfig.GITHUB && templateConfig.GITHUB.BASE_PATH)
             ? templateConfig.GITHUB.BASE_PATH
             : '';
-          let tasksFile = (templateConfig && templateConfig.GITHUB && templateConfig.GITHUB.TASKS_FILE)
-            ? templateConfig.GITHUB.TASKS_FILE
-            : 'public/tasksDB/tasks.json';
+          const gh = (templateConfig && templateConfig.GITHUB) ? templateConfig.GITHUB : null;
+          let tasksFile = (gh && typeof gh.getTasksFile === 'function')
+            ? gh.getTasksFile(resolveActiveProjectId())
+            : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/github-task-manager/tasks.json');
           
           // For local fetch, strip 'public/' prefix since /public is the root
           tasksFile = tasksFile.replace(/^public\//i, '');
@@ -364,7 +390,7 @@ class TaskDatabase {
       // Store in localStorage with timestamp
       if (typeof window !== 'undefined' && window.localStorage) {
         try {
-          const storageKey = 'taskManagerData';
+          const storageKey = getProjectScopedStorageKey();
           const storageData = {
             version: '1.0',
             lastSaved: new Date().toISOString(),
@@ -424,9 +450,10 @@ class TaskDatabase {
 
       const content = JSON.stringify(fullData, null, 2);
       const templateConfig = resolveTemplateConfig();
-      const tasksFile = (templateConfig && templateConfig.GITHUB && templateConfig.GITHUB.TASKS_FILE)
-        ? templateConfig.GITHUB.TASKS_FILE
-        : 'public/tasksDB/tasks.json';
+      const gh = (templateConfig && templateConfig.GITHUB) ? templateConfig.GITHUB : null;
+      const tasksFile = (gh && typeof gh.getTasksFile === 'function')
+        ? gh.getTasksFile(resolveActiveProjectId())
+        : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/github-task-manager/tasks.json');
 
       // Persist JSON
       const { sha: tasksSha } = await this.githubApi.getFileContent(tasksFile);

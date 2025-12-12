@@ -129,8 +129,8 @@ describe('GITHUB Configuration', () => {
     expect(GITHUB.BRANCH).toBe('main');
   });
 
-  it('should have TASKS_FILE set to public/tasksDB/tasks.json', () => {
-    expect(GITHUB.TASKS_FILE).toBe('public/tasksDB/tasks.json');
+  it('should have TASKS_FILE set to public/tasksDB/github-task-manager/tasks.json', () => {
+    expect(GITHUB.TASKS_FILE).toBe('public/tasksDB/github-task-manager/tasks.json');
   });
 });
 

@@ -40,3 +40,8 @@ coverage/
 tools/
 playwright-report/
 test-results/
+.playwright-mcp/
+
+
+
+

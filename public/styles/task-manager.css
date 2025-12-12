@@ -88,6 +88,23 @@ header h1 {
     color: var(--primary-color);
 }
 
+.project-select-label {
+    color: var(--text-secondary);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.project-select {
+    min-width: 240px;
+    max-width: 360px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    background: var(--background);
+    color: var(--text-primary);
+    border-radius: 6px;
+    font-size: 13px;
+}
+
 .user-section {
     background: var(--surface);
     padding: 20px;

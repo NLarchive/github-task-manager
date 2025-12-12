@@ -97,9 +97,39 @@ function ensureDir(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
 }
 
+function sanitizeProjectId(value) {
+  if (!value) return null;
+  const id = String(value).trim();
+  if (!id) return null;
+  // Allow only safe folder characters to avoid traversal.
+  const safe = id.replace(/[^a-zA-Z0-9_-]/g, '');
+  return safe || null;
+}
+
 function maybeBootstrapTasksDb(tasksDbDir, fallbackDir) {
   try {
     ensureDir(tasksDbDir);
+    // Prefer bootstrapping the default project folder (multi-project layout)
+    const defaultProject = 'github-task-manager';
+    const fallbackProjectDir = path.join(fallbackDir, defaultProject);
+    const targetProjectDir = path.join(tasksDbDir, defaultProject);
+
+    const bootstrapPair = (srcDir, dstDir) => {
+      ensureDir(dstDir);
+      const jsonSrc = path.join(srcDir, 'tasks.json');
+      const csvSrc = path.join(srcDir, 'tasks.csv');
+      const jsonDst = path.join(dstDir, 'tasks.json');
+      const csvDst = path.join(dstDir, 'tasks.csv');
+      if (!fs.existsSync(jsonDst) && fs.existsSync(jsonSrc)) fs.copyFileSync(jsonSrc, jsonDst);
+      if (!fs.existsSync(csvDst) && fs.existsSync(csvSrc)) fs.copyFileSync(csvSrc, csvDst);
+    };
+
+    if (fs.existsSync(fallbackProjectDir)) {
+      bootstrapPair(fallbackProjectDir, targetProjectDir);
+      return;
+    }
+
+    // Legacy fallback (single-project layout)
     const jsonPath = path.join(tasksDbDir, 'tasks.json');
     const csvPath = path.join(tasksDbDir, 'tasks.csv');
     if (!fs.existsSync(jsonPath) && fs.existsSync(path.join(fallbackDir, 'tasks.json'))) {
@@ -163,8 +193,10 @@ function createServer({ publicDir, tasksDbDir }) {
       }
 
       if (pathname === '/api/tasks') {
-        const tasksJsonPath = path.join(tasksDbDir, 'tasks.json');
-        const tasksCsvPath = path.join(tasksDbDir, 'tasks.csv');
+        const projectId = sanitizeProjectId(url.searchParams.get('project'));
+        const effectiveTasksDbDir = projectId ? path.join(tasksDbDir, projectId) : tasksDbDir;
+        const tasksJsonPath = path.join(effectiveTasksDbDir, 'tasks.json');
+        const tasksCsvPath = path.join(effectiveTasksDbDir, 'tasks.csv');
 
         if (req.method === 'GET') {
           if (!fs.existsSync(tasksJsonPath)) {
@@ -192,10 +224,10 @@ function createServer({ publicDir, tasksDbDir }) {
             return sendJson(res, 400, { ok: false, error: `Duplicate task_id detected: ${dupes.join(', ')}` });
           }
 
-          ensureDir(tasksDbDir);
+          ensureDir(effectiveTasksDbDir);
           fs.writeFileSync(tasksJsonPath, JSON.stringify(fullData, null, 2), 'utf8');
           fs.writeFileSync(tasksCsvPath, generatePersistedCSV(fullData.tasks), 'utf8');
-          writeStateFiles(tasksDbDir, fullData);
+          writeStateFiles(effectiveTasksDbDir, fullData);
 
           return sendJson(res, 200, { ok: true, tasks: fullData.tasks.length });
         }

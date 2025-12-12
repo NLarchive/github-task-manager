@@ -328,8 +328,8 @@ describe('TaskDatabase Persistence', () => {
     const result = await db.saveTasks('Test save');
     expect(result.success).toBeTruthy();
 
-    expect(mockApi.files['public/tasksDB/tasks.json']).toBeTruthy();
-    expect(mockApi.files['public/tasksDB/tasks.csv']).toBeTruthy();
+    expect(mockApi.files['public/tasksDB/github-task-manager/tasks.json']).toBeTruthy();
+    expect(mockApi.files['public/tasksDB/github-task-manager/tasks.csv']).toBeTruthy();
 
     // Restore token
     TEMPLATE_CONFIG.GITHUB.TOKEN = previousToken;

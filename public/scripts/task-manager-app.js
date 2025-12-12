@@ -26,6 +26,9 @@ class TaskManagerApp {
 
         // Issues sync state
         this.issuesForSync = [];
+
+        // Multi-project state
+        this.activeProjectId = null;
     }
 
     // Initialize the application
@@ -34,6 +37,7 @@ class TaskManagerApp {
         this.loadConfig();
 
         this.setupEventListeners();
+        this.setupProjectSelector();
         this.setupStatCardFilters();
         this.loadUserName();
         this.updateAccessIndicator(); // Initialize access indicator
@@ -57,6 +61,20 @@ class TaskManagerApp {
             throw new Error('TEMPLATE_CONFIG.GITHUB not available. Check script loading order.');
         }
 
+        // Resolve active project (query param wins, then localStorage, then default)
+        const fromQuery = this.getQueryParam('project');
+        const fromStorage = (typeof localStorage !== 'undefined') ? localStorage.getItem('taskManagerActiveProject') : null;
+        const defaultProject = templateConfig.GITHUB.DEFAULT_PROJECT_ID || 'github-task-manager';
+        const activeProject = (fromQuery || fromStorage || defaultProject || '').trim();
+        const safeProject = activeProject.replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
+        this.activeProjectId = safeProject;
+
+        // Persist to global config so TaskDatabase can resolve it
+        templateConfig.GITHUB.ACTIVE_PROJECT_ID = safeProject;
+        if (typeof templateConfig.GITHUB.getTasksFile === 'function') {
+            templateConfig.GITHUB.TASKS_FILE = templateConfig.GITHUB.getTasksFile(safeProject);
+        }
+
         this.config = {
             owner: templateConfig.GITHUB.OWNER,
             repo: templateConfig.GITHUB.REPO,
@@ -68,6 +86,59 @@ class TaskManagerApp {
         // Initialize components with config
         this.validator = new TemplateValidator(templateConfig);
         this.automation = new TemplateAutomation(templateConfig);
+    }
+
+    setupProjectSelector() {
+        const templateConfig = window.TEMPLATE_CONFIG || TEMPLATE_CONFIG;
+        const select = document.getElementById('projectSelect');
+        if (!select || !templateConfig || !templateConfig.GITHUB) return;
+
+        const projects = Array.isArray(templateConfig.GITHUB.PROJECTS) ? templateConfig.GITHUB.PROJECTS : [];
+        if (projects.length === 0) return;
+
+        // Populate options (id + label)
+        select.innerHTML = '';
+        for (const proj of projects) {
+            if (!proj || !proj.id) continue;
+            const opt = document.createElement('option');
+            opt.value = proj.id;
+            opt.textContent = proj.label || proj.id;
+            select.appendChild(opt);
+        }
+
+        // Set current selection
+        const current = this.activeProjectId || templateConfig.GITHUB.ACTIVE_PROJECT_ID || templateConfig.GITHUB.DEFAULT_PROJECT_ID;
+        if (current) select.value = current;
+
+        select.addEventListener('change', async () => {
+            const nextId = (select.value || '').trim();
+            await this.setActiveProject(nextId);
+        });
+    }
+
+    async setActiveProject(projectId) {
+        const templateConfig = window.TEMPLATE_CONFIG || TEMPLATE_CONFIG;
+        if (!templateConfig || !templateConfig.GITHUB) return;
+
+        const safeProject = String(projectId || '').trim().replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
+        if (safeProject === this.activeProjectId) return;
+
+        this.activeProjectId = safeProject;
+        localStorage.setItem('taskManagerActiveProject', safeProject);
+
+        templateConfig.GITHUB.ACTIVE_PROJECT_ID = safeProject;
+        if (typeof templateConfig.GITHUB.getTasksFile === 'function') {
+            templateConfig.GITHUB.TASKS_FILE = templateConfig.GITHUB.getTasksFile(safeProject);
+        }
+
+        // Keep app config in sync
+        if (this.config) {
+            this.config.tasksFile = templateConfig.GITHUB.TASKS_FILE;
+        }
+
+        // Reload tasks for the newly selected project
+        this.showToast(`Switched project to: ${safeProject}`, 'info');
+        await this.loadTasks();
     }
 
     // User Management

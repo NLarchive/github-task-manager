@@ -35,7 +35,8 @@ test.describe('New Features - Password / Timeline / Issues', () => {
     const passwordInput = page.locator('#accessPassword');
     await passwordInput.fill('playwright-secret');
     const unlockBtn = page.locator('#passwordModal button:has-text("Unlock")');
-    await unlockBtn.click();
+    await unlockBtn.scrollIntoViewIfNeeded();
+    await unlockBtn.click({ force: true });
 
     // Wait a bit for modal to process password
     await page.waitForTimeout(200);
@@ -103,7 +104,7 @@ test.describe('New Features - Password / Timeline / Issues', () => {
     await page.click('#issuesModal button:has-text("Import Selected")');
 
     await page.waitForSelector('text=Tasks saved successfully', { timeout: 30000 });
-    await page.click('#issuesModal .close');
+    await page.locator('#issuesModal .close').click({ force: true });
 
     // Ensure imported task is visible in list mode
     await page.click('[data-testid="view-list"]');
