@@ -312,11 +312,15 @@
     </div>
 
     <!-- Load Components -->
-    <script src="config/github-token.local.js"></script>
-    <script src="config/github-token.js"></script>
+    <!-- Password config MUST load before template-config so ACCESS_PASSWORD is available -->
     <script src="config/access-secret.local.js"></script>
     <script src="config/access-secret.js"></script>
+    <!-- GitHub token config -->
+    <script src="config/github-token.local.js"></script>
+    <script src="config/github-token.js"></script>
+    <!-- Main config (depends on ACCESS_PASSWORD from access-secret) -->
     <script src="config/template-config.js"></script>
+    <!-- Rest of the scripts -->
     <script src="scripts/template-validator.js"></script>
     <script src="scripts/template-automation.js"></script>
     <script src="tasksDB/task-database.js"></script>
