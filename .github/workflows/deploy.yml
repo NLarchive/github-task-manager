@@ -38,6 +38,18 @@ jobs:
           }
           EOF
 
+      - name: Create access password config
+        run: |
+          mkdir -p public/config
+          cat > public/config/access-secret.js << 'EOF'
+          // Injected by GitHub Actions from repository secrets
+          // NOTE: This value is shipped to the browser. Client-side passwords are not a strong security boundary.
+          const ACCESS_PASSWORD = '${{ secrets.ACCESS_PASSWORD }}';
+          if (typeof module !== 'undefined' && module.exports) {
+            module.exports = { ACCESS_PASSWORD };
+          }
+          EOF
+
       - name: Validate project files
         run: |
           echo "=== Checking required files ==="

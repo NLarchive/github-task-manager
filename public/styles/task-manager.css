@@ -819,6 +819,167 @@ button {
     border-color: var(--danger-color);
 }
 
+/* View Toggle */
+.view-toggle {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.view-toggle .btn-secondary.active {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: rgba(46, 164, 79, 0.08);
+}
+
+/* Timeline View */
+.timeline-view {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--background);
+    overflow: hidden;
+}
+
+.timeline-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.timeline-header h3 {
+    margin: 0;
+    font-size: 15px;
+}
+
+.timeline-header .timeline-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.timeline-scroll {
+    overflow: auto;
+    max-height: 65vh;
+}
+
+.timeline-grid {
+    --unit-width: 16px;
+    --name-col: 260px;
+    position: relative;
+    min-width: calc(var(--name-col) + (var(--units) * var(--unit-width)));
+}
+
+.timeline-row {
+    display: grid;
+    grid-template-columns: var(--name-col) 1fr;
+    align-items: stretch;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.timeline-row:hover {
+    background: rgba(46, 164, 79, 0.04);
+}
+
+.timeline-task {
+    padding: 10px 12px;
+    border-right: 1px solid rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.timeline-task .task-name {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.timeline-task .task-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.timeline-track {
+    position: relative;
+    padding: 10px 0;
+    background-image: repeating-linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.06) 0,
+        rgba(0, 0, 0, 0.06) 1px,
+        transparent 1px,
+        transparent calc(var(--unit-width))
+    );
+}
+
+.timeline-bar {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 18px;
+    border-radius: 9px;
+    border: 1px solid rgba(0, 0, 0, 0.18);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+}
+
+.timeline-bar.status-not-started { background: rgba(108, 117, 125, 0.22); }
+.timeline-bar.status-in-progress { background: rgba(13, 110, 253, 0.22); }
+.timeline-bar.status-on-hold { background: rgba(255, 193, 7, 0.22); }
+.timeline-bar.status-blocked { background: rgba(220, 53, 69, 0.22); }
+.timeline-bar.status-completed { background: rgba(46, 164, 79, 0.22); }
+.timeline-bar.status-cancelled { background: rgba(108, 117, 125, 0.16); }
+.timeline-bar.status-pending-review { background: rgba(102, 16, 242, 0.18); }
+
+.timeline-bar.critical {
+    border-color: rgba(220, 53, 69, 0.6);
+}
+
+/* Issues Sync */
+.issues-toolbar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.issues-list {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    max-height: 55vh;
+    overflow-y: auto;
+}
+
+.issues-item {
+    display: grid;
+    grid-template-columns: 34px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    background: var(--background);
+}
+
+.issues-item:last-child {
+    border-bottom: none;
+}
+
+.issues-item .issue-title a {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.issues-item .issue-title a:hover {
+    text-decoration: underline;
+}
+
+.issues-item .issue-meta {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .form-row {

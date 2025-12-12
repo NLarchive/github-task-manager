@@ -7,7 +7,7 @@ A collaborative, open-source task management system integrated with GitHub, enab
 ## Features ✨
 
 ### Core Functionality
-- ✅ **No Authentication Required** - Public collaboration for all users
+- ✅ **Public Read + Optional Write Gate** - Viewing is public; GitHub Pages can require a shared password for modifications
 - ✅ **Auto-Generated Task IDs** - Sequential numbering with gap filling
 - ✅ **Real-Time GitHub Sync** - All changes commit directly to repository
 - ✅ **Full CRUD Operations** - Create, read, update, delete tasks seamlessly
@@ -506,6 +506,7 @@ For GitHub Actions deployment:
 # .github/workflows/deploy.yml
 secrets:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}  # GitHub API token
+   ACCESS_PASSWORD: ${{ secrets.ACCESS_PASSWORD }}  # Shared password for write actions (client-side gate)
 ```
 
 ## Troubleshooting 🔧
@@ -615,12 +616,12 @@ Copyright © 2025 Nicolas Larenas
 - ✅ **HTTPS Only**: GitHub Pages uses HTTPS by default
 - ✅ **Input Validation**: All user input validated before processing
 - ✅ **CORS Protection**: API calls respect GitHub's CORS policy
-- ✅ **No Auth Required**: Intentional design for public collaboration
+- ✅ **Read-Only by Default**: Live site can require a shared password to modify tasks
 - ✅ **Rate Limiting**: Respects GitHub API rate limits
 
 ### Security Considerations
 
-- ⚠️ This app is public - anyone can modify tasks
+- ⚠️ Client-side passwords are not a strong security boundary (users can inspect served JS)
 - ⚠️ No user authentication - attribution based on name input
 - ⚠️ GitHub history is permanent - no true deletion
 - ⚠️ Token is visible in Actions logs - use read-only token if sensitive

@@ -183,12 +183,10 @@ const TEMPLATE_CONFIG = {
   // Password required for modifications (create, edit, delete)
   // Reading/viewing tasks is always public
   ACCESS: {
-    // SHA-256 hash of the password "collaborate" 
-    // To generate: crypto.subtle.digest('SHA-256', new TextEncoder().encode('yourpassword'))
-    // Or use: echo -n "yourpassword" | sha256sum
-    PASSWORD_HASH: '5e884898da28047d9169ee68dd20d17f88f1e7ce7d1c1e7f1b5f4f5b5f5f5f5f',
-    // Simple plaintext password for demo (in production, use hash only)
-    PASSWORD: 'collaborate',
+    // GitHub Pages: inject this at deploy-time from a GitHub Secret (not committed).
+    // NOTE: This is still client-side only. Anyone can view served JS.
+    // See .github/workflows/deploy.yml for how ACCESS_PASSWORD is injected.
+    PASSWORD: (typeof ACCESS_PASSWORD !== 'undefined' ? ACCESS_PASSWORD : ''),
     // Session duration in minutes (0 = until page refresh)
     SESSION_DURATION: 30,
     // Allow read-only access without password

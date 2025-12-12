@@ -37,6 +37,11 @@
                     <button onclick="showAddTaskModal()" class="btn-primary">+ Add New Task</button>
                     <button onclick="loadTasks()" class="btn-secondary">🔄 Refresh</button>
                     <button onclick="exportToCSV()" class="btn-secondary">📥 Export CSV</button>
+                    <button type="button" onclick="app.openIssuesSyncModal()" class="btn-secondary" data-testid="sync-issues">🐙 Sync Issues</button>
+                    <div class="view-toggle" role="group" aria-label="View mode">
+                        <button type="button" id="viewListBtn" onclick="app.setViewMode('list')" class="btn-secondary active" data-testid="view-list">📋 List</button>
+                        <button type="button" id="viewTimelineBtn" onclick="app.setViewMode('timeline')" class="btn-secondary" data-testid="view-timeline">📅 Timeline</button>
+                    </div>
                     <div class="filter-section">
                         <select id="filterStatus" onchange="app.filterTasks()">
                             <option value="all">All Tasks</option>
@@ -78,7 +83,8 @@
                 </section>
 
                 <section class="tasks-section">
-                    <div id="tasksList" class="tasks-list"></div>
+                    <div id="timelineView" class="timeline-view" style="display: none;" data-testid="timeline-view"></div>
+                    <div id="tasksList" class="tasks-list" data-testid="tasks-list"></div>
                     <div id="emptyState" class="empty-state" style="display: none;">
                         <p>No tasks found. Click "Add New Task" to get started, or import a template above!</p>
                     </div>
@@ -274,6 +280,33 @@
             </div>
         </div>
 
+        <!-- GitHub Issues Sync Modal -->
+        <div id="issuesModal" class="modal">
+            <div class="modal-content" style="max-width: 720px;">
+                <span class="close" onclick="app.closeIssuesSyncModal()">&times;</span>
+                <h2>🐙 GitHub Issues Sync</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 14px;">
+                    Import open issues as tasks.
+                    <br><small>Tip: Click an issue title to open it in GitHub.</small>
+                </p>
+
+                <div id="issuesSyncStatus" class="validation-messages" style="display: none;"></div>
+
+                <div class="issues-toolbar">
+                    <button type="button" class="btn-secondary" onclick="app.loadIssuesForSync()">🔄 Refresh Issues</button>
+                    <button type="button" class="btn-primary" onclick="app.importSelectedIssues()">⬇️ Import Selected</button>
+                </div>
+
+                <div id="issuesList" class="issues-list" data-testid="issues-list"></div>
+
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+                    <small style="color: var(--text-secondary);">
+                        Note: This is a client-side integration; public issue reads may be rate-limited without a token.
+                    </small>
+                </div>
+            </div>
+        </div>
+
         <!-- Toast Notification -->
         <div id="toast" class="toast"></div>
     </div>
@@ -281,6 +314,8 @@
     <!-- Load Components -->
     <script src="config/github-token.local.js"></script>
     <script src="config/github-token.js"></script>
+    <script src="config/access-secret.local.js"></script>
+    <script src="config/access-secret.js"></script>
     <script src="config/template-config.js"></script>
     <script src="scripts/template-validator.js"></script>
     <script src="scripts/template-automation.js"></script>

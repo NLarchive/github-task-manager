@@ -465,7 +465,7 @@ test.describe('GitHub Task Manager - UI/UX', () => {
   test('should display all control buttons', async ({ page }) => {
     // Verify all buttons are visible
     await expect(page.locator('button:has-text("+ Add New Task")')).toBeVisible();
-    await expect(page.locator('button:has-text("🔄 Refresh")')).toBeVisible();
+    await expect(page.getByRole('button', { name: '🔄 Refresh', exact: true })).toBeVisible();
     await expect(page.locator('button:has-text("📥 Export CSV")')).toBeVisible();
   });
 

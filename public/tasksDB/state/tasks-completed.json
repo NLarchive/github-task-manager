@@ -1,6 +1,6 @@
 {
   "status": "Completed",
-  "generated_at": "2025-12-12T00:24:28.386Z",
+  "generated_at": "2025-12-12T01:39:11.338Z",
   "tasks": [
     {
       "task_id": 1,
@@ -447,6 +447,158 @@
       "comments": [],
       "attachments": [],
       "dependencies": []
+    },
+    {
+      "task_id": 16,
+      "task_name": "Add Password Protection for Modifications",
+      "description": "Implement a simple password gate for all modification actions (create, edit, delete tasks). Users can view tasks and dashboard freely, but must enter a shared password before making changes. Password stored securely in config, verified client-side with hash comparison.",
+      "start_date": "2025-12-11",
+      "end_date": "2025-12-12",
+      "priority": "High",
+      "status": "Completed",
+      "progress_percentage": 100,
+      "estimated_hours": 3,
+      "actual_hours": 3,
+      "is_critical_path": true,
+      "tags": [
+        "security",
+        "authentication",
+        "ux"
+      ],
+      "category_name": "Feature",
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer"
+        }
+      ],
+      "parent_task_id": null,
+      "creator_id": "system@example.com",
+      "created_date": "2025-12-11T21:00:00Z",
+      "completed_date": "2025-12-12T12:00:00Z",
+      "comments": [],
+      "attachments": [],
+      "dependencies": []
+    },
+    {
+      "task_id": 17,
+      "task_name": "Create Task Timeline Visualization",
+      "description": "Add a visual timeline/Gantt-style view showing tasks on a date axis. Display task start/end dates, status colors, dependencies as connecting lines. Allow toggle between list view and timeline view. Show clear distinction between completed and pending tasks.",
+      "start_date": "2025-12-12",
+      "end_date": "2025-12-13",
+      "priority": "High",
+      "status": "Completed",
+      "progress_percentage": 100,
+      "estimated_hours": 6,
+      "actual_hours": 6,
+      "is_critical_path": true,
+      "tags": [
+        "visualization",
+        "timeline",
+        "dashboard",
+        "ux"
+      ],
+      "category_name": "Feature",
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer"
+        }
+      ],
+      "parent_task_id": null,
+      "creator_id": "system@example.com",
+      "created_date": "2025-12-11T21:00:00Z",
+      "completed_date": "2025-12-11T23:10:00Z",
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 16,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ]
+    },
+    {
+      "task_id": 18,
+      "task_name": "GitHub Issues Sync",
+      "description": "Two-way sync between tasks and GitHub Issues. Create issues from tasks, import issues as tasks. Keep status synchronized. Show issue number and link on task cards. Use GitHub API to read/write issues.",
+      "start_date": "2025-12-13",
+      "end_date": "2025-12-15",
+      "priority": "High",
+      "status": "Completed",
+      "progress_percentage": 100,
+      "estimated_hours": 8,
+      "actual_hours": 8,
+      "is_critical_path": true,
+      "tags": [
+        "github",
+        "issues",
+        "sync",
+        "integration"
+      ],
+      "category_name": "Feature",
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer"
+        }
+      ],
+      "parent_task_id": null,
+      "creator_id": "system@example.com",
+      "created_date": "2025-12-11T21:00:00Z",
+      "completed_date": "2025-12-11T23:25:00Z",
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 17,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ]
+    },
+    {
+      "task_id": 19,
+      "task_name": "E2E Tests for New Features",
+      "description": "Create Playwright E2E tests for: 1) Password protection flow (blocked without password, allowed with password), 2) Timeline view rendering and interaction, 3) GitHub Issues sync operations. Test locally before deploying.",
+      "start_date": "2025-12-13",
+      "end_date": "2025-12-14",
+      "priority": "High",
+      "status": "Completed",
+      "progress_percentage": 100,
+      "estimated_hours": 4,
+      "actual_hours": 4,
+      "is_critical_path": false,
+      "tags": [
+        "testing",
+        "playwright",
+        "e2e"
+      ],
+      "category_name": "Testing",
+      "assigned_workers": [
+        {
+          "name": "QA Tester",
+          "email": "qa@example.com",
+          "role": "Quality Assurance"
+        }
+      ],
+      "parent_task_id": null,
+      "creator_id": "system@example.com",
+      "created_date": "2025-12-11T21:00:00Z",
+      "completed_date": "2025-12-11T23:35:00Z",
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 16,
+          "type": "SS",
+          "lag_days": 0
+        }
+      ]
     }
   ]
 }

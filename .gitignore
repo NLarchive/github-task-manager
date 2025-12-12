@@ -5,6 +5,8 @@ package-lock.json
 # Token files - NEVER COMMIT THESE
 public/config/github-token.local.js
 public/config/github-token.js
+public/config/access-secret.local.js
+public/config/access-secret.js
 config/github-token.local.js
 *.token
 *.secret

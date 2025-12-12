@@ -19,6 +19,13 @@ class TaskManagerApp {
         this.isAuthenticated = false;
         this.authExpiry = null;
         this.pendingAction = null; // Store action to execute after password verification
+
+        // UI state
+        this.viewMode = 'list';
+        this.timelineScale = 'day'; // 'day' | 'week'
+
+        // Issues sync state
+        this.issuesForSync = [];
     }
 
     // Initialize the application
@@ -86,13 +93,47 @@ class TaskManagerApp {
         return templateConfig.ACCESS || { PASSWORD: '', PUBLIC_READ: true, SESSION_DURATION: 30 };
     }
 
-    isPasswordProtected() {
-        const accessConfig = this.getAccessConfig();
-        return accessConfig.PASSWORD && accessConfig.PASSWORD.length > 0;
+    isGitHubPagesHost() {
+        if (typeof window === 'undefined' || !window.location) return false;
+        const hostname = window.location.hostname || '';
+        return hostname.endsWith('github.io');
     }
 
+    getQueryParam(name) {
+        try {
+            if (typeof window === 'undefined' || !window.location) return null;
+            const params = new URLSearchParams(window.location.search || '');
+            return params.get(name);
+        } catch {
+            return null;
+        }
+    }
+
+    isLocalHost() {
+        if (typeof window === 'undefined' || !window.location) return true;
+        const hostname = window.location.hostname || '';
+        return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '';
+    }
+
+    isPasswordProtectionEnabled() {
+        // For local E2E validation: /?forcePassword=1
+        if (this.getQueryParam('forcePassword') === '1') return true;
+
+        // Local dev: no password required
+        if (this.isLocalHost()) return false;
+
+        // GitHub Pages: enforce password gate
+        return this.isGitHubPagesHost();
+    }
+
+    isPasswordProtected() {
+        // “Protected” means we enforce auth for modifications in this environment.
+        return this.isPasswordProtectionEnabled();
+    }
+
+
     checkAuth() {
-        // If no password configured, allow all actions
+        // If password protection is not enabled for this environment, allow all actions
         if (!this.isPasswordProtected()) {
             return true;
         }
@@ -154,15 +195,22 @@ class TaskManagerApp {
         this.pendingAction = null;
     }
 
-    verifyPassword(event) {
+    async verifyPassword(event) {
         event.preventDefault();
         
         const passwordInput = document.getElementById('accessPassword');
         const errorDiv = document.getElementById('passwordError');
-        const enteredPassword = passwordInput.value;
+        const enteredPassword = (passwordInput.value || '').trim();
         const accessConfig = this.getAccessConfig();
-        
-        if (enteredPassword === accessConfig.PASSWORD) {
+        const configuredPassword = (accessConfig.PASSWORD || '').trim();
+
+        if (!configuredPassword) {
+            errorDiv.innerHTML = '<span style="color: var(--danger-color);">⚠️ Access is not configured for this deployment. Please set the GitHub Secret <code>ACCESS_PASSWORD</code>.</span>';
+            errorDiv.style.display = 'block';
+            return false;
+        }
+
+        if (enteredPassword === configuredPassword) {
             // Password correct - set authentication
             const sessionDuration = (accessConfig.SESSION_DURATION || 30) * 60 * 1000; // Convert to ms
             this.authExpiry = Date.now() + sessionDuration;
@@ -209,7 +257,7 @@ class TaskManagerApp {
         const indicator = document.getElementById('accessIndicator');
         if (!indicator) return;
         
-        // Hide indicator if no password configured
+        // Hide indicator if password protection is not enabled
         if (!this.isPasswordProtected()) {
             indicator.style.display = 'none';
             return;
@@ -316,15 +364,35 @@ class TaskManagerApp {
 
     renderTasks() {
         const tasksList = document.getElementById('tasksList');
+        const timelineView = document.getElementById('timelineView');
         const emptyState = document.getElementById('emptyState');
 
         if (this.filteredTasks.length === 0) {
             tasksList.innerHTML = '';
+            if (timelineView) {
+                timelineView.innerHTML = '';
+                timelineView.style.display = 'none';
+            }
             emptyState.style.display = 'block';
             return;
         }
 
         emptyState.style.display = 'none';
+
+        if (this.viewMode === 'timeline' && timelineView) {
+            tasksList.style.display = 'none';
+            timelineView.style.display = 'block';
+            this.renderTimeline();
+            this.updateViewToggle();
+            return;
+        }
+
+        if (timelineView) {
+            timelineView.style.display = 'none';
+        }
+        tasksList.style.display = '';
+        this.updateViewToggle();
+
         tasksList.innerHTML = this.filteredTasks.map(task => `
             <div class="task-card" onclick="app.editTask('${task.task_id || task.id}')">
                 <div class="task-header" onclick="app.editTask('${task.task_id || task.id}')">
@@ -343,6 +411,7 @@ class TaskManagerApp {
                         ${task.assigned_workers && task.assigned_workers.length > 0 ? `<span>👤 ${task.assigned_workers.map(w => w.name).join(', ')}</span>` : ''}
                         ${task.end_date ? `<span>📅 ${task.end_date}</span>` : ''}
                         ${task.estimated_hours ? `<span>⏱️ ${task.estimated_hours}h</span>` : ''}
+                        ${this.getLinkedIssue(task) ? `<span>🐙 <a href="${this.getLinkedIssue(task).url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">#${this.getLinkedIssue(task).number}</a></span>` : ''}
                         <span>🕐 ${new Date(task.created_date || task.createdAt).toLocaleDateString()}</span>
                     </div>
                     ${task.tags && task.tags.length > 0 ? `
@@ -354,9 +423,372 @@ class TaskManagerApp {
                 <div class="task-actions" onclick="event.stopPropagation()">
                     <button class="btn-secondary" onclick="app.editTask('${task.task_id || task.id}')">Edit</button>
                     <button class="btn-danger" onclick="app.deleteTask('${task.task_id || task.id}')">Delete</button>
+                    ${this.getLinkedIssue(task) ? `<a class="btn-secondary" href="${this.getLinkedIssue(task).url}" target="_blank" rel="noopener">Open Issue</a>` : `<button class="btn-secondary" onclick="app.createIssueForTask('${task.task_id || task.id}')">Create Issue</button>`}
                 </div>
             </div>
         `).join('');
+    }
+
+    setViewMode(mode) {
+        const next = (mode === 'timeline') ? 'timeline' : 'list';
+        if (this.viewMode === next) return;
+        this.viewMode = next;
+        this.renderTasks();
+    }
+
+    updateViewToggle() {
+        const listBtn = document.getElementById('viewListBtn');
+        const timelineBtn = document.getElementById('viewTimelineBtn');
+        if (listBtn) listBtn.classList.toggle('active', this.viewMode === 'list');
+        if (timelineBtn) timelineBtn.classList.toggle('active', this.viewMode === 'timeline');
+    }
+
+    setTimelineScale(scale) {
+        const next = (scale === 'week') ? 'week' : 'day';
+        this.timelineScale = next;
+        if (this.viewMode === 'timeline') this.renderTasks();
+    }
+
+    parseDate(dateStr) {
+        if (!dateStr || typeof dateStr !== 'string') return null;
+        const d = new Date(`${dateStr}T00:00:00`);
+        return Number.isNaN(d.getTime()) ? null : d;
+    }
+
+    daysBetween(a, b) {
+        const ms = 24 * 60 * 60 * 1000;
+        return Math.floor((b.getTime() - a.getTime()) / ms);
+    }
+
+    formatShortDate(d) {
+        try {
+            return d.toISOString().slice(0, 10);
+        } catch {
+            return '';
+        }
+    }
+
+    renderTimeline() {
+        const timelineView = document.getElementById('timelineView');
+        if (!timelineView) return;
+
+        const tasks = (this.filteredTasks || []).slice();
+        const dated = tasks
+            .map(t => ({
+                task: t,
+                start: this.parseDate(t.start_date),
+                end: this.parseDate(t.end_date) || this.parseDate(t.start_date)
+            }))
+            .filter(x => x.start && x.end);
+
+        if (dated.length === 0) {
+            timelineView.innerHTML = `<div class="empty-state" style="display:block; padding: 18px;">
+                <p>No tasks with valid start/end dates to render on a timeline.</p>
+            </div>`;
+            return;
+        }
+
+        let min = dated[0].start;
+        let max = dated[0].end;
+        for (const item of dated) {
+            if (item.start < min) min = item.start;
+            if (item.end > max) max = item.end;
+        }
+
+        const totalDays = Math.max(1, this.daysBetween(min, max) + 1);
+        const scale = (totalDays > 180) ? 'week' : this.timelineScale;
+        const units = (scale === 'week') ? Math.ceil(totalDays / 7) : totalDays;
+        const unitWidth = (scale === 'week') ? 10 : 16;
+
+        // Sort by start date
+        dated.sort((a, b) => a.start - b.start);
+
+        const headerTitle = `Timeline (${this.formatShortDate(min)} → ${this.formatShortDate(max)})`;
+        const rowsHtml = dated.map(({ task, start, end }) => {
+            const statusClass = `status-${String(task.status || '').toLowerCase().replace(/\s+/g, '-')}`;
+            const startOffsetDays = this.daysBetween(min, start);
+            const endOffsetDays = this.daysBetween(min, end);
+            const unitStart = (scale === 'week') ? Math.floor(startOffsetDays / 7) : startOffsetDays;
+            const unitEnd = (scale === 'week') ? Math.floor(endOffsetDays / 7) : endOffsetDays;
+            const unitLen = Math.max(1, (unitEnd - unitStart + 1));
+            const leftCss = `calc(${unitStart} * var(--unit-width))`;
+            const widthCss = `calc(${unitLen} * var(--unit-width))`;
+
+            return `
+                <div class="timeline-row" onclick="app.editTask('${task.task_id || task.id}')" role="button" tabindex="0">
+                    <div class="timeline-task">
+                        <div class="task-name">${this.escapeHtml(task.task_name || task.title)}</div>
+                        <div class="task-sub">${this.escapeHtml(task.status || '')} • ${this.escapeHtml(task.start_date || '')} → ${this.escapeHtml(task.end_date || '')}</div>
+                    </div>
+                    <div class="timeline-track">
+                        <div class="timeline-bar ${statusClass} ${task.is_critical_path ? 'critical' : ''}" style="left: ${leftCss}; width: ${widthCss};" title="${this.escapeHtml(task.task_name || task.title)}"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        timelineView.innerHTML = `
+            <div class="timeline-header">
+                <h3>${this.escapeHtml(headerTitle)}</h3>
+                <div class="timeline-actions">
+                    <button type="button" class="btn-secondary" onclick="app.setTimelineScale('day')" ${scale === 'day' ? 'disabled' : ''}>Day</button>
+                    <button type="button" class="btn-secondary" onclick="app.setTimelineScale('week')" ${scale === 'week' ? 'disabled' : ''}>Week</button>
+                </div>
+            </div>
+            <div class="timeline-scroll">
+                <div class="timeline-grid" style="--units:${units}; --unit-width:${unitWidth}px;">
+                    ${rowsHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    // GitHub Issues Sync
+    openIssuesSyncModal() {
+        if (this.isPasswordProtected()) {
+            this.requireAuth(this._openIssuesSyncModal);
+        } else {
+            this._openIssuesSyncModal();
+        }
+    }
+
+    _openIssuesSyncModal() {
+        const modal = document.getElementById('issuesModal');
+        if (!modal) return;
+        modal.style.display = 'block';
+        this.loadIssuesForSync();
+    }
+
+    closeIssuesSyncModal() {
+        const modal = document.getElementById('issuesModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    setIssuesSyncStatus(message, type = 'info') {
+        const el = document.getElementById('issuesSyncStatus');
+        if (!el) return;
+        if (!message) {
+            el.style.display = 'none';
+            el.textContent = '';
+            return;
+        }
+        el.style.display = 'block';
+        el.className = `validation-messages ${type}`;
+        el.textContent = message;
+    }
+
+    async loadIssuesForSync() {
+        if (!this.githubApi) {
+            this.setIssuesSyncStatus('GitHub API not initialized yet.', 'error');
+            return;
+        }
+        this.setIssuesSyncStatus('Loading issues...', 'info');
+
+        try {
+            const issues = await this.githubApi.listIssues('open');
+            // Filter out PRs
+            this.issuesForSync = (issues || []).filter(i => !i.pull_request);
+            this.renderIssuesList();
+            this.setIssuesSyncStatus(`Loaded ${this.issuesForSync.length} open issues.`, 'success');
+        } catch (e) {
+            console.error('Issues sync load failed', e);
+            this.issuesForSync = [];
+            this.renderIssuesList();
+            this.setIssuesSyncStatus(`Failed to load issues: ${e.message}`, 'error');
+        }
+    }
+
+    renderIssuesList() {
+        const list = document.getElementById('issuesList');
+        if (!list) return;
+        const issues = this.issuesForSync || [];
+
+        if (issues.length === 0) {
+            list.innerHTML = `<div class="empty-state" style="display:block; padding: 14px;"><p>No issues found.</p></div>`;
+            return;
+        }
+
+        list.innerHTML = issues.map(issue => {
+            const alreadyImported = this.isIssueAlreadyImported(issue.number);
+            const checkbox = alreadyImported
+                ? `<input type="checkbox" disabled title="Already imported" />`
+                : `<input type="checkbox" class="issue-select" data-issue-number="${issue.number}" />`;
+
+            return `
+                <div class="issues-item">
+                    <div>${checkbox}</div>
+                    <div class="issue-title">
+                        <a href="${issue.html_url}" target="_blank" rel="noopener">#${issue.number} ${this.escapeHtml(issue.title || '')}</a>
+                        <div class="issue-meta">${alreadyImported ? 'Already imported' : 'Not imported'} • ${this.escapeHtml((issue.state || '').toUpperCase())}</div>
+                    </div>
+                    <div class="issue-meta">${issue.comments ? `${issue.comments} comments` : ''}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    isIssueAlreadyImported(issueNumber) {
+        const tag = `issue-#${issueNumber}`;
+        return (this.database && Array.isArray(this.database.tasks))
+            ? this.database.tasks.some(t => Array.isArray(t.tags) && t.tags.includes(tag))
+            : false;
+    }
+
+    async importSelectedIssues() {
+        if (this.isPasswordProtected()) {
+            this.requireAuth(this._importSelectedIssues);
+        } else {
+            this._importSelectedIssues();
+        }
+    }
+
+    _importSelectedIssues() {
+        // async wrapper below
+        this._importSelectedIssuesAsync();
+    }
+
+    async _importSelectedIssuesAsync() {
+        const list = document.getElementById('issuesList');
+        if (!list) return;
+
+        const selected = Array.from(list.querySelectorAll('input.issue-select:checked'))
+            .map(cb => Number(cb.getAttribute('data-issue-number')))
+            .filter(n => Number.isFinite(n));
+
+        if (selected.length === 0) {
+            this.setIssuesSyncStatus('Select at least one issue to import.', 'warning');
+            return;
+        }
+
+        const issuesByNumber = new Map((this.issuesForSync || []).map(i => [i.number, i]));
+        let imported = 0;
+        const today = new Date();
+        const startDate = today.toISOString().slice(0, 10);
+        const endDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+        for (const num of selected) {
+            const issue = issuesByNumber.get(num);
+            if (!issue) continue;
+            if (this.isIssueAlreadyImported(num)) continue;
+
+            const taskData = {
+                task_name: issue.title || `Issue #${num}`,
+                description: (issue.body && issue.body.trim().length > 0)
+                    ? issue.body
+                    : `Imported from GitHub Issue #${num}: ${issue.html_url}`,
+                start_date: startDate,
+                end_date: endDate,
+                priority: 'Medium',
+                status: 'Not Started',
+                estimated_hours: 2,
+                category_name: 'Feature',
+                tags: ['github', 'issues', `issue-#${num}`],
+                comments: [{
+                    author: this.currentUser || 'public@example.com',
+                    timestamp: new Date().toISOString(),
+                    text: `Imported from GitHub Issue #${num}: ${issue.html_url}`
+                }]
+            };
+
+            const result = this.database.createTask(taskData, this.currentUser);
+            if (result && result.success) {
+                imported++;
+            }
+        }
+
+        if (imported === 0) {
+            this.setIssuesSyncStatus('No new issues were imported (already imported or none selected).', 'warning');
+            this.renderIssuesList();
+            return;
+        }
+
+        try {
+            await this.saveTasks();
+            this.tasks = this.database.tasks;
+            this.filteredTasks = [...this.tasks];
+            this.renderTasks();
+            this.updateStats();
+            await this.loadIssuesForSync();
+            this.setIssuesSyncStatus(`Imported ${imported} issue(s) as tasks.`, 'success');
+        } catch (e) {
+            console.error('Issue import save failed', e);
+            this.setIssuesSyncStatus(`Imported ${imported} issue(s), but failed to save: ${e.message}`, 'error');
+        }
+    }
+
+    getLinkedIssue(task) {
+        const tags = Array.isArray(task && task.tags) ? task.tags : [];
+        const match = tags.find(t => typeof t === 'string' && /^issue-#\d+$/.test(t));
+        if (!match) return null;
+        const number = Number(match.replace('issue-#', ''));
+        if (!Number.isFinite(number)) return null;
+        return {
+            number,
+            url: `https://github.com/${this.config.owner}/${this.config.repo}/issues/${number}`
+        };
+    }
+
+    createIssueForTask(taskId) {
+        if (this.isPasswordProtected()) {
+            this.requireAuth(this._createIssueForTask, taskId);
+        } else {
+            this._createIssueForTask(taskId);
+        }
+    }
+
+    async _createIssueForTask(taskId) {
+        if (!this.githubApi) {
+            this.showToast('GitHub API not initialized', 'error');
+            return;
+        }
+
+        const task = this.database.getTask(taskId);
+        if (!task) {
+            this.showToast('Task not found', 'error');
+            return;
+        }
+
+        if (this.getLinkedIssue(task)) {
+            window.open(this.getLinkedIssue(task).url, '_blank', 'noopener');
+            return;
+        }
+
+        try {
+            this.showLoading();
+            const body = `${task.description || ''}\n\n---\nImported from GitHub Task Manager (task_id: ${task.task_id}).`;
+            const issue = await this.githubApi.createIssue(task.task_name, body, task.tags || []);
+
+            const nextTags = Array.isArray(task.tags) ? [...task.tags] : [];
+            const linkTag = `issue-#${issue.number}`;
+            if (!nextTags.includes(linkTag)) nextTags.push(linkTag);
+            if (!nextTags.includes('github')) nextTags.push('github');
+            if (!nextTags.includes('issues')) nextTags.push('issues');
+
+            const nextComments = Array.isArray(task.comments) ? [...task.comments] : [];
+            nextComments.push({
+                author: this.currentUser || 'public@example.com',
+                timestamp: new Date().toISOString(),
+                text: `Created GitHub Issue #${issue.number}: ${issue.html_url}`
+            });
+
+            const updated = this.database.updateTask(task.task_id, {
+                tags: nextTags,
+                comments: nextComments
+            });
+
+            if (!updated || !updated.success) {
+                throw new Error(updated && updated.errors ? updated.errors.join(', ') : 'Failed to update task with issue link');
+            }
+
+            await this.saveTasks();
+            this.renderTasks();
+            this.showToast(`Created Issue #${issue.number}`, 'success');
+        } catch (e) {
+            console.error('Create issue failed', e);
+            this.showToast(`Create issue failed: ${e.message}`, 'error');
+        } finally {
+            this.hideLoading();
+        }
     }
 
     updateStats() {
@@ -846,6 +1278,16 @@ class TaskManagerApp {
             if (event.target === modal) {
                 this.closeModal();
             }
+
+            const issuesModal = document.getElementById('issuesModal');
+            if (event.target === issuesModal) {
+                this.closeIssuesSyncModal();
+            }
+
+            const passwordModal = document.getElementById('passwordModal');
+            if (event.target === passwordModal) {
+                this.closePasswordModal();
+            }
         };
     }
 }
@@ -907,6 +1349,23 @@ class GitHubAPI {
 
         return await this.request(`/repos/${this.config.owner}/${this.config.repo}/contents/${path}`, 'PUT', body);
     }
+
+    async listIssues(state = 'open') {
+        const qs = new URLSearchParams({ state, per_page: '100' }).toString();
+        return await this.request(`/repos/${this.config.owner}/${this.config.repo}/issues?${qs}`);
+    }
+
+    async createIssue(title, body, labels = []) {
+        const payload = {
+            title,
+            body
+        };
+        if (Array.isArray(labels) && labels.length > 0) {
+            // GitHub labels must already exist to attach cleanly; ignore failures server-side.
+            payload.labels = labels.filter(l => typeof l === 'string' && l.trim().length > 0).slice(0, 10);
+        }
+        return await this.request(`/repos/${this.config.owner}/${this.config.repo}/issues`, 'POST', payload);
+    }
 }
 
 // Initialize the application
@@ -921,4 +1380,4 @@ function closeModal() { app.closeModal(); }
 function exportToCSV() { app.exportToCSV(); }
 function loadTasks() { app.loadTasks(); }
 function closePasswordModal() { app.closePasswordModal(); }
-function verifyPassword(event) { return app.verifyPassword(event); }
+function verifyPassword(event) { app.verifyPassword(event); return false; }
