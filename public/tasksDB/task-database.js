@@ -552,7 +552,9 @@ class TaskDatabase {
   getSessionAccessPassword() {
     // Retrieve the password from sessionStorage (set when user unlocked)
     try {
-      return sessionStorage.getItem('taskManagerAccessPassword') || '';
+      const projectId = resolveActiveProjectId();
+      const key = `taskManagerAccessPassword:${String(projectId || '').replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager'}`;
+      return sessionStorage.getItem(key) || sessionStorage.getItem('taskManagerAccessPassword') || '';
     } catch (e) {
       return '';
     }

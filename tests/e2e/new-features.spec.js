@@ -4,6 +4,7 @@ const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000/';
 const LIVE_URL = 'https://nlarchive.github.io/github-task-manager/';
 const TIMEOUT = 5000;
 const LIVE_PASSWORD = '1324';
+const LIVE_PASSWORD_AI_CAREER_ROADMAP = 'ai-career-roadmap-1234';
 
 async function waitForAppReady(page) {
   await page.waitForSelector('[id="totalTasks"]', { timeout: TIMEOUT });
@@ -134,6 +135,10 @@ test.describe('Live Site - Password Protection & New Features', () => {
 
   test('password gate accepts correct password and opens task edit', async ({ page }) => {
     await page.goto(LIVE_URL);
+    // Ensure a clean auth state (avoid previous unlock in same browser profile)
+    await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch (e) {} });
+    await page.reload();
+
     await page.waitForSelector('[id="totalTasks"]', { timeout: 15000 });
     await page.waitForFunction(
       () => document.querySelector('[id="tasksList"]')?.children.length > 0,
@@ -161,6 +166,40 @@ test.describe('Live Site - Password Protection & New Features', () => {
     await expect(taskModal).toBeVisible({ timeout: 5000 });
     
     // Close the modal
+    await page.click('#taskModal .close');
+  });
+
+  test('switching project forces lock again (no cross-project unlock)', async ({ page }) => {
+    await page.goto(LIVE_URL);
+    await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch (e) {} });
+    await page.reload();
+
+    await page.waitForSelector('[id="totalTasks"]', { timeout: 15000 });
+    await page.waitForFunction(
+      () => document.querySelector('[id="tasksList"]')?.children.length > 0,
+      { timeout: 30000 }
+    );
+
+    // Unlock on default project
+    await page.locator('button:has-text("Edit")').first().click();
+    await expect(page.locator('#passwordModal')).toBeVisible({ timeout: 5000 });
+    await page.locator('#accessPassword').fill(LIVE_PASSWORD);
+    await page.locator('#passwordModal button:has-text("Unlock")').click();
+    await expect(page.locator('#taskModal')).toBeVisible({ timeout: 5000 });
+    await page.click('#taskModal .close');
+
+    // Switch project
+    await page.locator('#projectSelect').selectOption('ai-career-roadmap');
+    await page.waitForTimeout(250);
+
+    // Editing should require password again
+    await page.locator('button:has-text("Edit")').first().click();
+    await expect(page.locator('#passwordModal')).toBeVisible({ timeout: 5000 });
+
+    // Unlock with the project password and ensure edit opens
+    await page.locator('#accessPassword').fill(LIVE_PASSWORD_AI_CAREER_ROADMAP);
+    await page.locator('#passwordModal button:has-text("Unlock")').click();
+    await expect(page.locator('#taskModal')).toBeVisible({ timeout: 5000 });
     await page.click('#taskModal .close');
   });
 

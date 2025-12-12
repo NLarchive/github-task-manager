@@ -123,6 +123,16 @@ class TaskManagerApp {
         const safeProject = String(projectId || '').trim().replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
         if (safeProject === this.activeProjectId) return;
 
+        // IMPORTANT: auth is scoped per project.
+        // Switching projects must force Read-Only until unlocked for the new project.
+        this.isAuthenticated = false;
+        this.authExpiry = null;
+        try {
+            sessionStorage.removeItem(this.getProjectPasswordKey(this.activeProjectId));
+        } catch (e) {
+            // ignore
+        }
+
         this.activeProjectId = safeProject;
         localStorage.setItem('taskManagerActiveProject', safeProject);
 
@@ -138,7 +148,18 @@ class TaskManagerApp {
 
         // Reload tasks for the newly selected project
         this.showToast(`Switched project to: ${safeProject}`, 'info');
+        this.updateAccessIndicator();
         await this.loadTasks();
+    }
+
+    getProjectAuthKey(projectId) {
+        const safe = String(projectId || '').trim().replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
+        return `taskManagerAuth:${safe}`;
+    }
+
+    getProjectPasswordKey(projectId) {
+        const safe = String(projectId || '').trim().replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
+        return `taskManagerAccessPassword:${safe}`;
     }
 
     // User Management
@@ -248,8 +269,10 @@ class TaskManagerApp {
             this.authExpiry = null;
         }
         
-        // Check localStorage for persisted session
-        const storedAuth = localStorage.getItem('taskManagerAuth');
+        // Check localStorage for persisted session (scoped per active project)
+        const templateConfig = window.TEMPLATE_CONFIG || TEMPLATE_CONFIG;
+        const projectId = this.activeProjectId || (templateConfig && templateConfig.GITHUB && (templateConfig.GITHUB.ACTIVE_PROJECT_ID || templateConfig.GITHUB.DEFAULT_PROJECT_ID)) || 'github-task-manager';
+        const storedAuth = localStorage.getItem(this.getProjectAuthKey(projectId));
         if (storedAuth) {
             const { expiry } = JSON.parse(storedAuth);
             if (expiry && Date.now() < expiry) {
@@ -258,7 +281,7 @@ class TaskManagerApp {
                 return true;
             }
             // Clear expired session
-            localStorage.removeItem('taskManagerAuth');
+            localStorage.removeItem(this.getProjectAuthKey(projectId));
         }
         
         return false;
@@ -326,13 +349,16 @@ class TaskManagerApp {
             this.isAuthenticated = true;
             
             // Persist to localStorage
-            localStorage.setItem('taskManagerAuth', JSON.stringify({
+            const projectId = this.activeProjectId || (window.TEMPLATE_CONFIG && window.TEMPLATE_CONFIG.GITHUB && (window.TEMPLATE_CONFIG.GITHUB.ACTIVE_PROJECT_ID || window.TEMPLATE_CONFIG.GITHUB.DEFAULT_PROJECT_ID)) || 'github-task-manager';
+            localStorage.setItem(this.getProjectAuthKey(projectId), JSON.stringify({
                 expiry: this.authExpiry
             }));
 
-            // Store password in sessionStorage for Worker API calls
+            // Store password in sessionStorage for Worker API calls (project-scoped)
             // (Worker validates password server-side before writing to GitHub)
             try {
+                sessionStorage.setItem(this.getProjectPasswordKey(projectId), enteredPassword);
+                // Backwards compatibility (older TaskDatabase versions)
                 sessionStorage.setItem('taskManagerAccessPassword', enteredPassword);
             } catch (e) {
                 // ignore
@@ -365,9 +391,27 @@ class TaskManagerApp {
     logout() {
         this.isAuthenticated = false;
         this.authExpiry = null;
-        localStorage.removeItem('taskManagerAuth');
-        // Clear session password (used for Worker API calls)
+
+        // Clear persisted auth for all projects
         try {
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('taskManagerAuth:')) keysToRemove.push(key);
+            }
+            keysToRemove.forEach(k => localStorage.removeItem(k));
+        } catch (e) {
+            // ignore
+        }
+
+        // Clear session passwords (used for Worker API calls)
+        try {
+            const keysToRemove = [];
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                if (key && key.startsWith('taskManagerAccessPassword:')) keysToRemove.push(key);
+            }
+            keysToRemove.forEach(k => sessionStorage.removeItem(k));
             sessionStorage.removeItem('taskManagerAccessPassword');
         } catch (e) {
             // ignore
