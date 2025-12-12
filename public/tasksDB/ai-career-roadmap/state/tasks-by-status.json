@@ -1,11 +1,12 @@
 {
-  "generated_at": "2025-12-12T12:54:42.014Z",
+  "generated_at": "2025-12-12T17:59:44.548Z",
   "total_tasks": 10,
   "counts_by_status": {
-    "Not Started": 10
+    "In Progress": 1,
+    "Not Started": 9
   },
   "tasks_by_status": {
-    "Not Started": [
+    "In Progress": [
       {
         "task_id": 1,
         "task_name": "Define target role, timeline, and success criteria",
@@ -13,7 +14,7 @@
         "start_date": "2025-12-15",
         "end_date": "2025-12-16",
         "priority": "Critical",
-        "status": "Not Started",
+        "status": "In Progress",
         "progress_percentage": 0,
         "estimated_hours": 3,
         "actual_hours": 0,
@@ -21,12 +22,12 @@
         "tags": [
           "planning"
         ],
-        "category_name": "Planning",
+        "category_name": "Project Setup",
         "assigned_workers": [
           {
-            "name": "Learner",
+            "name": "learner@example.com",
             "email": "learner@example.com",
-            "role": "Student"
+            "role": "Collaborator"
           }
         ],
         "parent_task_id": null,
@@ -36,7 +37,9 @@
         "comments": [],
         "attachments": [],
         "dependencies": []
-      },
+      }
+    ],
+    "Not Started": [
       {
         "task_id": 2,
         "task_name": "Set up learning environment",
