@@ -27,10 +27,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Sync tasks.json to public folder
-        run: |
-          cp tasks.json public/tasks.json
-
       - name: Create GitHub token config
         run: |
           mkdir -p public/config
@@ -45,7 +41,7 @@ jobs:
       - name: Validate project files
         run: |
           echo "=== Checking required files ==="
-          test -f public/tasks.json && echo "✓ tasks.json" || (echo "✗ Missing: tasks.json" && exit 1)
+          test -f public/tasksDB/tasks.json && echo "✓ tasksDB/tasks.json" || (echo "✗ Missing: tasksDB/tasks.json" && exit 1)
           test -f public/index.html && echo "✓ index.html" || (echo "✗ Missing: index.html" && exit 1)
           test -f public/config/template-config.js && echo "✓ template-config.js" || (echo "✗ Missing: template-config.js" && exit 1)
           echo "✓ All required files found"
