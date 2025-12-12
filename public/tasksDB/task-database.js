@@ -49,6 +49,146 @@ class TaskDatabase {
     this.categories = null;
     this.workers = null;
     this.actor = '';
+    this._lastSyncedTasksSnapshot = null;
+  }
+
+  cloneTasksSnapshot(tasks) {
+    try {
+      return JSON.parse(JSON.stringify(Array.isArray(tasks) ? tasks : []));
+    } catch {
+      return Array.isArray(tasks) ? [...tasks] : [];
+    }
+  }
+
+  getHistoryTaskKey(task) {
+    if (!task || typeof task !== 'object') return '';
+    const id = (task.task_id ?? task.id ?? task.taskId ?? '').toString();
+    return id ? id : '';
+  }
+
+  summarizeHistoryChanges(changes) {
+    if (!Array.isArray(changes) || changes.length === 0) return 'No field changes';
+    const fields = changes.map(c => c.field).filter(Boolean);
+    return fields.slice(0, 6).join(', ') + (fields.length > 6 ? ` (+${fields.length - 6} more)` : '');
+  }
+
+  diffTasksForHistory(beforeTasks, afterTasks) {
+    const beforeMap = new Map();
+    const afterMap = new Map();
+
+    (Array.isArray(beforeTasks) ? beforeTasks : []).forEach(t => {
+      const k = this.getHistoryTaskKey(t);
+      if (k) beforeMap.set(k, t);
+    });
+
+    (Array.isArray(afterTasks) ? afterTasks : []).forEach(t => {
+      const k = this.getHistoryTaskKey(t);
+      if (k) afterMap.set(k, t);
+    });
+
+    const events = [];
+
+    for (const [taskId, afterTask] of afterMap.entries()) {
+      const beforeTask = beforeMap.get(taskId);
+      if (!beforeTask) {
+        events.push({ action: 'create', taskId, before: null, after: afterTask, changes: null });
+        continue;
+      }
+
+      const allKeys = new Set([...Object.keys(beforeTask || {}), ...Object.keys(afterTask || {})]);
+      const changes = [];
+      for (const key of allKeys) {
+        const beforeVal = beforeTask[key];
+        const afterVal = afterTask[key];
+        if (JSON.stringify(beforeVal) !== JSON.stringify(afterVal)) {
+          changes.push({ field: key, before: beforeVal, after: afterVal });
+        }
+      }
+
+      if (changes.length > 0) {
+        events.push({ action: 'update', taskId, before: beforeTask, after: afterTask, changes });
+      }
+    }
+
+    for (const [taskId, beforeTask] of beforeMap.entries()) {
+      if (!afterMap.has(taskId)) {
+        events.push({ action: 'delete', taskId, before: beforeTask, after: null, changes: null });
+      }
+    }
+
+    return events;
+  }
+
+  async appendHistoryNdjsonViaWorkerFallback({ projectId, workerUrl, accessPassword, tasksFile, message, actor, commitSha, beforeTasks, afterTasks }) {
+    try {
+      const templateConfig = resolveTemplateConfig();
+      const gh = (templateConfig && templateConfig.GITHUB) ? templateConfig.GITHUB : null;
+      const owner = gh && gh.OWNER ? String(gh.OWNER) : '';
+      const repo = gh && gh.REPO ? String(gh.REPO) : '';
+      const branch = gh && gh.BRANCH ? String(gh.BRANCH) : 'main';
+      if (!owner || !repo) return;
+
+      const rawEvents = this.diffTasksForHistory(beforeTasks, afterTasks);
+      if (!rawEvents.length) return;
+
+      const origin = (() => {
+        try {
+          return (typeof window !== 'undefined' && window.location) ? window.location.origin : '';
+        } catch {
+          return '';
+        }
+      })();
+
+      const now = new Date().toISOString();
+      const events = rawEvents.map(ev => {
+        const taskName = (ev.after && (ev.after.task_name || ev.after.title)) || (ev.before && (ev.before.task_name || ev.before.title)) || '';
+        return {
+          ts: now,
+          projectId,
+          actor,
+          origin,
+          file: tasksFile,
+          commitSha: commitSha || '',
+          message: message || `Update ${tasksFile}`,
+          action: ev.action,
+          taskId: ev.taskId,
+          taskName,
+          changeSummary: ev.action === 'update' ? this.summarizeHistoryChanges(ev.changes) : ev.action,
+          changes: ev.changes,
+          before: ev.before,
+          after: ev.after
+        };
+      });
+
+      const historyPath = `public/tasksDB/${projectId}/history/changes.ndjson`;
+      const rawUrl = `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/${historyPath}`;
+
+      let existing = '';
+      try {
+        const res = await fetch(rawUrl, { cache: 'no-store' });
+        if (res && res.ok) existing = await res.text();
+      } catch {
+        // ignore
+      }
+
+      const nextLines = events.map(e => JSON.stringify(e)).join('\n') + '\n';
+      const nextContent = `${existing || ''}${nextLines}`;
+
+      await fetch(`${workerUrl}/api/tasks`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectId,
+          accessPassword,
+          filePath: historyPath,
+          content: nextContent,
+          message: `Append task history (${projectId})`,
+          actor
+        })
+      });
+    } catch (e) {
+      console.warn('History append fallback failed:', e && e.message ? e.message : e);
+    }
   }
 
   resolveActor() {
@@ -298,6 +438,9 @@ class TaskDatabase {
 
       this.tasks = loadedTasks || [];
 
+      // Keep a snapshot for history diffs when saving via Worker.
+      this._lastSyncedTasksSnapshot = this.cloneTasksSnapshot(this.tasks);
+
       // Ensure this.tasks is always an array
       if (!Array.isArray(this.tasks)) {
         console.warn('Tasks is not an array, converting to empty array');
@@ -493,6 +636,8 @@ class TaskDatabase {
       ? gh.getTasksFile(projectId)
       : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/github-task-manager/tasks.json');
 
+    const beforeTasksSnapshot = this.cloneTasksSnapshot(this._lastSyncedTasksSnapshot || []);
+
     // Get access password from session (user already entered it to unlock)
     const accessPassword = this.getSessionAccessPassword();
     if (!accessPassword) {
@@ -522,6 +667,9 @@ class TaskDatabase {
       const err = await jsonResponse.json().catch(() => ({ error: 'Unknown error' }));
       throw new Error(err.error || `Worker error: ${jsonResponse.status}`);
     }
+
+    const jsonResult = await jsonResponse.json().catch(() => ({}));
+    const commitSha = jsonResult && jsonResult.commit ? String(jsonResult.commit) : '';
 
     // Save tasks.csv
     const tasksCsvFile = tasksFile.replace(/\.json$/i, '.csv');
@@ -562,8 +710,24 @@ class TaskDatabase {
       console.warn('Could not persist state files:', stateError.message);
     }
 
+    // Fallback: append history from client side (useful if Worker history append isn't deployed yet).
+    await this.appendHistoryNdjsonViaWorkerFallback({
+      projectId,
+      workerUrl,
+      accessPassword,
+      tasksFile,
+      message,
+      actor,
+      commitSha,
+      beforeTasks: beforeTasksSnapshot,
+      afterTasks: this.tasks
+    });
+
     // Also save locally as backup
     this.saveTasksLocal(message);
+
+    // Update snapshot after successful save
+    this._lastSyncedTasksSnapshot = this.cloneTasksSnapshot(this.tasks);
 
     return { success: true, source: 'worker' };
   }

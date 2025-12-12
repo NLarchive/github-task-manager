@@ -646,7 +646,9 @@ class TaskManagerApp {
             const result = await this.database.saveTasks();
             const source = result.source === 'github'
                 ? 'to GitHub'
-                : (result.source === 'local-disk' ? 'locally (disk)' : 'locally');
+                : (result.source === 'worker'
+                    ? 'to GitHub (via Worker)'
+                    : (result.source === 'local-disk' ? 'locally (disk)' : 'locally'));
             this.showToast(`Tasks saved successfully ${source}`, 'success');
 
             // If history modal is open, refresh it.
