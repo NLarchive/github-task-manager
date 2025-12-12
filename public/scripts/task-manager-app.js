@@ -90,7 +90,17 @@ class TaskManagerApp {
     // Password Protection Methods
     getAccessConfig() {
         const templateConfig = window.TEMPLATE_CONFIG || TEMPLATE_CONFIG;
-        return templateConfig.ACCESS || { PASSWORD: '', PUBLIC_READ: true, SESSION_DURATION: 30 };
+        const baseConfig = templateConfig.ACCESS || { PASSWORD: '', PUBLIC_READ: true, SESSION_DURATION: 30 };
+        
+        // Check if ACCESS_PASSWORD was injected at runtime (from GitHub Actions secret)
+        if (typeof ACCESS_PASSWORD !== 'undefined' && ACCESS_PASSWORD && ACCESS_PASSWORD !== '') {
+            return {
+                ...baseConfig,
+                PASSWORD: ACCESS_PASSWORD
+            };
+        }
+        
+        return baseConfig;
     }
 
     isGitHubPagesHost() {
