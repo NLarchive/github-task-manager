@@ -162,16 +162,35 @@ class TaskManagerApp {
     getAccessConfig() {
         const templateConfig = window.TEMPLATE_CONFIG || TEMPLATE_CONFIG;
         const baseConfig = templateConfig.ACCESS || { PASSWORD: '', PUBLIC_READ: true, SESSION_DURATION: 30 };
-        
-        // Check if ACCESS_PASSWORD was injected at runtime (from GitHub Actions secret)
-        if (typeof ACCESS_PASSWORD !== 'undefined' && ACCESS_PASSWORD && ACCESS_PASSWORD !== '') {
-            return {
-                ...baseConfig,
-                PASSWORD: ACCESS_PASSWORD
-            };
+        // Password resolution order (most specific → least specific):
+        // 1) Per-project password from ACCESS_PASSWORDS[projectId]
+        // 2) Master password ACCESS_PASSWORD_MASTER
+        // 3) Backwards compatibility: ACCESS_PASSWORD
+        let resolvedPassword = '';
+        try {
+            const projectId = this.activeProjectId || templateConfig.GITHUB.ACTIVE_PROJECT_ID || templateConfig.GITHUB.DEFAULT_PROJECT_ID || 'github-task-manager';
+            if (typeof ACCESS_PASSWORDS !== 'undefined' && ACCESS_PASSWORDS && typeof ACCESS_PASSWORDS === 'object') {
+                const p = String(projectId || '').trim();
+                if (p && ACCESS_PASSWORDS[p]) {
+                    resolvedPassword = ACCESS_PASSWORDS[p];
+                }
+            }
+        } catch (e) {
+            // ignore
         }
-        
-        return baseConfig;
+
+        if (!resolvedPassword && typeof ACCESS_PASSWORD_MASTER !== 'undefined' && ACCESS_PASSWORD_MASTER) {
+            resolvedPassword = ACCESS_PASSWORD_MASTER;
+        }
+
+        if (!resolvedPassword && typeof ACCESS_PASSWORD !== 'undefined' && ACCESS_PASSWORD) {
+            resolvedPassword = ACCESS_PASSWORD;
+        }
+
+        return {
+            ...baseConfig,
+            PASSWORD: resolvedPassword
+        };
     }
 
     isGitHubPagesHost() {
@@ -265,6 +284,15 @@ class TaskManagerApp {
             document.getElementById('accessPassword').value = '';
             document.getElementById('accessPassword').focus();
             document.getElementById('passwordError').style.display = 'none';
+            try {
+                const help = document.getElementById('passwordHelp');
+                if (help) {
+                    const project = this.activeProjectId || (window.TEMPLATE_CONFIG && window.TEMPLATE_CONFIG.GITHUB && window.TEMPLATE_CONFIG.GITHUB.DEFAULT_PROJECT_ID) || 'github-task-manager';
+                    help.textContent = `Project: ${project} — use the project password or the master password to unlock.`;
+                }
+            } catch (e) {
+                // ignore
+            }
         }
     }
 
@@ -286,7 +314,7 @@ class TaskManagerApp {
         const configuredPassword = (accessConfig.PASSWORD || '').trim();
 
         if (!configuredPassword) {
-            errorDiv.innerHTML = '<span style="color: var(--danger-color);">⚠️ Access is not configured for this deployment. Please set the GitHub Secret <code>ACCESS_PASSWORD</code>.</span>';
+            errorDiv.innerHTML = '<span style="color: var(--danger-color);">⚠️ Access is not configured for this deployment. Please set the GitHub Secret(s) <code>ACCESS_PASSWORD_MASTER</code> and/or per-project keys via <code>ACCESS_PASSWORDS</code>.</span>';
             errorDiv.style.display = 'block';
             return false;
         }
@@ -301,6 +329,14 @@ class TaskManagerApp {
             localStorage.setItem('taskManagerAuth', JSON.stringify({
                 expiry: this.authExpiry
             }));
+
+            // Store password in sessionStorage for Worker API calls
+            // (Worker validates password server-side before writing to GitHub)
+            try {
+                sessionStorage.setItem('taskManagerAccessPassword', enteredPassword);
+            } catch (e) {
+                // ignore
+            }
             
             // Store pending action before closing modal (which clears it)
             const pendingAction = this.pendingAction;
@@ -330,8 +366,140 @@ class TaskManagerApp {
         this.isAuthenticated = false;
         this.authExpiry = null;
         localStorage.removeItem('taskManagerAuth');
+        // Clear session password (used for Worker API calls)
+        try {
+            sessionStorage.removeItem('taskManagerAccessPassword');
+        } catch (e) {
+            // ignore
+        }
         this.updateAccessIndicator();
         this.showToast('🔒 Logged out', 'info');
+    }
+
+    // --- GitHub OAuth Device Flow ---
+    getGitHubOAuthToken() {
+        try {
+            const token = sessionStorage.getItem('githubOAuthToken');
+            if (token && String(token).trim()) return String(token).trim();
+        } catch (e) {
+            // ignore
+        }
+        return '';
+    }
+
+    setGitHubOAuthToken(token, user = '') {
+        try {
+            if (token && String(token).trim()) {
+                sessionStorage.setItem('githubOAuthToken', String(token).trim());
+                if (user) sessionStorage.setItem('githubOAuthUser', user);
+                // Apply to runtime config
+                if (this.config) this.config.token = token;
+                const templateConfig = window.TEMPLATE_CONFIG || TEMPLATE_CONFIG;
+                if (templateConfig && templateConfig.GITHUB) {
+                    templateConfig.GITHUB.TOKEN = token;
+                }
+            }
+        } catch (e) {
+            // ignore
+        }
+    }
+
+    clearGitHubOAuthToken() {
+        try {
+            sessionStorage.removeItem('githubOAuthToken');
+            sessionStorage.removeItem('githubOAuthUser');
+        } catch (e) {
+            // ignore
+        }
+        if (this.config) this.config.token = '';
+    }
+
+    isGitHubConnected() {
+        return !!this.getGitHubOAuthToken();
+    }
+
+    showGitHubLoginModal() {
+        const modal = document.getElementById('githubLoginModal');
+        if (!modal) return;
+        modal.style.display = 'block';
+        // Reset to step 1
+        document.getElementById('githubLoginStep1').style.display = 'block';
+        document.getElementById('githubLoginStep2').style.display = 'none';
+        document.getElementById('githubLoginSuccess').style.display = 'none';
+        const err = document.getElementById('githubLoginError');
+        if (err) { err.style.display = 'none'; err.textContent = ''; }
+    }
+
+    closeGitHubLoginModal() {
+        const modal = document.getElementById('githubLoginModal');
+        if (modal) modal.style.display = 'none';
+        // Stop polling if running
+        if (this._deviceFlowPollTimer) {
+            clearInterval(this._deviceFlowPollTimer);
+            this._deviceFlowPollTimer = null;
+        }
+    }
+
+    async startGitHubDeviceFlow() {
+        const oauthConfig = window.GITHUB_OAUTH_CONFIG;
+        if (!oauthConfig || !oauthConfig.CLIENT_ID) {
+            this.showGitHubLoginError('GitHub OAuth is not configured. Set GITHUB_OAUTH_CLIENT_ID secret.');
+            return;
+        }
+
+        try {
+            // Note: GitHub Device Flow requires a CORS proxy or backend because
+            // the /login/device/code endpoint doesn't support CORS from browsers.
+            // For a fully static site, we'll need to guide users to manually authorize.
+            // Alternative: Use a simple Cloudflare Worker as CORS proxy.
+            
+            // For now, show instructions for manual OAuth authorization
+            this.showManualOAuthInstructions();
+        } catch (e) {
+            console.error('Device flow error:', e);
+            this.showGitHubLoginError(`OAuth error: ${e.message}`);
+        }
+    }
+
+    showManualOAuthInstructions() {
+        const oauthConfig = window.GITHUB_OAUTH_CONFIG;
+        const clientId = oauthConfig && oauthConfig.CLIENT_ID;
+        
+        // GitHub OAuth web flow (redirect-based)
+        // This works for GitHub Pages but requires a callback URL
+        const redirectUri = `${window.location.origin}${window.location.pathname}`;
+        const scope = 'public_repo';
+        const state = Math.random().toString(36).substring(2);
+        sessionStorage.setItem('githubOAuthState', state);
+
+        const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&state=${state}`;
+
+        // Show step 2 with manual link
+        document.getElementById('githubLoginStep1').style.display = 'none';
+        document.getElementById('githubLoginStep2').style.display = 'block';
+        document.getElementById('deviceUserCode').textContent = 'See link below';
+        document.getElementById('deviceVerificationLink').href = authUrl;
+        document.getElementById('deviceVerificationLink').textContent = 'Authorize on GitHub →';
+        document.getElementById('devicePollStatus').innerHTML = `
+            After authorizing, you'll be redirected back here.<br>
+            <small style="color: var(--text-secondary);">Note: GitHub OAuth requires a backend to exchange the code for a token. For a fully static site, consider using a CORS proxy or Cloudflare Worker.</small>
+        `;
+    }
+
+    showGitHubLoginError(message) {
+        const err = document.getElementById('githubLoginError');
+        if (err) {
+            err.style.display = 'block';
+            err.textContent = message;
+        }
+    }
+
+    copyDeviceCode() {
+        const code = document.getElementById('deviceUserCode').textContent;
+        if (code && navigator.clipboard) {
+            navigator.clipboard.writeText(code);
+            this.showToast('Code copied!', 'success');
+        }
     }
 
     updateAccessIndicator() {

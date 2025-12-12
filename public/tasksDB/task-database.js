@@ -430,7 +430,16 @@ class TaskDatabase {
         return { success: false, error: `Validation failed: ${errors.join(', ')}` };
       }
 
-      // Check if we have a valid GitHub token
+      const templateConfig = resolveTemplateConfig();
+      const gh = (templateConfig && templateConfig.GITHUB) ? templateConfig.GITHUB : null;
+
+      // Check if we have a Worker URL configured (secure proxy mode)
+      const workerUrl = (gh && gh.WORKER_URL) ? String(gh.WORKER_URL).trim() : '';
+      if (workerUrl) {
+        return await this.saveTasksViaWorker(message, workerUrl);
+      }
+
+      // Check if we have a valid GitHub token (direct mode - less secure)
       if (!hasValidGitHubToken()) {
         // If running locally with the dev server, persist to disk so clearing cache doesn't lose data.
         if (this.isLocalDevHost()) {
@@ -445,6 +454,112 @@ class TaskDatabase {
         return this.saveTasksLocal(message);
       }
 
+      // Direct GitHub API mode (token in browser - NOT recommended for production)
+      return await this.saveTasksDirectGitHub(message);
+
+    } catch (error) {
+      console.error('Error saving tasks to GitHub:', error);
+      // Fallback to local storage on GitHub API failure
+      console.log('Attempting to save to local storage as fallback...');
+      try {
+        return this.saveTasksLocal(message);
+      } catch (fallbackError) {
+        console.error('Fallback to local storage also failed:', fallbackError);
+        return { success: false, error: error.message };
+      }
+    }
+  }
+
+  // Save via Cloudflare Worker (secure - token stays server-side)
+  async saveTasksViaWorker(message, workerUrl) {
+    const templateConfig = resolveTemplateConfig();
+    const projectId = resolveActiveProjectId();
+    const gh = (templateConfig && templateConfig.GITHUB) ? templateConfig.GITHUB : null;
+    const tasksFile = (gh && typeof gh.getTasksFile === 'function')
+      ? gh.getTasksFile(projectId)
+      : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/github-task-manager/tasks.json');
+
+    // Get access password from session (user already entered it to unlock)
+    const accessPassword = this.getSessionAccessPassword();
+    if (!accessPassword) {
+      return { success: false, error: 'Access password required. Please unlock first.' };
+    }
+
+    const fullData = this.buildFullData(this.tasks);
+    const content = JSON.stringify(fullData, null, 2);
+
+    // Save tasks.json
+    const jsonResponse = await fetch(`${workerUrl}/api/tasks`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        projectId,
+        accessPassword,
+        filePath: tasksFile,
+        content,
+        message
+      })
+    });
+
+    if (!jsonResponse.ok) {
+      const err = await jsonResponse.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(err.error || `Worker error: ${jsonResponse.status}`);
+    }
+
+    // Save tasks.csv
+    const tasksCsvFile = tasksFile.replace(/\.json$/i, '.csv');
+    const csvContent = this.generatePersistedCSV(this.tasks);
+    await fetch(`${workerUrl}/api/tasks`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        projectId,
+        accessPassword,
+        filePath: tasksCsvFile,
+        content: csvContent,
+        message: `${message} (csv)`
+      })
+    });
+
+    // Save state files
+    try {
+      const stateFiles = this.generateStateFiles(this.tasks);
+      const baseDir = tasksFile.replace(/\/[^\/]+$/, '');
+      const stateDir = `${baseDir}/state`;
+      for (const [filename, stateContent] of Object.entries(stateFiles)) {
+        await fetch(`${workerUrl}/api/tasks`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            projectId,
+            accessPassword,
+            filePath: `${stateDir}/${filename}`,
+            content: stateContent,
+            message: `${message} (state)`
+          })
+        });
+      }
+    } catch (stateError) {
+      console.warn('Could not persist state files:', stateError.message);
+    }
+
+    // Also save locally as backup
+    this.saveTasksLocal(message);
+
+    return { success: true, source: 'worker' };
+  }
+
+  getSessionAccessPassword() {
+    // Retrieve the password from sessionStorage (set when user unlocked)
+    try {
+      return sessionStorage.getItem('taskManagerAccessPassword') || '';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  // Direct GitHub API mode (token in browser - legacy, not recommended)
+  async saveTasksDirectGitHub(message) {
       // Save with full project structure to match tasks.json format
       const fullData = this.buildFullData(this.tasks);
 
@@ -483,17 +598,6 @@ class TaskDatabase {
       this.saveTasksLocal(message);
 
       return { success: true, source: 'github' };
-    } catch (error) {
-      console.error('Error saving tasks to GitHub:', error);
-      // Fallback to local storage on GitHub API failure
-      console.log('Attempting to save to local storage as fallback...');
-      try {
-        return this.saveTasksLocal(message);
-      } catch (fallbackError) {
-        console.error('Fallback to local storage also failed:', fallbackError);
-        return { success: false, error: error.message };
-      }
-    }
   }
 
   // Load project templates

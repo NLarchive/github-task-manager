@@ -31,10 +31,35 @@ jobs:
         run: |
           mkdir -p public/config
           cat > public/config/github-token.js << 'EOF'
-          const GITHUB_TOKEN = '${{ secrets.GH_TOKEN }}';
+          // GitHub OAuth - users authenticate with their own GitHub account
+          // No shared write token is deployed to the browser.
+          // The OAuth Client ID is public and safe to expose.
+          const GITHUB_TOKEN = '';
           const GH_TOKEN = GITHUB_TOKEN;
           if (typeof module !== 'undefined' && module.exports) {
             module.exports = { GH_TOKEN, GITHUB_TOKEN };
+          }
+          EOF
+
+      - name: Create GitHub OAuth config
+        run: |
+          mkdir -p public/config
+          cat > public/config/github-oauth.js << 'EOF'
+          // GitHub OAuth Configuration (injected at deploy time)
+          // Client ID is public and safe to expose
+          const GITHUB_OAUTH_CLIENT_ID = '${{ secrets.GITHUB_OAUTH_CLIENT_ID }}';
+          const GITHUB_OAUTH_CONFIG = {
+            CLIENT_ID: GITHUB_OAUTH_CLIENT_ID || '',
+            SCOPES: 'public_repo',
+            DEVICE_AUTH_URL: 'https://github.com/login/device/code',
+            TOKEN_URL: 'https://github.com/login/oauth/access_token',
+            POLL_INTERVAL: 5000
+          };
+          if (typeof module !== 'undefined' && module.exports) {
+            module.exports = { GITHUB_OAUTH_CONFIG, GITHUB_OAUTH_CLIENT_ID };
+          }
+          if (typeof window !== 'undefined') {
+            window.GITHUB_OAUTH_CONFIG = GITHUB_OAUTH_CONFIG;
           }
           EOF
 
@@ -43,10 +68,37 @@ jobs:
           mkdir -p public/config
           cat > public/config/access-secret.js << 'EOF'
           // Injected by GitHub Actions from repository secrets
-          // NOTE: This value is shipped to the browser. Client-side passwords are not a strong security boundary.
-          const ACCESS_PASSWORD = '${{ secrets.ACCESS_PASSWORD }}';
+          // NOTE: These values are shipped to the browser. Client-side passwords are not a strong security boundary.
+          // Master (fallback) password
+          const ACCESS_PASSWORD_MASTER = '${{ secrets.ACCESS_PASSWORD_MASTER || secrets.ACCESS_PASSWORD || '' }}';
+
+          // Per-project passwords (add more as needed in repository secrets)
+          const ACCESS_PASSWORD_GITHUB_TASK_MANAGER = '${{ secrets.ACCESS_PASSWORD_GITHUB_TASK_MANAGER || '' }}';
+          const ACCESS_PASSWORD_AI_CAREER_ROADMAP = '${{ secrets.ACCESS_PASSWORD_AI_CAREER_ROADMAP || '' }}';
+
+          // Mapping object for easy lookup in browser code
+          const ACCESS_PASSWORDS = {
+            'github-task-manager': ACCESS_PASSWORD_GITHUB_TASK_MANAGER,
+            'ai-career-roadmap': ACCESS_PASSWORD_AI_CAREER_ROADMAP
+          };
+
+          // Backwards compatibility
+          const ACCESS_PASSWORD = ACCESS_PASSWORD_MASTER;
+
           if (typeof module !== 'undefined' && module.exports) {
-            module.exports = { ACCESS_PASSWORD };
+            module.exports = { ACCESS_PASSWORD, ACCESS_PASSWORD_MASTER, ACCESS_PASSWORDS };
+          }
+          EOF
+
+      - name: Create worker URL config
+        run: |
+          mkdir -p public/config
+          cat > public/config/worker-url.js << 'EOF'
+          // Cloudflare Worker URL for secure GitHub API proxy
+          // Injected at deploy time from repository secrets
+          const GITHUB_WORKER_URL = '${{ secrets.GITHUB_WORKER_URL }}';
+          if (typeof module !== 'undefined' && module.exports) {
+            module.exports = { GITHUB_WORKER_URL };
           }
           EOF
 

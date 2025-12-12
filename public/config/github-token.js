@@ -7,7 +7,10 @@
 //   3. Make sure 'github-token.local.js' is in .gitignore
 //
 // For GitHub Pages deployment:
-//   The token is injected via GitHub Actions from repository secrets
+//   For security, a write token is NOT injected into the deployed site.
+//   Any token shipped to /public is publicly downloadable and would leak write access.
+//   To enable GitHub writes, provide your own fine-grained token locally (stored in session/local storage)
+//   or implement a GitHub OAuth/App flow.
 //
 // Required token permissions:
 //   - repo (Full control of private repositories) OR
@@ -18,7 +21,7 @@
 // Generate at: https://github.com/settings/tokens
 //
 // IMPORTANT:
-// - `GITHUB_TOKEN` may be injected at build/runtime (e.g., GitHub Actions).
+// - `GITHUB_TOKEN` should NOT be injected for GitHub Pages deployments.
 // - When it is not injected, it will be undefined; do not reference it directly.
 const GITHUB_TOKEN_VALUE = (typeof GITHUB_TOKEN !== 'undefined') ? GITHUB_TOKEN : '';
 const GH_TOKEN = GITHUB_TOKEN_VALUE;

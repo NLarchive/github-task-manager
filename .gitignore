@@ -7,6 +7,8 @@ public/config/github-token.local.js
 public/config/github-token.js
 public/config/access-secret.local.js
 public/config/access-secret.js
+public/config/worker-url.local.js
+public/config/github-oauth.js
 config/github-token.local.js
 *.token
 *.secret

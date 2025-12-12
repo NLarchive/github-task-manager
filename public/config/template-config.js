@@ -183,9 +183,9 @@ const TEMPLATE_CONFIG = {
   // Password required for modifications (create, edit, delete)
   // Reading/viewing tasks is always public
   ACCESS: {
-    // GitHub Pages: inject this at deploy-time from a GitHub Secret (not committed).
-    // NOTE: This is still client-side only. Anyone can view served JS.
-    // See .github/workflows/deploy.yml for how ACCESS_PASSWORD is injected.
+    // GitHub Pages: inject this at deploy-time from GitHub Secrets (not committed).
+    // NOTE: These values are client-side only and not a secure server-side gate.
+    // See .github/workflows/deploy.yml for how ACCESS_PASSWORD_MASTER and ACCESS_PASSWORDS are injected.
     PASSWORD: (typeof ACCESS_PASSWORD !== 'undefined' ? ACCESS_PASSWORD : ''),
     // Session duration in minutes (0 = until page refresh)
     SESSION_DURATION: 30,
@@ -201,8 +201,13 @@ const TEMPLATE_CONFIG = {
     REPO: 'github-task-manager',
     // Token is loaded from github-token.js (gitignored) or environment
     // For GitHub Pages, public repos can be read without a token
+    // SECURITY: Do NOT deploy a write token to GitHub Pages (it would be exposed)
     TOKEN: (typeof GH_TOKEN !== 'undefined' ? GH_TOKEN : ''),
     BRANCH: 'main',
+    // Cloudflare Worker URL for secure writes (token stays server-side)
+    // Set this to your deployed worker URL, e.g., 'https://task-manager-api.YOUR-SUBDOMAIN.workers.dev'
+    // When set, all writes go through the worker which validates ACCESS_PASSWORD and restricts paths
+    WORKER_URL: (typeof GITHUB_WORKER_URL !== 'undefined' ? GITHUB_WORKER_URL : ''),
     // Multi-project TasksDB
     // Each project lives under: public/tasksDB/<projectId>/{tasks.json,tasks.csv,state/,history/}
     TASKS_ROOT: 'public/tasksDB',

@@ -506,8 +506,24 @@ For GitHub Actions deployment:
 # .github/workflows/deploy.yml
 secrets:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}  # GitHub API token
-   ACCESS_PASSWORD: ${{ secrets.ACCESS_PASSWORD }}  # Shared password for write actions (client-side gate)
+  # Access passwords (client-side gate). Add per-project secrets to allow project-specific write access.
+  ACCESS_PASSWORD_MASTER: ${{ secrets.ACCESS_PASSWORD_MASTER }}  # Master password (fallback)
+  ACCESS_PASSWORD_GITHUB_TASK_MANAGER: ${{ secrets.ACCESS_PASSWORD_GITHUB_TASK_MANAGER }}  # Password for public/tasksDB/github-task-manager
+  ACCESS_PASSWORD_AI_CAREER_ROADMAP: ${{ secrets.ACCESS_PASSWORD_AI_CAREER_ROADMAP }}  # Password for public/tasksDB/ai-career-roadmap
 ```
+
+How to set secrets for each project folder in GitHub:
+
+- Go to your repository on GitHub → Settings → Secrets and variables → Actions.
+- Click "New repository secret" and add the following secrets (example names):
+   - `ACCESS_PASSWORD_MASTER` — a master password that unlocks all projects (fallback).
+   - `ACCESS_PASSWORD_GITHUB_TASK_MANAGER` — password specifically for public/tasksDB/github-task-manager.
+   - `ACCESS_PASSWORD_AI_CAREER_ROADMAP` — password specifically for public/tasksDB/ai-career-roadmap.
+- You may add more per-project secrets using the pattern `ACCESS_PASSWORD_<PROJECT_ID>` and update `.github/workflows/deploy.yml` to include the new mapping.
+
+During deployment, the workflow writes the secrets into `public/config/access-secret.js` so the client can identify which password applies for each active project. The master password continues to be supported for backward compatibility.
+
+Security note: These passwords are injected into client-side code and are not a substitute for server-side authentication. They provide a basic gate to prevent casual edits on the live site; users can still inspect JavaScript to read the password.
 
 ## Troubleshooting 🔧
 
@@ -632,6 +648,14 @@ Recommendations:
 3. Review commits in GitHub history
 4. Consider adding branch protection rules
 5. Backup tasks regularly
+
+Important update (GitHub Pages security):
+
+- Do NOT ship a repo write token to the browser. Anything under `public/` is downloadable by anyone.
+- If you previously injected `GH_TOKEN` into `public/config/github-token.js` during deploy, rotate/revoke that token immediately.
+- Recommended model for a static site:
+   - Public read: fetch tasks without auth.
+   - Writes: require the shared access password AND a user-provided fine-grained token stored only in that user's browser (or a GitHub OAuth flow).
 
 ## Support & Contact 💬
 
