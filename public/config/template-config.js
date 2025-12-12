@@ -207,7 +207,7 @@ const TEMPLATE_CONFIG = {
     // Cloudflare Worker URL for secure writes (token stays server-side)
     // Set this to your deployed worker URL, e.g., 'https://task-manager-api.YOUR-SUBDOMAIN.workers.dev'
     // When set, all writes go through the worker which validates ACCESS_PASSWORD and restricts paths
-    WORKER_URL: (typeof GITHUB_WORKER_URL !== 'undefined' ? GITHUB_WORKER_URL : ''),
+    WORKER_URL: (typeof GH_WORKER_URL !== 'undefined' ? GH_WORKER_URL : ''),
     // Multi-project TasksDB
     // Each project lives under: public/tasksDB/<projectId>/{tasks.json,tasks.csv,state/,history/}
     TASKS_ROOT: 'public/tasksDB',

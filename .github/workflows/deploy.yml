@@ -96,9 +96,9 @@ jobs:
           cat > public/config/worker-url.js << 'EOF'
           // Cloudflare Worker URL for secure GitHub API proxy
           // Injected at deploy time from repository secrets
-          const GITHUB_WORKER_URL = '${{ secrets.GITHUB_WORKER_URL }}';
+          const GH_WORKER_URL = '${{ secrets.GH_WORKER_URL }}';
           if (typeof module !== 'undefined' && module.exports) {
-            module.exports = { GITHUB_WORKER_URL };
+            module.exports = { GH_WORKER_URL };
           }
           EOF
 
