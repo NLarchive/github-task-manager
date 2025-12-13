@@ -639,7 +639,16 @@ class TaskDatabase {
     const beforeTasksSnapshot = this.cloneTasksSnapshot(this._lastSyncedTasksSnapshot || []);
 
     // Get access password from session (user already entered it to unlock)
-    const accessPassword = this.getSessionAccessPassword();
+    // On localhost, fallback to configured password for development convenience
+    let accessPassword = this.getSessionAccessPassword();
+    if (!accessPassword && this.isLocalDevHost()) {
+      // On localhost, try to get the password from ACCESS_PASSWORDS config
+      if (typeof ACCESS_PASSWORDS !== 'undefined' && ACCESS_PASSWORDS && ACCESS_PASSWORDS[projectId]) {
+        accessPassword = ACCESS_PASSWORDS[projectId];
+      } else if (typeof ACCESS_PASSWORD !== 'undefined' && ACCESS_PASSWORD) {
+        accessPassword = ACCESS_PASSWORD;
+      }
+    }
     if (!accessPassword) {
       return { success: false, error: 'Access password required. Please unlock first.' };
     }

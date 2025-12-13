@@ -1,6 +1,6 @@
 {
   "status": "In Progress",
-  "generated_at": "2025-12-13T03:20:46.635Z",
+  "generated_at": "2025-12-13T03:09:24.894Z",
   "tasks": [
     {
       "task_id": 1,
@@ -10,7 +10,7 @@
       "end_date": "2025-12-16",
       "priority": "Critical",
       "status": "In Progress",
-      "progress_percentage": 40,
+      "progress_percentage": 25,
       "estimated_hours": 3,
       "actual_hours": 0,
       "is_critical_path": true,
