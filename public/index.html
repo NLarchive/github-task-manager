@@ -373,16 +373,23 @@
     </div>
 
     <!-- Load Components -->
-    <!-- Password config MUST load before template-config so ACCESS_PASSWORD is available -->
-    <script src="config/access-secret.local.js"></script>
+    <!-- Conditionally load local config files for development -->
+    <script>
+      // Load local config files only in development
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        // Load local configs synchronously before other scripts
+        document.write('<script src="config/access-secret.local.js"><\/script>');
+        document.write('<script src="config/github-token.local.js"><\/script>');
+        document.write('<script src="config/worker-url.local.js"><\/script>');
+      }
+    </script>
+    <!-- Password config (injected by GitHub Actions on live, or loaded above in dev) -->
     <script src="config/access-secret.js"></script>
     <!-- GitHub token config -->
-    <script src="config/github-token.local.js"></script>
     <script src="config/github-token.js"></script>
     <!-- GitHub OAuth config -->
     <script src="config/github-oauth.js"></script>
     <!-- Worker URL config (for secure writes via Cloudflare Worker) -->
-    <script src="config/worker-url.local.js"></script>
     <script src="config/worker-url.js"></script>
     <!-- Main config (depends on ACCESS_PASSWORD from access-secret) -->
     <script src="config/template-config.js"></script>
