@@ -49,7 +49,3 @@ test-results/
 public/tasksDB/*/state/
 public/tasksDB/*/state/**
 public/tasksDB/*/tasks.csv
-
-
-
-
