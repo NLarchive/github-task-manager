@@ -1,10 +1,9 @@
 {
-  "generated_at": "2025-12-12T23:54:10.915Z",
+  "generated_at": "2025-12-13T03:05:41.157Z",
   "total_tasks": 19,
   "counts_by_status": {
     "Completed": 16,
-    "Not Started": 1,
-    "In Progress": 2
+    "In Progress": 3
   },
   "tasks_by_status": {
     "Completed": [
@@ -607,7 +606,7 @@
         ]
       }
     ],
-    "Not Started": [
+    "In Progress": [
       {
         "task_id": 8,
         "task_name": "Update Documentation & README",
@@ -615,7 +614,7 @@
         "start_date": "2025-12-20",
         "end_date": "2025-12-22",
         "priority": "Medium",
-        "status": "Not Started",
+        "status": "In Progress",
         "progress_percentage": 20,
         "estimated_hours": 6,
         "actual_hours": 1,
@@ -646,9 +645,7 @@
             "lag_days": 0
           }
         ]
-      }
-    ],
-    "In Progress": [
+      },
       {
         "task_id": 10,
         "task_name": "Project Retrospective",
