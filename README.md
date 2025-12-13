@@ -574,6 +574,7 @@ When working on system code, the repository stores both the canonical `tasks.jso
 - **Only commit `tasks.json`**: Treat `tasks.json` as the single source of truth for task data.
 - **Use `git rerere` to speed conflict resolution**: Enable it with `git config --global rerere.enabled true`.
 - **If you must update derived files**: Regenerate them using the repo's tooling (such as the CSV/state generation scripts in `tools/scripts`) and commit only when necessary.
+   - **Regenerate locally**: Use the npm script `npm run tasks:generate-state` to produce fresh `state/` pages and CSVs before testing locally.
 
 These changes are enabled by updating `.gitignore` so generated state files are no longer tracked by default. If you see a conflict for these files, rebase and ensure you didn't accidentally check them in.
 
