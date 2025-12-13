@@ -1,0 +1,51 @@
+{
+  "status": "In Progress",
+  "generated_at": "2025-12-13T23:25:24.190Z",
+  "tasks": [
+    {
+      "task_id": 10,
+      "task_name": "Project Retrospective",
+      "description": "Conduct project retrospective to review what went well, what could be improved, and lessons learned. Document findings and create improvement tasks for next iteration.",
+      "start_date": "2025-12-24",
+      "end_date": "2025-12-26",
+      "priority": "Medium",
+      "status": "In Progress",
+      "progress_percentage": 25,
+      "estimated_hours": 4,
+      "actual_hours": 0,
+      "is_critical_path": false,
+      "tags": [
+        "retrospective",
+        "process-improvement",
+        "team"
+      ],
+      "category_name": "Retrospective",
+      "assigned_workers": [
+        {
+          "name": "public@example.com",
+          "email": "public@example.com",
+          "role": "Collaborator"
+        }
+      ],
+      "parent_task_id": null,
+      "creator_id": "system@example.com",
+      "created_date": "2025-12-10T09:00:00Z",
+      "completed_date": null,
+      "comments": [
+        {
+          "author": "dev@example.com",
+          "timestamp": "2025-12-13T03:00:00Z",
+          "text": "Kickoff: captured conflicts and workstream improvements (ignore derived files; rebase workflow)."
+        }
+      ],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 9,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ]
+    }
+  ]
+}
