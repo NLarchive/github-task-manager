@@ -17,14 +17,20 @@ This worker acts as a secure proxy between the static GitHub Pages site and the 
 - Click "Save and Deploy"
 
 ### 3. Configure Environment Variables
-In your Worker settings, add these environment variables:
+In your Worker settings, add these environment variables (either shared or per-project keys are supported):
 
 | Variable | Description |
 |----------|-------------|
-| `GITHUB_TOKEN` | Fine-grained PAT with `contents:write` for the repo |
+| `GH_TOKEN` or `GITHUB_TOKEN` | Shared fine-grained PAT with `contents:write` for repositories (fallback) |
+| `GH_TOKEN_AI_CAREER_ROADMAP` or `GITHUB_TOKEN_AI_CAREER_ROADMAP` | Per-project PAT for `ai-career-roadmap` (preferred) |
 | `ACCESS_PASSWORD_MASTER` | Master password (unlocks all projects) |
 | `ACCESS_PASSWORD_GITHUB_TASK_MANAGER` | Password for github-task-manager project |
 | `ACCESS_PASSWORD_AI_CAREER_ROADMAP` | Password for ai-career-roadmap project |
+
+Notes:
+- The worker prefers per-project tokens (`GH_TOKEN_<PROJECTID>` or `GITHUB_TOKEN_<PROJECTID>`). If not set, it falls back to `GH_TOKEN` or `GITHUB_TOKEN`.
+- Use fine-grained PATs limited to the minimum repo permissions (Contents: Read & Write) and scoped to the specific target repo when possible.
+- Use `wrangler secret put <KEY>` to set secrets securely on Cloudflare.
 
 ### 4. Get Your Worker URL
 After deploying, you'll get a URL like:
@@ -124,6 +130,35 @@ Cloudflare Workers free tier includes:
 - No credit card required
 
 This is more than enough for a task management app.
+
+## Set Worker secrets (recommended)
+Use `wrangler` to securely set secrets for the Worker. Example commands (local dev / terminal with wrangler configured):
+
+```bash
+cd tools/cloudflare-worker
+# Set per-project token (preferred):
+wrangler secret put GH_TOKEN_AI_CAREER_ROADMAP
+
+# Or set shared token fallback:
+wrangler secret put GH_TOKEN
+
+# Set per-project password and master password:
+wrangler secret put ACCESS_PASSWORD_AI_CAREER_ROADMAP
+wrangler secret put ACCESS_PASSWORD_MASTER
+
+# After setting secrets, deploy:
+wrangler publish
+```
+
+## Validate token access locally
+You can validate the token(s) before deploying using the `validate-secrets.js` script:
+
+```bash
+# Test per-project token
+GH_TOKEN_AI_CAREER_ROADMAP=xxx node validate-secrets.js
+# Test shared token
+GH_TOKEN=xxx node validate-secrets.js
+```
 
 ## Alternative: Vercel Edge Functions
 If you prefer Vercel, the same logic can be deployed as an Edge Function. The code is nearly identical - just adapt the handler signature.

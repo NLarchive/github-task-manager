@@ -6,7 +6,11 @@ compatibility_date = "2024-12-12"
 vars = { ENVIRONMENT = "production" }
 
 # Secrets (must be set with `wrangler secret put`)
-# - GITHUB_TOKEN
+# - GH_TOKEN (optional shorthand fallback) or GITHUB_TOKEN
+# - GITHUB_TOKEN_AI_CAREER_ROADMAP or GH_TOKEN_AI_CAREER_ROADMAP
 # - ACCESS_PASSWORD_MASTER
 # - ACCESS_PASSWORD_GITHUB_TASK_MANAGER
 # - ACCESS_PASSWORD_AI_CAREER_ROADMAP
+# Notes: you can set per-project tokens using either GITHUB_TOKEN_<PROJECTID> or GH_TOKEN_<PROJECTID>. Example:
+#   wrangler secret put GH_TOKEN_AI_CAREER_ROADMAP
+#   wrangler secret put ACCESS_PASSWORD_AI_CAREER_ROADMAP

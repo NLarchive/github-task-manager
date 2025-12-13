@@ -36,14 +36,23 @@ function getTokenForProject(projectId, env) {
   const id = safeProjectId(projectId);
   if (!env) return '';
 
-  // Preferred: per-project secret token, e.g. GITHUB_TOKEN_AI_CAREER_ROADMAP
-  const perKey = `GITHUB_TOKEN_${id.toUpperCase().replace(/-/g, '_')}`;
-  const per = env[perKey];
-  if (per && String(per).trim()) return String(per).trim();
+  // Preferred: per-project secret token - support both naming conventions
+  //  - GITHUB_TOKEN_AI_CAREER_ROADMAP
+  //  - GH_TOKEN_AI_CAREER_ROADMAP
+  const perKey1 = `GITHUB_TOKEN_${id.toUpperCase().replace(/-/g, '_')}`;
+  const perKey2 = `GH_TOKEN_${id.toUpperCase().replace(/-/g, '_')}`;
+  const per1 = env[perKey1];
+  if (per1 && String(per1).trim()) return String(per1).trim();
+  const per2 = env[perKey2];
+  if (per2 && String(per2).trim()) return String(per2).trim();
 
-  // Fallback: shared token for all projects
-  const shared = env.GITHUB_TOKEN;
-  return shared && String(shared).trim() ? String(shared).trim() : '';
+  // Shared token fallback (both naming conventions)
+  const shared1 = env.GITHUB_TOKEN;
+  if (shared1 && String(shared1).trim()) return String(shared1).trim();
+  const shared2 = env.GH_TOKEN;
+  if (shared2 && String(shared2).trim()) return String(shared2).trim();
+
+  return '';
 }
 
 function safeProjectId(value) {
