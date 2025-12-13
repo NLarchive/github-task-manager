@@ -373,8 +373,25 @@ class TaskDatabase {
         ? gh.getTasksFile(projectId)
         : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/github-task-manager/tasks.json');
 
-      // 1) Try to load from localStorage first (local development)
-      if (typeof window !== 'undefined' && window.localStorage) {
+      // We want GitHub Pages to reflect canonical repo state.
+      // LocalStorage is useful as a fallback, but should not override remote reads on production.
+      const isBrowser = (typeof window !== 'undefined');
+      const host = isBrowser && window.location ? String(window.location.hostname || '') : '';
+      const isLocalHost = host === 'localhost' || host === '127.0.0.1';
+      const isGitHubPagesHost = host.endsWith('github.io');
+
+      const projectCfgForRead = (gh && typeof gh.getProjectConfig === 'function') ? gh.getProjectConfig(projectId) : null;
+      const hostOwner = gh && gh.OWNER ? String(gh.OWNER) : '';
+      const hostRepo = gh && gh.REPO ? String(gh.REPO) : '';
+      const hostBranch = gh && gh.BRANCH ? String(gh.BRANCH) : 'main';
+      const isSameRepoAsHost = !!(projectCfgForRead && hostOwner && hostRepo &&
+        String(projectCfgForRead.owner || '') === hostOwner &&
+        String(projectCfgForRead.repo || '') === hostRepo &&
+        String(projectCfgForRead.branch || '') === hostBranch);
+
+      // 1) Try to load from localStorage first ONLY on localhost.
+      // On GitHub Pages, prefer canonical repo sources and only fall back to localStorage.
+      if (isLocalHost && typeof window !== 'undefined' && window.localStorage) {
         try {
           const storageKey = getProjectScopedStorageKey();
           const stored = window.localStorage.getItem(storageKey);
@@ -393,18 +410,7 @@ class TaskDatabase {
         }
       }
 
-      // 2) Try local static fetch (same origin) if we're in a browser environment.
-      // Only do this when the active project is hosted in THIS repo. If the project
-      // points at a different repo (e.g. ai-career-roadmap), prefer raw GitHub reads.
-      const projectCfgForRead = (gh && typeof gh.getProjectConfig === 'function') ? gh.getProjectConfig(projectId) : null;
-      const hostOwner = gh && gh.OWNER ? String(gh.OWNER) : '';
-      const hostRepo = gh && gh.REPO ? String(gh.REPO) : '';
-      const hostBranch = gh && gh.BRANCH ? String(gh.BRANCH) : 'main';
-      const isSameRepoAsHost = !!(projectCfgForRead && hostOwner && hostRepo &&
-        String(projectCfgForRead.owner || '') === hostOwner &&
-        String(projectCfgForRead.repo || '') === hostRepo &&
-        String(projectCfgForRead.branch || '') === hostBranch);
-
+      // 2) Try local static fetch (same origin) when the active project is hosted in THIS repo.
       if (!loadedTasks && isSameRepoAsHost && typeof fetch === 'function') {
         try {
           const basePath = (gh && gh.BASE_PATH) ? String(gh.BASE_PATH) : '';
@@ -423,6 +429,26 @@ class TaskDatabase {
           }
         } catch (fetchError) {
           console.warn('Local fetch failed, will try remote sources:', fetchError && fetchError.message ? fetchError.message : fetchError);
+        }
+      }
+
+      // 2.5) If we are on GitHub Pages and still have no data, fall back to localStorage (best-effort)
+      if (!loadedTasks && isGitHubPagesHost && typeof window !== 'undefined' && window.localStorage) {
+        try {
+          const storageKey = getProjectScopedStorageKey();
+          const stored = window.localStorage.getItem(storageKey);
+          if (stored) {
+            const storageData = JSON.parse(stored);
+            if (storageData && storageData.json && storageData.json.tasks) {
+              this.currentProject = storageData.json.project || this.currentProject;
+              this.categories = storageData.json.categories || this.categories;
+              this.workers = storageData.json.workers || this.workers;
+              loadedTasks = storageData.json.tasks;
+              console.log('Loaded', loadedTasks.length, 'tasks from localStorage fallback (project:', projectId, ', last saved:', storageData.lastSaved, ')');
+            }
+          }
+        } catch (storageError) {
+          console.warn('Could not load from localStorage fallback:', storageError);
         }
       }
 

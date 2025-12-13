@@ -733,6 +733,20 @@ class TaskManagerApp {
         if (repoInfo) {
             repoInfo.textContent = `Repository: ${this.config.owner}/${this.config.repo} (${this.config.branch})`;
         }
+
+        const workerInfo = document.getElementById('workerInfo');
+        if (workerInfo) {
+            const workerUrl = (typeof window !== 'undefined' && window.TEMPLATE_CONFIG && window.TEMPLATE_CONFIG.GITHUB && window.TEMPLATE_CONFIG.GITHUB.WORKER_URL)
+                ? String(window.TEMPLATE_CONFIG.GITHUB.WORKER_URL || '')
+                : (this.getWorkerUrl ? this.getWorkerUrl() : '');
+            workerInfo.textContent = workerUrl ? `Worker: ${workerUrl}` : 'Worker: Not configured';
+        }
+
+        const tasksInfo = document.getElementById('tasksInfo');
+        if (tasksInfo) {
+            const tasksFile = this.config && this.config.tasksFile ? String(this.config.tasksFile) : (window.TEMPLATE_CONFIG && window.TEMPLATE_CONFIG.GITHUB && window.TEMPLATE_CONFIG.GITHUB.TASKS_FILE ? String(window.TEMPLATE_CONFIG.GITHUB.TASKS_FILE) : '-');
+            tasksInfo.textContent = `TasksFile: ${tasksFile}`;
+        }
     }
 
     // Task Management
@@ -766,12 +780,26 @@ class TaskManagerApp {
             // Ensure actor name is attached to Worker writes for history/audit.
             this.database.actor = this.currentUser || '';
             const result = await this.database.saveTasks();
+
+            // TaskDatabase.saveTasks() returns { success: false, error: ... } for validation/auth issues.
+            // Treat that as a failure (otherwise UI incorrectly claims GitHub was updated).
+            if (!result || result.success !== true) {
+                throw new Error((result && result.error) ? result.error : 'Save failed');
+            }
             const source = result.source === 'github'
                 ? 'to GitHub'
                 : (result.source === 'worker'
                     ? 'to GitHub (via Worker)'
                     : (result.source === 'local-disk' ? 'locally (disk)' : 'locally'));
-            this.showToast(`Tasks saved successfully ${source}`, 'success');
+
+            // If we're on GitHub Pages and we only saved locally, make that explicit.
+            // This commonly happens when GH_WORKER_URL isn't configured.
+            const isGhPages = this.isGitHubPagesHost && this.isGitHubPagesHost();
+            if (isGhPages && (result.source === 'local' || result.source === 'local-disk')) {
+                this.showToast(`Saved locally only (NOT pushed to GitHub). Configure Worker URL, then unlock and save again.`, 'warning');
+            } else {
+                this.showToast(`Tasks saved successfully ${source}`, 'success');
+            }
 
             // If history modal is open, refresh it.
             const historyModal = document.getElementById('historyModal');

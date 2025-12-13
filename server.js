@@ -241,7 +241,16 @@ function createServer({ publicDir, tasksDbDir }) {
       let serveRoot = publicDir;
       let effectivePath = pathname === '/' ? '/index.html' : pathname;
       
-      if (pathname.startsWith('/tasksDB/')) {
+      // Only route tasksDB *data* requests to the external TASKS_DB_DIR.
+      // Keep static assets like /tasksDB/task-database.js served from /public.
+      const isTasksDbDataRequest = pathname.startsWith('/tasksDB/') && (
+        pathname.endsWith('.json') ||
+        pathname.endsWith('.csv') ||
+        pathname.includes('/state/') ||
+        pathname.includes('/history/')
+      );
+
+      if (isTasksDbDataRequest) {
         serveRoot = tasksDbDir;
         // Remove the /tasksDB/ prefix since we're serving from tasksDbDir
         effectivePath = pathname.replace(/^\/tasksDB/, '');
