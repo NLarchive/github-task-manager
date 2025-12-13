@@ -111,6 +111,15 @@ jobs:
           test -f public/config/template-config.js && echo "✓ template-config.js" || (echo "✗ Missing: template-config.js" && exit 1)
           echo "✓ All required files found"
 
+      - name: Regenerate derived state and CSV files
+        run: |
+          echo "=== Regenerating derived task files ==="
+          node tools/scripts/generate-state-files.js github-task-manager
+          node tools/scripts/regenerate-tasks-csv.js github-task-manager
+          node tools/scripts/generate-state-files.js ai-career-roadmap
+          node tools/scripts/regenerate-tasks-csv.js ai-career-roadmap
+          echo "✓ State and CSV files regenerated"
+
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v4
 

@@ -17,6 +17,8 @@
     "test:all": "npm run test && npm run test:validate && npm run test:playwright",
     "tasks:archive-root": "node tools/scripts/archive-root-tasks.js",
     "tasks:generate-state": "node tools/scripts/generate-state-files.js",
+    "tasks:regenerate-csv": "node tools/scripts/regenerate-tasks-csv.js github-task-manager",
+    "tasks:regenerate-all": "npm run tasks:generate-state && npm run tasks:regenerate-csv",
     "lint": "eslint public/scripts/*.js public/config/*.js",
     "format": "prettier --write \"public/**/*.{js,css,html,json}\"",
     "validate": "node tests/unit/validate-schema.js",
