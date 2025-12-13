@@ -1,0 +1,759 @@
+{
+  "generated_at": "2025-12-13T23:25:24.190Z",
+  "total_tasks": 19,
+  "counts_by_status": {
+    "Completed": 17,
+    "Not Started": 1,
+    "In Progress": 1
+  },
+  "tasks_by_status": {
+    "Completed": [
+      {
+        "task_id": 1,
+        "task_name": "Remove Authentication Form & Pre-Configure Token",
+        "description": "Remove the personal token input section from the UI. Implement pre-configured GitHub token in config to allow public users to collaborate. Token should be stored securely in environment variables for GitHub Pages deployment.",
+        "start_date": "2025-12-10",
+        "end_date": "2025-12-11",
+        "priority": "Critical",
+        "status": "Completed",
+        "progress_percentage": 100,
+        "estimated_hours": 4,
+        "actual_hours": 4,
+        "is_critical_path": true,
+        "tags": [
+          "frontend",
+          "authentication",
+          "setup"
+        ],
+        "category_name": "Frontend Development",
+        "assigned_workers": [
+          {
+            "name": "Developer",
+            "email": "dev@example.com",
+            "role": "Full Stack Developer"
+          }
+        ],
+        "parent_task_id": null,
+        "creator_id": "system@example.com",
+        "created_date": "2025-12-10T09:00:00Z",
+        "completed_date": "2025-12-10T16:00:00Z",
+        "comments": [
+          {
+            "author": "public@example.com",
+            "timestamp": "2025-12-10T14:00:00Z",
+            "text": "Need to ensure this works with GitHub Actions secrets"
+          },
+          {
+            "author": "dev@example.com",
+            "timestamp": "2025-12-10T16:00:00Z",
+            "text": "Completed - Token is now loaded from github-token.js which is gitignored. For production, GitHub Actions injects the token from secrets."
+          }
+        ],
+        "attachments": [],
+        "dependencies": []
+      },
+      {
+        "task_id": 2,
+        "task_name": "Update Task Form with All Required Fields",
+        "description": "Add form inputs for all non-automatable task fields from template schema. Include fields for: task_name, description, status, priority, start_date, end_date, estimated_hours, category_name, tags, assigned_workers, dependencies, parent_task_id, is_critical_path. Auto-populate task_id, created_date, and creator_id.",
+        "start_date": "2025-12-10",
+        "end_date": "2025-12-12",
+        "priority": "Critical",
+        "status": "Completed",
+        "progress_percentage": 100,
+        "estimated_hours": 8,
+        "actual_hours": 6,
+        "is_critical_path": true,
+        "tags": [
+          "frontend",
+          "forms",
+          "validation"
+        ],
+        "category_name": "Frontend Development",
+        "assigned_workers": [
+          {
+            "name": "Developer",
+            "email": "dev@example.com",
+            "role": "Full Stack Developer"
+          }
+        ],
+        "parent_task_id": null,
+        "creator_id": "system@example.com",
+        "created_date": "2025-12-10T09:00:00Z",
+        "completed_date": null,
+        "comments": [],
+        "attachments": [],
+        "dependencies": [
+          {
+            "predecessor_task_id": 1,
+            "type": "FS",
+            "lag_days": 0
+          }
+        ]
+      },
+      {
+        "task_id": 3,
+        "task_name": "Implement Task Automation Logic",
+        "description": "Enhance template-automation.js to automatically populate task_id, created_date, creator_id, and other automatable fields. Ensure validation happens before task creation. Support status normalization and default values from TEMPLATE_CONFIG.",
+        "start_date": "2025-12-11",
+        "end_date": "2025-12-13",
+        "priority": "High",
+        "status": "Completed",
+        "progress_percentage": 100,
+        "estimated_hours": 6,
+        "actual_hours": 5,
+        "is_critical_path": true,
+        "tags": [
+          "backend",
+          "automation",
+          "templates"
+        ],
+        "category_name": "Backend Development",
+        "assigned_workers": [
+          {
+            "name": "Developer",
+            "email": "dev@example.com",
+            "role": "Full Stack Developer"
+          }
+        ],
+        "parent_task_id": null,
+        "creator_id": "system@example.com",
+        "created_date": "2025-12-10T09:00:00Z",
+        "completed_date": null,
+        "comments": [],
+        "attachments": [],
+        "dependencies": [
+          {
+            "predecessor_task_id": 2,
+            "type": "SS",
+            "lag_days": 0
+          }
+        ]
+      },
+      {
+        "task_id": 4,
+        "task_name": "Create Subtask Support",
+        "description": "Implement parent_task_id functionality to enable subtask creation. Update the UI to show parent-child relationships and support creating subtasks from task detail view. Ensure dependencies work correctly with subtasks.",
+        "start_date": "2025-12-13",
+        "end_date": "2025-12-15",
+        "priority": "High",
+        "status": "Completed",
+        "progress_percentage": 100,
+        "estimated_hours": 8,
+        "actual_hours": 8,
+        "is_critical_path": false,
+        "tags": [
+          "frontend",
+          "hierarchy",
+          "subtasks"
+        ],
+        "category_name": "Frontend Development",
+        "assigned_workers": [
+          {
+            "name": "Developer",
+            "email": "dev@example.com",
+            "role": "Full Stack Developer"
+          }
+        ],
+        "parent_task_id": null,
+        "creator_id": "system@example.com",
+        "created_date": "2025-12-10T09:00:00Z",
+        "completed_date": "2025-12-11T16:00:00Z",
+        "comments": [],
+        "attachments": [],
+        "dependencies": [
+          {
+            "predecessor_task_id": 2,
+            "type": "FS",
+            "lag_days": 1
+          }
+        ]
+      },
+      {
+        "task_id": 5,
+        "task_name": "Implement Task Dependencies & Critical Path",
+        "description": "Add UI controls for defining task dependencies with types (FS, SS, FF, SF) and lag_days. Implement critical path visualization. Validate dependency chains to prevent circular dependencies.",
+        "start_date": "2025-12-14",
+        "end_date": "2025-12-17",
+        "priority": "High",
+        "status": "Completed",
+        "progress_percentage": 100,
+        "estimated_hours": 10,
+        "actual_hours": 10,
+        "is_critical_path": true,
+        "tags": [
+          "frontend",
+          "dependencies",
+          "project-management"
+        ],
+        "category_name": "Frontend Development",
+        "assigned_workers": [
+          {
+            "name": "Developer",
+            "email": "dev@example.com",
+            "role": "Full Stack Developer"
+          }
+        ],
+        "parent_task_id": null,
+        "creator_id": "system@example.com",
+        "created_date": "2025-12-10T09:00:00Z",
+        "completed_date": "2025-12-11T16:00:00Z",
+        "comments": [],
+        "attachments": [],
+        "dependencies": [
+          {
+            "predecessor_task_id": 3,
+            "type": "FS",
+            "lag_days": 0
+          }
+        ]
+      },
+      {
+        "task_id": 6,
+        "task_name": "Implement Public Collaboration Features",
+        "description": "Add user name input for public collaborators. Implement comment system on tasks. Add worker assignment without authentication. Enable status updates and progress tracking for all users. Show who made changes and when.",
+        "start_date": "2025-12-15",
+        "end_date": "2025-12-18",
+        "priority": "High",
+        "status": "Completed",
+        "progress_percentage": 100,
+        "estimated_hours": 12,
+        "actual_hours": 12,
+        "is_critical_path": true,
+        "tags": [
+          "frontend",
+          "collaboration",
+          "ux"
+        ],
+        "category_name": "Frontend Development",
+        "assigned_workers": [
+          {
+            "name": "Developer",
+            "email": "dev@example.com",
+            "role": "Full Stack Developer"
+          }
+        ],
+        "parent_task_id": null,
+        "creator_id": "system@example.com",
+        "created_date": "2025-12-10T09:00:00Z",
+        "completed_date": "2025-12-11T16:00:00Z",
+        "comments": [],
+        "attachments": [],
+        "dependencies": [
+          {
+            "predecessor_task_id": 2,
+            "type": "FS",
+            "lag_days": 0
+          }
+        ]
+      },
+      {
+        "task_id": 7,
+        "task_name": "Test Task Creation & Automation",
+        "description": "Comprehensive testing of task creation flow with all field types. Verify auto-population of task_id, dates, and creator. Test validation error messages. Test with various input combinations.",
+        "start_date": "2025-12-16",
+        "end_date": "2025-12-19",
+        "priority": "High",
+        "status": "Completed",
+        "progress_percentage": 100,
+        "estimated_hours": 8,
+        "actual_hours": 6,
+        "is_critical_path": false,
+        "tags": [
+          "testing",
+          "qa",
+          "validation"
+        ],
+        "category_name": "Testing",
+        "assigned_workers": [
+          {
+            "name": "QA Tester",
+            "email": "qa@example.com",
+            "role": "Quality Assurance"
+          }
+        ],
+        "parent_task_id": null,
+        "creator_id": "system@example.com",
+        "created_date": "2025-12-10T09:00:00Z",
+        "completed_date": null,
+        "comments": [],
+        "attachments": [],
+        "dependencies": [
+          {
+            "predecessor_task_id": 3,
+            "type": "FS",
+            "lag_days": 0
+          }
+        ]
+      },
+      {
+        "task_id": 9,
+        "task_name": "Deploy to GitHub Pages",
+        "description": "Setup GitHub Actions workflow to deploy the task manager to GitHub Pages. Configure environment variables for GitHub token. Test public access and collaboration features on live deployment.",
+        "start_date": "2025-12-20",
+        "end_date": "2025-12-23",
+        "priority": "Critical",
+        "status": "Completed",
+        "progress_percentage": 100,
+        "estimated_hours": 6,
+        "actual_hours": 5,
+        "is_critical_path": true,
+        "tags": [
+          "deployment",
+          "ci-cd",
+          "github-actions"
+        ],
+        "category_name": "Deployment",
+        "assigned_workers": [
+          {
+            "name": "Developer",
+            "email": "dev@example.com",
+            "role": "Full Stack Developer"
+          }
+        ],
+        "parent_task_id": null,
+        "creator_id": "system@example.com",
+        "created_date": "2025-12-10T09:00:00Z",
+        "completed_date": "2025-12-23T18:00:00Z",
+        "comments": [],
+        "attachments": [],
+        "dependencies": [
+          {
+            "predecessor_task_id": 7,
+            "type": "FS",
+            "lag_days": 0
+          }
+        ]
+      },
+      {
+        "task_id": 11,
+        "task_name": "Stabilize Local Dev & E2E Test Setup",
+        "description": "Fix local dev/test issues: make token loading safe when no injected variable exists, point the app to the deployed tasks database file, and stabilize Playwright to run locally without hitting production.",
+        "start_date": "2025-12-11",
+        "end_date": "2025-12-11",
+        "priority": "High",
+        "status": "Completed",
+        "progress_percentage": 100,
+        "estimated_hours": 3,
+        "actual_hours": 3,
+        "is_critical_path": true,
+        "tags": [
+          "bugfix",
+          "playwright",
+          "devx"
+        ],
+        "category_name": "Testing",
+        "assigned_workers": [
+          {
+            "name": "Developer",
+            "email": "dev@example.com",
+            "role": "Full Stack Developer"
+          }
+        ],
+        "parent_task_id": null,
+        "creator_id": "system@example.com",
+        "created_date": "2025-12-11T17:30:00Z",
+        "completed_date": "2025-12-11T18:00:00Z",
+        "comments": [],
+        "attachments": [],
+        "dependencies": []
+      },
+      {
+        "task_id": 12,
+        "task_name": "Sync tasks.csv with tasks.json",
+        "description": "Update /public/tasksDB/tasks.csv so it reflects the same project state as /public/tasksDB/tasks.json (statuses, dates, and any newly added tasks).",
+        "start_date": "2025-12-11",
+        "end_date": "2025-12-12",
+        "priority": "Medium",
+        "status": "Completed",
+        "progress_percentage": 100,
+        "estimated_hours": 1,
+        "actual_hours": 1,
+        "is_critical_path": false,
+        "tags": [
+          "data",
+          "reporting"
+        ],
+        "category_name": "Maintenance",
+        "assigned_workers": [
+          {
+            "name": "Developer",
+            "email": "dev@example.com",
+            "role": "Full Stack Developer"
+          }
+        ],
+        "parent_task_id": null,
+        "creator_id": "system@example.com",
+        "created_date": "2025-12-11T18:00:00Z",
+        "completed_date": "2025-12-11T19:30:00Z",
+        "comments": [],
+        "attachments": [],
+        "dependencies": []
+      },
+      {
+        "task_id": 13,
+        "task_name": "Review Public Token Strategy",
+        "description": "Confirm the intended security model for public collaboration (token injection, permissions/scoping, abuse prevention). Document the approach and constraints in README/tools docs.",
+        "start_date": "2025-12-12",
+        "end_date": "2025-12-13",
+        "priority": "High",
+        "status": "Completed",
+        "progress_percentage": 100,
+        "estimated_hours": 2,
+        "actual_hours": 2,
+        "is_critical_path": true,
+        "tags": [
+          "security",
+          "documentation"
+        ],
+        "category_name": "Documentation",
+        "assigned_workers": [
+          {
+            "name": "Developer",
+            "email": "dev@example.com",
+            "role": "Full Stack Developer"
+          }
+        ],
+        "parent_task_id": null,
+        "creator_id": "system@example.com",
+        "created_date": "2025-12-11T18:00:00Z",
+        "completed_date": "2025-12-13T12:00:00Z",
+        "comments": [
+          {
+            "author": "dev@example.com",
+            "timestamp": "2025-12-13T03:00:00Z",
+            "text": "Added README guidance and GH Actions note; next steps: finalize token model and add deployment docs."
+          },
+          {
+            "author": "dev@example.com",
+            "timestamp": "2025-12-13T12:00:00Z",
+            "text": "Completed: token model documented, .gitignore updated for derived files, CI step design ready."
+          }
+        ],
+        "attachments": [],
+        "dependencies": [
+          {
+            "predecessor_task_id": 11,
+            "type": "FS",
+            "lag_days": 0
+          }
+        ]
+      },
+      {
+        "task_id": 14,
+        "task_name": "Archive legacy root tasks.json",
+        "description": "Preserve the older repo-root tasks.json as an immutable history snapshot under /public/tasksDB/history without changing the canonical runtime database.",
+        "start_date": "2025-12-11",
+        "end_date": "2025-12-11",
+        "priority": "Medium",
+        "status": "Completed",
+        "progress_percentage": 100,
+        "estimated_hours": 1,
+        "actual_hours": 1,
+        "is_critical_path": false,
+        "tags": [
+          "data",
+          "history"
+        ],
+        "category_name": "Maintenance",
+        "assigned_workers": [
+          {
+            "name": "Developer",
+            "email": "dev@example.com",
+            "role": "Full Stack Developer"
+          }
+        ],
+        "parent_task_id": null,
+        "creator_id": "system@example.com",
+        "created_date": "2025-12-11T20:00:00Z",
+        "completed_date": "2025-12-11T20:15:00Z",
+        "comments": [],
+        "attachments": [],
+        "dependencies": []
+      },
+      {
+        "task_id": 15,
+        "task_name": "Clickable dashboard stat cards",
+        "description": "Make the dashboard stat cards clickable so users can quickly filter tasks by status (All, Not Started, In Progress, Completed).",
+        "start_date": "2025-12-11",
+        "end_date": "2025-12-11",
+        "priority": "Medium",
+        "status": "Completed",
+        "progress_percentage": 100,
+        "estimated_hours": 2,
+        "actual_hours": 2,
+        "is_critical_path": false,
+        "tags": [
+          "ux",
+          "filters"
+        ],
+        "category_name": "Feature",
+        "assigned_workers": [
+          {
+            "name": "Developer",
+            "email": "dev@example.com",
+            "role": "Full Stack Developer"
+          }
+        ],
+        "parent_task_id": null,
+        "creator_id": "system@example.com",
+        "created_date": "2025-12-11T20:00:00Z",
+        "completed_date": "2025-12-11T20:30:00Z",
+        "comments": [],
+        "attachments": [],
+        "dependencies": []
+      },
+      {
+        "task_id": 16,
+        "task_name": "Add Password Protection for Modifications",
+        "description": "Implement a simple password gate for all modification actions (create, edit, delete tasks). Users can view tasks and dashboard freely, but must enter a shared password before making changes. GitHub Pages uses a repo Secret injected at deploy time; local dev is unlocked by default.",
+        "start_date": "2025-12-11",
+        "end_date": "2025-12-12",
+        "priority": "High",
+        "status": "Completed",
+        "progress_percentage": 100,
+        "estimated_hours": 3,
+        "actual_hours": 3,
+        "is_critical_path": true,
+        "tags": [
+          "security",
+          "authentication",
+          "ux"
+        ],
+        "category_name": "Feature",
+        "assigned_workers": [
+          {
+            "name": "Developer",
+            "email": "dev@example.com",
+            "role": "Full Stack Developer"
+          }
+        ],
+        "parent_task_id": null,
+        "creator_id": "system@example.com",
+        "created_date": "2025-12-11T21:00:00Z",
+        "completed_date": "2025-12-12T12:00:00Z",
+        "comments": [],
+        "attachments": [],
+        "dependencies": []
+      },
+      {
+        "task_id": 17,
+        "task_name": "Create Task Timeline Visualization",
+        "description": "Add a visual timeline/Gantt-style view showing tasks on a date axis. Display task start/end dates, status colors, dependencies as connecting lines. Allow toggle between list view and timeline view. Show clear distinction between completed and pending tasks.",
+        "start_date": "2025-12-12",
+        "end_date": "2025-12-13",
+        "priority": "High",
+        "status": "Completed",
+        "progress_percentage": 100,
+        "estimated_hours": 6,
+        "actual_hours": 6,
+        "is_critical_path": true,
+        "tags": [
+          "visualization",
+          "timeline",
+          "dashboard",
+          "ux"
+        ],
+        "category_name": "Feature",
+        "assigned_workers": [
+          {
+            "name": "Developer",
+            "email": "dev@example.com",
+            "role": "Full Stack Developer"
+          }
+        ],
+        "parent_task_id": null,
+        "creator_id": "system@example.com",
+        "created_date": "2025-12-11T21:00:00Z",
+        "completed_date": "2025-12-11T23:10:00Z",
+        "comments": [],
+        "attachments": [],
+        "dependencies": [
+          {
+            "predecessor_task_id": 16,
+            "type": "FS",
+            "lag_days": 0
+          }
+        ]
+      },
+      {
+        "task_id": 18,
+        "task_name": "GitHub Issues Sync",
+        "description": "Two-way sync between tasks and GitHub Issues. Create issues from tasks, import issues as tasks. Keep status synchronized. Show issue number and link on task cards. Use GitHub API to read/write issues.",
+        "start_date": "2025-12-13",
+        "end_date": "2025-12-15",
+        "priority": "High",
+        "status": "Completed",
+        "progress_percentage": 100,
+        "estimated_hours": 8,
+        "actual_hours": 8,
+        "is_critical_path": true,
+        "tags": [
+          "github",
+          "issues",
+          "sync",
+          "integration"
+        ],
+        "category_name": "Feature",
+        "assigned_workers": [
+          {
+            "name": "Developer",
+            "email": "dev@example.com",
+            "role": "Full Stack Developer"
+          }
+        ],
+        "parent_task_id": null,
+        "creator_id": "system@example.com",
+        "created_date": "2025-12-11T21:00:00Z",
+        "completed_date": "2025-12-11T23:25:00Z",
+        "comments": [],
+        "attachments": [],
+        "dependencies": [
+          {
+            "predecessor_task_id": 17,
+            "type": "FS",
+            "lag_days": 0
+          }
+        ]
+      },
+      {
+        "task_id": 19,
+        "task_name": "E2E Tests for New Features",
+        "description": "Create Playwright E2E tests for: 1) Password protection flow (blocked without password, allowed with password), 2) Timeline view rendering and interaction, 3) GitHub Issues sync operations. Test locally before deploying.",
+        "start_date": "2025-12-13",
+        "end_date": "2025-12-14",
+        "priority": "High",
+        "status": "Completed",
+        "progress_percentage": 100,
+        "estimated_hours": 4,
+        "actual_hours": 4,
+        "is_critical_path": false,
+        "tags": [
+          "testing",
+          "playwright",
+          "e2e"
+        ],
+        "category_name": "Testing",
+        "assigned_workers": [
+          {
+            "name": "QA Tester",
+            "email": "qa@example.com",
+            "role": "Quality Assurance"
+          }
+        ],
+        "parent_task_id": null,
+        "creator_id": "system@example.com",
+        "created_date": "2025-12-11T21:00:00Z",
+        "completed_date": "2025-12-11T23:35:00Z",
+        "comments": [],
+        "attachments": [],
+        "dependencies": [
+          {
+            "predecessor_task_id": 16,
+            "type": "SS",
+            "lag_days": 0
+          }
+        ]
+      }
+    ],
+    "Not Started": [
+      {
+        "task_id": 8,
+        "task_name": "Update Documentation & README",
+        "description": "Create comprehensive documentation for public users on how to use the task manager. Include examples of creating tasks, managing dependencies, setting status, and collaborating. Add developer setup guide for GitHub Pages deployment.",
+        "start_date": "2025-12-20",
+        "end_date": "2025-12-22",
+        "priority": "Medium",
+        "status": "Not Started",
+        "progress_percentage": 60,
+        "estimated_hours": 6,
+        "actual_hours": 3,
+        "is_critical_path": false,
+        "tags": [
+          "documentation",
+          "guides",
+          "user-manual"
+        ],
+        "category_name": "Documentation",
+        "assigned_workers": [
+          {
+            "name": "dev@example.com",
+            "email": "dev@example.com",
+            "role": "Collaborator"
+          }
+        ],
+        "parent_task_id": null,
+        "creator_id": "system@example.com",
+        "created_date": "2025-12-10T09:00:00Z",
+        "completed_date": null,
+        "comments": [
+          {
+            "author": "dev@example.com",
+            "timestamp": "2025-12-13T03:00:00Z",
+            "text": "Added contributing guidance on generated task files and workflow; more docs pending."
+          },
+          {
+            "author": "dev@example.com",
+            "timestamp": "2025-12-13T12:00:00Z",
+            "text": "Added CONTRIBUTING.md draft and npm regeneration scripts to package.json."
+          }
+        ],
+        "attachments": [],
+        "dependencies": [
+          {
+            "predecessor_task_id": 6,
+            "type": "FS",
+            "lag_days": 0
+          }
+        ]
+      }
+    ],
+    "In Progress": [
+      {
+        "task_id": 10,
+        "task_name": "Project Retrospective",
+        "description": "Conduct project retrospective to review what went well, what could be improved, and lessons learned. Document findings and create improvement tasks for next iteration.",
+        "start_date": "2025-12-24",
+        "end_date": "2025-12-26",
+        "priority": "Medium",
+        "status": "In Progress",
+        "progress_percentage": 25,
+        "estimated_hours": 4,
+        "actual_hours": 0,
+        "is_critical_path": false,
+        "tags": [
+          "retrospective",
+          "process-improvement",
+          "team"
+        ],
+        "category_name": "Retrospective",
+        "assigned_workers": [
+          {
+            "name": "public@example.com",
+            "email": "public@example.com",
+            "role": "Collaborator"
+          }
+        ],
+        "parent_task_id": null,
+        "creator_id": "system@example.com",
+        "created_date": "2025-12-10T09:00:00Z",
+        "completed_date": null,
+        "comments": [
+          {
+            "author": "dev@example.com",
+            "timestamp": "2025-12-13T03:00:00Z",
+            "text": "Kickoff: captured conflicts and workstream improvements (ignore derived files; rebase workflow)."
+          }
+        ],
+        "attachments": [],
+        "dependencies": [
+          {
+            "predecessor_task_id": 9,
+            "type": "FS",
+            "lag_days": 0
+          }
+        ]
+      }
+    ]
+  }
+}
