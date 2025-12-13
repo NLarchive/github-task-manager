@@ -30,7 +30,7 @@
                 <section class="user-section">
                     <div class="user-info">
                         <label for="userName">Your Name (for task updates):</label>
-                        <input type="text" id="userName" placeholder="Enter your name (optional)" />
+                        <input type="text" id="userName" placeholder="Enter your name (optional)" autocomplete="name" aria-label="Your name for task updates" />
                         <small>Your name will appear when you create or update tasks</small>
                     </div>
                 </section>
@@ -267,7 +267,7 @@
                 <form id="passwordForm" onsubmit="return app.verifyPassword(event)">
                     <div class="form-group">
                         <label for="accessPassword">Password</label>
-                        <input type="password" id="accessPassword" placeholder="Enter password" required autofocus />
+                        <input type="password" id="accessPassword" placeholder="Enter password" required autofocus autocomplete="current-password" />
                     </div>
                     <div id="passwordError" class="validation-messages" style="display: none;"></div>
                         <div id="passwordHelp" style="margin-top: 8px; color: var(--text-secondary); font-size: 0.9em;"></div>
@@ -367,7 +367,7 @@
 
                 <div class="issues-toolbar">
                     <button type="button" class="btn-secondary" onclick="app.refreshHistory()">🔄 Refresh History</button>
-                    <input type="text" id="historyTaskIdFilter" placeholder="Filter by Task ID (optional)" style="flex: 1; min-width: 220px;" />
+                    <input type="text" id="historyTaskIdFilter" placeholder="Filter by Task ID (optional)" style="flex: 1; min-width: 220px;" autocomplete="off" aria-label="Filter history by task ID" />
                     <button type="button" class="btn-primary" onclick="app.applyHistoryFilter()">Apply</button>
                 </div>
 
