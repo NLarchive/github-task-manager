@@ -394,7 +394,18 @@ class TaskDatabase {
       }
 
       // 2) Try local static fetch (same origin) if we're in a browser environment.
-      if (!loadedTasks && typeof fetch === 'function') {
+      // Only do this when the active project is hosted in THIS repo. If the project
+      // points at a different repo (e.g. ai-career-roadmap), prefer raw GitHub reads.
+      const projectCfgForRead = (gh && typeof gh.getProjectConfig === 'function') ? gh.getProjectConfig(projectId) : null;
+      const hostOwner = gh && gh.OWNER ? String(gh.OWNER) : '';
+      const hostRepo = gh && gh.REPO ? String(gh.REPO) : '';
+      const hostBranch = gh && gh.BRANCH ? String(gh.BRANCH) : 'main';
+      const isSameRepoAsHost = !!(projectCfgForRead && hostOwner && hostRepo &&
+        String(projectCfgForRead.owner || '') === hostOwner &&
+        String(projectCfgForRead.repo || '') === hostRepo &&
+        String(projectCfgForRead.branch || '') === hostBranch);
+
+      if (!loadedTasks && isSameRepoAsHost && typeof fetch === 'function') {
         try {
           const basePath = (gh && gh.BASE_PATH) ? String(gh.BASE_PATH) : '';
           const localPath = String(tasksFile || '').replace(/^public\//i, '');
