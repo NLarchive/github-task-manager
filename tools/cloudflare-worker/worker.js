@@ -32,6 +32,20 @@ const ALLOWED_PATHS = [
   /^(?:public\/)?tasksDB\/[a-zA-Z0-9_-]+\/history\/[a-zA-Z0-9_-]+\.ndjson$/
 ];
 
+function getTokenForProject(projectId, env) {
+  const id = safeProjectId(projectId);
+  if (!env) return '';
+
+  // Preferred: per-project secret token, e.g. GITHUB_TOKEN_AI_CAREER_ROADMAP
+  const perKey = `GITHUB_TOKEN_${id.toUpperCase().replace(/-/g, '_')}`;
+  const per = env[perKey];
+  if (per && String(per).trim()) return String(per).trim();
+
+  // Fallback: shared token for all projects
+  const shared = env.GITHUB_TOKEN;
+  return shared && String(shared).trim() ? String(shared).trim() : '';
+}
+
 function safeProjectId(value) {
   return String(value || '').trim().replace(/[^a-zA-Z0-9_-]/g, '');
 }
@@ -236,9 +250,6 @@ async function appendNdjsonEvents(projectId, token, events, env) {
 
 async function handleGetTaskHistory(request, env, origin) {
   try {
-    const token = env.GITHUB_TOKEN;
-    if (!token) return jsonResponse({ error: 'GitHub token not configured' }, origin, 500);
-
     const url = new URL(request.url);
     const projectId = (url.searchParams.get('project') || '').trim().replace(/[^a-zA-Z0-9_-]/g, '');
     const taskId = (url.searchParams.get('taskId') || '').trim();
@@ -247,6 +258,9 @@ async function handleGetTaskHistory(request, env, origin) {
 
     const cfg = getProjectConfig(projectId, env);
     if (!cfg) return jsonResponse({ error: `Unknown project: ${projectId}` }, origin, 400);
+
+    const token = getTokenForProject(projectId, env);
+    if (!token) return jsonResponse({ error: 'GitHub token not configured' }, origin, 500);
 
     const historyPath = `${cfg.tasksRoot}/${cfg.id}/history/changes.ndjson`;
     const existing = await getFileContentAndShaForRepo(cfg, historyPath, token);
@@ -315,7 +329,7 @@ async function handleTasksUpdate(request, env, origin) {
     }
 
     // Get current file SHA (needed for update)
-    const token = env.GITHUB_TOKEN;
+    const token = getTokenForProject(projectId, env);
     if (!token) {
       return jsonResponse({ error: 'GitHub token not configured' }, origin, 500);
     }
