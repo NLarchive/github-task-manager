@@ -565,6 +565,18 @@ Contributions welcome! To contribute:
 6. Push to branch (`git push origin feature/amazing-feature`)
 7. Open a Pull Request
 
+### Avoiding Conflicts on Generated Task Files
+
+When working on system code, the repository stores both the canonical `tasks.json` and a few derived/state files (CSV exports and `state/` JSON files). These derived files are often regenerated and can cause merge conflicts when multiple contributors update them. Follow these best practices to avoid conflicts:
+
+- **Don't commit derived files**: Avoid committing `public/tasksDB/*/state/*` and `public/tasksDB/*/tasks.csv` — they're generated from `tasks.json`.
+- **Rebase before starting work**: Run `git fetch && git rebase origin/main` before making changes.
+- **Only commit `tasks.json`**: Treat `tasks.json` as the single source of truth for task data.
+- **Use `git rerere` to speed conflict resolution**: Enable it with `git config --global rerere.enabled true`.
+- **If you must update derived files**: Regenerate them using the repo's tooling (such as the CSV/state generation scripts in `tools/scripts`) and commit only when necessary.
+
+These changes are enabled by updating `.gitignore` so generated state files are no longer tracked by default. If you see a conflict for these files, rebase and ensure you didn't accidentally check them in.
+
 ## Roadmap 🗺️
 
 ### Current Phase (Sprint 1) ✅ COMPLETE

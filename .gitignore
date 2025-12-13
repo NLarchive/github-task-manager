@@ -44,6 +44,11 @@ tools/**/.wrangler/
 playwright-report/
 test-results/
 .playwright-mcp/
+ 
+# Ignore derived task state and CSV files to avoid merge conflicts
+public/tasksDB/*/state/
+public/tasksDB/*/state/**
+public/tasksDB/*/tasks.csv
 
 
 
