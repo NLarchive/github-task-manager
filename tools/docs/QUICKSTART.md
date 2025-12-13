@@ -1,27 +1,30 @@
-# Quick Start: Enable GitHub Pages
+# Quick Start: GitHub Task Manager
 
-## ⚡ 2-Minute Setup
+## 🚀 3-Minute Setup
 
-### 1. Go to Settings
-📍 https://github.com/NLarchive/github-task-manager/settings
+### 1. Enable GitHub Pages
 
-### 2. Find "Pages" Section
-Scroll down to **Pages** and look for "Build and deployment"
+- **Repo Settings** → **Pages**
+- Set Source: `GitHub Actions`
+- Save
 
-### 3. Change Source
-**Current**: "Deploy from a branch"  
-**Change to**: "GitHub Actions"
+### 2. Add Repository Secret
 
-### 4. Add Secret
-📍 https://github.com/NLarchive/github-task-manager/settings/secrets/actions
+- **Settings** → **Secrets and variables** → **Actions**
+- Click **New repository secret**
+- Name: `TASK_MANAGER_TOKEN`
+- Value: [GitHub PAT with `repo` scope](https://github.com/settings/tokens/new)
+- Click **Add secret**
 
-- Click **"New repository secret"**
-- **Name**: `TASK_MANAGER_TOKEN`
-- **Value**: [Your GitHub PAT with repo + pages scope]
-- Click **"Add secret"**
+### 3. Deploy
 
-### 5. Done! 
-Site will be live at: https://nlarchive.github.io/github-task-manager/
+- Push code or manually trigger workflow in **Actions** tab
+- Wait 1-2 minutes for deployment
+
+### 4. Visit
+
+- **Live Site**: https://nlarchive.github.io/github-task-manager/
+- **Diagnostics**: https://nlarchive.github.io/github-task-manager/health-check.html
 
 ---
 

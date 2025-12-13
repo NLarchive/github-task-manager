@@ -1,10 +1,40 @@
-// Template Validation Configuration
-// Based on TEMPLATE_VALIDATION_GUIDE.md and starter_project_template.json
+/**
+ * Template Validation Configuration
+ * 
+ * This configuration defines:
+ * - ENUM values for valid task status, priority, dependency types
+ * - Required and optional fields for validation
+ * - Default values for new tasks
+ * - Validation patterns (date, email, task ID)
+ * - GitHub configuration for multi-project support
+ * 
+ * Validation Rules (from TEMPLATE_VALIDATION_GUIDE.md):
+ * - Task Status: "Not Started", "In Progress", "On Hold", "Blocked", "Completed", "Cancelled", "Pending Review"
+ * - Priority: "Low", "Medium", "High", "Critical"
+ * - Dates: ISO 8601 format (YYYY-MM-DD)
+ * - Task ID: Must be unique positive integer within project
+ * - Task Name: Must be unique within project
+ * - Dependencies: Reference other tasks by ID or name; use Finish-to-Start (FS), Start-to-Start (SS), etc.
+ * 
+ * See template-validator.js for validation logic
+ */
 
 const TEMPLATE_CONFIG = {
   version: "1.3",
   template_type: "project_task_template",
 
+  /**
+   * Field Categories for Form Generation
+   * 
+   * AUTOMATIC: System generates these; user doesn't input
+   * - task_id: Auto-incremented ID
+   * - created_date: ISO timestamp when created
+   * - creator_id: Email/ID of user who created
+   * - completed_date: ISO timestamp when marked complete
+   * 
+   * REQUIRED_INPUT: User must fill these
+   * OPTIONAL_INPUT: User can fill these
+   */
   // Field Categories for Form Generation
   FIELD_CATEGORIES: {
     // Fields that are automatically generated - user doesn't input these
