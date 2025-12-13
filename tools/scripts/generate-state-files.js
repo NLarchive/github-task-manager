@@ -1,3 +1,10 @@
+/**
+ * generate-state-files.js
+ * -----------------------
+ * Generates derived state JSON files from public/tasksDB/<project>/tasks.json
+ * Output: public/tasksDB/<project>/state/*.json
+ * Usage: node tools/scripts/generate-state-files.js <projectId>
+ */
 const fs = require('fs');
 const path = require('path');
 

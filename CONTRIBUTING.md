@@ -73,6 +73,12 @@ npm run tasks:regenerate-csv
 
 **Note**: These files are not committed; they're ignored by `.gitignore`. The live site regenerates them during deploy via CI.
 
+### Writes, Tokens, and Security
+
+- Do **not** ship a repo write token to GitHub Pages. Anything under `public/` is publicly downloadable.
+- Preferred write path for the live site is **Cloudflare Worker mode**, where the token stays server-side.
+- For local development only, you may provide a fine-grained token in `public/config/github-token.local.js` (gitignored), or run the local dev server (`npm start`) to persist to disk via `/api/tasks`.
+
 ### 4. Testing Locally
 
 #### View generated files (without committing them):

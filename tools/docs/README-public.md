@@ -1,16 +1,27 @@
 # GitHub Task Manager
 
-A modern, GitHub Pages-hosted task management application that uses professional project templates for validation and automation.
+A lightweight task manager for GitHub Pages with template-driven validation and automation.
 
-## 🚀 Features
+## Key Features
+- Template-based validation and automation
+- GitHub-backed storage (`tasks.json`) and CSV export
+- Simple, dependency-free static deployment to GitHub Pages
+- Playwright-based UI automation for updating tasks via the web UI
 
-- **Template-Based Validation**: Uses comprehensive project templates to validate task data
-- **Automated Task Creation**: Auto-generates IDs, sets defaults, and validates dependencies
-- **GitHub Integration**: All tasks stored in your GitHub repository as JSON/CSV
-- **Component Architecture**: Modular, maintainable codebase organized by functionality
-- **Professional Templates**: Pre-built templates with dependencies, critical paths, and best practices
-- **Real-time Validation**: Client-side validation with detailed error messages
-- **CSV Import/Export**: Full compatibility with spreadsheet tools
+## Quick Commands
+- Regenerate state and CSV locally:
+  ```bash
+  npm run tasks:regenerate-all
+  ```
+- Start a local static server:
+  ```bash
+  cd public
+  npx http-server -p 8000
+  ```
+- Run Playwright tests:
+  ```bash
+  npx playwright test tests/e2e/update-task-via-ui.spec.js --headed
+  ```
 
 ## 📁 Project Structure
 
@@ -40,21 +51,18 @@ task-templates/
 
 ### 1. GitHub Repository Setup
 
-1. Create a new repository on GitHub (or use existing)
-2. Enable GitHub Pages in repository settings
-3. Copy all files from this project to your repository
+1. Create a repository (or use an existing one)
+2. Enable GitHub Pages
+3. Deploy the `public/` folder
 
-### 2. Personal Access Token
+### 2. Configuration Model
 
-1. Go to GitHub Settings → Developer settings → Personal access tokens
-2. Create token with `repo` scope
-3. Copy the token (keep it secure!)
+The app is configured via `public/config/template-config.js` (repo owner/name/branch, projects list, tasks file path helper, etc.).
 
-### 3. Configuration
+For writes, do **not** ship a repo write token to the browser. Use one of:
 
-1. Open your GitHub Pages URL
-2. Enter repository details and token
-3. Click "Connect"
+- **Cloudflare Worker mode (recommended)**: configure a Worker URL and keep the write token server-side.
+- **Local development token**: provide your own token via `public/config/github-token.local.js` (gitignored).
 
 ## 📋 Template Validation System
 
@@ -203,10 +211,9 @@ task_id,task_name,description,start_date,end_date,priority,status,progress_perce
 ## 🔒 Security & Best Practices
 
 ### Token Security:
-- Never commit tokens to repository
-- Use tokens with minimal required scopes
-- Rotate tokens regularly
-- Store locally in browser only
+- Never commit tokens to repository.
+- Never inject a repo write token into GitHub Pages (everything under `public/` is public).
+- Prefer Worker-based writes where the token stays server-side.
 
 ### Data Validation:
 - All data validated client-side before GitHub API calls

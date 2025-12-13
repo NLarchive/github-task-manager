@@ -123,9 +123,16 @@ class TaskDatabase {
     try {
       const templateConfig = resolveTemplateConfig();
       const gh = (templateConfig && templateConfig.GITHUB) ? templateConfig.GITHUB : null;
-      const owner = gh && gh.OWNER ? String(gh.OWNER) : '';
-      const repo = gh && gh.REPO ? String(gh.REPO) : '';
-      const branch = gh && gh.BRANCH ? String(gh.BRANCH) : 'main';
+      const projectCfg = (gh && typeof gh.getProjectConfig === 'function') ? gh.getProjectConfig(projectId) : null;
+      const owner = (this.githubApi && this.githubApi.config && this.githubApi.config.owner)
+        ? String(this.githubApi.config.owner)
+        : (projectCfg && projectCfg.owner ? String(projectCfg.owner) : (gh && gh.OWNER ? String(gh.OWNER) : ''));
+      const repo = (this.githubApi && this.githubApi.config && this.githubApi.config.repo)
+        ? String(this.githubApi.config.repo)
+        : (projectCfg && projectCfg.repo ? String(projectCfg.repo) : (gh && gh.REPO ? String(gh.REPO) : ''));
+      const branch = (this.githubApi && this.githubApi.config && this.githubApi.config.branch)
+        ? String(this.githubApi.config.branch)
+        : (projectCfg && projectCfg.branch ? String(projectCfg.branch) : (gh && gh.BRANCH ? String(gh.BRANCH) : 'main'));
       if (!owner || !repo) return;
 
       const rawEvents = this.diffTasksForHistory(beforeTasks, afterTasks);
@@ -160,7 +167,8 @@ class TaskDatabase {
         };
       });
 
-      const historyPath = `public/tasksDB/${projectId}/history/changes.ndjson`;
+      const baseDir = String(tasksFile || '').replace(/\/[^\/]+$/g, '');
+      const historyPath = `${baseDir}/history/changes.ndjson`;
       const rawUrl = `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/${historyPath}`;
 
       let existing = '';
@@ -358,8 +366,14 @@ class TaskDatabase {
   async loadTasks() {
     try {
       let loadedTasks = null;
+      const templateConfig = resolveTemplateConfig();
+      const gh = (templateConfig && templateConfig.GITHUB) ? templateConfig.GITHUB : null;
+      const projectId = resolveActiveProjectId();
+      const tasksFile = (gh && typeof gh.getTasksFile === 'function')
+        ? gh.getTasksFile(projectId)
+        : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/github-task-manager/tasks.json');
 
-      // Try to load from localStorage first (local development)
+      // 1) Try to load from localStorage first (local development)
       if (typeof window !== 'undefined' && window.localStorage) {
         try {
           const storageKey = getProjectScopedStorageKey();
@@ -371,7 +385,7 @@ class TaskDatabase {
               this.categories = storageData.json.categories || this.categories;
               this.workers = storageData.json.workers || this.workers;
               loadedTasks = storageData.json.tasks;
-              console.log('Loaded', loadedTasks.length, 'tasks from localStorage (project:', resolveActiveProjectId(), ', last saved:', storageData.lastSaved, ')');
+              console.log('Loaded', loadedTasks.length, 'tasks from localStorage (project:', projectId, ', last saved:', storageData.lastSaved, ')');
             }
           }
         } catch (storageError) {
@@ -379,59 +393,73 @@ class TaskDatabase {
         }
       }
 
-      // If no localStorage data, try GitHub API
-      if (!loadedTasks) {
+      // 2) Try local static fetch (same origin) if we're in a browser environment.
+      if (!loadedTasks && typeof fetch === 'function') {
         try {
-          if (hasValidGitHubToken()) {
-            const templateConfig = resolveTemplateConfig();
-            const gh = (templateConfig && templateConfig.GITHUB) ? templateConfig.GITHUB : null;
-            const tasksFile = (gh && typeof gh.getTasksFile === 'function')
-              ? gh.getTasksFile(resolveActiveProjectId())
-              : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/github-task-manager/tasks.json');
-            console.log('Loading tasks from GitHub API with file path:', tasksFile);
-            const { content } = await this.githubApi.getFileContent(tasksFile);
-            const data = JSON.parse(content || '{}');
-            loadedTasks = data.tasks || (Array.isArray(data) ? data : []);
-            console.log('Successfully loaded', loadedTasks.length, 'tasks from GitHub API');
-          } else {
-            console.log('No valid GitHub token, skipping GitHub API load');
-          }
-        } catch (apiError) {
-          console.warn('GitHub API failed:', apiError.message);
-        }
-      }
-
-      // If GitHub API failed, try local static file
-      if (!loadedTasks) {
-        try {
-          const templateConfig = resolveTemplateConfig();
-          const basePath = (templateConfig && templateConfig.GITHUB && templateConfig.GITHUB.BASE_PATH)
-            ? templateConfig.GITHUB.BASE_PATH
-            : '';
-          const gh = (templateConfig && templateConfig.GITHUB) ? templateConfig.GITHUB : null;
-          let tasksFile = (gh && typeof gh.getTasksFile === 'function')
-            ? gh.getTasksFile(resolveActiveProjectId())
-            : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/github-task-manager/tasks.json');
-          
-          // For local fetch, strip 'public/' prefix since /public is the root
-          tasksFile = tasksFile.replace(/^public\//i, '');
-          
-          const fetchUrl = basePath ? `${basePath}/${tasksFile}` : `/${tasksFile}`;
+          const basePath = (gh && gh.BASE_PATH) ? String(gh.BASE_PATH) : '';
+          const localPath = String(tasksFile || '').replace(/^public\//i, '');
+          const fetchUrl = basePath ? `${basePath}/${localPath}` : `/${localPath}`;
           console.log('Attempting local fetch from URL:', fetchUrl);
+
           const response = await fetch(fetchUrl);
-          if (response.ok) {
+          if (response && response.ok) {
             const data = await response.json();
             this.currentProject = data.project || this.currentProject;
             this.categories = data.categories || this.categories;
             this.workers = data.workers || this.workers;
             loadedTasks = data.tasks || (Array.isArray(data) ? data : []);
             console.log('Successfully loaded', loadedTasks.length, 'tasks from local file');
-          } else {
-            console.warn('Local tasks file not found (404), using empty array');
-            loadedTasks = [];
           }
         } catch (fetchError) {
-          console.error('Failed to load local tasks.json:', fetchError);
+          console.warn('Local fetch failed, will try remote sources:', fetchError && fetchError.message ? fetchError.message : fetchError);
+        }
+      }
+
+      // 3) If tasks live in another repo (or local file not present), try raw.githubusercontent.com (public read)
+      if (!loadedTasks && typeof fetch === 'function') {
+        try {
+          const projectCfg = (gh && typeof gh.getProjectConfig === 'function') ? gh.getProjectConfig(projectId) : null;
+          const owner = (this.githubApi && this.githubApi.config && this.githubApi.config.owner)
+            ? String(this.githubApi.config.owner)
+            : (projectCfg && projectCfg.owner ? String(projectCfg.owner) : (gh && gh.OWNER ? String(gh.OWNER) : ''));
+          const repo = (this.githubApi && this.githubApi.config && this.githubApi.config.repo)
+            ? String(this.githubApi.config.repo)
+            : (projectCfg && projectCfg.repo ? String(projectCfg.repo) : (gh && gh.REPO ? String(gh.REPO) : ''));
+          const branch = (this.githubApi && this.githubApi.config && this.githubApi.config.branch)
+            ? String(this.githubApi.config.branch)
+            : (projectCfg && projectCfg.branch ? String(projectCfg.branch) : (gh && gh.BRANCH ? String(gh.BRANCH) : 'main'));
+
+          if (owner && repo && branch && tasksFile) {
+            const rawUrl = `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/${String(tasksFile)}`;
+            console.log('Attempting raw GitHub fetch:', rawUrl);
+            const res = await fetch(rawUrl, { cache: 'no-store' });
+            if (res && res.ok) {
+              const data = await res.json();
+              this.currentProject = data.project || this.currentProject;
+              this.categories = data.categories || this.categories;
+              this.workers = data.workers || this.workers;
+              loadedTasks = data.tasks || (Array.isArray(data) ? data : []);
+              console.log('Successfully loaded', loadedTasks.length, 'tasks from raw GitHub');
+            }
+          }
+        } catch (rawError) {
+          console.warn('Raw GitHub fetch failed:', rawError && rawError.message ? rawError.message : rawError);
+        }
+      }
+
+      // 4) Last resort: try GitHub API (works for public repos without a token but is rate-limited)
+      if (!loadedTasks) {
+        try {
+          console.log('Attempting GitHub API read with file path:', tasksFile);
+          const { content } = await this.githubApi.getFileContent(tasksFile);
+          const data = JSON.parse(content || '{}');
+          this.currentProject = data.project || this.currentProject;
+          this.categories = data.categories || this.categories;
+          this.workers = data.workers || this.workers;
+          loadedTasks = data.tasks || (Array.isArray(data) ? data : []);
+          console.log('Successfully loaded', loadedTasks.length, 'tasks from GitHub API');
+        } catch (apiError) {
+          console.warn('GitHub API failed:', apiError && apiError.message ? apiError.message : apiError);
           loadedTasks = [];
         }
       }

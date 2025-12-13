@@ -1,40 +1,10 @@
-/**
- * Template Validation Configuration
- * 
- * This configuration defines:
- * - ENUM values for valid task status, priority, dependency types
- * - Required and optional fields for validation
- * - Default values for new tasks
- * - Validation patterns (date, email, task ID)
- * - GitHub configuration for multi-project support
- * 
- * Validation Rules (from TEMPLATE_VALIDATION_GUIDE.md):
- * - Task Status: "Not Started", "In Progress", "On Hold", "Blocked", "Completed", "Cancelled", "Pending Review"
- * - Priority: "Low", "Medium", "High", "Critical"
- * - Dates: ISO 8601 format (YYYY-MM-DD)
- * - Task ID: Must be unique positive integer within project
- * - Task Name: Must be unique within project
- * - Dependencies: Reference other tasks by ID or name; use Finish-to-Start (FS), Start-to-Start (SS), etc.
- * 
- * See template-validator.js for validation logic
- */
+// Template Validation Configuration
+// Based on TEMPLATE_VALIDATION_GUIDE.md and starter_project_template.json
 
 const TEMPLATE_CONFIG = {
   version: "1.3",
   template_type: "project_task_template",
 
-  /**
-   * Field Categories for Form Generation
-   * 
-   * AUTOMATIC: System generates these; user doesn't input
-   * - task_id: Auto-incremented ID
-   * - created_date: ISO timestamp when created
-   * - creator_id: Email/ID of user who created
-   * - completed_date: ISO timestamp when marked complete
-   * 
-   * REQUIRED_INPUT: User must fill these
-   * OPTIONAL_INPUT: User can fill these
-   */
   // Field Categories for Form Generation
   FIELD_CATEGORIES: {
     // Fields that are automatically generated - user doesn't input these
@@ -226,7 +196,7 @@ const TEMPLATE_CONFIG = {
   // GitHub Configuration (Pre-configured for public collaboration)
   // For NLarchive/github-task-manager repository
   GITHUB: {
-    // Owner and repo are fixed for this deployment
+    // Default repo (used when a project does not override it)
     OWNER: 'nlarchive',
     REPO: 'github-task-manager',
     // Token is loaded from github-token.js (gitignored) or environment
@@ -239,19 +209,52 @@ const TEMPLATE_CONFIG = {
     // When set, all writes go through the worker which validates ACCESS_PASSWORD and restricts paths
     WORKER_URL: (typeof GH_WORKER_URL !== 'undefined' ? GH_WORKER_URL : ''),
     // Multi-project TasksDB
-    // Each project lives under: public/tasksDB/<projectId>/{tasks.json,tasks.csv,state/,history/}
+    // NOTE: Different projects may live in different repositories and may use different roots.
+    // - github-task-manager repo: public/tasksDB/<projectId>/...
+    // - ai-career-roadmap repo: tasksDB/<projectId>/...
+    // TASKS_ROOT is the default root when a project does not specify its own.
     TASKS_ROOT: 'public/tasksDB',
     DEFAULT_PROJECT_ID: 'github-task-manager',
     // App can set this at runtime (UI selector). If empty, DEFAULT_PROJECT_ID is used.
     ACTIVE_PROJECT_ID: '',
     PROJECTS: [
-      { id: 'github-task-manager', label: 'GitHub Task Manager' },
-      { id: 'ai-career-roadmap', label: 'AI Career Roadmap (learn.deeplearning.ai)' }
+      {
+        id: 'github-task-manager',
+        label: 'GitHub Task Manager',
+        owner: 'nlarchive',
+        repo: 'github-task-manager',
+        branch: 'main',
+        tasksRoot: 'public/tasksDB'
+      },
+      {
+        id: 'ai-career-roadmap',
+        label: 'AI Career Roadmap (learn.deeplearning.ai)',
+        owner: 'nlarchive',
+        repo: 'ai-career-roadmap',
+        branch: 'main',
+        tasksRoot: 'tasksDB'
+      }
     ],
-    getTasksFile(projectId) {
+
+    getProjectConfig(projectId) {
       const id = (projectId || this.ACTIVE_PROJECT_ID || this.DEFAULT_PROJECT_ID || '').trim();
-      const safeId = id.replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
-      return `${this.TASKS_ROOT}/${safeId}/tasks.json`;
+      const safeId = id.replace(/[^a-zA-Z0-9_-]/g, '') || this.DEFAULT_PROJECT_ID || 'github-task-manager';
+      const projects = Array.isArray(this.PROJECTS) ? this.PROJECTS : [];
+      const match = projects.find(p => p && p.id === safeId) || null;
+
+      return {
+        id: safeId,
+        owner: (match && match.owner) ? String(match.owner) : String(this.OWNER || ''),
+        repo: (match && match.repo) ? String(match.repo) : String(this.REPO || ''),
+        branch: (match && match.branch) ? String(match.branch) : String(this.BRANCH || 'main'),
+        tasksRoot: (match && match.tasksRoot) ? String(match.tasksRoot) : String(this.TASKS_ROOT || 'public/tasksDB')
+      };
+    },
+
+    getTasksFile(projectId) {
+      const cfg = this.getProjectConfig(projectId);
+      const root = String(cfg.tasksRoot || this.TASKS_ROOT || 'public/tasksDB').replace(/\/+$/g, '');
+      return `${root}/${cfg.id}/tasks.json`;
     },
     // Default tasks file (app may override at runtime)
     TASKS_FILE: 'public/tasksDB/github-task-manager/tasks.json',

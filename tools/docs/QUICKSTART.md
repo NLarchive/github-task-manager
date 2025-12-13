@@ -1,30 +1,64 @@
-# Quick Start: GitHub Task Manager
+# Quickstart — GitHub Task Manager
 
-## 🚀 3-Minute Setup
+This quickstart gets you running locally and enables GitHub Pages deployment with minimal steps.
 
-### 1. Enable GitHub Pages
+## Local Development
+1. Clone repository:
+   ```bash
+   git clone https://github.com/nlarchive/github-task-manager.git
+   cd github-task-manager
+   ```
+2. Regenerate derived files:
+   ```bash
+   npm run tasks:regenerate-all
+   ```
+3. Serve the `public/` directory:
+   ```bash
+   cd public
+   npx http-server -p 8000
+   # or python -m http.server 8000
+   ```
+4. Visit: http://localhost:8000
 
-- **Repo Settings** → **Pages**
-- Set Source: `GitHub Actions`
-- Save
+## Enable GitHub Pages
+1. Settings → Pages → Build and deployment → Source: **GitHub Actions**
+2. Add SECRET: `TASK_MANAGER_TOKEN` (PAT with `repo` + `pages` scopes)
+3. Push to `main` to trigger deploy
 
-### 2. Add Repository Secret
+## Quick Tests
+- Run unit tests:
+  ```bash
+  npm test
+  ```
+- Run Playwright E2E:
+  ```bash
+  npx playwright test
+  ```
 
-- **Settings** → **Secrets and variables** → **Actions**
-- Click **New repository secret**
-- Name: `TASK_MANAGER_TOKEN`
-- Value: [GitHub PAT with `repo` scope](https://github.com/settings/tokens/new)
-- Click **Add secret**
 
-### 3. Deploy
 
-- Push code or manually trigger workflow in **Actions** tab
-- Wait 1-2 minutes for deployment
+## ⚡ 2-Minute Setup
 
-### 4. Visit
+### 1. Go to Settings
+📍 https://github.com/NLarchive/github-task-manager/settings
 
-- **Live Site**: https://nlarchive.github.io/github-task-manager/
-- **Diagnostics**: https://nlarchive.github.io/github-task-manager/health-check.html
+### 2. Find "Pages" Section
+Scroll down to **Pages** and look for "Build and deployment"
+
+### 3. Change Source
+**Current**: "Deploy from a branch"  
+**Change to**: "GitHub Actions"
+
+### 4. Add Secret
+📍 https://github.com/NLarchive/github-task-manager/settings/secrets/actions
+
+- Click **"New repository secret"**
+- **Name**: `TASK_MANAGER_TOKEN`
+- **Value**: [Your GitHub PAT with repo + pages scope]
+- Click **"Add secret"**
+
+### 5. Done! 
+Site will be live at: https://nlarchive.github.io/github-task-manager/
 
 ---
 

@@ -1,3 +1,10 @@
+/**
+ * regenerate-tasks-csv.js
+ * ------------------------
+ * Generates a flattened CSV export from public/tasksDB/<project>/tasks.json
+ * Output: public/tasksDB/<project>/tasks.csv
+ * Usage: node tools/scripts/regenerate-tasks-csv.js <projectId>
+ */
 const fs = require('fs');
 const path = require('path');
 

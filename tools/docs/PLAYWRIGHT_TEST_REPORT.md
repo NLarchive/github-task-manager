@@ -1,4 +1,36 @@
-# Playwright Test Report - GitHub Task Manager
+# Playwright Test Report — GitHub Task Manager
+
+Date: 2025-12-10
+Base URL: https://nlarchive.github.io/github-task-manager/
+Browser: Playwright (Chromium)
+
+## Executive Summary
+- All major scenarios (Create/Read/Update) are functional.
+- Minor issue discovered: Delete action shows a "Task not found" error in some cases.
+
+## How to Reproduce Locally
+1. Run a local server:
+   ```bash
+   cd public
+   npx http-server -p 8000
+   # or python -m http.server 8000
+   ```
+2. Run Playwright test suite (example):
+   ```bash
+   npx playwright test tests/e2e/update-task-via-ui.spec.js --headed
+   ```
+
+## Quick Results
+- Create Task: Passed - Task persisted and next sequential ID assigned
+- Edit Task: Passed - field updates persisted
+- Refresh/Reload: Passed - Tasks reloaded from GitHub
+- Delete Task: Partial - delete displayed an error for the created task; investigate `deleteTask` logic
+
+## Recommendations
+- Add a unit test for `deleteTask`
+- Expand Playwright coverage for edit and delete workflows
+- Keep regeneration scripts and CI in place to prevent stale derived files
+
 
 **Test Date**: December 10, 2025  
 **URL Tested**: https://nlarchive.github.io/github-task-manager/  

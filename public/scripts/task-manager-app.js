@@ -48,6 +48,7 @@ class TaskManagerApp {
             this.database = new TaskDatabase(this.githubApi, this.validator, this.automation);
             await this.showTaskManager();
             await this.loadTasks();
+            this.refreshCategoryOptions();
         } else {
             console.error('GitHub configuration missing. Please check TEMPLATE_CONFIG.GITHUB settings.');
             this.showConfigError();
@@ -71,15 +72,25 @@ class TaskManagerApp {
 
         // Persist to global config so TaskDatabase can resolve it
         templateConfig.GITHUB.ACTIVE_PROJECT_ID = safeProject;
+        const projCfg = (typeof templateConfig.GITHUB.getProjectConfig === 'function')
+            ? templateConfig.GITHUB.getProjectConfig(safeProject)
+            : {
+                id: safeProject,
+                owner: templateConfig.GITHUB.OWNER,
+                repo: templateConfig.GITHUB.REPO,
+                branch: templateConfig.GITHUB.BRANCH,
+                tasksRoot: templateConfig.GITHUB.TASKS_ROOT
+            };
+
         if (typeof templateConfig.GITHUB.getTasksFile === 'function') {
             templateConfig.GITHUB.TASKS_FILE = templateConfig.GITHUB.getTasksFile(safeProject);
         }
 
         this.config = {
-            owner: templateConfig.GITHUB.OWNER,
-            repo: templateConfig.GITHUB.REPO,
+            owner: projCfg.owner,
+            repo: projCfg.repo,
             token: templateConfig.GITHUB.TOKEN,
-            branch: templateConfig.GITHUB.BRANCH,
+            branch: projCfg.branch,
             tasksFile: templateConfig.GITHUB.TASKS_FILE
         };
 
@@ -137,19 +148,104 @@ class TaskManagerApp {
         localStorage.setItem('taskManagerActiveProject', safeProject);
 
         templateConfig.GITHUB.ACTIVE_PROJECT_ID = safeProject;
+        const projCfg = (typeof templateConfig.GITHUB.getProjectConfig === 'function')
+            ? templateConfig.GITHUB.getProjectConfig(safeProject)
+            : {
+                id: safeProject,
+                owner: templateConfig.GITHUB.OWNER,
+                repo: templateConfig.GITHUB.REPO,
+                branch: templateConfig.GITHUB.BRANCH,
+                tasksRoot: templateConfig.GITHUB.TASKS_ROOT
+            };
         if (typeof templateConfig.GITHUB.getTasksFile === 'function') {
             templateConfig.GITHUB.TASKS_FILE = templateConfig.GITHUB.getTasksFile(safeProject);
         }
 
         // Keep app config in sync
         if (this.config) {
+            this.config.owner = projCfg.owner;
+            this.config.repo = projCfg.repo;
+            this.config.branch = projCfg.branch;
             this.config.tasksFile = templateConfig.GITHUB.TASKS_FILE;
+        }
+
+        // Keep GitHub API + DB wired to the active repo
+        if (this.githubApi) {
+            this.githubApi.config = this.config;
+        }
+        if (this.database) {
+            this.database.githubApi = this.githubApi;
         }
 
         // Reload tasks for the newly selected project
         this.showToast(`Switched project to: ${safeProject}`, 'info');
         this.updateAccessIndicator();
         await this.loadTasks();
+        this.refreshCategoryOptions();
+    }
+
+    getAvailableCategoryNames() {
+        // Preferred source: per-project categories loaded from tasks.json
+        const fromDb = (this.database && Array.isArray(this.database.categories))
+            ? this.database.categories
+                .map(c => (c && typeof c.name === 'string' ? c.name.trim() : ''))
+                .filter(Boolean)
+            : [];
+        if (fromDb.length > 0) return fromDb;
+
+        // Fallback: global template config categories (strings)
+        try {
+            const templateConfig = (typeof window !== 'undefined' && window.TEMPLATE_CONFIG) ? window.TEMPLATE_CONFIG : (typeof TEMPLATE_CONFIG !== 'undefined' ? TEMPLATE_CONFIG : null);
+            const fromConfig = templateConfig && Array.isArray(templateConfig.CATEGORIES)
+                ? templateConfig.CATEGORIES.map(n => String(n || '').trim()).filter(Boolean)
+                : [];
+            if (fromConfig.length > 0) return fromConfig;
+        } catch {
+            // ignore
+        }
+
+        // Last resort: keep any existing <option> values already in the DOM
+        const select = document.getElementById('taskCategory');
+        if (!select) return [];
+        const existing = Array.from(select.querySelectorAll('option'))
+            .map(o => (o && typeof o.value === 'string' ? o.value.trim() : ''))
+            .filter(Boolean);
+        return existing;
+    }
+
+    refreshCategoryOptions({ preserveValue = true } = {}) {
+        const select = document.getElementById('taskCategory');
+        if (!select) return;
+
+        const currentValue = preserveValue ? (select.value || '') : '';
+        const names = this.getAvailableCategoryNames();
+
+        // Rebuild options (placeholder + category list)
+        select.innerHTML = '';
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = 'Select Category';
+        select.appendChild(placeholder);
+
+        const unique = Array.from(new Set(names));
+        for (const name of unique) {
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            select.appendChild(opt);
+        }
+
+        // Restore selection if it still exists
+        if (currentValue && unique.includes(currentValue)) {
+            select.value = currentValue;
+            return;
+        }
+
+        // If no selection, choose a sensible default when possible
+        if (!select.value && unique.length > 0) {
+            // Prefer "Feature" when present, else first category
+            select.value = unique.includes('Feature') ? 'Feature' : unique[0];
+        }
     }
 
     getProjectAuthKey(projectId) {
@@ -334,22 +430,48 @@ class TaskManagerApp {
         const errorDiv = document.getElementById('passwordError');
         const enteredPassword = (passwordInput.value || '').trim();
         const accessConfig = this.getAccessConfig();
-        const configuredPassword = (accessConfig.PASSWORD || '').trim();
 
-        if (!configuredPassword) {
+        // Accept either per-project password OR master password (and legacy ACCESS_PASSWORD)
+        const templateConfig = window.TEMPLATE_CONFIG || TEMPLATE_CONFIG;
+        const projectId = this.activeProjectId || (templateConfig && templateConfig.GITHUB && (templateConfig.GITHUB.ACTIVE_PROJECT_ID || templateConfig.GITHUB.DEFAULT_PROJECT_ID)) || 'github-task-manager';
+        const allowedPasswords = [];
+        try {
+            if (typeof ACCESS_PASSWORDS !== 'undefined' && ACCESS_PASSWORDS && typeof ACCESS_PASSWORDS === 'object') {
+                const p = String(projectId || '').trim();
+                if (p && ACCESS_PASSWORDS[p]) allowedPasswords.push(String(ACCESS_PASSWORDS[p] || '').trim());
+            }
+        } catch (e) {
+            // ignore
+        }
+        try {
+            if (typeof ACCESS_PASSWORD_MASTER !== 'undefined' && ACCESS_PASSWORD_MASTER) {
+                allowedPasswords.push(String(ACCESS_PASSWORD_MASTER || '').trim());
+            }
+        } catch (e) {
+            // ignore
+        }
+        try {
+            if (typeof ACCESS_PASSWORD !== 'undefined' && ACCESS_PASSWORD) {
+                allowedPasswords.push(String(ACCESS_PASSWORD || '').trim());
+            }
+        } catch (e) {
+            // ignore
+        }
+
+        const uniqueAllowed = Array.from(new Set(allowedPasswords.filter(Boolean)));
+        if (uniqueAllowed.length === 0) {
             errorDiv.innerHTML = '<span style="color: var(--danger-color);">⚠️ Access is not configured for this deployment. Please set the GitHub Secret(s) <code>ACCESS_PASSWORD_MASTER</code> and/or per-project keys via <code>ACCESS_PASSWORDS</code>.</span>';
             errorDiv.style.display = 'block';
             return false;
         }
 
-        if (enteredPassword === configuredPassword) {
+        if (uniqueAllowed.includes(enteredPassword)) {
             // Password correct - set authentication
             const sessionDuration = (accessConfig.SESSION_DURATION || 30) * 60 * 1000; // Convert to ms
             this.authExpiry = Date.now() + sessionDuration;
             this.isAuthenticated = true;
             
             // Persist to localStorage
-            const projectId = this.activeProjectId || (window.TEMPLATE_CONFIG && window.TEMPLATE_CONFIG.GITHUB && (window.TEMPLATE_CONFIG.GITHUB.ACTIVE_PROJECT_ID || window.TEMPLATE_CONFIG.GITHUB.DEFAULT_PROJECT_ID)) || 'github-task-manager';
             localStorage.setItem(this.getProjectAuthKey(projectId), JSON.stringify({
                 expiry: this.authExpiry
             }));
@@ -1328,6 +1450,7 @@ class TaskManagerApp {
         document.getElementById('modalTitle').textContent = 'Add New Task';
         document.getElementById('taskForm').reset();
         document.getElementById('taskId').value = '';
+        this.refreshCategoryOptions({ preserveValue: false });
         this.populateFormWithDefaults();
         modal.style.display = 'block';
         // Force visibility check
@@ -1361,6 +1484,7 @@ class TaskManagerApp {
         }
 
         document.getElementById('modalTitle').textContent = 'Edit Task';
+        this.refreshCategoryOptions({ preserveValue: false });
         this.populateFormWithTask(task);
         modal.style.display = 'block';
         

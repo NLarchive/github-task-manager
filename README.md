@@ -53,7 +53,6 @@ A collaborative, open-source task management system integrated with GitHub, enab
 #### Prerequisites
 - Node.js 14+ (for development/testing only)
 - Git
-- GitHub personal access token (for pushing changes)
 
 #### Installation
 
@@ -65,15 +64,14 @@ cd github-task-manager
 # Install dependencies (optional - only for testing)
 npm install
 
-# Setup GitHub token (local development)
-cp config/github-token.js config/github-token.local.js
-# Edit github-token.local.js and add your GitHub token
+# (Optional) Setup a GitHub token for local development
+# IMPORTANT: Never ship a repo write token to GitHub Pages.
+# Create public/config/github-token.local.js (gitignored) if you want direct GitHub writes locally.
 
 # Run tests
 npm test
 
-# Build (no build step needed - vanilla JS)
-# Simply open public/index.html in your browser
+# No build step needed (vanilla JS)
 ```
 
 #### Running Locally
@@ -88,7 +86,7 @@ python -m http.server 8000
 npx http-server
 ```
 
-Visit `http://localhost:8000/public/` in your browser.
+Visit `http://localhost:8000/` in your browser.
 
 ## How to Use 📖
 
@@ -177,13 +175,12 @@ Filters combine - select status AND priority to narrow results.
 
 The app supports **dual-mode persistence** that works seamlessly whether deployed or running locally:
 
-#### GitHub Mode (Deployed)
-When a valid GitHub token is available:
-- All changes save to GitHub repository in real-time
-- Both `tasks.json` and `tasks.csv` are updated on each save
-- Automatic fallback to localStorage if GitHub API fails
-- Changes visible to all users accessing the live site
-- Complete version history in Git commits
+#### GitHub Pages (Deployed)
+For security, the deployed site should **not** include a repo write token.
+
+Write options:
+- **Cloudflare Worker mode (recommended)**: the UI sends authenticated write requests to the Worker; the Worker performs GitHub writes with a server-side token.
+- **Read-only**: users can still browse and export.
 
 #### Local Storage Mode (Local Development)
 When no GitHub token is available:
@@ -211,24 +208,12 @@ When no GitHub token is available:
    - No network → works offline with localStorage
    - Multiple sources → user always has access to tasks
 
-#### Local Development with GitHub Token
+#### Local Development Writes
 
-If you want to test GitHub integration locally:
-
-1. Create a GitHub Personal Access Token:
-   - Go to https://github.com/settings/tokens
-   - Create token with `repo` scope
-   
-2. Add token to `public/config/github-token.local.js`:
-   ```javascript
-   // github-token.local.js (gitignored)
-   const GITHUB_TOKEN = 'your_token_here';
-   ```
-
-3. The app will:
-   - Use your token for local development
-   - Fall back to localStorage if token is invalid
-   - Still save everything locally as backup
+On localhost, the app can persist in three ways (in priority order):
+- Worker URL configured → save via Worker
+- Dev server running (`npm start`) → save to local disk via `/api/tasks`
+- Otherwise → save to browser localStorage
 
 #### Data Sync Between Modes
 
@@ -445,7 +430,7 @@ github-task-manager/
 │   │   ├── task-manager-app.js     # Main application controller
 │   │   ├── template-validator.js   # Validation logic
 │   │   ├── template-automation.js  # Auto-population logic
-│   │   └── github-api.js           # GitHub API integration (in app.js)
+│   │   └── (GitHub API wrapper lives in task-manager-app.js)
 │   ├── tasksDB/
 │   │   ├── task-database.js        # Database CRUD operations
 │   │   ├── tasks.json              # Task storage file
@@ -469,7 +454,7 @@ github-task-manager/
 │   └── workflows/
 │       └── deploy.yml              # GitHub Actions CI/CD
 │
-├── tasks.json                       # Master task file (repo root)
+├── public/tasksDB/<project>/tasks.json  # Task database (source of truth)
 ├── package.json                     # Node.js dependencies
 ├── README.md                        # This file
 ├── QUICKSTART.md                    # Quick start guide
@@ -688,7 +673,7 @@ When reporting issues, include:
 - Error messages from console
 - Screenshots if helpful
 
-## Acknowledgments 🙏
+## Acknowledgments
 
 Built with:
 - 🎯 Vanilla JavaScript (no frameworks)
@@ -713,113 +698,4 @@ Built with:
 
 ---
 
-**Happy task managing! 🚀**
-
 For the latest updates and features, visit: https://github.com/nlarchive/github-task-manager
-
-## 📁 Project Structure
-
-```
-github-task-manager/
-├── .github/
-│   └── workflows/
-│       └── deploy.yml          # GitHub Actions workflow
-├── public/
-│   ├── config/
-│   │   ├── template-config.js  # Configuration & schema
-│   │   └── github-token.js     # Token placeholder (gitignored)
-│   ├── scripts/
-│   │   ├── task-manager-app.js # Main application
-│   │   ├── template-validator.js
-│   │   └── template-automation.js
-│   ├── styles/
-│   │   └── task-manager.css    # Styling
-│   ├── tasksDB/
-│   │   └── task-database.js    # Task storage logic
-│   ├── index.html              # Main UI
-│   └── tasks.json              # Task data
-├── task-templates/
-│   ├── starter_project_template.json
-│   ├── starter_project_template.csv
-│   └── TEMPLATE_VALIDATION_GUIDE.md
-├── tests/
-│   ├── run-tests.js            # Test runner
-│   ├── validate-schema.js      # Schema validator
-│   ├── template-config.test.js
-│   ├── template-validator.test.js
-│   ├── template-automation.test.js
-│   └── task-database.test.js
-├── package.json
-└── README.md
-```
-
-## 📋 Task Schema
-
-### Field Categories
-
-| Category | Fields | Description |
-|----------|--------|-------------|
-| **Automatic** | `task_id`, `created_date`, `creator_id`, `completed_date` | Auto-generated by the system |
-| **Required** | `task_name`, `description`, `start_date`, `end_date`, `priority`, `status`, `estimated_hours`, `category_name` | Must be provided by user |
-| **Optional** | `progress_percentage`, `actual_hours`, `is_critical_path`, `tags`, `assigned_workers`, `parent_task_id`, `dependencies`, `comments`, `attachments` | User can optionally provide |
-
-### Valid Status Values
-- `Not Started`, `In Progress`, `On Hold`, `Blocked`, `Completed`, `Cancelled`, `Pending Review`
-
-### Valid Priority Values
-- `Low`, `Medium`, `High`, `Critical`
-
-### Dependency Types
-- `FS` (Finish-to-Start), `SS` (Start-to-Start), `FF` (Finish-to-Finish), `SF` (Start-to-Finish)
-
-## 🔧 Configuration
-
-### GitHub Repository Settings
-
-1. Go to repository **Settings** → **Secrets and variables** → **Actions**
-2. Add secret: `TASK_MANAGER_TOKEN` with a GitHub Personal Access Token
-3. Token requires these permissions:
-   - `repo` (for private repos) OR `public_repo` (for public repos)
-   - Contents: Read and write
-
-### Local Development
-
-Create `config/github-token.local.js` (gitignored):
-```javascript
-const GH_TOKEN = 'ghp_your_token_here';
-```
-
-## 🧪 Testing
-
-```bash
-# Run all tests
-npm test
-
-# Validate tasks.json schema
-npm run test:validate
-```
-
-## 📦 Deployment
-
-The project auto-deploys to GitHub Pages when:
-1. All tests pass
-2. Schema validation succeeds
-3. Code is pushed to `main` branch
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) file for details.
-
-## 🔗 Links
-
-- **Live Site**: https://nlarchive.github.io/github-task-manager
-- **Repository**: https://github.com/nlarchive/github-task-manager
-- **Issues**: https://github.com/nlarchive/github-task-manager/issues

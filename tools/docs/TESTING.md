@@ -1,136 +1,34 @@
-# Testing Guide
+# Live Testing Guide - GitHub Task Manager
 
-## Unit Tests
+## ✓ Issues Fixed
+1. **GitHub token configuration** - Token now properly injected from GitHub Actions secrets
+2. **Tasks loading error** - Implemented fallback mechanism to load from local `tasks.json` file
+3. **Repository API access** - Added `tasks.json` to repository root for GitHub API access
 
-Run Node.js unit tests:
+## 🚀 Live Website
+**https://nlarchive.github.io/github-task-manager/**
 
-```bash
-npm test                    # Run all tests once
-npm run test:watch        # Watch mode (reruns on changes)
-npm run test:validate     # Validate task schema only
-```
+## ✅ Features to Test
 
-Tests cover:
-- Task validation rules
-- Field automation
-- Task database operations
-- Configuration schema
+### 1. **View Existing Tasks**
+- Page loads 10 project tasks automatically
+- Tasks from 4 categories visible: Frontend Development, Backend Development, Testing, Deployment, Documentation, Project Setup, Retrospective
 
----
+### 2. **Task Statistics**
+- Dashboard shows: Total Tasks (10), Not Started (5), In Progress (3), Completed (2)
+- Stats update when you modify tasks
 
-## Playwright E2E Tests
+### 3. **Filters**
+- Filter by Status: Not Started, In Progress, On Hold, Blocked, Completed, Cancelled, Pending Review
+- Filter by Priority: Critical, High, Medium, Low
+- Multiple filters work together
 
-End-to-end browser automation tests.
-
-### Setup
-
-```bash
-npm install @playwright/test  # Already in package.json
-```
-
-### Run Tests
-
-```bash
-# Headless (default)
-npm run test:playwright
-
-# With UI (watch mode, very useful)
-npm run test:playwright:ui
-
-# Headed (see browser)
-npm run test:playwright:headed
-
-# Debug mode (step through)
-npm run test:playwright:debug
-
-# HTML report
-npm run test:playwright:report
-```
-
-### Specific Tests
-
-```bash
-# Run one test file
-npx playwright test tests/e2e/crud-operations.spec.js
-
-# Run one test
-npx playwright test -g "should create new task"
-
-# Chrome only
-npx playwright test --project=chromium
-```
-
----
-
-## Task Update via UI
-
-Use Playwright to update tasks through the web interface instead of editing JSON:
-
-```bash
-npx playwright test tests/e2e/update-task-via-ui.spec.js --headed
-```
-
-This automation:
-- Navigates to the app
-- Fills task forms programmatically
-- Updates progress, status, dates, etc.
-- Saves through the UI
-- Regenerates derived files
-
----
-
-## Local Testing Workflow
-
-```bash
-# 1. Start local server
-cd public
-python -m http.server 8000    # or: npx http-server -p 8000
-
-# 2. In another terminal, run tests
-npm run test:playwright:ui    # Use UI mode to watch
-
-# 3. Tests interact with http://localhost:3000/
-```
-
----
-
-## Coverage
-
-Current test categories:
-- ✅ **Unit Tests** — Configuration, validation, automation, database
-- ✅ **E2E Tests** — Create, read, update, delete tasks
-- ✅ **UI Automation** — Update tasks via web form
-- ✅ **Password Protection** — Write gate testing
-- ✅ **GitHub Issues Sync** — Sync operations
-- ✅ **Timeline View** — Visualization rendering
-
----
-
-## Continuous Integration
-
-Tests run automatically on:
-- Every push to `main`
-- Every pull request
-- Can be manually triggered in Actions tab
-
-See [.github/workflows/deploy.yml](../../.github/workflows/deploy.yml) for CI configuration.
-
----
-
-## Tips
-
-1. **Use UI mode for development**: `npm run test:playwright:ui` lets you watch tests run and interact
-2. **Debug specific tests**: `npx playwright test -g "keyword" --debug`
-3. **Check Playwright Report**: `npm run test:playwright:report` opens interactive HTML report
-4. **Run headless for CI**: Default mode is faster and suitable for automation
-
----
-
-## Resources
-
-- [Playwright Documentation](https://playwright.dev)
-- [Test Files](../../tests/e2e/)
-- [Configuration](../../tests/playwright.config.js)
+### 4. **Task List Display**
+Each task card shows:
+- Task ID and Name
+- Priority (color-coded: Critical=red, High=orange, Medium=yellow, Low=blue)
+- Status badge
+- Progress percentage bar
 - Category label
 - Start/End dates
 - Estimated hours vs Actual hours

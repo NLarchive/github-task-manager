@@ -132,6 +132,33 @@ describe('GITHUB Configuration', () => {
   it('should have TASKS_FILE set to public/tasksDB/github-task-manager/tasks.json', () => {
     expect(GITHUB.TASKS_FILE).toBe('public/tasksDB/github-task-manager/tasks.json');
   });
+
+  it('should resolve project config for github-task-manager', () => {
+    expect(typeof GITHUB.getProjectConfig).toBe('function');
+    const cfg = GITHUB.getProjectConfig('github-task-manager');
+    expect(cfg).toBeTruthy();
+    expect(cfg.id).toBe('github-task-manager');
+    expect(cfg.owner).toBe('nlarchive');
+    expect(cfg.repo).toBe('github-task-manager');
+    expect(cfg.branch).toBe('main');
+    expect(cfg.tasksRoot).toBe('public/tasksDB');
+  });
+
+  it('should resolve project config for ai-career-roadmap', () => {
+    const cfg = GITHUB.getProjectConfig('ai-career-roadmap');
+    expect(cfg).toBeTruthy();
+    expect(cfg.id).toBe('ai-career-roadmap');
+    expect(cfg.owner).toBe('nlarchive');
+    expect(cfg.repo).toBe('ai-career-roadmap');
+    expect(cfg.branch).toBe('main');
+    expect(cfg.tasksRoot).toBe('tasksDB');
+  });
+
+  it('should compute tasks file per project root', () => {
+    expect(typeof GITHUB.getTasksFile).toBe('function');
+    expect(GITHUB.getTasksFile('github-task-manager')).toBe('public/tasksDB/github-task-manager/tasks.json');
+    expect(GITHUB.getTasksFile('ai-career-roadmap')).toBe('tasksDB/ai-career-roadmap/tasks.json');
+  });
 });
 
 describe('CATEGORIES List', () => {

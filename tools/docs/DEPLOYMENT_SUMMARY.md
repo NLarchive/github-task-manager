@@ -1,4 +1,6 @@
-# GitHub Task Manager - Deployment Complete
+# Deployment Summary — GitHub Task Manager
+
+A concise deployment summary with steps to enable GitHub Pages and verify site availability.
 
 ## 🎯 Status Summary
 

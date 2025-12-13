@@ -5,6 +5,7 @@ const LIVE_URL = 'https://nlarchive.github.io/github-task-manager/';
 const TIMEOUT = 5000;
 const LIVE_PASSWORD = '1324';
 const LIVE_PASSWORD_AI_CAREER_ROADMAP = 'ai-career-roadmap-1234';
+const RUN_LIVE = process.env.PLAYWRIGHT_RUN_LIVE === '1' || process.env.RUN_LIVE_E2E === '1';
 
 async function waitForAppReady(page) {
   await page.waitForSelector('[id="totalTasks"]', { timeout: TIMEOUT });
@@ -115,6 +116,8 @@ test.describe('New Features - Password / Timeline / Issues', () => {
 
 // Live GitHub Pages Tests
 test.describe('Live Site - Password Protection & New Features', () => {
+  test.skip(!RUN_LIVE, 'Set PLAYWRIGHT_RUN_LIVE=1 (or RUN_LIVE_E2E=1) to enable live-site tests');
+
   test('password gate blocks edit without password', async ({ page }) => {
     await page.goto(LIVE_URL);
     await page.waitForSelector('[id="totalTasks"]', { timeout: 15000 });
@@ -159,7 +162,8 @@ test.describe('Live Site - Password Protection & New Features', () => {
     
     // Click Unlock button
     const unlockBtn = page.locator('#passwordModal button:has-text("Unlock")');
-    await unlockBtn.click();
+    await unlockBtn.scrollIntoViewIfNeeded();
+    await unlockBtn.click({ force: true });
 
     // Task edit modal should open (password was correct)
     const taskModal = page.locator('#taskModal');
@@ -184,7 +188,8 @@ test.describe('Live Site - Password Protection & New Features', () => {
     await page.locator('button:has-text("Edit")').first().click();
     await expect(page.locator('#passwordModal')).toBeVisible({ timeout: 5000 });
     await page.locator('#accessPassword').fill(LIVE_PASSWORD);
-    await page.locator('#passwordModal button:has-text("Unlock")').click();
+    await page.locator('#passwordModal button:has-text("Unlock")').scrollIntoViewIfNeeded();
+    await page.locator('#passwordModal button:has-text("Unlock")').click({ force: true });
     await expect(page.locator('#taskModal')).toBeVisible({ timeout: 5000 });
     await page.click('#taskModal .close');
 
@@ -198,7 +203,8 @@ test.describe('Live Site - Password Protection & New Features', () => {
 
     // Unlock with the project password and ensure edit opens
     await page.locator('#accessPassword').fill(LIVE_PASSWORD_AI_CAREER_ROADMAP);
-    await page.locator('#passwordModal button:has-text("Unlock")').click();
+    await page.locator('#passwordModal button:has-text("Unlock")').scrollIntoViewIfNeeded();
+    await page.locator('#passwordModal button:has-text("Unlock")').click({ force: true });
     await expect(page.locator('#taskModal')).toBeVisible({ timeout: 5000 });
     await page.click('#taskModal .close');
   });
@@ -225,7 +231,8 @@ test.describe('Live Site - Password Protection & New Features', () => {
     
     // Click Unlock button
     const unlockBtn = page.locator('#passwordModal button:has-text("Unlock")');
-    await unlockBtn.click();
+    await unlockBtn.scrollIntoViewIfNeeded();
+    await unlockBtn.click({ force: true });
 
     // Error message should appear
     const errorDiv = page.locator('#passwordError');

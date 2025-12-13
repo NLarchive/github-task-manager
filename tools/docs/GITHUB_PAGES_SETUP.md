@@ -1,8 +1,8 @@
-# GitHub Pages Setup Instructions
+# GitHub Pages Setup — Quick Guide
 
-## Automatic Setup (via GitHub Actions)
+This guide helps you enable GitHub Pages and configure the required secrets. The CI workflow regenerates the derived state and CSV files before deployment.
 
-The workflow is now configured to automatically deploy to GitHub Pages. However, you need to enable GitHub Pages in the repository settings:
+## Enable GitHub Pages
 
 ### Step 1: Enable GitHub Pages
 1. Go to: https://github.com/NLarchive/github-task-manager/settings

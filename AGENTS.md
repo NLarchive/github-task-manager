@@ -14,7 +14,6 @@ current project structure;
 """
 .github
 .playwright-mcp
-.playwright-mcp\live-site-validation-complete.png
 node_modules
 public
 public\config
@@ -45,7 +44,6 @@ public\tasksDB\github-task-manager\README.md
 public\tasksDB\github-task-manager\tasks.csv
 public\tasksDB\github-task-manager\tasks.json
 public\tasksDB\task-database.js
-public\app.js
 public\health-check.html
 public\index.html
 public\styles.css
@@ -55,6 +53,7 @@ tests\artifacts
 tests\e2e
 tests\e2e\crud-operations.spec.js
 tests\e2e\new-features.spec.js
+tests\e2e\update-task-via-ui.spec.js
 tests\playwright-report
 tests\test-results
 tests\unit
@@ -76,6 +75,14 @@ tools\cloudflare-worker\README.md
 tools\cloudflare-worker\worker.js
 tools\cloudflare-worker\wrangler.toml
 tools\docs
+tools\docs\.archive
+tools\docs\DEPLOYMENT_SUMMARY.md
+tools\docs\GITHUB_PAGES_SETUP.md
+tools\docs\PLAYWRIGHT_TEST_REPORT.md
+tools\docs\QUICKSTART.md
+tools\docs\README-public.md
+tools\docs\TEMPLATE_VALIDATION_GUIDE.md
+tools\docs\TESTING.md
 tools\scripts
 tools\scripts\archive-root-tasks.js
 tools\scripts\generate-state-files.js
@@ -87,6 +94,7 @@ tools\task-templates\starter_project_template.csv
 tools\task-templates\starter_project_template.json
 .gitignore
 AGENTS.md
+CONTRIBUTING.md
 LICENSE
 package-lock.json
 package.json

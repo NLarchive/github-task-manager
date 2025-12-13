@@ -21,18 +21,55 @@ const ALLOWED_ORIGINS = [
 ];
 
 // Only allow writes to these paths (regex patterns)
+// Supports both repo layouts:
+// - github-task-manager: public/tasksDB/<projectId>/...
+// - ai-career-roadmap: tasksDB/<projectId>/...
 const ALLOWED_PATHS = [
-  /^public\/tasksDB\/[a-zA-Z0-9_-]+\/tasks\.json$/,
-  /^public\/tasksDB\/[a-zA-Z0-9_-]+\/tasks\.csv$/,
-  /^public\/tasksDB\/[a-zA-Z0-9_-]+\/state\/[a-zA-Z0-9_-]+\.json$/,
-  /^public\/tasksDB\/[a-zA-Z0-9_-]+\/history\/[a-zA-Z0-9_-]+\.json$/,
-  /^public\/tasksDB\/[a-zA-Z0-9_-]+\/history\/[a-zA-Z0-9_-]+\.ndjson$/
+  /^(?:public\/)?tasksDB\/[a-zA-Z0-9_-]+\/tasks\.json$/,
+  /^(?:public\/)?tasksDB\/[a-zA-Z0-9_-]+\/tasks\.csv$/,
+  /^(?:public\/)?tasksDB\/[a-zA-Z0-9_-]+\/state\/[a-zA-Z0-9_-]+\.json$/,
+  /^(?:public\/)?tasksDB\/[a-zA-Z0-9_-]+\/history\/[a-zA-Z0-9_-]+\.json$/,
+  /^(?:public\/)?tasksDB\/[a-zA-Z0-9_-]+\/history\/[a-zA-Z0-9_-]+\.ndjson$/
 ];
 
-// GitHub repo config
-const GITHUB_OWNER = 'nlarchive';
-const GITHUB_REPO = 'github-task-manager';
-const GITHUB_BRANCH = 'main';
+function safeProjectId(value) {
+  return String(value || '').trim().replace(/[^a-zA-Z0-9_-]/g, '');
+}
+
+function getProjectConfig(projectId, env) {
+  const id = safeProjectId(projectId);
+  if (!id) return null;
+
+  // Optional env override: JSON mapping { "projectId": { owner, repo, branch, tasksRoot } }
+  const raw = env && env.PROJECTS_JSON ? String(env.PROJECTS_JSON) : '';
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      const cfg = parsed && parsed[id] ? parsed[id] : null;
+      if (cfg && cfg.owner && cfg.repo) {
+        return {
+          id,
+          owner: String(cfg.owner),
+          repo: String(cfg.repo),
+          branch: String(cfg.branch || 'main'),
+          tasksRoot: String(cfg.tasksRoot || 'public/tasksDB').replace(/\/+$/g, '')
+        };
+      }
+    } catch {
+      // ignore malformed env JSON
+    }
+  }
+
+  // Defaults (kept in sync with public/config/template-config.js)
+  const defaults = {
+    'github-task-manager': { owner: 'nlarchive', repo: 'github-task-manager', branch: 'main', tasksRoot: 'public/tasksDB' },
+    'ai-career-roadmap': { owner: 'nlarchive', repo: 'ai-career-roadmap', branch: 'main', tasksRoot: 'tasksDB' }
+  };
+
+  const base = defaults[id];
+  if (!base) return null;
+  return { id, ...base };
+}
 
 export default {
   async fetch(request, env, ctx) {
@@ -68,10 +105,10 @@ export default {
   }
 };
 
-async function getFileContentAndSha(filePath, token) {
+async function getFileContentAndShaForRepo({ owner, repo, branch }, filePath, token) {
   try {
     const res = await fetch(
-      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath}?ref=${GITHUB_BRANCH}`,
+      `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`,
       {
         headers: {
           'Authorization': `token ${token}`,
@@ -84,7 +121,7 @@ async function getFileContentAndSha(filePath, token) {
     const data = await res.json();
     const raw = data && data.content ? atob(data.content) : '';
     return { content: raw, sha: data.sha };
-  } catch (e) {
+  } catch {
     return null;
   }
 }
@@ -158,10 +195,12 @@ function diffTasks(oldTasks, newTasks) {
   return events;
 }
 
-async function appendNdjsonEvents(projectId, token, events) {
+async function appendNdjsonEvents(projectId, token, events, env) {
   if (!Array.isArray(events) || events.length === 0) return;
-  const historyPath = `public/tasksDB/${projectId}/history/changes.ndjson`;
-  const existing = await getFileContentAndSha(historyPath, token);
+  // Default: keep old behavior if project config cannot be resolved.
+  const cfg = getProjectConfig(projectId, env) || { owner: 'nlarchive', repo: 'github-task-manager', branch: 'main', tasksRoot: 'public/tasksDB' };
+  const historyPath = `${cfg.tasksRoot}/${cfg.id}/history/changes.ndjson`;
+  const existing = await getFileContentAndShaForRepo(cfg, historyPath, token);
   const existingContent = existing && typeof existing.content === 'string' ? existing.content : '';
 
   const nextLines = events.map(e => JSON.stringify(e)).join('\n') + '\n';
@@ -176,12 +215,12 @@ async function appendNdjsonEvents(projectId, token, events) {
   const updateBody = {
     message: `Append task history (${projectId})`,
     content: btoa(unescape(encodeURIComponent(nextContent))),
-    branch: GITHUB_BRANCH
+    branch: cfg.branch
   };
   if (existing && existing.sha) updateBody.sha = existing.sha;
 
   await fetch(
-    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${historyPath}`,
+    `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${historyPath}`,
     {
       method: 'PUT',
       headers: {
@@ -206,8 +245,11 @@ async function handleGetTaskHistory(request, env, origin) {
     const limit = Math.max(1, Math.min(500, Number(url.searchParams.get('limit') || '200')));
     if (!projectId) return jsonResponse({ error: 'Missing project parameter' }, origin, 400);
 
-    const historyPath = `public/tasksDB/${projectId}/history/changes.ndjson`;
-    const existing = await getFileContentAndSha(historyPath, token);
+    const cfg = getProjectConfig(projectId, env);
+    if (!cfg) return jsonResponse({ error: `Unknown project: ${projectId}` }, origin, 400);
+
+    const historyPath = `${cfg.tasksRoot}/${cfg.id}/history/changes.ndjson`;
+    const existing = await getFileContentAndShaForRepo(cfg, historyPath, token);
     const content = existing && typeof existing.content === 'string' ? existing.content : '';
     if (!content.trim()) return jsonResponse({ items: [] }, origin);
 
@@ -238,6 +280,11 @@ async function handleTasksUpdate(request, env, origin) {
       return jsonResponse({ error: 'Missing required fields' }, origin, 400);
     }
 
+    const cfg = getProjectConfig(projectId, env);
+    if (!cfg) {
+      return jsonResponse({ error: `Unknown project: ${projectId}` }, origin, 400);
+    }
+
     // Validate access password
     const masterPassword = env.ACCESS_PASSWORD_MASTER || '';
     const projectPassword = env[`ACCESS_PASSWORD_${projectId.toUpperCase().replace(/-/g, '_')}`] || '';
@@ -249,6 +296,13 @@ async function handleTasksUpdate(request, env, origin) {
     // Validate file path (only allow TaskDB files)
     if (!ALLOWED_PATHS.some(regex => regex.test(filePath))) {
       return jsonResponse({ error: `Path not allowed: ${filePath}` }, origin, 403);
+    }
+
+    // Ensure the file path is scoped to the selected project + its configured root.
+    // Prevents a client from writing github-task-manager paths while claiming another projectId.
+    const expectedPrefix = `${cfg.tasksRoot}/${cfg.id}/`;
+    if (!String(filePath).startsWith(expectedPrefix)) {
+      return jsonResponse({ error: `File path must start with ${expectedPrefix}` }, origin, 403);
     }
 
     // Validate content is valid JSON (for .json files)
@@ -270,7 +324,7 @@ async function handleTasksUpdate(request, env, origin) {
     let previousTasksJson = null;
     try {
       const getResponse = await fetch(
-        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath}?ref=${GITHUB_BRANCH}`,
+        `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${filePath}?ref=${cfg.branch}`,
         {
           headers: {
             'Authorization': `token ${token}`,
@@ -296,14 +350,14 @@ async function handleTasksUpdate(request, env, origin) {
     const updateBody = {
       message: message || `Update ${filePath}`,
       content: btoa(unescape(encodeURIComponent(content))),
-      branch: GITHUB_BRANCH
+      branch: cfg.branch
     };
     if (sha) {
       updateBody.sha = sha;
     }
 
     const updateResponse = await fetch(
-      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath}`,
+      `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${filePath}`,
       {
         method: 'PUT',
         headers: {
@@ -358,7 +412,7 @@ async function handleTasksUpdate(request, env, origin) {
         });
 
         // Append to history file (best-effort; do not block response)
-        appendNdjsonEvents(projectId, token, events).catch(() => {});
+        appendNdjsonEvents(projectId, token, events, env).catch(() => {});
       } catch {
         // ignore history errors
       }

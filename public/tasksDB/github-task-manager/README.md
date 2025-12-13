@@ -30,10 +30,12 @@ This directory contains the task database in both JSON and CSV formats, managed 
 
 ## Data Synchronization
 
-Both files represent the same project state:
-- The UI primarily works with `tasks.json`
-- `tasks.csv` is generated/updated automatically for reporting purposes
-- Both files are committed to version control for full audit trail
+`tasks.json` is the source of truth.
+
+- The UI reads/writes `tasks.json`.
+- `tasks.csv` and `state/` files are derived artifacts generated from `tasks.json`.
+- Derived artifacts are intentionally ignored by git to reduce merge conflicts.
+  - They may still be generated locally (for testing) and/or during CI before deploying GitHub Pages.
 
 ## Adding Tasks Through UI
 
@@ -98,9 +100,9 @@ The complete task history is maintained in git commits:
 
 1. **Always validate** through the UI form
 2. **Use version control** - never directly edit production data
-3. **Keep both files** - JSON for app, CSV for reporting
-4. **Document changes** - commit messages explain updates
-5. **Regular backups** - push to GitHub regularly
+3. **Treat `tasks.json` as canonical** - avoid editing derived files.
+4. **Regenerate derived artifacts for testing** - use `npm run tasks:regenerate-all`.
+5. **Document changes** - commit messages explain updates.
 
 ## Future Enhancements
 
