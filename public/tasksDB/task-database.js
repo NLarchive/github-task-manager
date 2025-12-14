@@ -146,10 +146,25 @@ class TaskDatabase {
         const safeName = sanitize(name);
         const changeSummary = Array.isArray(e.changes) && e.changes.length ? String(this.summarizeHistoryChanges(e.changes)) : '';
         const safeChangeSummary = sanitize(changeSummary);
-        if (e.action === 'create') subject = `TaskDB: create ${e.taskId}|${safeName}|create`;
-        else if (e.action === 'delete') subject = `TaskDB: delete ${e.taskId}|${safeName}|delete`;
+        const rawDescription = (e.task && (e.task.description || e.task.desc)) ? String(e.task.description || e.task.desc) : '';
+        const safeDescription = sanitize(rawDescription).substring(0, 120);
+        // Machine-readable commit subject format for single-event commits:
+        // TaskDB: <action> <id>|<task_name>|<description_or_summary>
+        // - action: create, update, delete (human-friendly marker for filtering/understanding)
+        // - id: numeric task ID (first field after action)
+        // - task_name: sanitized task name (no pipes, newlines; max ~50 chars after sanitization)
+        // - description_or_summary:
+        //   - create: first 120 chars of task description (sanitized)
+        //   - delete: "deleted" placeholder
+        //   - update: comma-separated list of changed field names (e.g., "status, progress_percentage")
+        // Pipe-separated (|) for easy machine parsing; robust because pipes rarely appear in user text.
+        // Example subjects:
+        //   TaskDB: create 15|Secure token config|Remove the personal token input section from the UI
+        //   TaskDB: update 7|Fix auth flow|status, priority, progress_percentage
+        //   TaskDB: delete 3|Old cleanup task|deleted
+        if (e.action === 'create') subject = `TaskDB: create ${e.taskId}|${safeName}|${safeDescription || 'created'}`;
+        else if (e.action === 'delete') subject = `TaskDB: delete ${e.taskId}|${safeName}|deleted`;
         else if (e.action === 'update') {
-          // Machine-friendly: id|task_name|short-change-summary (pipe-separated, no spaces around pipes)
           subject = `TaskDB: update ${e.taskId}|${safeName}|${safeChangeSummary}`;
         }
     } else if (normalizedEvents.length > 1) {
@@ -201,6 +216,66 @@ class TaskDatabase {
   sanitizeSubjectField(str) {
     if (!str && str !== 0) return '';
     return String(str).replace(/[\r\n]+/g, ' ').replace(/[|,]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  /**
+   * Validates and parses a TaskDB commit subject line.
+   * Format: TaskDB: <action> <id>|<task_name>|<description_or_summary>
+   * 
+   * Returns: { valid, action, id, taskName, summary, raw }
+   * Use this for downstream tools, dashboards, or commit history analysis.
+   */
+  parseTaskDbCommitSubject(subjectLine) {
+    const schema = {
+      format: 'TaskDB: <action> <id>|<task_name>|<description_or_summary>',
+      separator: '|',
+      actions: ['create', 'update', 'delete'],
+      parts: {
+        action: 'one of: create, update, delete (human-friendly marker)',
+        id: 'numeric task ID (positive integer)',
+        taskName: 'sanitized task name (no pipes, newlines; ~50 chars max)',
+        summary: 'create: first 120 chars of description | update: comma-separated field names | delete: "deleted"'
+      }
+    };
+
+    if (!subjectLine || typeof subjectLine !== 'string') {
+      return { valid: false, raw: subjectLine, schema };
+    }
+
+    const trimmed = subjectLine.trim();
+    const match = trimmed.match(/^TaskDB:\s*(\w+)\s+(.+)$/i);
+    if (!match) {
+      return { valid: false, raw: trimmed, schema, error: 'Does not start with "TaskDB: <action>"' };
+    }
+
+    const action = match[1].toLowerCase();
+    const payload = match[2];
+    if (!schema.actions.includes(action)) {
+      return { valid: false, raw: trimmed, schema, error: `Action "${action}" not in ${schema.actions.join(', ')}` };
+    }
+
+    const parts = payload.split('|');
+    if (parts.length < 3) {
+      return { valid: false, raw: trimmed, schema, error: `Expected 3 pipe-separated fields, got ${parts.length}` };
+    }
+
+    const id = parseInt(parts[0].trim(), 10);
+    if (isNaN(id) || id <= 0) {
+      return { valid: false, raw: trimmed, schema, error: `ID "${parts[0]}" is not a positive integer` };
+    }
+
+    const taskName = parts[1].trim();
+    const summary = parts[2].trim();
+
+    return {
+      valid: true,
+      raw: trimmed,
+      action,
+      id,
+      taskName,
+      summary,
+      schema
+    };
   }
 
   diffTasksForHistory(beforeTasks, afterTasks) {

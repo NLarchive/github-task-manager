@@ -442,6 +442,40 @@ describe('TaskDatabase Persistence', () => {
     TEMPLATE_CONFIG.GITHUB.TOKEN = previousToken;
   });
 
+  it('should parse and validate TaskDB commit subject format', () => {
+    const mockApi = new MockGitHubAPI();
+    const db = new TaskDatabase(mockApi);
+
+    // Test valid create subject
+    const createSubject = 'TaskDB: create 5|Sample Task|Brief description of task';
+    const createParsed = db.parseTaskDbCommitSubject(createSubject);
+    expect(createParsed.valid).toBeTruthy();
+    expect(createParsed.action).toBe('create');
+    expect(createParsed.id).toBe(5);
+    expect(createParsed.taskName).toBe('Sample Task');
+    expect(createParsed.summary).toBe('Brief description of task');
+
+    // Test valid update subject
+    const updateSubject = 'TaskDB: update 7|Fix bug|status, progress_percentage';
+    const updateParsed = db.parseTaskDbCommitSubject(updateSubject);
+    expect(updateParsed.valid).toBeTruthy();
+    expect(updateParsed.action).toBe('update');
+    expect(updateParsed.id).toBe(7);
+    expect(updateParsed.taskName).toBe('Fix bug');
+
+    // Test invalid (missing fields)
+    const invalidSubject = 'TaskDB: create 9|Only Two Fields';
+    const invalidParsed = db.parseTaskDbCommitSubject(invalidSubject);
+    expect(invalidParsed.valid).toBeFalsy();
+    expect(invalidParsed.error).toContain('pipe-separated');
+
+    // Test invalid action
+    const badActionSubject = 'TaskDB: modify 10|Task|desc';
+    const badActionParsed = db.parseTaskDbCommitSubject(badActionSubject);
+    expect(badActionParsed.valid).toBeFalsy();
+    expect(badActionParsed.error).toContain('not in');
+  });
+
   it('should refuse saving when duplicate task_id exists', async () => {
     const mockApi = new MockGitHubAPI();
     const db = new TaskDatabase(mockApi);
