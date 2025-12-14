@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-12-14T15:25:06.897Z",
+  "generated_at": "2025-12-14T15:31:53.745Z",
   "total_tasks": 30,
   "counts_by_status": {
     "Completed": 17,
@@ -62,7 +62,7 @@
         "status": "Completed",
         "progress_percentage": 100,
         "estimated_hours": 8,
-        "actual_hours": 6,
+        "actual_hours": 7,
         "is_critical_path": true,
         "tags": [
           "frontend",
@@ -72,9 +72,9 @@
         "category_name": "Frontend Development",
         "assigned_workers": [
           {
-            "name": "Developer",
+            "name": "dev@example.com",
             "email": "dev@example.com",
-            "role": "Full Stack Developer"
+            "role": "Collaborator"
           }
         ],
         "parent_task_id": null,
