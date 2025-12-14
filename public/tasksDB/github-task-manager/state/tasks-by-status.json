@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-12-14T13:33:02.783Z",
+  "generated_at": "2025-12-14T13:33:13.650Z",
   "total_tasks": 22,
   "counts_by_status": {
     "Completed": 17,
@@ -10,7 +10,7 @@
     "Completed": [
       {
         "task_id": 1,
-        "task_name": "Remove Authentication Form & Pre-Configure Token",
+        "task_name": "Edited Task - 1765719190980",
         "description": "Remove the personal token input section from the UI. Implement pre-configured GitHub token in config to allow public users to collaborate. Token should be stored securely in environment variables for GitHub Pages deployment.",
         "start_date": "2025-12-10",
         "end_date": "2025-12-11",
@@ -28,9 +28,9 @@
         "category_name": "Frontend Development",
         "assigned_workers": [
           {
-            "name": "Developer",
+            "name": "dev@example.com",
             "email": "dev@example.com",
-            "role": "Full Stack Developer"
+            "role": "Collaborator"
           }
         ],
         "parent_task_id": null,
