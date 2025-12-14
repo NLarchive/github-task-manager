@@ -408,19 +408,18 @@ describe('TaskDatabase Persistence', () => {
     expect(payload).toBeTruthy();
     expect(payload.artifact).toBe('tasks.json');
 
-    // Subject line should be machine-friendly and include id, task_name, and change summary (pipe-separated)
+    // Subject line should be machine-friendly and include action, id, task_name, and change summary (fully pipe-separated)
     const subjectLine = String(msg || '').split('\n')[0] || '';
-    expect(subjectLine).toContain(`TaskDB: update ${created.task.task_id}|`);
+    expect(subjectLine).toContain(`TaskDB|update|${created.task.task_id}|`);
     expect(subjectLine).toContain(created.task.task_name);
     expect(subjectLine).toContain('progress_percentage');
 
-    // Structured subject should parse into pipe-separated fields: id|task_name|summary
-    const structured = subjectLine.replace(/^TaskDB:\s*update\s*/, '');
-    const parts = structured.split('|');
-    expect(parts.length).toBeGreaterThan(2);
-    expect(String(parts[0])).toBe(String(created.task.task_id));
-    expect(String(parts[1])).toContain('Commit Order Task');
-    expect(String(parts[2])).toContain('progress_percentage');
+    // Structured subject should parse into pipe-separated fields: TaskDB|action|id|task_name|summary
+    const parts = subjectLine.split('|');
+    expect(parts.length).toBeGreaterThan(4);
+    expect(String(parts[2])).toBe(String(created.task.task_id));
+    expect(String(parts[3])).toContain('Commit Order Task');
+    expect(String(parts[4])).toContain('progress_percentage');
 
     // Find the update event
     const updateEv = (payload.events || []).find(e => e && e.action === 'update' && String(e.taskId) === String(created.task.task_id));
@@ -447,7 +446,7 @@ describe('TaskDatabase Persistence', () => {
     const db = new TaskDatabase(mockApi);
 
     // Test valid create subject
-    const createSubject = 'TaskDB: create 5|Sample Task|Brief description of task';
+    const createSubject = 'TaskDB|create|5|Sample Task|Brief description of task';
     const createParsed = db.parseTaskDbCommitSubject(createSubject);
     expect(createParsed.valid).toBeTruthy();
     expect(createParsed.action).toBe('create');
@@ -456,7 +455,7 @@ describe('TaskDatabase Persistence', () => {
     expect(createParsed.summary).toBe('Brief description of task');
 
     // Test valid update subject
-    const updateSubject = 'TaskDB: update 7|Fix bug|status, progress_percentage';
+    const updateSubject = 'TaskDB|update|7|Fix bug|status, progress_percentage';
     const updateParsed = db.parseTaskDbCommitSubject(updateSubject);
     expect(updateParsed.valid).toBeTruthy();
     expect(updateParsed.action).toBe('update');
@@ -464,13 +463,13 @@ describe('TaskDatabase Persistence', () => {
     expect(updateParsed.taskName).toBe('Fix bug');
 
     // Test invalid (missing fields)
-    const invalidSubject = 'TaskDB: create 9|Only Two Fields';
+    const invalidSubject = 'TaskDB|create|9|Only Two Fields';
     const invalidParsed = db.parseTaskDbCommitSubject(invalidSubject);
     expect(invalidParsed.valid).toBeFalsy();
-    expect(invalidParsed.error).toContain('pipe-separated');
+    expect(invalidParsed.error).toContain('Expected at least 5');
 
     // Test invalid action
-    const badActionSubject = 'TaskDB: modify 10|Task|desc';
+    const badActionSubject = 'TaskDB|modify|10|Task|desc';
     const badActionParsed = db.parseTaskDbCommitSubject(badActionSubject);
     expect(badActionParsed.valid).toBeFalsy();
     expect(badActionParsed.error).toContain('not in');

@@ -90,18 +90,19 @@ test.describe('@live Verify commit subject + payload structure', () => {
     expect(commitDetail).toBeTruthy();
 
     const subjectLine = (commitDetail.commit.message || '').split('\n')[0] || '';
-    expect(subjectLine.startsWith('TaskDB:')).toBeTruthy();
+    expect(subjectLine.startsWith('TaskDB|')).toBeTruthy();
 
-    // Subject should be compact and pipe-separated: TaskDB: <action> <id>|<name>|<description>
-    const subjectBody = subjectLine.replace(/^TaskDB:\s*\w+\s+/, ''); // remove prefix
-    const parts = subjectBody.split('|');
-    expect(parts.length).toBeGreaterThanOrEqual(3);
-    // first part is id
-    expect(String(Number(parts[0]))).toMatch(/\d+/);
-    // second part should contain our taskName (without timestamp in the middle)
-    expect(String(parts[1])).toContain('E2E Commit Verify');
-    // third part should contain the description
-    expect(String(parts[2])).toContain('Verify commit message');
+    // Subject should be fully pipe-separated: TaskDB|action|id|name|description
+    const parts = subjectLine.split('|');
+    expect(parts.length).toBeGreaterThanOrEqual(5);
+    // parts[0] is 'TaskDB', parts[1] is action
+    expect(parts[1]).toMatch(/create|update|delete/);
+    // parts[2] is id
+    expect(String(Number(parts[2]))).toMatch(/\d+/);
+    // parts[3] should contain our taskName
+    expect(String(parts[3])).toContain('E2E Commit Verify');
+    // parts[4] should contain the description
+    expect(String(parts[4])).toContain('Verify commit message');
 
     // Commit payload should include the TASKDB_CHANGE_V1 block
     expect(commitDetail.commit.message.includes('---TASKDB_CHANGE_V1---')).toBeTruthy();

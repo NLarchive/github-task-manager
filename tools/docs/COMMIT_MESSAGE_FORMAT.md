@@ -6,14 +6,14 @@ This document describes the machine-readable format for TaskDB commit subjects, 
 
 ### Subject Line
 ```
-TaskDB: <action> <id>|<task_name>|<description_or_summary>
+TaskDB|<action>|<id>|<task_name>|<description_or_summary>
 ```
 
 ### Components
 
 | Field | Type | Description | Example |
 |-------|------|-------------|---------|
-| **Prefix** | Literal | Always `TaskDB:` | `TaskDB:` |
+| **Prefix** | Literal | Always `TaskDB` | `TaskDB` |
 | **Action** | Enum | One of: `create`, `update`, `delete` | `create` |
 | **ID** | Integer | Numeric task ID (positive) | `15` |
 | **Task Name** | String | Sanitized task name (no pipes, newlines; ~50 chars max) | `Secure token config` |
@@ -29,7 +29,7 @@ TaskDB: <action> <id>|<task_name>|<description_or_summary>
 
 ### Create
 ```
-TaskDB: create 15|Secure token config|Remove the personal token input section from the UI
+TaskDB|create|15|Secure token config|Remove the personal token input section from the UI
 ```
 - Numeric ID: `15`
 - Name: `Secure token config`
@@ -37,7 +37,7 @@ TaskDB: create 15|Secure token config|Remove the personal token input section fr
 
 ### Update
 ```
-TaskDB: update 7|Fix auth flow|status, priority, progress_percentage
+TaskDB|update|7|Fix auth flow|status, priority, progress_percentage
 ```
 - Numeric ID: `7`
 - Name: `Fix auth flow`
@@ -45,7 +45,7 @@ TaskDB: update 7|Fix auth flow|status, priority, progress_percentage
 
 ### Delete
 ```
-TaskDB: delete 3|Old cleanup task|deleted
+TaskDB|delete|3|Old cleanup task|deleted
 ```
 - Numeric ID: `3`
 - Name: `Old cleanup task`
@@ -72,22 +72,24 @@ if (parsed.valid) {
 
 ```javascript
 function parseTaskDbSubject(line) {
-  // Remove prefix and action
-  const match = line.match(/^TaskDB:\s*(\w+)\s+(.+)$/i);
-  if (!match) return null;
-  
-  const [, action, payload] = match;
-  const [id, taskName, summary] = payload.split('|').map(s => s.trim());
-  
+  const parts = String(line || '').trim().split('|');
+  if (parts.length < 5) return null;
+  if (parts[0] !== 'TaskDB') return null;
+
+  const action = String(parts[1] || '').trim().toLowerCase();
+  const id = parseInt(String(parts[2] || '').trim(), 10);
+  const taskName = String(parts[3] || '').trim();
+  const summary = parts.slice(4).join('|').trim();
+
   return {
-    action: action.toLowerCase(),
-    id: parseInt(id, 10),
+    action,
+    id,
     taskName,
     summary
   };
 }
 
-const result = parseTaskDbSubject('TaskDB: create 15|Task Name|Description');
+const result = parseTaskDbSubject('TaskDB|create|15|Task Name|Description');
 // { action: 'create', id: 15, taskName: 'Task Name', summary: 'Description' }
 ```
 
@@ -96,7 +98,7 @@ const result = parseTaskDbSubject('TaskDB: create 15|Task Name|Description');
 In addition to the structured subject, commit messages include the full **TASKDB_CHANGE_V1** JSON payload:
 
 ```
-TaskDB: create 15|Secure token config|Remove the personal token input section...
+TaskDB|create|15|Secure token config|Remove the personal token input section...
 
 ---TASKDB_CHANGE_V1---
 {
@@ -148,10 +150,11 @@ The `TaskDatabase.parseTaskDbCommitSubject(line)` function includes a full schem
 
 ```javascript
 schema = {
-  format: 'TaskDB: <action> <id>|<task_name>|<description_or_summary>',
+  format: 'TaskDB|<action>|<id>|<task_name>|<description_or_summary>',
   separator: '|',
   actions: ['create', 'update', 'delete'],
   parts: {
+    prefix: 'literal "TaskDB"',
     action: 'one of: create, update, delete',
     id: 'numeric task ID (positive integer)',
     taskName: 'sanitized task name (no pipes, newlines)',
