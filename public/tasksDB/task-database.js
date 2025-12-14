@@ -129,6 +129,7 @@ class TaskDatabase {
       return {
         action: 'update',
         taskId: ev.taskId,
+        task: this.normalizeObjectKeyOrder(ev.after, fieldOrder),
         changes
       };
     });
@@ -144,7 +145,11 @@ class TaskDatabase {
         const suffix = name ? ` | ${name}` : '';
         if (e.action === 'create') subject = `TaskDB: create #${e.taskId}${suffix}`;
         else if (e.action === 'delete') subject = `TaskDB: delete #${e.taskId}${suffix}`;
-        else if (e.action === 'update') subject = `TaskDB: update #${e.taskId}`;
+        else if (e.action === 'update') {
+          // Include a concise human-friendly title with task name and changed fields
+          const changeSummary = Array.isArray(e.changes) && e.changes.length ? ` | ${this.summarizeHistoryChanges(e.changes)}` : '';
+          subject = `TaskDB: update #${e.taskId}${suffix}${changeSummary}`;
+        }
     } else if (normalizedEvents.length > 1) {
       subject = `TaskDB: changes +${creates} ~${updates} -${deletes}`;
     }
