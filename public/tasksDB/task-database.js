@@ -142,13 +142,15 @@ class TaskDatabase {
       if (normalizedEvents.length === 1) {
         const e = normalizedEvents[0];
         const name = e.task && e.task.task_name ? String(e.task.task_name) : '';
-        const suffix = name ? ` | ${name}` : '';
-        if (e.action === 'create') subject = `TaskDB: create #${e.taskId}${suffix}`;
-        else if (e.action === 'delete') subject = `TaskDB: delete #${e.taskId}${suffix}`;
+        const sanitize = str => String(str || '').replace(/[\r\n]+/g, ' ').replace(/[|,]/g, ' ').replace(/\s+/g, ' ').trim();
+        const safeName = sanitize(name);
+        const changeSummary = Array.isArray(e.changes) && e.changes.length ? String(this.summarizeHistoryChanges(e.changes)) : '';
+        const safeChangeSummary = sanitize(changeSummary);
+        if (e.action === 'create') subject = `TaskDB: create ${e.taskId}|${safeName}|create`;
+        else if (e.action === 'delete') subject = `TaskDB: delete ${e.taskId}|${safeName}|delete`;
         else if (e.action === 'update') {
-          // Include a concise human-friendly title with task name and changed fields
-          const changeSummary = Array.isArray(e.changes) && e.changes.length ? ` | ${this.summarizeHistoryChanges(e.changes)}` : '';
-          subject = `TaskDB: update #${e.taskId}${suffix}${changeSummary}`;
+          // Machine-friendly: id|task_name|short-change-summary (pipe-separated, no spaces around pipes)
+          subject = `TaskDB: update ${e.taskId}|${safeName}|${safeChangeSummary}`;
         }
     } else if (normalizedEvents.length > 1) {
       subject = `TaskDB: changes +${creates} ~${updates} -${deletes}`;
@@ -193,6 +195,12 @@ class TaskDatabase {
     if (!Array.isArray(changes) || changes.length === 0) return 'No field changes';
     const fields = changes.map(c => c.field).filter(Boolean);
     return fields.slice(0, 6).join(', ') + (fields.length > 6 ? ` (+${fields.length - 6} more)` : '');
+  }
+
+  // Sanitize a string for inclusion in a compact, machine-friendly commit subject
+  sanitizeSubjectField(str) {
+    if (!str && str !== 0) return '';
+    return String(str).replace(/[\r\n]+/g, ' ').replace(/[|,]/g, ' ').replace(/\s+/g, ' ').trim();
   }
 
   diffTasksForHistory(beforeTasks, afterTasks) {

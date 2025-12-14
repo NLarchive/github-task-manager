@@ -408,10 +408,19 @@ describe('TaskDatabase Persistence', () => {
     expect(payload).toBeTruthy();
     expect(payload.artifact).toBe('tasks.json');
 
-    // Subject line should include the task name and changed fields summary
+    // Subject line should be machine-friendly and include id, task_name, and change summary (pipe-separated)
     const subjectLine = String(msg || '').split('\n')[0] || '';
-    expect(subjectLine).toContain(`TaskDB: update #${created.task.task_id}`);
+    expect(subjectLine).toContain(`TaskDB: update ${created.task.task_id}|`);
     expect(subjectLine).toContain(created.task.task_name);
+    expect(subjectLine).toContain('progress_percentage');
+
+    // Structured subject should parse into pipe-separated fields: id|task_name|summary
+    const structured = subjectLine.replace(/^TaskDB:\s*update\s*/, '');
+    const parts = structured.split('|');
+    expect(parts.length).toBeGreaterThan(2);
+    expect(String(parts[0])).toBe(String(created.task.task_id));
+    expect(String(parts[1])).toContain('Commit Order Task');
+    expect(String(parts[2])).toContain('progress_percentage');
 
     // Find the update event
     const updateEv = (payload.events || []).find(e => e && e.action === 'update' && String(e.taskId) === String(created.task.task_id));
