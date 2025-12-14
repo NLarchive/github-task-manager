@@ -907,6 +907,29 @@
       "completed_date": null,
       "created_date": "2025-12-13T23:26:25.951Z",
       "creator_id": "system@example.com"
+    },
+    {
+      "task_id": 22,
+      "task_name": "Test Task - 1765719179618",
+      "description": "Test description for automated testing",
+      "status": "Not Started",
+      "priority": "Medium",
+      "start_date": "2025-12-15",
+      "end_date": "2025-12-20",
+      "progress_percentage": 0,
+      "estimated_hours": 8,
+      "actual_hours": 0,
+      "category_name": "Feature",
+      "tags": [],
+      "is_critical_path": false,
+      "assigned_workers": [],
+      "parent_task_id": null,
+      "dependencies": [],
+      "comments": [],
+      "attachments": [],
+      "completed_date": null,
+      "created_date": "2025-12-14T13:33:00.068Z",
+      "creator_id": "system@example.com"
     }
   ]
 }
