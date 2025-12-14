@@ -72,6 +72,11 @@ class TemplateAutomation {
       populated.progress_percentage = 100;
     }
 
+    // Mark intentionally-created test tasks (created during E2E) if tags contain e2e-test
+    if (Array.isArray(populated.tags) && populated.tags.includes('e2e-test')) {
+      populated.is_test = true;
+    }
+
     return populated;
   }
 

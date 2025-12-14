@@ -111,6 +111,13 @@ jobs:
           test -f public/config/template-config.js && echo "✓ template-config.js" || (echo "✗ Missing: template-config.js" && exit 1)
           echo "✓ All required files found"
 
+      - name: Validate TaskDB schema and commit format
+        run: |
+          echo "=== Validating TaskDB schema ==="
+          node tools/scripts/validate-tasks-schema.js --all
+          echo "=== Validating TaskDB commit format ==="
+          node tools/scripts/validate-commit-format.js --max 300
+
       - name: Regenerate derived state and CSV files
         run: |
           echo "=== Regenerating derived task files ==="

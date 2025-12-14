@@ -92,7 +92,7 @@ async function unlockProject(page, password) {
   await page.waitForSelector('.auth-indicator.unlocked', { timeout: TIMEOUT });
 }
 
-async function createTestTask(page, taskName = 'Test Task - ' + Date.now()) {
+async function createTestTask(page, taskName = 'Test Task ' + Math.random().toString(36).slice(2,8)) {
   // Click Add New Task
   await page.locator('button:has-text("Add New Task")').click();
 
@@ -105,6 +105,8 @@ async function createTestTask(page, taskName = 'Test Task - ' + Date.now()) {
   await page.locator('#taskStartDate').fill('2025-12-15');
   await page.locator('#taskEndDate').fill('2025-12-20');
   await page.locator('#taskEstimatedHours').fill('8');
+  // Mark this as an E2E test task so CI and reporting can ignore timestamp-like names
+  await page.locator('#taskTags').fill('e2e-test');
 
   // Submit
   await page.locator('#taskForm button[type="submit"]').click();
@@ -115,7 +117,7 @@ async function createTestTask(page, taskName = 'Test Task - ' + Date.now()) {
   return taskName;
 }
 
-async function editFirstTask(page, newName = 'Edited Task - ' + Date.now()) {
+async function editFirstTask(page, newName = 'Edited Task ' + Math.random().toString(36).slice(2,8)) {
   // Find and click the first Edit button
   const editButtons = page.locator('button:has-text("Edit")');
   await editButtons.first().click();

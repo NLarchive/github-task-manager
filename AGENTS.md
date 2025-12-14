@@ -90,6 +90,8 @@ tools\scripts\generate-state-files.js
 tools\scripts\regenerate-tasks-csv.js
 tools\scripts\setup.bat
 tools\scripts\setup.js
+tools\scripts\validate-tasks-schema.js
+tools\scripts\validate-commit-format.js
 tools\task-templates
 .gitignore
 AGENTS.md

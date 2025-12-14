@@ -72,12 +72,13 @@ test.describe('@smoke app boot + create task', () => {
     await page.getByRole('button', { name: '+ Add New Task' }).click();
     await page.locator('#taskModal').waitFor({ state: 'visible', timeout: TIMEOUT });
 
-    const name = `Smoke Task ${Date.now()}`;
+    const name = `Smoke Task ` + Math.random().toString(36).slice(2,8);
     await page.locator('#taskName').fill(name);
     await page.locator('#taskDescription').fill('Smoke test task');
     await page.locator('#taskStartDate').fill('2025-12-14');
     await page.locator('#taskEndDate').fill('2025-12-15');
     await page.locator('#taskEstimatedHours').fill('1');
+    await page.locator('#taskTags').fill('e2e-test');
     await page.locator('#taskForm button[type="submit"]').click();
 
     const toast = page.locator('#toast');

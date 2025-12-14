@@ -1,0 +1,35 @@
+name: Validate TaskDB (Schema + Commit Format)
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate TaskDB schema (ai-career-roadmap)
+        run: |
+          node tools/scripts/validate-tasks-schema.js ai-career-roadmap
+
+      - name: Validate TaskDB schema (github-task-manager)
+        run: |
+          node tools/scripts/validate-tasks-schema.js github-task-manager
+
+      - name: Validate TaskDB commit format
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+        run: |
+          node tools/scripts/validate-commit-format.js --max 300

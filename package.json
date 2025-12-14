@@ -8,6 +8,8 @@
     "start:static": "npx serve public -l 3000",
     "test": "node tests/run-tests.js",
     "test:validate": "node tests/unit/validate-schema.js",
+    "validate:tasks": "node tools/scripts/validate-tasks-schema.js --all",
+    "validate:commits": "node tools/scripts/validate-commit-format.js --max 300",
     "test:watch": "node tests/run-tests.js --watch",
     "test:playwright": "playwright test --config=tests/playwright.config.js",
     "test:playwright:ui": "playwright test --ui --config=tests/playwright.config.js",
