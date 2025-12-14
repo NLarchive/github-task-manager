@@ -39,6 +39,8 @@ coverage/
 .env
 .env.local
 .env.*.local
+.docs
+
 # Cloudflare Wrangler local state
 tools/**/.wrangler/
 playwright-report/

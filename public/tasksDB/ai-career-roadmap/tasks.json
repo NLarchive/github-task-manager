@@ -1,7 +1,7 @@
 {
   "project": {
     "name": "AI Career Roadmap (learn.deeplearning.ai)",
-    "description": "A structured learning + portfolio plan to build practical AI/ML skills and transition into an AI-related role.",
+    "description": "A structured learning + portfolio plan to build practical AI/ML skills and transition into an AI-related role. Current state: roadmap defined with 10 core learning tasks spanning foundations through interview prep. Future: integrate task tracking with GitHub, add progress dashboards, and validate learning outcomes with real project delivery.",
     "start_date": "2025-12-15",
     "end_date": "2026-06-30",
     "status": "Not Started",
