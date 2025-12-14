@@ -199,6 +199,8 @@ When no GitHub token is available:
 
 2. **On Load**:
    - Check localStorage first (fastest, local data)
+
+Note: For easy machine‑parsing, single-event commit subjects are compact and pipe-separated: `TaskDB: <action> <id>|<task_name>|<short-summary>`.
    - If empty, try GitHub API (production data)
    - If API fails, try fetching static JSON file
    - Always fall back gracefully to empty task list
