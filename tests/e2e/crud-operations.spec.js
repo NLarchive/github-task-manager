@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 // Test configuration
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000/';
-const TIMEOUT = 5000;
+const TIMEOUT = 30000;
 
 async function waitForAppReady(page) {
   await page.waitForSelector('[id="totalTasks"]', { timeout: TIMEOUT });

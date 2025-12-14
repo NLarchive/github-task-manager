@@ -52,7 +52,9 @@ tests
 tests\artifacts
 tests\e2e
 tests\e2e\crud-operations.spec.js
+tests\e2e\live-multi-project-saves.spec.js
 tests\e2e\new-features.spec.js
+tests\e2e\smoke.spec.js
 tests\e2e\update-task-via-ui.spec.js
 tests\playwright-report
 tests\test-results
@@ -72,10 +74,10 @@ tools\cloudflare-worker\deploy.ps1
 tools\cloudflare-worker\deploy.sh
 tools\cloudflare-worker\package.json
 tools\cloudflare-worker\README.md
+tools\cloudflare-worker\validate-secrets.js
 tools\cloudflare-worker\worker.js
 tools\cloudflare-worker\wrangler.toml
 tools\docs
-tools\docs\.archive
 tools\docs\DEPLOYMENT_SUMMARY.md
 tools\docs\GITHUB_PAGES_SETUP.md
 tools\docs\PLAYWRIGHT_TEST_REPORT.md

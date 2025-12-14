@@ -11,10 +11,16 @@
     "test:watch": "node tests/run-tests.js --watch",
     "test:playwright": "playwright test --config=tests/playwright.config.js",
     "test:playwright:ui": "playwright test --ui --config=tests/playwright.config.js",
-    "test:playwright:headed": "playwright test --headed --config=tests/playwright.config.js",
-    "test:playwright:debug": "playwright test --debug --config=tests/playwright.config.js",
-    "test:playwright:report": "playwright test --reporter=html --config=tests/playwright.config.js && npx playwright show-report",
-    "test:all": "npm run test && npm run test:validate && npm run test:playwright",
+    "test:playwright:headed": "cross-env PLAYWRIGHT_HEADFUL=1 playwright test --config=tests/playwright.config.js",
+    "test:playwright:debug": "cross-env PLAYWRIGHT_HEADFUL=1 playwright test --debug --config=tests/playwright.config.js",
+    "test:playwright:report": "cross-env PW_FULL=1 playwright test --config=tests/playwright.config.js --reporter=html",
+    "test:playwright:show-report": "npx playwright show-report tests/playwright-report",
+    "test:quick": "npm run test && npm run test:validate && npm run test:e2e:smoke",
+    "test:full": "npm run test && npm run test:validate && npm run test:e2e:full",
+    "test:all": "npm run test:quick",
+    "test:e2e:smoke": "cross-env PW_FAST=1 playwright test tests/e2e/smoke.spec.js --config=tests/playwright.config.js",
+    "test:e2e:full": "cross-env PW_FULL=1 playwright test --config=tests/playwright.config.js",
+    "test:e2e:live": "cross-env PLAYWRIGHT_RUN_LIVE=1 PLAYWRIGHT_BASE_URL=https://nlarchive.github.io/github-task-manager/ PW_FAST=1 playwright test --config=tests/playwright.config.js --grep @live",
     "tasks:archive-root": "node tools/scripts/archive-root-tasks.js",
     "tasks:generate-state": "node tools/scripts/generate-state-files.js",
     "tasks:regenerate-csv": "node tools/scripts/regenerate-tasks-csv.js github-task-manager",
@@ -42,9 +48,13 @@
   "homepage": "https://nlarchive.github.io/github-task-manager",
   "devDependencies": {
     "@playwright/test": "^1.57.0",
+    "cross-env": "^7.0.3",
     "eslint": "^8.56.0",
     "gh-pages": "^6.1.0",
     "prettier": "^3.2.0",
     "serve": "^14.2.0"
+  },
+  "dependencies": {
+    "github-task-manager": "file:"
   }
 }

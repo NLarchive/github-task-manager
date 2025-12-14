@@ -177,6 +177,11 @@ class TaskManagerApp {
             this.database.githubApi = this.githubApi;
         }
 
+        // Keep the header/status panel in sync with the newly selected project.
+        // Previously this was only updated during initial initialize(), which made
+        // project switching misleading (repo/tasks file stayed "Loading"/stale).
+        await this.showTaskManager();
+
         // Reload tasks for the newly selected project
         this.showToast(`Switched project to: ${safeProject}`, 'info');
         this.updateAccessIndicator();

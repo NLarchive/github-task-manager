@@ -37,6 +37,7 @@ const TaskDatabase = getDatabase(TemplateValidator, TemplateAutomation, console)
 class MockGitHubAPI {
   constructor() {
     this.files = {};
+    this.messages = {};
   }
   
   async getFileContent(path) {
@@ -48,7 +49,23 @@ class MockGitHubAPI {
   
   async updateFile(path, content, message, sha) {
     this.files[path] = content;
+    this.messages[path] = message;
     return { sha: 'new-mock-sha' };
+  }
+}
+
+function extractTaskDbCommitPayload(message) {
+  const start = '---TASKDB_CHANGE_V1---';
+  const end = '---/TASKDB_CHANGE_V1---';
+  if (typeof message !== 'string') return null;
+  const i = message.indexOf(start);
+  const j = message.indexOf(end);
+  if (i < 0 || j < 0 || j <= i) return null;
+  const jsonText = message.slice(i + start.length, j).trim();
+  try {
+    return JSON.parse(jsonText);
+  } catch {
+    return null;
   }
 }
 
@@ -331,7 +348,83 @@ describe('TaskDatabase Persistence', () => {
     expect(mockApi.files['public/tasksDB/github-task-manager/tasks.json']).toBeTruthy();
     expect(mockApi.files['public/tasksDB/github-task-manager/tasks.csv']).toBeTruthy();
 
+    // Commit message should include a machine-readable change block
+    const msg = mockApi.messages['public/tasksDB/github-task-manager/tasks.json'];
+    expect(typeof msg).toBe('string');
+    expect(msg).toContain('---TASKDB_CHANGE_V1---');
+    expect(msg).toContain('---/TASKDB_CHANGE_V1---');
+
+    const payload = extractTaskDbCommitPayload(msg);
+    expect(payload).toBeTruthy();
+    expect(payload.spec).toBe('taskdb.commit.v1');
+    expect(payload.projectId).toBe('github-task-manager');
+    expect(payload.artifact).toBe('tasks.json');
+    expect(Array.isArray(payload.events)).toBeTruthy();
+    expect(payload.events.length).toBeGreaterThan(0);
+    expect(payload.events[0].action).toBe('create');
+    expect(payload.events[0].task).toBeTruthy();
+    expect(payload.events[0].task.task_name).toBe('Persist Test Task');
+
     // Restore token
+    TEMPLATE_CONFIG.GITHUB.TOKEN = previousToken;
+  });
+
+  it('should include field-level changes for updates in a stable schema order', async () => {
+    const previousToken = TEMPLATE_CONFIG.GITHUB.TOKEN;
+    TEMPLATE_CONFIG.GITHUB.TOKEN = 'unit-test-token';
+
+    const mockApi = new MockGitHubAPI();
+    const db = new TaskDatabase(mockApi);
+
+    const created = db.createTask({
+      task_name: 'Commit Order Task',
+      description: 'Original',
+      start_date: '2025-12-11',
+      end_date: '2025-12-12',
+      priority: 'Medium',
+      status: 'Not Started',
+      estimated_hours: 1,
+      category_name: 'Testing'
+    }, 'dev@example.com');
+    expect(created.success).toBeTruthy();
+
+    // First save establishes snapshot
+    const first = await db.saveTasks('Initial save');
+    expect(first.success).toBeTruthy();
+
+    // Update a couple of fields (as the UI taskForm would)
+    const updated = db.updateTask(created.task.task_id, {
+      status: 'In Progress',
+      progress_percentage: 50,
+      description: 'Updated desc'
+    });
+    expect(updated.success).toBeTruthy();
+
+    const second = await db.saveTasks('Second save');
+    expect(second.success).toBeTruthy();
+
+    const msg = mockApi.messages['public/tasksDB/github-task-manager/tasks.json'];
+    const payload = extractTaskDbCommitPayload(msg);
+    expect(payload).toBeTruthy();
+    expect(payload.artifact).toBe('tasks.json');
+
+    // Find the update event
+    const updateEv = (payload.events || []).find(e => e && e.action === 'update' && String(e.taskId) === String(created.task.task_id));
+    expect(updateEv).toBeTruthy();
+    expect(Array.isArray(updateEv.changes)).toBeTruthy();
+
+    const fields = updateEv.changes.map(c => c.field);
+    expect(fields).toContain('description');
+    expect(fields).toContain('status');
+    expect(fields).toContain('progress_percentage');
+
+    // Schema-order sanity: status should appear before progress_percentage in the template config
+    const idxStatus = fields.indexOf('status');
+    const idxProgress = fields.indexOf('progress_percentage');
+    expect(idxStatus).toBeGreaterThan(-1);
+    expect(idxProgress).toBeGreaterThan(-1);
+    expect(idxStatus < idxProgress).toBeTruthy();
+
     TEMPLATE_CONFIG.GITHUB.TOKEN = previousToken;
   });
 

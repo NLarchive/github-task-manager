@@ -52,6 +52,124 @@ class TaskDatabase {
     this._lastSyncedTasksSnapshot = null;
   }
 
+  getTaskSchemaFieldOrder() {
+    const templateConfig = resolveTemplateConfig();
+    const categories = templateConfig && templateConfig.FIELD_CATEGORIES ? templateConfig.FIELD_CATEGORIES : null;
+    const automatic = (categories && Array.isArray(categories.AUTOMATIC)) ? categories.AUTOMATIC : [];
+    const required = (categories && Array.isArray(categories.REQUIRED_INPUT)) ? categories.REQUIRED_INPUT : [];
+    const optional = (categories && Array.isArray(categories.OPTIONAL_INPUT)) ? categories.OPTIONAL_INPUT : [];
+
+    const ordered = [];
+    for (const k of [...automatic, ...required, ...optional]) {
+      const key = (typeof k === 'string' ? k.trim() : '');
+      if (!key) continue;
+      if (!ordered.includes(key)) ordered.push(key);
+    }
+    return ordered;
+  }
+
+  normalizeObjectKeyOrder(obj, preferredKeys = []) {
+    if (!obj || typeof obj !== 'object') return obj;
+    const out = {};
+    const seen = new Set();
+
+    for (const key of Array.isArray(preferredKeys) ? preferredKeys : []) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        out[key] = obj[key];
+        seen.add(key);
+      }
+    }
+
+    const remaining = Object.keys(obj).filter(k => !seen.has(k)).sort();
+    for (const key of remaining) {
+      out[key] = obj[key];
+    }
+    return out;
+  }
+
+  buildTaskCommitBlock({ baseMessage, projectId, tasksFile, actor, artifact, beforeTasks, afterTasks }) {
+    const safeProjectId = String(projectId || '').trim() || 'github-task-manager';
+    const safeTasksFile = String(tasksFile || '').trim();
+    const safeActor = String(actor || '').trim();
+    const safeArtifact = String(artifact || '').trim() || 'tasks.json';
+
+    const fieldOrder = this.getTaskSchemaFieldOrder();
+    const rawEvents = this.diffTasksForHistory(beforeTasks, afterTasks);
+
+    // Ensure stable ordering for downstream parsing/visualization.
+    const normalizedEvents = rawEvents.map(ev => {
+      if (ev.action === 'create') {
+        return {
+          action: 'create',
+          taskId: ev.taskId,
+          task: this.normalizeObjectKeyOrder(ev.after, fieldOrder)
+        };
+      }
+      if (ev.action === 'delete') {
+        return {
+          action: 'delete',
+          taskId: ev.taskId,
+          task: this.normalizeObjectKeyOrder(ev.before, fieldOrder)
+        };
+      }
+
+      const changeMap = new Map();
+      (Array.isArray(ev.changes) ? ev.changes : []).forEach(c => {
+        if (c && typeof c.field === 'string' && c.field.trim()) changeMap.set(c.field, c);
+      });
+
+      const preferred = [...fieldOrder, ...Array.from(new Set(Array.from(changeMap.keys()).filter(k => !fieldOrder.includes(k))).values()).sort()];
+      const changes = [];
+      for (const field of preferred) {
+        const c = changeMap.get(field);
+        if (!c) continue;
+        changes.push({ field, before: c.before, after: c.after });
+      }
+
+      return {
+        action: 'update',
+        taskId: ev.taskId,
+        changes
+      };
+    });
+
+    const creates = normalizedEvents.filter(e => e.action === 'create').length;
+    const updates = normalizedEvents.filter(e => e.action === 'update').length;
+    const deletes = normalizedEvents.filter(e => e.action === 'delete').length;
+
+    let subject = String(baseMessage || 'Update tasks').trim() || 'Update tasks';
+      if (normalizedEvents.length === 1) {
+        const e = normalizedEvents[0];
+        const name = e.task && e.task.task_name ? String(e.task.task_name) : '';
+        const suffix = name ? ` | ${name}` : '';
+        if (e.action === 'create') subject = `TaskDB: create #${e.taskId}${suffix}`;
+        else if (e.action === 'delete') subject = `TaskDB: delete #${e.taskId}${suffix}`;
+        else if (e.action === 'update') subject = `TaskDB: update #${e.taskId}`;
+    } else if (normalizedEvents.length > 1) {
+      subject = `TaskDB: changes +${creates} ~${updates} -${deletes}`;
+    }
+
+    const payload = {
+      spec: 'taskdb.commit.v1',
+      ts: new Date().toISOString(),
+      projectId: safeProjectId,
+      tasksFile: safeTasksFile,
+      artifact: safeArtifact,
+      actor: safeActor,
+      events: normalizedEvents
+    };
+
+    const block = [
+      subject,
+      '',
+      '---TASKDB_CHANGE_V1---',
+      JSON.stringify(payload, null, 2),
+      '---/TASKDB_CHANGE_V1---'
+    ].join('\n');
+
+    return { subject, payload, message: block };
+  }
+
   cloneTasksSnapshot(tasks) {
     try {
       return JSON.parse(JSON.stringify(Array.isArray(tasks) ? tasks : []));
@@ -723,6 +841,16 @@ class TaskDatabase {
 
     const actor = this.resolveActor();
 
+    const { message: tasksJsonCommitMessage } = this.buildTaskCommitBlock({
+      baseMessage: message,
+      projectId,
+      tasksFile,
+      actor,
+      artifact: 'tasks.json',
+      beforeTasks: beforeTasksSnapshot,
+      afterTasks: this.tasks
+    });
+
     // Save tasks.json
     const jsonResponse = await fetch(`${workerUrl}/api/tasks`, {
       method: 'PUT',
@@ -732,7 +860,7 @@ class TaskDatabase {
         accessPassword,
         filePath: tasksFile,
         content,
-        message,
+        message: tasksJsonCommitMessage,
         actor
       })
     });
@@ -748,6 +876,17 @@ class TaskDatabase {
     // Save tasks.csv
     const tasksCsvFile = tasksFile.replace(/\.json$/i, '.csv');
     const csvContent = this.generatePersistedCSV(this.tasks);
+
+    const { message: tasksCsvCommitMessage } = this.buildTaskCommitBlock({
+      baseMessage: message,
+      projectId,
+      tasksFile,
+      actor,
+      artifact: 'tasks.csv',
+      beforeTasks: beforeTasksSnapshot,
+      afterTasks: this.tasks
+    });
+
     await fetch(`${workerUrl}/api/tasks`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -756,7 +895,7 @@ class TaskDatabase {
         accessPassword,
         filePath: tasksCsvFile,
         content: csvContent,
-        message: `${message} (csv)`,
+        message: tasksCsvCommitMessage,
         actor
       })
     });
@@ -767,6 +906,15 @@ class TaskDatabase {
       const baseDir = tasksFile.replace(/\/[^\/]+$/, '');
       const stateDir = `${baseDir}/state`;
       for (const [filename, stateContent] of Object.entries(stateFiles)) {
+        const { message: stateCommitMessage } = this.buildTaskCommitBlock({
+          baseMessage: message,
+          projectId,
+          tasksFile,
+          actor,
+          artifact: `state/${filename}`,
+          beforeTasks: beforeTasksSnapshot,
+          afterTasks: this.tasks
+        });
         await fetch(`${workerUrl}/api/tasks`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -775,7 +923,7 @@ class TaskDatabase {
             accessPassword,
             filePath: `${stateDir}/${filename}`,
             content: stateContent,
-            message: `${message} (state)`,
+            message: stateCommitMessage,
             actor
           })
         });
@@ -829,15 +977,36 @@ class TaskDatabase {
         ? gh.getTasksFile(resolveActiveProjectId())
         : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/github-task-manager/tasks.json');
 
+      const beforeTasksSnapshot = this.cloneTasksSnapshot(this._lastSyncedTasksSnapshot || []);
+      const actor = this.resolveActor();
+      const { message: tasksJsonCommitMessage } = this.buildTaskCommitBlock({
+        baseMessage: message,
+        projectId: resolveActiveProjectId(),
+        tasksFile,
+        actor,
+        artifact: 'tasks.json',
+        beforeTasks: beforeTasksSnapshot,
+        afterTasks: this.tasks
+      });
+
       // Persist JSON
       const { sha: tasksSha } = await this.githubApi.getFileContent(tasksFile);
-      await this.githubApi.updateFile(tasksFile, content, message, tasksSha);
+      await this.githubApi.updateFile(tasksFile, content, tasksJsonCommitMessage, tasksSha);
 
       // Persist CSV alongside JSON
       const tasksCsvFile = tasksFile.endsWith('.json') ? tasksFile.replace(/\.json$/i, '.csv') : 'tasksDB/tasks.csv';
       const csvContent = this.generatePersistedCSV(this.tasks);
       const { sha: csvSha } = await this.githubApi.getFileContent(tasksCsvFile);
-      await this.githubApi.updateFile(tasksCsvFile, csvContent, `${message} (csv)`, csvSha);
+      const { message: tasksCsvCommitMessage } = this.buildTaskCommitBlock({
+        baseMessage: message,
+        projectId: resolveActiveProjectId(),
+        tasksFile,
+        actor,
+        artifact: 'tasks.csv',
+        beforeTasks: beforeTasksSnapshot,
+        afterTasks: this.tasks
+      });
+      await this.githubApi.updateFile(tasksCsvFile, csvContent, tasksCsvCommitMessage, csvSha);
 
       // Persist LLM-friendly state files by status (optional but useful)
       try {
@@ -847,7 +1016,16 @@ class TaskDatabase {
         for (const [filename, stateContent] of Object.entries(stateFiles)) {
           const path = `${stateDir}/${filename}`;
           const { sha } = await this.githubApi.getFileContent(path);
-          await this.githubApi.updateFile(path, stateContent, `${message} (state)`, sha);
+          const { message: stateCommitMessage } = this.buildTaskCommitBlock({
+            baseMessage: message,
+            projectId: resolveActiveProjectId(),
+            tasksFile,
+            actor,
+            artifact: `state/${filename}`,
+            beforeTasks: beforeTasksSnapshot,
+            afterTasks: this.tasks
+          });
+          await this.githubApi.updateFile(path, stateContent, stateCommitMessage, sha);
         }
       } catch (stateError) {
         console.warn('Could not persist state files:', stateError.message);
@@ -855,6 +1033,9 @@ class TaskDatabase {
 
       // Also save locally as backup
       this.saveTasksLocal(message);
+
+        // Update snapshot after successful save
+        this._lastSyncedTasksSnapshot = this.cloneTasksSnapshot(this.tasks);
 
       return { success: true, source: 'github' };
   }
