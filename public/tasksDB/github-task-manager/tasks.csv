@@ -25,3 +25,4 @@ task_id,task_name,description,start_date,end_date,priority,status,progress_perce
 24,Test Task - 1765719719965,Test description for automated testing,2025-12-15,2025-12-20,Medium,Not Started,0,8,0,false,Feature,,system@example.com,2025-12-14T13:42:00.340Z,
 25,Test Task - 1765719743527,Test description for automated testing,2025-12-15,2025-12-20,Medium,Not Started,0,8,0,false,Feature,,system@example.com,2025-12-14T13:42:24.205Z,
 26,Test Task - 1765719792028,Test description for automated testing,2025-12-15,2025-12-20,Medium,Not Started,0,8,0,false,Feature,,system@example.com,2025-12-14T13:43:13.092Z,
+27,Test Task - 1765723235562,Test description for automated testing,2025-12-15,2025-12-20,Medium,Not Started,0,8,0,false,Feature,,system@example.com,2025-12-14T14:40:35.998Z,
