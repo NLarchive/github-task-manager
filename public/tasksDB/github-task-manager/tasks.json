@@ -174,7 +174,7 @@
       "status": "Completed",
       "progress_percentage": 100,
       "estimated_hours": 8,
-      "actual_hours": 6,
+      "actual_hours": 7,
       "is_critical_path": true,
       "tags": [
         "frontend",
@@ -184,9 +184,9 @@
       "category_name": "Frontend Development",
       "assigned_workers": [
         {
-          "name": "Developer",
+          "name": "dev@example.com",
           "email": "dev@example.com",
-          "role": "Full Stack Developer"
+          "role": "Collaborator"
         }
       ],
       "parent_task_id": null,
