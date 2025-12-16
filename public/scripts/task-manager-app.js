@@ -157,6 +157,19 @@ class TaskManagerApp {
         this.loadUserName();
         this.updateAccessIndicator(); // Initialize access indicator
 
+        // Listen for exit requests from embedded graph iframe (postMessage)
+        window.addEventListener('message', (e) => {
+            try {
+                if (!e || !e.data || e.data.type !== 'exitGraphView') return;
+                const frame = document.getElementById('graphFrame');
+                if (frame && e.source !== frame.contentWindow) return; // only accept from graph iframe
+                if (this.viewMode === 'graph') this.setViewMode('list');
+            } catch (err) {
+                // non-fatal
+                console.warn('Error handling message event', err);
+            }
+        });
+
         // Setup GitHub API with pre-configured settings
         if (this.isConfigured()) {
             this.githubApi = new GitHubAPI(this.config);
@@ -1213,19 +1226,15 @@ class TaskManagerApp {
                 graphView.classList.add('fullscreen');
                 document.body.classList.add('graph-fullscreen-active');
 
-                // Add an exit button if not already present
-                let exitBtn = document.getElementById('exitGraphViewBtn');
-                if (!exitBtn) {
-                    exitBtn = document.createElement('button');
-                    exitBtn.id = 'exitGraphViewBtn';
-                    exitBtn.className = 'graph-exit-btn btn-secondary';
-                    exitBtn.setAttribute('aria-label', 'Close graph view');
-                    exitBtn.textContent = '← Close';
+                // Exit action handled via the menu panel button (#exitGraphViewBtn).
+                const exitBtn = document.getElementById('exitGraphViewBtn');
+                if (exitBtn && !exitBtn._hasExitHandler) {
                     exitBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
                         this.setViewMode('list');
                     });
-                    graphView.appendChild(exitBtn);
+                    // mark to avoid duplicate handlers
+                    exitBtn._hasExitHandler = true;
                 }
 
                 // Add Escape key handler to exit fullscreen
@@ -1243,8 +1252,6 @@ class TaskManagerApp {
             } else {
                 graphView.classList.remove('fullscreen');
                 document.body.classList.remove('graph-fullscreen-active');
-                const exitBtn = document.getElementById('exitGraphViewBtn');
-                if (exitBtn && exitBtn.parentNode) exitBtn.parentNode.removeChild(exitBtn);
 
                 // Remove Escape key handler
                 if (typeof this._graphEscHandler === 'function') {

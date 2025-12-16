@@ -1803,6 +1803,34 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
         window.graphInstance = graphInstance; // Make global if needed
 
+        // If an exit button exists in the graph menu, notify parent when clicked so the parent can exit fullscreen
+        (function wireExitToParent(){
+            try {
+                const exitBtn = document.getElementById('exitGraphViewBtn');
+                if (exitBtn && !exitBtn._wiredToParent) {
+                    exitBtn.addEventListener('click', () => {
+                        try { window.parent.postMessage({ type: 'exitGraphView' }, '*'); }
+                        catch (e) { console.warn('Unable to postMessage to parent for exitGraphView', e); }
+                    });
+                    exitBtn._wiredToParent = true;
+                }
+
+                // Also forward Escape key presses inside the iframe to the parent
+                if (!window._exitForwarderInstalled) {
+                    document.addEventListener('keydown', (ev) => {
+                        if (ev.key === 'Escape') {
+                            try { window.parent.postMessage({ type: 'exitGraphView' }, '*'); }
+                            catch (e) { /* noop */ }
+                        }
+                    });
+                    window._exitForwarderInstalled = true;
+                }
+            } catch (err) {
+                // Non-fatal
+                console.warn('Failed to wire exit button to parent:', err);
+            }
+        })();
+
          // --- Initialize Walkthrough (template-controlled) ---
         const walkthroughEnabled = template?.meta?.walkthroughEnabled !== false;
         if (walkthroughEnabled && typeof Walkthrough === 'function') {

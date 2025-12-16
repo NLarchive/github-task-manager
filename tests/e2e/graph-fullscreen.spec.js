@@ -39,11 +39,15 @@ test.describe('Graph Fullscreen', () => {
       return gv && gv.classList && gv.classList.contains('fullscreen');
     }, { timeout: TIMEOUT });
 
-    // Exit button present
-    const exitBtn = page.locator('#exitGraphViewBtn');
+    // Open the menu inside the graph iframe to access the exit button (we moved it into the menu panel)
+    const frame = page.frameLocator('#graphFrame');
+    await frame.locator('#profile-legend-button').click();
+    await frame.locator('#menu-panel.menu-open').waitFor({ timeout: TIMEOUT });
+
+    const exitBtn = frame.locator('#exitGraphViewBtn');
     await expect(exitBtn).toBeVisible();
 
-    // Click the exit button
+    // Click the exit button inside the iframe menu
     await exitBtn.click();
 
     // Graph view should exit fullscreen

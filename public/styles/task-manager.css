@@ -798,30 +798,9 @@ header h1 {
     height: 100%;
 }
 
-/* Exit button shown when graph is fullscreen */
-.graph-exit-btn {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    z-index: 1610;
-    padding: 8px 12px;
-    font-size: 14px;
-    border-radius: 8px;
-    background: rgba(0,0,0,0.35);
-    color: var(--text-primary);
-    border: 1px solid rgba(255,255,255,0.06);
-    cursor: pointer;
-    min-height: var(--touch-target-min);
-    min-width: 44px;
-}
-.graph-exit-btn:hover { background: rgba(0,0,0,0.5); }
-
+/* Exit button styling removed — control moved into the graph menu (.control-button) */
 /* Prevent background scrolling when graph fullscreen is active */
 body.graph-fullscreen-active { overflow: hidden; }
-
-@media (max-width: 768px) {
-    .graph-exit-btn { top: 8px; right: 8px; padding: 10px 14px; }
-}
 
 /* ============================================================ */
 /* Mobile Responsive Overrides */
