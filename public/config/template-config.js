@@ -5,6 +5,12 @@ const TEMPLATE_CONFIG = {
   version: "1.3",
   template_type: "project_task_template",
 
+  // Environment flags
+  // DEV_MODE: when true, enables loading templates and other dev-only features
+  // SHOW_TEMPLATES: explicitly show templates even on hosted sites (use with caution)
+  DEV_MODE: false,
+  SHOW_TEMPLATES: false,
+
   // Field Categories for Form Generation
   FIELD_CATEGORIES: {
     // Fields that are automatically generated - user doesn't input these
@@ -230,9 +236,9 @@ const TEMPLATE_CONFIG = {
         id: 'ai-career-roadmap',
         label: 'AI Career Roadmap (learn.deeplearning.ai)',
         owner: 'nlarchive',
-        repo: 'ai-career-roadmap',
+        repo: 'github-task-manager',
         branch: 'main',
-        tasksRoot: 'tasksDB'
+        tasksRoot: 'public/tasksDB'
       }
     ],
 
@@ -291,6 +297,13 @@ const TEMPLATE_CONFIG = {
     "Analytics"
   ]
 };
+
+// Prefer centralized projects list when available (browser runtime)
+// This keeps TaskDB paths consistent across local dev and GitHub Pages.
+if (typeof PROJECTS_CONFIG !== 'undefined' && Array.isArray(PROJECTS_CONFIG) && PROJECTS_CONFIG.length) {
+  TEMPLATE_CONFIG.GITHUB = TEMPLATE_CONFIG.GITHUB || {};
+  TEMPLATE_CONFIG.GITHUB.PROJECTS = PROJECTS_CONFIG;
+}
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {

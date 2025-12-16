@@ -1,0 +1,62 @@
+[
+  {
+    "title": "Welcome to the Roadmap Graph",
+    "content": "This guided tour explains how to read the project graph: layers (sequencing), color = priority, and size = estimated effort. Follow the steps to inspect key tasks and controls.",
+    "position": "center-bottom"
+  },
+  {
+    "nodeId": "project-start",
+    "title": "Project Start",
+    "content": "Layer 1 tasks (immediately visible from this node) have no prerequisites and start the project timeline.",
+    "position": "bottom",
+    "focus": true,
+    "hoverNode": true
+  },
+  {
+    "title": "Layered Dependencies",
+    "content": "Tasks are placed in layers computed from their dependencies: later layers depend on earlier ones. Use layering to find blockers and ordering.",
+    "position": "center-bottom"
+  },
+  {
+    "nodeId": "task-1",
+    "title": "Inspect a Kickoff Task",
+    "content": "Click a node to open its details: description, estimated hours, dependencies, and assigned roles. Try opening this kickoff task to see the information available.",
+    "position": "bottom",
+    "focus": true,
+    "hoverNode": true,
+    "clickNode": true
+  },
+  {
+    "nodeId": "task-21",
+    "title": "Major Implementation Task: Roadmap UI Component",
+    "content": "This task (Roadmap UI Component) has a large estimated effort and is marked critical — it represents a major implementation milestone. Click to inspect acceptance criteria and dependencies.",
+    "position": "bottom",
+    "focus": true,
+    "hoverNode": true,
+    "clickNode": true
+  },
+  {
+    "title": "Critical Path & Priorities",
+    "content": "Look for tasks labeled Critical (red). These drive the critical path; resolving blockers on them helps the project finish sooner.",
+    "position": "center-bottom"
+  },
+  {
+    "nodeId": "project-end",
+    "title": "Project Milestone (End)",
+    "content": "Terminal tasks with no dependents flow into this milestone — use it to identify final deliverables and completion points.",
+    "position": "bottom",
+    "focus": true,
+    "hoverNode": true
+  },
+  {
+    "title": "Legend & Controls",
+    "content": "Open the Legend to see the mapping of colors and relationship types. Use the menu to search, filter by priority, and export the task list.",
+    "position": "bottom-left",
+    "target": "#menu-panel"
+  },
+  {
+    "title": "Try it Out",
+    "content": "Use search to find tasks by name, filter by priority to see critical work only, and click nodes to view details. Close this tour when you're ready to explore further.",
+    "position": "center-bottom"
+  }
+]

@@ -149,15 +149,15 @@ describe('GITHUB Configuration', () => {
     expect(cfg).toBeTruthy();
     expect(cfg.id).toBe('ai-career-roadmap');
     expect(cfg.owner).toBe('nlarchive');
-    expect(cfg.repo).toBe('ai-career-roadmap');
+    expect(cfg.repo).toBe('github-task-manager');
     expect(cfg.branch).toBe('main');
-    expect(cfg.tasksRoot).toBe('tasksDB');
+    expect(cfg.tasksRoot).toBe('public/tasksDB');
   });
 
   it('should compute tasks file per project root', () => {
     expect(typeof GITHUB.getTasksFile).toBe('function');
     expect(GITHUB.getTasksFile('github-task-manager')).toBe('public/tasksDB/github-task-manager/tasks.json');
-    expect(GITHUB.getTasksFile('ai-career-roadmap')).toBe('tasksDB/ai-career-roadmap/tasks.json');
+    expect(GITHUB.getTasksFile('ai-career-roadmap')).toBe('public/tasksDB/ai-career-roadmap/tasks.json');
   });
 });
 

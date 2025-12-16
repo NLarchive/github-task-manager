@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles/task-manager.css">
 </head>
 <body>
+    <a class="skip-link" href="#taskManager">Skip to main content</a>
     <div class="container">
         <header>
             <h1>📋 GitHub Task Manager</h1>
@@ -46,6 +47,7 @@
                     <div class="view-toggle" role="group" aria-label="View mode">
                         <button type="button" id="viewListBtn" onclick="app.setViewMode('list')" class="btn-secondary active" data-testid="view-list">📋 List</button>
                         <button type="button" id="viewTimelineBtn" onclick="app.setViewMode('timeline')" class="btn-secondary" data-testid="view-timeline">📅 Timeline</button>
+                        <button type="button" id="viewGraphBtn" onclick="app.setViewMode('graph')" class="btn-secondary" data-testid="view-graph">🕸️ Graph</button>
                     </div>
                     <div class="filter-section">
                         <select id="filterStatus" onchange="app.filterTasks()">
@@ -89,6 +91,14 @@
 
                 <section class="tasks-section">
                     <div id="timelineView" class="timeline-view" style="display: none;" data-testid="timeline-view"></div>
+                    <div id="graphView" class="graph-view" style="display: none;" data-testid="graph-view">
+                        <iframe id="graphFrame" class="graph-frame" title="Project Graph View" loading="lazy"></iframe>
+                        <div id="graphFrameError" class="graph-frame-error" style="display: none; margin-top: 12px; padding: 12px; background: #fff8f0; border: 1px solid #ffd8b0; color: #663300;">
+                            <strong>Graph could not be loaded.</strong>
+                            <div id="graphFrameErrorMessage" style="margin-top:6px;">Please check that <code>/public/graph-display/index.html</code> is accessible from your server.</div>
+                            <div style="margin-top:8px;"><a id="graphFrameOpenDirect" href="#" target="_blank">Open graph template directly</a></div>
+                        </div>
+                    </div>
                     <div id="tasksList" class="tasks-list" data-testid="tasks-list"></div>
                     <div id="emptyState" class="empty-state" style="display: none;">
                         <p>No tasks found. Click "Add New Task" to get started, or import a template above!</p>
@@ -384,6 +394,8 @@
     <!-- Worker URL config (for secure writes via Cloudflare Worker) -->
     <script src="config/worker-url.local.js"></script>
     <script src="config/worker-url.js"></script>
+    <!-- Centralized projects list (overrides template-config defaults when present) -->
+    <script src="config/projects-config.js"></script>
     <!-- Main config (depends on ACCESS_PASSWORD from access-secret) -->
     <script src="config/template-config.js"></script>
     <!-- Rest of the scripts -->

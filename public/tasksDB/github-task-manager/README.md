@@ -81,6 +81,7 @@ If updating these files manually:
 
 All tasks must conform to the template validation schema defined in:
 - `/public/config/template-config.js`
+- `/public/config/projects-config.js` (multi-project repo metadata; non-secret)
 - `/task-templates/TEMPLATE_VALIDATION_GUIDE.md`
 
 ## Backup & Recovery

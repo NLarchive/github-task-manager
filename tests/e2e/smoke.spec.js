@@ -1,3 +1,15 @@
+/**
+ * Smoke tests: app boot and basic create task flow.
+ *
+ * Verifies the app loads, initializes config, and can create a task locally.
+ * Steps:
+ *  - Wait for app ready signals and loading overlay to hide
+ *  - Unlock access if the repo is locked
+ *  - Open the "Add New Task" modal and submit a new task
+ *  - Assert success toast and that total task count increases
+ *
+ * Tagged with '@smoke' and intended to be quick and resilient.
+ */
 import { test, expect } from '@playwright/test';
 
 const TIMEOUT = 30000;

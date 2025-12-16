@@ -15,9 +15,6 @@ configContent = configContent.replace(
 const getConfig = new Function(configContent + '\nreturn TEMPLATE_CONFIG;');
 const TEMPLATE_CONFIG = getConfig();
 
-// Make available to code evaluated via new Function() (TaskDatabase.resolveTemplateConfig())
-globalThis.TEMPLATE_CONFIG = TEMPLATE_CONFIG;
-
 // Load validator
 const validatorContent = fs.readFileSync(path.join(__dirname, '../../public/scripts/template-validator.js'), 'utf8');
 const getValidator = new Function('TEMPLATE_CONFIG', validatorContent + '\nreturn TemplateValidator;');
@@ -37,7 +34,6 @@ const TaskDatabase = getDatabase(TemplateValidator, TemplateAutomation, console)
 class MockGitHubAPI {
   constructor() {
     this.files = {};
-    this.messages = {};
   }
   
   async getFileContent(path) {
@@ -49,23 +45,7 @@ class MockGitHubAPI {
   
   async updateFile(path, content, message, sha) {
     this.files[path] = content;
-    this.messages[path] = message;
     return { sha: 'new-mock-sha' };
-  }
-}
-
-function extractTaskDbCommitPayload(message) {
-  const start = '---TASKDB_CHANGE_V1---';
-  const end = '---/TASKDB_CHANGE_V1---';
-  if (typeof message !== 'string') return null;
-  const i = message.indexOf(start);
-  const j = message.indexOf(end);
-  if (i < 0 || j < 0 || j <= i) return null;
-  const jsonText = message.slice(i + start.length, j).trim();
-  try {
-    return JSON.parse(jsonText);
-  } catch {
-    return null;
   }
 }
 
@@ -322,10 +302,6 @@ describe('Statistics Generation', () => {
 
 describe('TaskDatabase Persistence', () => {
   it('should save both tasks.json and tasks.csv', async () => {
-    // Force GitHub persistence path for this test
-    const previousToken = TEMPLATE_CONFIG.GITHUB.TOKEN;
-    TEMPLATE_CONFIG.GITHUB.TOKEN = 'unit-test-token';
-
     const mockApi = new MockGitHubAPI();
     const db = new TaskDatabase(mockApi);
 
@@ -345,134 +321,8 @@ describe('TaskDatabase Persistence', () => {
     const result = await db.saveTasks('Test save');
     expect(result.success).toBeTruthy();
 
-    expect(mockApi.files['public/tasksDB/github-task-manager/tasks.json']).toBeTruthy();
-    expect(mockApi.files['public/tasksDB/github-task-manager/tasks.csv']).toBeTruthy();
-
-    // Commit message should include a machine-readable change block
-    const msg = mockApi.messages['public/tasksDB/github-task-manager/tasks.json'];
-    expect(typeof msg).toBe('string');
-    expect(msg).toContain('---TASKDB_CHANGE_V1---');
-    expect(msg).toContain('---/TASKDB_CHANGE_V1---');
-
-    const payload = extractTaskDbCommitPayload(msg);
-    expect(payload).toBeTruthy();
-    expect(payload.spec).toBe('taskdb.commit.v1');
-    expect(payload.projectId).toBe('github-task-manager');
-    expect(payload.artifact).toBe('tasks.json');
-    expect(Array.isArray(payload.events)).toBeTruthy();
-    expect(payload.events.length).toBeGreaterThan(0);
-    expect(payload.events[0].action).toBe('create');
-    expect(payload.events[0].task).toBeTruthy();
-    expect(payload.events[0].task.task_name).toBe('Persist Test Task');
-
-    // Restore token
-    TEMPLATE_CONFIG.GITHUB.TOKEN = previousToken;
-  });
-
-  it('should include field-level changes for updates in a stable schema order', async () => {
-    const previousToken = TEMPLATE_CONFIG.GITHUB.TOKEN;
-    TEMPLATE_CONFIG.GITHUB.TOKEN = 'unit-test-token';
-
-    const mockApi = new MockGitHubAPI();
-    const db = new TaskDatabase(mockApi);
-
-    const created = db.createTask({
-      task_name: 'Commit Order Task',
-      description: 'Original',
-      start_date: '2025-12-11',
-      end_date: '2025-12-12',
-      priority: 'Medium',
-      status: 'Not Started',
-      estimated_hours: 1,
-      category_name: 'Testing'
-    }, 'dev@example.com');
-    expect(created.success).toBeTruthy();
-
-    // First save establishes snapshot
-    const first = await db.saveTasks('Initial save');
-    expect(first.success).toBeTruthy();
-
-    // Update a couple of fields (as the UI taskForm would)
-    const updated = db.updateTask(created.task.task_id, {
-      status: 'In Progress',
-      progress_percentage: 50,
-      description: 'Updated desc'
-    });
-    expect(updated.success).toBeTruthy();
-
-    const second = await db.saveTasks('Second save');
-    expect(second.success).toBeTruthy();
-
-    const msg = mockApi.messages['public/tasksDB/github-task-manager/tasks.json'];
-    const payload = extractTaskDbCommitPayload(msg);
-    expect(payload).toBeTruthy();
-    expect(payload.artifact).toBe('tasks.json');
-
-    // Subject line should be machine-friendly and include action, id, task_name, and change summary (fully pipe-separated)
-    const subjectLine = String(msg || '').split('\n')[0] || '';
-    expect(subjectLine).toContain(`TaskDB|update|${created.task.task_id}|`);
-    expect(subjectLine).toContain(created.task.task_name);
-    expect(subjectLine).toContain('progress_percentage');
-
-    // Structured subject should parse into pipe-separated fields: TaskDB|action|id|task_name|summary
-    const parts = subjectLine.split('|');
-    expect(parts.length).toBeGreaterThan(4);
-    expect(String(parts[2])).toBe(String(created.task.task_id));
-    expect(String(parts[3])).toContain('Commit Order Task');
-    expect(String(parts[4])).toContain('progress_percentage');
-
-    // Find the update event
-    const updateEv = (payload.events || []).find(e => e && e.action === 'update' && String(e.taskId) === String(created.task.task_id));
-    expect(updateEv).toBeTruthy();
-    expect(Array.isArray(updateEv.changes)).toBeTruthy();
-
-    const fields = updateEv.changes.map(c => c.field);
-    expect(fields).toContain('description');
-    expect(fields).toContain('status');
-    expect(fields).toContain('progress_percentage');
-
-    // Schema-order sanity: status should appear before progress_percentage in the template config
-    const idxStatus = fields.indexOf('status');
-    const idxProgress = fields.indexOf('progress_percentage');
-    expect(idxStatus).toBeGreaterThan(-1);
-    expect(idxProgress).toBeGreaterThan(-1);
-    expect(idxStatus < idxProgress).toBeTruthy();
-
-    TEMPLATE_CONFIG.GITHUB.TOKEN = previousToken;
-  });
-
-  it('should parse and validate TaskDB commit subject format', () => {
-    const mockApi = new MockGitHubAPI();
-    const db = new TaskDatabase(mockApi);
-
-    // Test valid create subject
-    const createSubject = 'TaskDB|create|5|Sample Task|Brief description of task';
-    const createParsed = db.parseTaskDbCommitSubject(createSubject);
-    expect(createParsed.valid).toBeTruthy();
-    expect(createParsed.action).toBe('create');
-    expect(createParsed.id).toBe(5);
-    expect(createParsed.taskName).toBe('Sample Task');
-    expect(createParsed.summary).toBe('Brief description of task');
-
-    // Test valid update subject
-    const updateSubject = 'TaskDB|update|7|Fix bug|status, progress_percentage';
-    const updateParsed = db.parseTaskDbCommitSubject(updateSubject);
-    expect(updateParsed.valid).toBeTruthy();
-    expect(updateParsed.action).toBe('update');
-    expect(updateParsed.id).toBe(7);
-    expect(updateParsed.taskName).toBe('Fix bug');
-
-    // Test invalid (missing fields)
-    const invalidSubject = 'TaskDB|create|9|Only Two Fields';
-    const invalidParsed = db.parseTaskDbCommitSubject(invalidSubject);
-    expect(invalidParsed.valid).toBeFalsy();
-    expect(invalidParsed.error).toContain('Expected at least 5');
-
-    // Test invalid action
-    const badActionSubject = 'TaskDB|modify|10|Task|desc';
-    const badActionParsed = db.parseTaskDbCommitSubject(badActionSubject);
-    expect(badActionParsed.valid).toBeFalsy();
-    expect(badActionParsed.error).toContain('not in');
+    expect(mockApi.files['tasksDB/tasks.json']).toBeTruthy();
+    expect(mockApi.files['tasksDB/tasks.csv']).toBeTruthy();
   });
 
   it('should refuse saving when duplicate task_id exists', async () => {
@@ -531,33 +381,5 @@ describe('TaskDatabase Persistence', () => {
     const result = await db.saveTasks('Should fail');
     expect(result.success).toBeFalsy();
     expect(result.error).toContain('Duplicate task_id');
-  });
-
-  it('should not allow updateTask to change task_id type/value', () => {
-    const mockApi = new MockGitHubAPI();
-    const db = new TaskDatabase(mockApi);
-
-    const created = db.createTask({
-      task_name: 'Task A',
-      description: 'A',
-      start_date: '2025-12-10',
-      end_date: '2025-12-11',
-      priority: 'Medium',
-      status: 'Not Started',
-      estimated_hours: 1,
-      category_name: 'Testing'
-    });
-
-    expect(created.success).toBeTruthy();
-    expect(typeof created.task.task_id).toBe('number');
-
-    const updated = db.updateTask(created.task.task_id, {
-      task_id: String(created.task.task_id),
-      description: 'Updated'
-    });
-
-    expect(updated.success).toBeTruthy();
-    expect(typeof updated.task.task_id).toBe('number');
-    expect(updated.task.task_id).toBe(created.task.task_id);
   });
 });

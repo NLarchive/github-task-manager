@@ -942,6 +942,74 @@
           "lag_days": 0
         }
       ]
+    },
+
+    {
+      "task_id": 22,
+      "task_name": "Standardize Scripts as Tasks-Workers Tools",
+      "description": "Standardize validation/enrichment tooling under tools/scripts/validate-tasks-workers.js and tools/scripts/enrich-tasks-workers.js; keep old script names as deprecated wrappers for backwards compatibility.",
+      "start_date": "2025-12-15",
+      "end_date": "2025-12-15",
+      "priority": "Medium",
+      "status": "Completed",
+      "progress_percentage": 100,
+      "estimated_hours": 2,
+      "actual_hours": 2,
+      "is_critical_path": false,
+      "tags": [
+        "tooling",
+        "validation",
+        "maintenance"
+      ],
+      "category_name": "Maintenance",
+      "assigned_workers": [],
+      "parent_task_id": null,
+      "creator_id": "system@example.com",
+      "created_date": "2025-12-15T10:00:00Z",
+      "completed_date": "2025-12-15T12:00:00Z",
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 21,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ]
+    },
+
+    {
+      "task_id": 23,
+      "task_name": "Remove Legacy Terminology from Roadmap Artifacts",
+      "description": "Update roadmap plan/docs and task metadata to use neutral terms (contributors/unassigned). Rename legacy capacity field names to assignee_capacity via enrichment so task data matches the project concept.",
+      "start_date": "2025-12-15",
+      "end_date": "2025-12-15",
+      "priority": "Medium",
+      "status": "Completed",
+      "progress_percentage": 100,
+      "estimated_hours": 2,
+      "actual_hours": 2,
+      "is_critical_path": false,
+      "tags": [
+        "docs",
+        "data",
+        "roadmap"
+      ],
+      "category_name": "Documentation",
+      "assigned_workers": [],
+      "parent_task_id": null,
+      "creator_id": "system@example.com",
+      "created_date": "2025-12-15T12:00:00Z",
+      "completed_date": "2025-12-15T14:00:00Z",
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 22,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ]
     }
   ]
 }

@@ -203,13 +203,35 @@ class TemplateValidator {
     }
 
     // Validate assigned workers
+    // NOTE: For privacy-safe templates, worker identity may be provided via worker_id (preferred)
+    // and email may be omitted.
     if (task.assigned_workers && Array.isArray(task.assigned_workers)) {
       task.assigned_workers.forEach((worker, index) => {
-        if (!worker.name || !worker.email) {
-          errors.push(`Task assigned_worker ${index + 1}: missing name or email`);
+        if (!worker || typeof worker !== 'object') {
+          errors.push(`Task assigned_worker ${index + 1}: must be an object`);
+          return;
         }
-        if (worker.email && !this.isValidEmail(worker.email)) {
+
+        const hasName = !!(worker.name && String(worker.name).trim());
+        const hasEmail = !!(worker.email && String(worker.email).trim());
+        const hasWorkerId = !!(worker.worker_id && String(worker.worker_id).trim());
+
+        // Require some way to identify the assignee (worker_id preferred)
+        if (!hasWorkerId && !hasEmail && !hasName) {
+          errors.push(`Task assigned_worker ${index + 1}: missing identifier (worker_id, email, or name)`);
+        }
+
+        if (hasEmail && !this.isValidEmail(worker.email)) {
           errors.push(`Task assigned_worker ${index + 1}: invalid email format`);
+        }
+
+        if (hasWorkerId && this.config.VALIDATION_RULES.WORKER_ID_FORMAT && !this.config.VALIDATION_RULES.WORKER_ID_FORMAT.test(String(worker.worker_id))) {
+          errors.push(`Task assigned_worker ${index + 1}: invalid worker_id format`);
+        }
+
+        // Role is strongly recommended for clarity
+        if (!worker.role || !String(worker.role).trim()) {
+          warnings.push(`Task assigned_worker ${index + 1}: missing role (recommended)`);
         }
       });
     }
@@ -289,7 +311,7 @@ class TemplateValidator {
   validateWorkers(workers) {
     const errors = [];
     const warnings = [];
-    const emails = new Set();
+    const seenKeys = new Set();
 
     if (!Array.isArray(workers)) {
       errors.push('Workers must be an array');
@@ -297,22 +319,41 @@ class TemplateValidator {
     }
 
     workers.forEach((worker, index) => {
-      if (!worker.name) {
-        errors.push(`Worker ${index + 1}: missing name`);
+      if (!worker || typeof worker !== 'object') {
+        errors.push(`Worker ${index + 1}: must be an object`);
+        return;
       }
 
-      if (!worker.email) {
-        errors.push(`Worker ${index + 1}: missing email`);
-      } else {
-        if (emails.has(worker.email)) {
-          errors.push(`Worker ${index + 1}: duplicate email "${worker.email}"`);
-        }
-        emails.add(worker.email);
+      const name = worker.name ? String(worker.name).trim() : '';
+      const role = worker.role ? String(worker.role).trim() : '';
+      const email = worker.email ? String(worker.email).trim() : '';
+      const workerId = worker.worker_id ? String(worker.worker_id).trim() : '';
 
-        if (!this.isValidEmail(worker.email)) {
+      // Require at least a stable identifier: worker_id (preferred) or email (legacy)
+      if (!workerId && !email) {
+        errors.push(`Worker ${index + 1}: missing worker_id (preferred) or email (legacy)`);
+      }
+
+      if (workerId && this.config.VALIDATION_RULES.WORKER_ID_FORMAT && !this.config.VALIDATION_RULES.WORKER_ID_FORMAT.test(workerId)) {
+        errors.push(`Worker ${index + 1}: invalid worker_id format`);
+      }
+
+      if (email) {
+        if (!this.isValidEmail(email)) {
           errors.push(`Worker ${index + 1}: invalid email format`);
         }
       }
+
+      // Require a human label for clarity (name or role)
+      if (!name && !role) {
+        errors.push(`Worker ${index + 1}: missing name or role`);
+      }
+
+      const dedupeKey = workerId ? `id:${workerId}` : `email:${email.toLowerCase()}`;
+      if (seenKeys.has(dedupeKey)) {
+        errors.push(`Worker ${index + 1}: duplicate ${workerId ? 'worker_id' : 'email'} "${workerId || email}"`);
+      }
+      seenKeys.add(dedupeKey);
 
       if (worker.hourly_rate !== undefined && (typeof worker.hourly_rate !== 'number' || worker.hourly_rate < 0)) {
         errors.push(`Worker ${index + 1}: hourly_rate must be a non-negative number`);

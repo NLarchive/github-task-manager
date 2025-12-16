@@ -1,34 +1,54 @@
 [
   {
     "title": "Welcome to the Project Graph",
-    "content": "This view layers tasks by dependency depth (Start → End). Use it to see sequencing and blockers at a glance.",
+    "content": "This guided tour highlights how the project graph organizes tasks by dependency layers, priority, and estimated work. Follow the steps to learn how to read the visual encodings and use the controls to explore.",
     "position": "center-bottom"
   },
   {
     "nodeId": "project-start",
-    "title": "Start",
-    "content": "Layer 1 tasks have no prerequisites.",
+    "title": "Project Start",
+    "content": "The start node anchors Layer 1 tasks — these have no prerequisites and begin the project timeline.",
     "position": "bottom",
     "focus": true,
-    "hoverNode": true,
-    "clickNode": true
+    "hoverNode": true
+  },
+  {
+    "title": "What layers mean",
+    "content": "Tasks are placed in layers computed from dependencies: Layer 1 = no prerequisites, Layer N depends on earlier layers. Use this to identify sequencing and bottlenecks.",
+    "position": "center-bottom"
   },
   {
     "nodeId": "task-1",
-    "title": "Open a Task",
-    "content": "Click a node to see details, owners/roles, and dependency info.",
+    "title": "Inspect a Task",
+    "content": "Click a task node to open detailed information: description, estimated hours, assigned workers, and explicit dependencies.",
     "position": "bottom",
     "focus": true,
     "hoverNode": true,
     "clickNode": true
   },
   {
+    "title": "Priority & Size",
+    "content": "Color encodes priority (Critical / High / Medium / Low). Node size indicates estimated hours — larger nodes usually mean more work or longer time.",
+    "position": "center-bottom"
+  },
+  {
     "nodeId": "project-end",
-    "title": "End",
-    "content": "Everything ultimately flows into this milestone.",
+    "title": "Project Milestone (End)",
+    "content": "Terminal tasks flow into this milestone. Use it to identify final deliverables and completion points.",
     "position": "bottom",
     "focus": true,
-    "hoverNode": true,
-    "clickNode": true
+    "hoverNode": true
+  },
+  {
+    "title": "Legend & Controls",
+    "content": "Open the Legend to see mapping of colors and line types. The menu also provides search, filtering by priority, and tour controls.",
+    "position": "bottom-left",
+    "target": "#menu-panel"
+  },
+  {
+    "title": "Try it out",
+    "content": "Use the search box to find tasks, try filtering by priority, and click nodes to inspect details. When ready, close this tour and explore the graph freely.",
+    "position": "center-bottom"
   }
 ]
+

@@ -355,6 +355,63 @@ GITHUB: {
 }
 ```
 
+## Authoring Graph Templates ✏️
+
+You can provide reusable graph templates that the **Interactive Career Graph** (`public/graph-display`) consumes.
+
+- Templates live under: `public/graph-display/templates/`
+- Template registry: `public/graph-display/templates/registry.json` — add entries here so the UI can discover them.
+- JSON schema (validation): `public/graph-display/templates/schema/graph-template.schema.json`
+
+Supported template types (see schema):
+
+1. **Career templates (type: `career`)**
+    - Shape: `{ rawNodes, rawRelationships, details, meta?, configOverrides? }`
+    - `rawNodes`: array of nodes in "Cypher-like" format: `{ id, properties: { name, layer, parent }, labels: [...] }`
+    - `rawRelationships`: array of relationship objects: `{ source, target, type }`
+    - `details`: map of nodeId → { title, photoUrl?, items: [...] } used for popups and the Classic CV view
+    - `meta`: optional UI hints (e.g., `profileNodeId`, `walkthroughStepsPath`, `legendMode`)
+
+2. **Task-management templates (type: `task-management`)**
+    - Shape: `{ project, tasks, meta?, configOverrides? }`
+    - `project`: basic project info (`name`, `description`, ...)
+    - `tasks`: array of tasks (each must include `task_id` and `task_name`). Dependencies can be an array of numbers or objects with `predecessor_task_id` and `type`.
+    - The loader converts `tasks` → graph nodes and edges (project-start → tasks, task dependency edges, terminal tasks → project-end).
+
+Best practices and notes:
+
+- Use `templates/registry.json` to expose templates to the UI (see existing `career-lite` and `task-management` entries). The `initTemplates()` loader fetches registry.json and loads each template.
+- Keep graph definitions in JSON — the application no longer contains large hard-coded graph data. This keeps templates editable, versionable, and re-usable across projects. Note: the code no longer ships minimal "fallback" templates; make sure your template is present in `templates/` or exposed via `templates/registry.json`.
+- Place per-project tasks in `public/tasksDB/<projectId>/tasks.json` to make them available via the dynamic TaskDB loader (templates ending with `-tasks`).
+- If your template includes a custom tour, add `tour.json` next to your `data.json` and reference it with `meta.walkthroughStepsPath`.
+- Validate your template against `templates/schema/graph-template.schema.json` before publishing.
+
+Example (career-style minimal `data.json`):
+
+```json
+{
+   "rawNodes": [ { "id": "profile", "properties": { "name": "Your Name", "layer": 0 }, "labels": ["Person","Domain"] } ],
+   "rawRelationships": [],
+   "details": { "profile": { "title": "Your Name", "items": ["Short bio line"] } },
+   "meta": { "profileNodeId": "profile", "legendMode": "career" }
+}
+```
+
+Example (task-management minimal `data.json`):
+
+```json
+{
+   "project": { "name": "My Project", "description": "One-line desc" },
+   "tasks": [ { "task_id": 1, "task_name": "Plan", "priority": "High", "estimated_hours": 8 } ]
+}
+```
+
+When ready, verify your template shows up in the UI by visiting `graph-display/index.html` and selecting it from the `Graph template` dropdown.
+
+If you want, I can add a small `TEMPLATE_AUTHORING.md` with a checklist and a JSON linter example.
+
+Multi-project repo metadata (owner/repo/branch/tasksRoot per project) is defined in `public/config/projects-config.js`.
+
 ### Token Security
 
 For GitHub Pages deployment:
@@ -426,6 +483,7 @@ github-task-manager/
 ├── public/                          # GitHub Pages content
 │   ├── index.html                  # Main application
 │   ├── config/
+│   │   ├── projects-config.js      # Canonical multi-project list (non-secret)
 │   │   ├── template-config.js      # Configuration and validation rules
 │   │   └── github-token.js         # GitHub API token (injected)
 │   ├── scripts/

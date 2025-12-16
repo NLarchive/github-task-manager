@@ -179,9 +179,12 @@ function writeStateFiles(tasksDbDir, fullData) {
   makeStatusFile('Completed', 'tasks-completed.json');
 }
 
-function createServer({ publicDir, tasksDbDir }) {
+function createServer({ publicDir, tasksDbDir, graphDir }) {
   const fallbackTasksDbDir = path.join(publicDir, 'tasksDB');
   maybeBootstrapTasksDb(tasksDbDir, fallbackTasksDbDir);
+
+  // graph-display is published alongside index.html under /public.
+  const effectiveGraphDir = graphDir || path.join(publicDir, 'graph-display');
 
   const server = http.createServer(async (req, res) => {
     try {
@@ -256,6 +259,14 @@ function createServer({ publicDir, tasksDbDir }) {
         effectivePath = pathname.replace(/^\/tasksDB/, '');
         if (!effectivePath) effectivePath = '/';
       }
+
+      // Serve graph-display as a sibling static app (lives outside /public).
+      if (pathname.startsWith('/graph-display/')) {
+        serveRoot = effectiveGraphDir;
+        effectivePath = pathname.replace(/^\/graph-display/, '');
+        if (!effectivePath) effectivePath = '/';
+        if (effectivePath === '/') effectivePath = '/index.html';
+      }
       
       const filePath = safeJoin(serveRoot, effectivePath);
       if (!filePath) {
@@ -289,12 +300,13 @@ function createServer({ publicDir, tasksDbDir }) {
 if (require.main === module) {
   const repoRoot = __dirname;
   const publicDir = path.join(repoRoot, 'public');
+  const graphDir = path.join(publicDir, 'graph-display');
   const tasksDbDir = process.env.TASKS_DB_DIR
     ? path.resolve(process.env.TASKS_DB_DIR)
     : path.join(publicDir, 'tasksDB');
 
   const port = Number(process.env.PORT || 3000);
-  const server = createServer({ publicDir, tasksDbDir });
+  const server = createServer({ publicDir, tasksDbDir, graphDir });
   server.listen(port, () => {
     console.log(`Local server running at http://localhost:${port}`);
     console.log(`Tasks DB dir: ${tasksDbDir}`);

@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000/';
 const LIVE_URL = 'https://nlarchive.github.io/github-task-manager/';
-const TIMEOUT = 30000;
+const TIMEOUT = 5000;
 const LIVE_PASSWORD = '1324';
 const LIVE_PASSWORD_AI_CAREER_ROADMAP = 'ai-career-roadmap-1234';
 const RUN_LIVE = process.env.PLAYWRIGHT_RUN_LIVE === '1' || process.env.RUN_LIVE_E2E === '1';

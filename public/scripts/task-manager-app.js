@@ -31,6 +31,121 @@ class TaskManagerApp {
         this.activeProjectId = null;
     }
 
+    getGraphTemplateIdForActiveProject() {
+        const safeProject = String(this.activeProjectId || '').trim().replace(/[^a-zA-Z0-9_-]/g, '');
+        if (!safeProject) return null;
+        return `${safeProject}-tasks`;
+    }
+
+    buildGraphIframeSrc() {
+        const templateId = this.getGraphTemplateIdForActiveProject();
+        const qp = new URLSearchParams();
+        if (templateId) qp.set('template', templateId);
+        qp.set('embed', '1');
+        // Build a host-relative path based on the current pathname so it works both
+        // locally and on GitHub Pages where the site may be hosted under a subpath.
+        const baseDir = (typeof window !== 'undefined' && window.location && window.location.pathname)
+            ? window.location.pathname.replace(/\/[^\/]*$/, '/')
+            : '/';
+        // Normalize common local dev path mistakes (some dev servers expose the site under '/public/')
+        const baseDirNormalized = baseDir.replace(/\/public\//, '/');
+        return `${baseDirNormalized}graph-display/index.html?${qp.toString()}`;
+    }
+
+    async ensureGraphIframeLoaded() {
+        const frame = document.getElementById('graphFrame');
+        if (!frame) return;
+        const qpSrc = this.buildGraphIframeSrc();
+        if (!qpSrc) return;
+
+        const candidates = [qpSrc];
+        // Also try a variant without '/public/' in the path
+        candidates.push(qpSrc.replace('/public/', '/'));
+        // Some dev servers (Live Server) serve the repo root and have the app under '/public/',
+        // so also try the '/public/graph-display' variant.
+        candidates.push(qpSrc.replace('/graph-display/', '/public/graph-display/'));
+        // Try host-root absolute paths (both /graph-display and /public/graph-display)
+        try {
+            const origin = window.location.origin || '';
+            const qp = new URLSearchParams(qpSrc.split('?')[1] || '');
+            candidates.push(`${origin}/graph-display/index.html?${qp.toString()}`);
+            candidates.push(`${origin}/public/graph-display/index.html?${qp.toString()}`);
+        } catch (e) {
+            // ignore
+        }
+
+        const triedCandidates = [];
+        for (const c of candidates) {
+            try {
+                triedCandidates.push(c);
+                const res = await fetch(c, { method: 'HEAD', cache: 'no-store' });
+                if (res && res.ok) {
+                    if (frame.getAttribute('src') !== c) frame.setAttribute('src', c);
+                    // Attach load/error handlers to surface friendly message in the parent UI
+                    frame.onload = () => {
+                        const errEl = document.getElementById('graphFrameError');
+                        if (errEl) errEl.style.display = 'none';
+                    };
+                    frame.onerror = () => {
+                        const errEl = document.getElementById('graphFrameError');
+                        if (errEl) {
+                            const msg = document.getElementById('graphFrameErrorMessage');
+                            const link = document.getElementById('graphFrameOpenDirect');
+                            if (msg) msg.textContent = `Failed to load graph from ${c}`;
+                            if (link) link.setAttribute('href', c);
+                            errEl.style.display = 'block';
+                        }
+                    };
+                    return;
+                }
+            } catch (e) {
+                // Try next candidate
+            }
+        }
+
+        // Last resort: try forcing the common '/public/graph-display' path before falling back
+        try {
+            const qp = new URLSearchParams(qpSrc.split('?')[1] || '');
+            const publicFallback = `/public/graph-display/index.html?${qp.toString()}`;
+            triedCandidates.push(publicFallback);
+            if (frame.getAttribute('src') !== publicFallback) {
+                frame.setAttribute('src', publicFallback);
+                // Attach friendly error display handlers
+                frame.onload = () => {
+                    const errEl = document.getElementById('graphFrameError');
+                    if (errEl) errEl.style.display = 'none';
+                };
+                frame.onerror = () => {
+                    const errEl = document.getElementById('graphFrameError');
+                    if (errEl) {
+                        const msg = document.getElementById('graphFrameErrorMessage');
+                        const link = document.getElementById('graphFrameOpenDirect');
+                        if (msg) msg.textContent = `Failed to load graph from ${publicFallback}`;
+                        if (link) link.setAttribute('href', publicFallback);
+                        errEl.style.display = 'block';
+                    }
+                };
+                return;
+            }
+        } catch (e) {
+            // ignore
+        }
+
+        // Final fallback: set the original URL so debugging tools show the 404
+        triedCandidates.push(qpSrc);
+        console.warn('No valid graph iframe URL found. Tried candidates:', triedCandidates);
+        // Show friendly message and provide direct link to the final URL
+        const errEl = document.getElementById('graphFrameError');
+        if (errEl) {
+            const msg = document.getElementById('graphFrameErrorMessage');
+            const link = document.getElementById('graphFrameOpenDirect');
+            if (msg) msg.textContent = `No graph template found at tried locations. Last attempt: ${qpSrc}`;
+            if (link) link.setAttribute('href', qpSrc);
+            errEl.style.display = 'block';
+        }
+        if (frame.getAttribute('src') !== qpSrc) frame.setAttribute('src', qpSrc);
+    }
+
     // Initialize the application
     async initialize() {
         // Load config now that all scripts should be loaded
@@ -57,6 +172,9 @@ class TaskManagerApp {
 
     loadConfig() {
         // Use pre-configured GitHub settings from template-config
+        // Note: The project list may be defined in a centralized file `public/config/projects-config.js`
+        // which defines a global `PROJECTS_CONFIG`. `template-config.js` will load and
+        // prefer that configuration when available, allowing a single canonical projects list.
         const templateConfig = window.TEMPLATE_CONFIG || TEMPLATE_CONFIG;
         if (!templateConfig || !templateConfig.GITHUB) {
             throw new Error('TEMPLATE_CONFIG.GITHUB not available. Check script loading order.');
@@ -187,6 +305,9 @@ class TaskManagerApp {
         this.updateAccessIndicator();
         await this.loadTasks();
         this.refreshCategoryOptions();
+
+        // Keep embedded graph in sync with project switching.
+        this.ensureGraphIframeLoaded();
     }
 
     getAvailableCategoryNames() {
@@ -791,6 +912,16 @@ class TaskManagerApp {
             if (!result || result.success !== true) {
                 throw new Error((result && result.error) ? result.error : 'Save failed');
             }
+            // If save succeeded but nothing was actually committed (e.g., content identical), warn user
+            if (result.committed === false) {
+                this.showToast('No changes were committed (content appears identical).', 'warning');
+                // Still refresh history if open, but avoid showing extra success toast below
+                const historyModal = document.getElementById('historyModal');
+                if (historyModal && historyModal.style.display === 'block') {
+                    this.refreshHistory();
+                }
+                return;
+            }
             const source = result.source === 'github'
                 ? 'to GitHub'
                 : (result.source === 'worker'
@@ -982,7 +1113,24 @@ class TaskManagerApp {
     renderTasks() {
         const tasksList = document.getElementById('tasksList');
         const timelineView = document.getElementById('timelineView');
+        const graphView = document.getElementById('graphView');
         const emptyState = document.getElementById('emptyState');
+
+        if (this.viewMode === 'graph' && graphView) {
+            if (tasksList) tasksList.style.display = 'none';
+            if (timelineView) {
+                timelineView.innerHTML = '';
+                timelineView.style.display = 'none';
+            }
+            if (emptyState) emptyState.style.display = 'none';
+
+            graphView.style.display = 'block';
+            this.ensureGraphIframeLoaded();
+            this.updateViewToggle();
+            return;
+        }
+
+        if (graphView) graphView.style.display = 'none';
 
         if (this.filteredTasks.length === 0) {
             tasksList.innerHTML = '';
@@ -1025,7 +1173,11 @@ class TaskManagerApp {
                 ${task.description ? `<div class="task-description">${this.escapeHtml(task.description)}</div>` : ''}
                 <div class="task-footer">
                     <div class="task-info">
-                        ${task.assigned_workers && task.assigned_workers.length > 0 ? `<span>👤 ${task.assigned_workers.map(w => w.name).join(', ')}</span>` : ''}
+                        ${task.assigned_workers && task.assigned_workers.length > 0
+                            ? `<span>👤 ${task.assigned_workers.map(w => w.name || w.worker_id || w.email).filter(Boolean).join(', ')}</span>`
+                            : (task.required_roles && Array.isArray(task.required_roles) && task.required_roles.length > 0
+                                ? `<span>🧩 Suggested: ${task.required_roles.map(r => r.role).filter(Boolean).join(', ')}</span>`
+                                : '')}
                         ${task.end_date ? `<span>📅 ${task.end_date}</span>` : ''}
                         ${task.estimated_hours ? `<span>⏱️ ${task.estimated_hours}h</span>` : ''}
                         ${this.getLinkedIssue(task) ? `<span>🐙 <a href="${this.getLinkedIssue(task).url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">#${this.getLinkedIssue(task).number}</a></span>` : ''}
@@ -1047,17 +1199,78 @@ class TaskManagerApp {
     }
 
     setViewMode(mode) {
-        const next = (mode === 'timeline') ? 'timeline' : 'list';
+        const next = (mode === 'timeline' || mode === 'graph') ? mode : 'list';
         if (this.viewMode === next) return;
         this.viewMode = next;
         this.renderTasks();
+
+        // Toggle fullscreen overlay for graph view
+        try {
+            const graphView = document.getElementById('graphView');
+            if (!graphView) return;
+
+            if (this.viewMode === 'graph') {
+                graphView.classList.add('fullscreen');
+                document.body.classList.add('graph-fullscreen-active');
+
+                // Add an exit button if not already present
+                let exitBtn = document.getElementById('exitGraphViewBtn');
+                if (!exitBtn) {
+                    exitBtn = document.createElement('button');
+                    exitBtn.id = 'exitGraphViewBtn';
+                    exitBtn.className = 'graph-exit-btn btn-secondary';
+                    exitBtn.setAttribute('aria-label', 'Close graph view');
+                    exitBtn.textContent = '← Close';
+                    exitBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.setViewMode('list');
+                    });
+                    graphView.appendChild(exitBtn);
+                }
+
+                // Add Escape key handler to exit fullscreen
+                if (typeof this._graphEscHandler !== 'function') {
+                    this._graphEscHandler = (e) => { if (e.key === 'Escape') this.setViewMode('list'); };
+                    document.addEventListener('keydown', this._graphEscHandler);
+                }
+
+                // Ensure iframe fills the viewport immediately
+                const frame = document.getElementById('graphFrame');
+                if (frame) {
+                    frame.style.width = '100%';
+                    frame.style.height = '100%';
+                }
+            } else {
+                graphView.classList.remove('fullscreen');
+                document.body.classList.remove('graph-fullscreen-active');
+                const exitBtn = document.getElementById('exitGraphViewBtn');
+                if (exitBtn && exitBtn.parentNode) exitBtn.parentNode.removeChild(exitBtn);
+
+                // Remove Escape key handler
+                if (typeof this._graphEscHandler === 'function') {
+                    document.removeEventListener('keydown', this._graphEscHandler);
+                    this._graphEscHandler = null;
+                }
+
+                const frame = document.getElementById('graphFrame');
+                if (frame) {
+                    frame.style.removeProperty('width');
+                    frame.style.removeProperty('height');
+                }
+            }
+        } catch (e) {
+            // Non-fatal - UI enhancement only
+            console.warn('Could not toggle graph fullscreen:', e);
+        }
     }
 
     updateViewToggle() {
         const listBtn = document.getElementById('viewListBtn');
         const timelineBtn = document.getElementById('viewTimelineBtn');
+        const graphBtn = document.getElementById('viewGraphBtn');
         if (listBtn) listBtn.classList.toggle('active', this.viewMode === 'list');
         if (timelineBtn) timelineBtn.classList.toggle('active', this.viewMode === 'timeline');
+        if (graphBtn) graphBtn.classList.toggle('active', this.viewMode === 'graph');
     }
 
     setTimelineScale(scale) {
@@ -1562,7 +1775,7 @@ class TaskManagerApp {
         // Handle assigned workers
         if (task.assigned_workers && task.assigned_workers.length > 0) {
             document.getElementById('taskAssignedWorkers').value = task.assigned_workers
-                .map(w => w.email || w.name).join(', ');
+                .map(w => w.worker_id || w.email || w.name).filter(Boolean).join(', ');
         } else {
             document.getElementById('taskAssignedWorkers').value = '';
         }
@@ -1672,12 +1885,16 @@ class TaskManagerApp {
         if (!input.trim()) return [];
         return input.split(',').map(w => {
             const trimmed = w.trim();
+            // Allow plain worker_id values (preferred), emails (legacy), or display names.
+            const isEmail = trimmed.includes('@');
+            const isWorkerId = /^[a-zA-Z0-9][a-zA-Z0-9_-]{2,}$/.test(trimmed);
             return {
-                name: trimmed,
-                email: trimmed.includes('@') ? trimmed : '',
+                name: isEmail || isWorkerId ? '' : trimmed,
+                email: isEmail ? trimmed : '',
+                worker_id: isWorkerId ? trimmed : '',
                 role: 'Collaborator'
             };
-        });
+        }).filter(w => w.worker_id || w.email || w.name);
     }
 
     parseDependencies(input) {

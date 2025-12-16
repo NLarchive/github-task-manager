@@ -184,13 +184,31 @@ These fields significantly enhance the utility of the template for detailed proj
 - `tasks[].is_critical_path` (boolean): Flag to identify tasks directly impacting project completion. Default to `false`. Explicitly setting this guides project managers to bottlenecks.
 - `tasks[].tags` (array of strings): For enhanced filtering, searchability, and flexible categorization beyond hierarchical categories.
 - `tasks[].assigned_workers` (array of objects):
-    - Details: Each object should contain `{ "name": "Worker Name", "email": "worker@example.com", "role": "Job Title" }`.
-    - Purpose: Assign specific workers to tasks for responsibility, workload management, and communication. Consider referencing worker `email` or a `worker_id` for less redundancy if worker details change.
+  - Details (recommended, PII-safe): `{ "worker_id": "pm-1", "name": "Product Manager", "role": "Product Manager" }`
+  - Details (legacy compatible): `{ "name": "Worker Name", "email": "worker@example.com", "role": "Job Title" }`
+  - Purpose: Assign specific workers to tasks for responsibility and workload management. Prefer `worker_id` over `email` to avoid personal data in committed templates.
 - `tasks[].dependencies` (array of objects):
     - Details: Each object should contain `{ "predecessor_task_id": 123, "type": "FS", "lag_days": 0 }`. (`predecessor_task_id` is preferred over `predecessor_task_name` for robustness).
     - Purpose: Define inter-task relationships for accurate scheduling, identifying bottlenecks, and critical path analysis. `lag_days` provides flexibility for staggered dependencies.
 - `categories` (array of objects): For defining a custom set of project categories.
 - `workers` (array of objects): For defining a custom pool of project workers and their attributes.
+
+### Collaboration Without Personal Data (PII-Safe)
+If you want to avoid personal identifiers in git (while still allowing optional contact info when someone picks a task), use these conventions:
+- Prefer `workers[].worker_id` (e.g., `"pm-1"`, `"ux-1"`) instead of `email`.
+- If you include `tasks[].creator_id`, use a non-PII identifier (e.g., `"system"`, `"pm-1"`) rather than an email.
+- For `tasks[].comments[].author` and `tasks[].attachments[].uploaded_by`, prefer `worker_id` or a role label.
+
+### Recommended Task Fields (Recommended)
+For boards where many tasks start unassigned, add explicit expectation fields to each task (not required by the core validator, but strongly recommended):
+- `goal` (string)
+- `expected_output` (string)
+- `skills_required` (array of strings)
+- `tools` (array of strings)
+- `requisites` (array of strings)
+- `required_roles` (array of objects, e.g., `{ role, skills, capacity }`)
+- `complexity` (string enum you define, e.g., Low/Medium/High)
+- `time_estimate_hours` (number)
 
 ### New Collaboration & Hierarchy Fields (Recommended)
 These fields add richer collaboration, traceability, and hierarchical structure to tasks:
@@ -280,9 +298,11 @@ When converting the JSON template to CSV (or vice-versa), specific conventions a
 *   **Array of Strings (`tags`):** Individual tags are joined by a semicolon (`;`).
     *   *JSON Example:* `["planning", "requirements"]`
     *   *CSV Output:* `"planning;requirements"`
-*   **Array of Objects (`assigned_workers`):** Each worker object is flattened into a structured string `Name:Email:Role`. Multiple workers are joined by a pipe (`|`). This allows for easier re-parsing into JSON.
-    *   *JSON Example:* `[{ "name": "Alice Example", "email": "alice@example.com", "role": "Backend Developer" }, { "name": "Bob Example", "email": "bob@example.com", "role": "Frontend Developer" }]`
-    *   *CSV Output:* `"Alice Example:alice@example.com:Backend Developer|Bob Example:bob@example.com:Frontend Developer"`
+*   **Array of Objects (`assigned_workers`):** Each worker object is flattened into a structured string.
+  - Legacy (3-part): `Name:Email:Role`
+  - Recommended (4-part): `Name:Email:Role:WorkerId` (email may be empty)
+  - Multiple workers are joined by a pipe (`|`).
+  *   *CSV Output (4-part):* `"Alice Example::Backend Developer:backend-dev-1|Bob Example::Frontend Developer:frontend-dev-1"`
     *   *Previous CSV Output:* `"Alice Example (Backend Developer) <alice@example.com>"` (single worker only example, difficult to parse back)
 *   **Array of Objects (`dependencies`):** Each dependency object is flattened into a string containing `PredecessorTaskID::Type::LagDays`. If `predecessor_task_id` is not present, `PredecessorTaskName` can be used (e.g., `PreviousTaskName::Type::LagDays`). Multiple dependencies are joined by a semicolon (`;`).
     *   *JSON Example:* `[{ "predecessor_task_id": 1, "type": "FS", "lag_days": 0 }]`
@@ -380,7 +400,7 @@ Before submitting a new template:
 - [x] `is_critical_path` is explicitly set (true/false) for relevant tasks.
 - [x] Structure of `assigned_workers` and `dependencies` arrays of objects is correct.
 - [x] All `category_name` references in tasks correspond to an existing category.
-- [x] All worker `name`/`email` references in `assigned_workers` correspond to an existing worker.
+- [x] All worker references in `assigned_workers` (by `worker_id` preferred, or `email` legacy) correspond to an existing worker.
 - [x] The `version` field is set appropriately and matches the template's schema.
 
 ## Status Mapping Reference

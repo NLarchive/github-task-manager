@@ -1,59 +1,133 @@
 {
+  "template_type": "project_task_template",
+  "version": "1.2",
+  "description": "Complete task breakdown for the Roadmap Integration on deeplearning.ai project, based on the web-integration-plan.md phases, roles, and sprint plan. Tasks are sorted by priority order (Critical first), with dependencies and critical path identified for a 6-person contributor team.",
   "project": {
-    "name": "AI Career Roadmap (learn.deeplearning.ai)",
-    "description": "A structured learning + portfolio plan to build practical AI/ML skills and transition into an AI-related role. Current state: roadmap defined with 10 core learning tasks spanning foundations through interview prep. Future: integrate task tracking with GitHub, add progress dashboards, and validate learning outcomes with real project delivery.",
-    "start_date": "2025-12-15",
-    "end_date": "2026-06-30",
+    "name": "Roadmap Integration on deeplearning.ai",
+    "description": "Integrate the AI Career Roadmap UI into the deeplearning.ai site, enabling learners to choose clear paths, view next steps, and see platform gaps. Delivered by a 6-person contributor team with diverse skills.",
+    "start_date": "2025-12-14",
+    "end_date": "2026-06-14",
     "status": "Not Started",
     "budget": 0
   },
   "categories": [
     {
-      "name": "Planning",
+      "name": "Discovery",
       "parent_category_name": null
     },
     {
-      "name": "Foundations",
+      "name": "Exploration",
       "parent_category_name": null
     },
     {
-      "name": "Machine Learning",
+      "name": "Creation",
       "parent_category_name": null
     },
     {
-      "name": "Deep Learning",
+      "name": "Validation",
       "parent_category_name": null
     },
     {
-      "name": "MLOps",
-      "parent_category_name": null
-    },
-    {
-      "name": "Portfolio",
-      "parent_category_name": null
-    },
-    {
-      "name": "Interview Prep",
-      "parent_category_name": null
-    },
-    {
-      "name": "Networking",
-      "parent_category_name": null
-    },
-    {
-      "name": "Content",
+      "name": "Delivery",
       "parent_category_name": null
     }
   ],
   "workers": [
     {
-      "name": "Learner",
-      "email": "learner@example.com",
-      "role": "Student",
+      "worker_id": "pm-1",
+      "name": "Product / Project Manager",
+      "role": "Project Manager",
+      "specialist_area": "Project management, scope, delivery planning",
       "skills": [
-        "Python",
-        "Math",
-        "Learning"
+        "Project planning",
+        "Stakeholder communication",
+        "Requirements"
+      ],
+      "tools": [
+        "GitHub",
+        "Docs",
+        "Figma"
+      ],
+      "hourly_rate": 0
+    },
+    {
+      "worker_id": "ux-1",
+      "name": "UX / Product Designer",
+      "role": "UX Designer",
+      "specialist_area": "Information architecture, UX flows, UI design",
+      "skills": [
+        "UX research",
+        "Wireframing",
+        "Design systems"
+      ],
+      "tools": [
+        "Figma",
+        "Miro"
+      ],
+      "hourly_rate": 0
+    },
+    {
+      "worker_id": "fe-1",
+      "name": "Frontend Engineer",
+      "role": "Frontend Developer",
+      "specialist_area": "Web UI implementation, accessibility, performance",
+      "skills": [
+        "JavaScript",
+        "HTML",
+        "CSS",
+        "Accessibility"
+      ],
+      "tools": [
+        "Node.js",
+        "Playwright"
+      ],
+      "hourly_rate": 0
+    },
+    {
+      "worker_id": "be-1",
+      "name": "Backend / API Engineer",
+      "role": "Backend Developer",
+      "specialist_area": "APIs, data modeling, integrations",
+      "skills": [
+        "API design",
+        "Data modeling",
+        "Security"
+      ],
+      "tools": [
+        "Node.js",
+        "Postman"
+      ],
+      "hourly_rate": 0
+    },
+    {
+      "worker_id": "qa-1",
+      "name": "QA / Test Automation",
+      "role": "QA Engineer",
+      "specialist_area": "Test plans, automation, release quality",
+      "skills": [
+        "Test planning",
+        "Playwright",
+        "Bug triage"
+      ],
+      "tools": [
+        "Playwright",
+        "GitHub"
+      ],
+      "hourly_rate": 0
+    },
+    {
+      "worker_id": "content-1",
+      "name": "Content / Community",
+      "role": "Content Strategist",
+      "specialist_area": "Copywriting, docs, community enablement",
+      "skills": [
+        "Technical writing",
+        "Content design",
+        "Community moderation"
+      ],
+      "tools": [
+        "Docs",
+        "GitHub"
       ],
       "hourly_rate": 0
     }
@@ -61,62 +135,83 @@
   "tasks": [
     {
       "task_id": 1,
-      "task_name": "Define target role, timeline, and success criteria",
-      "description": "Choose a target role (e.g., ML Engineer, Applied Scientist) and define measurable outcomes (projects shipped, skills, applications).",
+      "task_name": "Kickoff & Discovery: P1. Short Problem Statement",
+      "description": "Define the core problem the roadmap integration should solve: Users think in goals, not taxonomies; landing page is a giant list without structure, hierarchy, or narrative.",
+      "start_date": "2025-12-14",
+      "end_date": "2025-12-15",
+      "priority": "Critical",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 4,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "discovery",
+        "problem-definition"
+      ],
+      "category_name": "Discovery",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [],
+      "required_roles": [
+        {
+          "role": "Project Manager",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "Project planning",
+        "Stakeholder communication",
+        "Requirements"
+      ],
+      "requisites": [
+        "Access to existing roadmap content and links",
+        "Agreement on target audience and scope"
+      ],
+      "expected_output": "A concise problem statement (<= 1 page) describing the user problem, current pain, and why a roadmap UI is needed; include assumptions and out-of-scope notes.",
+      "goal": "Create shared alignment on the core problem to solve before research and design begin.",
+      "tools": [
+        "Google Docs",
+        "GitHub"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 4,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Project Manager",
+        "acceptance_criteria": [
+          "A concise problem statement (<= 1 page) describing the user problem, current pain, and why a roadmap UI is needed; include assumptions and out-of-scope notes."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 2,
+      "task_name": "Kickoff & Discovery: P2. Key Unknowns",
+      "description": "List things not yet known but must validate: Do users prefer paths or graphs? Do advanced learners want personalization?",
       "start_date": "2025-12-15",
       "end_date": "2025-12-16",
       "priority": "Critical",
-      "status": "In Progress",
-      "progress_percentage": 25,
+      "status": "Not Started",
+      "progress_percentage": 0,
       "estimated_hours": 3,
       "actual_hours": 0,
       "is_critical_path": true,
       "tags": [
-        "planning"
+        "discovery",
+        "unknowns"
       ],
-      "category_name": "Planning",
-      "assigned_workers": [
-        {
-          "name": "learner@example.com",
-          "email": "learner@example.com",
-          "role": "Collaborator"
-        }
-      ],
+      "category_name": "Discovery",
       "parent_task_id": null,
-      "creator_id": "learner@example.com",
-      "created_date": "2025-12-12T00:00:00Z",
-      "completed_date": null,
-      "comments": [],
-      "attachments": [],
-      "dependencies": []
-    },
-    {
-      "task_id": 2,
-      "task_name": "Set up learning environment",
-      "description": "Create a clean Python environment (conda/venv), install key libraries, and set up a GitHub repo structure for notes and projects.",
-      "start_date": "2025-12-16",
-      "end_date": "2025-12-18",
-      "priority": "High",
-      "status": "Not Started",
-      "progress_percentage": 0,
-      "estimated_hours": 6,
-      "actual_hours": 0,
-      "is_critical_path": true,
-      "tags": [
-        "setup",
-        "python"
-      ],
-      "category_name": "Foundations",
-      "assigned_workers": [
-        {
-          "name": "Learner",
-          "email": "learner@example.com",
-          "role": "Student"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "learner@example.com",
-      "created_date": "2025-12-12T00:00:00Z",
+      "created_date": "2025-12-14T10:00:00Z",
       "completed_date": null,
       "comments": [],
       "attachments": [],
@@ -126,35 +221,62 @@
           "type": "FS",
           "lag_days": 0
         }
-      ]
+      ],
+      "required_roles": [
+        {
+          "role": "UX Researcher",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 1: Kickoff & Discovery: P1. Short Problem Statement"
+      ],
+      "expected_output": "A prioritized list of key unknowns and research questions that must be validated (e.g., preferred navigation model, level of personalization, and how users choose paths).",
+      "goal": "Make uncertainty explicit so research and prototyping target the highest-risk assumptions.",
+      "tools": [
+        "Google Docs",
+        "GitHub"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 3,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "UX Researcher",
+        "acceptance_criteria": [
+          "A prioritized list of key unknowns and research questions that must be validated (e.g., preferred navigation model, level of personalization, and how users choose paths)."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
     },
     {
       "task_id": 3,
-      "task_name": "Refresh math foundations (linear algebra + calculus basics)",
-      "description": "Review vectors, matrices, derivatives, and gradients with focus on ML intuition.",
-      "start_date": "2025-12-19",
-      "end_date": "2026-01-10",
-      "priority": "High",
+      "task_name": "Kickoff & Discovery: P3. Success Indicators",
+      "description": "Define early hypothesis and business outcomes: Faster decision-making, clear starting point, clear next steps for new and existing learners.",
+      "start_date": "2025-12-16",
+      "end_date": "2025-12-17",
+      "priority": "Critical",
       "status": "Not Started",
       "progress_percentage": 0,
-      "estimated_hours": 25,
+      "estimated_hours": 3,
       "actual_hours": 0,
       "is_critical_path": true,
       "tags": [
-        "math",
-        "foundations"
+        "discovery",
+        "success-metrics"
       ],
-      "category_name": "Foundations",
-      "assigned_workers": [
-        {
-          "name": "Learner",
-          "email": "learner@example.com",
-          "role": "Student"
-        }
-      ],
+      "category_name": "Discovery",
       "parent_task_id": null,
-      "creator_id": "learner@example.com",
-      "created_date": "2025-12-12T00:00:00Z",
+      "created_date": "2025-12-14T10:00:00Z",
       "completed_date": null,
       "comments": [],
       "attachments": [],
@@ -164,73 +286,63 @@
           "type": "FS",
           "lag_days": 0
         }
-      ]
+      ],
+      "required_roles": [
+        {
+          "role": "Project Manager",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "Project planning",
+        "Stakeholder communication",
+        "Requirements"
+      ],
+      "requisites": [
+        "Complete task 2: Kickoff & Discovery: P2. Key Unknowns"
+      ],
+      "expected_output": "A short list of measurable success indicators (KPIs) and hypotheses, including how they will be measured and what baseline/targets mean for this phase.",
+      "goal": "Define what success looks like so the team can prioritize work and evaluate impact post-launch.",
+      "tools": [
+        "Google Docs",
+        "Google Sheets"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 3,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Project Manager",
+        "acceptance_criteria": [
+          "A short list of measurable success indicators (KPIs) and hypotheses, including how they will be measured and what baseline/targets mean for this phase."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
     },
     {
       "task_id": 4,
-      "task_name": "Python for data: NumPy/Pandas practice",
-      "description": "Complete a small notebook-based project (data cleaning + EDA) to reinforce core tooling.",
-      "start_date": "2026-01-05",
-      "end_date": "2026-01-18",
-      "priority": "Medium",
-      "status": "Not Started",
-      "progress_percentage": 0,
-      "estimated_hours": 16,
-      "actual_hours": 0,
-      "is_critical_path": false,
-      "tags": [
-        "python",
-        "data"
-      ],
-      "category_name": "Foundations",
-      "assigned_workers": [
-        {
-          "name": "Learner",
-          "email": "learner@example.com",
-          "role": "Student"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "learner@example.com",
-      "created_date": "2025-12-12T00:00:00Z",
-      "completed_date": null,
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 2,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 5,
-      "task_name": "Complete core Machine Learning curriculum",
-      "description": "Work through a structured ML curriculum: supervised learning, evaluation, feature engineering, and model selection.",
-      "start_date": "2026-01-11",
-      "end_date": "2026-02-22",
+      "task_name": "Research & IA: IA1. Learning Primitives",
+      "description": "Identify basic elements: Course attributes (difficulty, skills gained, duration, domain), skill nodes, relationships (prerequisite_of, etc.), user goal types.",
+      "start_date": "2025-12-18",
+      "end_date": "2025-12-22",
       "priority": "High",
       "status": "Not Started",
       "progress_percentage": 0,
-      "estimated_hours": 60,
+      "estimated_hours": 12,
       "actual_hours": 0,
       "is_critical_path": true,
       "tags": [
-        "ml",
-        "course"
+        "exploration",
+        "ia",
+        "primitives"
       ],
-      "category_name": "Machine Learning",
-      "assigned_workers": [
-        {
-          "name": "Learner",
-          "email": "learner@example.com",
-          "role": "Student"
-        }
-      ],
+      "category_name": "Exploration",
       "parent_task_id": null,
-      "creator_id": "learner@example.com",
-      "created_date": "2025-12-12T00:00:00Z",
+      "created_date": "2025-12-14T10:00:00Z",
       "completed_date": null,
       "comments": [],
       "attachments": [],
@@ -240,188 +352,389 @@
           "type": "FS",
           "lag_days": 0
         }
-      ]
+      ],
+      "required_roles": [
+        {
+          "role": "UX Researcher",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 3: Kickoff & Discovery: P3. Success Indicators"
+      ],
+      "expected_output": "An inventory of roadmap primitives (skills, courses, projects, prerequisites, tags) with definitions and required attributes for each primitive.",
+      "goal": "Establish the basic building blocks needed to model roadmap content and navigation.",
+      "tools": [
+        "Google Sheets",
+        "Miro"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 12,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "UX Researcher",
+        "acceptance_criteria": [
+          "An inventory of roadmap primitives (skills, courses, projects, prerequisites, tags) with definitions and required attributes for each primitive."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 5,
+      "task_name": "Research & IA: IA2. Relationship Map",
+      "description": "Create a rough sketch of how major learning themes relate: Branching, converging, prerequisites.",
+      "start_date": "2025-12-22",
+      "end_date": "2025-12-24",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 8,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "exploration",
+        "ia",
+        "relationships"
+      ],
+      "category_name": "Exploration",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 4,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Designer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 4: Research & IA: IA1. Learning Primitives"
+      ],
+      "expected_output": "A relationship map diagram showing prerequisites, branching paths, convergence points, and major topic groupings.",
+      "goal": "Make the structure of learning paths explicit so the UI can guide users through meaningful sequences.",
+      "tools": [
+        "Miro",
+        "Figma"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 8,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Designer",
+        "acceptance_criteria": [
+          "A relationship map diagram showing prerequisites, branching paths, convergence points, and major topic groupings."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
     },
     {
       "task_id": 6,
-      "task_name": "Complete deep learning foundations",
-      "description": "Cover neural networks, backpropagation, regularization, optimization, and practical training workflows.",
-      "start_date": "2026-02-23",
-      "end_date": "2026-04-05",
+      "task_name": "Research & IA: IA3. Content Inventory",
+      "description": "Simple list summarizing courses, grouped by IA primitives.",
+      "start_date": "2025-12-24",
+      "end_date": "2025-12-26",
       "priority": "High",
       "status": "Not Started",
       "progress_percentage": 0,
-      "estimated_hours": 60,
-      "actual_hours": 0,
-      "is_critical_path": true,
-      "tags": [
-        "deep-learning",
-        "course"
-      ],
-      "category_name": "Deep Learning",
-      "assigned_workers": [
-        {
-          "name": "Learner",
-          "email": "learner@example.com",
-          "role": "Student"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "learner@example.com",
-      "created_date": "2025-12-12T00:00:00Z",
-      "completed_date": null,
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 5,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 7,
-      "task_name": "Build and ship a capstone ML project",
-      "description": "Deliver an end-to-end project (data ingestion -> training -> evaluation -> deployment demo). Focus on clarity and reproducibility.",
-      "start_date": "2026-03-15",
-      "end_date": "2026-05-10",
-      "priority": "Critical",
-      "status": "Not Started",
-      "progress_percentage": 0,
-      "estimated_hours": 80,
-      "actual_hours": 0,
-      "is_critical_path": true,
-      "tags": [
-        "portfolio",
-        "project"
-      ],
-      "category_name": "Portfolio",
-      "assigned_workers": [
-        {
-          "name": "Learner",
-          "email": "learner@example.com",
-          "role": "Student"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "learner@example.com",
-      "created_date": "2025-12-12T00:00:00Z",
-      "completed_date": null,
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 5,
-          "type": "SS",
-          "lag_days": 14
-        }
-      ]
-    },
-    {
-      "task_id": 8,
-      "task_name": "Add basic MLOps practices to the capstone",
-      "description": "Add experiment tracking, simple CI checks, and a reproducible training pipeline.",
-      "start_date": "2026-04-06",
-      "end_date": "2026-05-17",
-      "priority": "Medium",
-      "status": "Not Started",
-      "progress_percentage": 0,
-      "estimated_hours": 24,
+      "estimated_hours": 6,
       "actual_hours": 0,
       "is_critical_path": false,
       "tags": [
-        "mlops",
-        "reproducibility"
+        "exploration",
+        "ia",
+        "inventory"
       ],
-      "category_name": "MLOps",
-      "assigned_workers": [
-        {
-          "name": "Learner",
-          "email": "learner@example.com",
-          "role": "Student"
-        }
-      ],
+      "category_name": "Exploration",
       "parent_task_id": null,
-      "creator_id": "learner@example.com",
-      "created_date": "2025-12-12T00:00:00Z",
+      "created_date": "2025-12-14T10:00:00Z",
       "completed_date": null,
       "comments": [],
       "attachments": [],
       "dependencies": [
         {
-          "predecessor_task_id": 7,
-          "type": "SS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 9,
-      "task_name": "Publish portfolio artifacts",
-      "description": "Polish GitHub repos, write clear READMEs, and publish 1–2 short posts describing the capstone and learning outcomes.",
-      "start_date": "2026-05-11",
-      "end_date": "2026-05-31",
-      "priority": "High",
-      "status": "Not Started",
-      "progress_percentage": 0,
-      "estimated_hours": 14,
-      "actual_hours": 0,
-      "is_critical_path": true,
-      "tags": [
-        "portfolio",
-        "writing"
-      ],
-      "category_name": "Content",
-      "assigned_workers": [
-        {
-          "name": "Learner",
-          "email": "learner@example.com",
-          "role": "Student"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "learner@example.com",
-      "created_date": "2025-12-12T00:00:00Z",
-      "completed_date": null,
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 7,
+          "predecessor_task_id": 4,
           "type": "FS",
           "lag_days": 0
         }
-      ]
+      ],
+      "required_roles": [
+        {
+          "role": "Content Strategist",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "Technical writing",
+        "Content strategy",
+        "Community enablement"
+      ],
+      "requisites": [
+        "Complete task 4: Research & IA: IA1. Learning Primitives"
+      ],
+      "expected_output": "A content inventory spreadsheet summarizing existing courses/resources grouped by IA primitives, including metadata and initial gap notes.",
+      "goal": "Create a single reference of what exists today so the roadmap can surface content and highlight gaps.",
+      "tools": [
+        "Google Sheets"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 6,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Content Strategist",
+        "acceptance_criteria": [
+          "A content inventory spreadsheet summarizing existing courses/resources grouped by IA primitives, including metadata and initial gap notes."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
     },
     {
-      "task_id": 10,
-      "task_name": "Interview prep + networking + applications",
-      "description": "Prepare resume + interview answers, practice coding/ML questions, and build a lightweight networking/application cadence.",
-      "start_date": "2026-05-18",
-      "end_date": "2026-06-30",
+      "task_id": 7,
+      "task_name": "Research & IA: PE1. Short Heuristic Evaluation",
+      "description": "Heuristic evaluation of current platform to guide decisions.",
+      "start_date": "2025-12-18",
+      "end_date": "2025-12-20",
       "priority": "High",
       "status": "Not Started",
       "progress_percentage": 0,
-      "estimated_hours": 40,
+      "estimated_hours": 8,
+      "actual_hours": 0,
+      "is_critical_path": false,
+      "tags": [
+        "exploration",
+        "platform-evaluation",
+        "heuristic"
+      ],
+      "category_name": "Exploration",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 3,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "UX Researcher",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 3: Kickoff & Discovery: P3. Success Indicators"
+      ],
+      "expected_output": "A short heuristic evaluation report of the current platform experience, including issues, severity, and quick-win recommendations.",
+      "goal": "Identify usability issues and opportunities that should inform prototype scope and UI improvements.",
+      "tools": [
+        "Google Docs"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 8,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "UX Researcher",
+        "acceptance_criteria": [
+          "A short heuristic evaluation report of the current platform experience, including issues, severity, and quick-win recommendations."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 8,
+      "task_name": "Research & IA: U1. Summary of Learner Types",
+      "description": "Overview of main learner segments and their goals.",
+      "start_date": "2025-12-18",
+      "end_date": "2025-12-20",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 8,
       "actual_hours": 0,
       "is_critical_path": true,
       "tags": [
-        "interviews",
-        "networking",
-        "applications"
+        "exploration",
+        "user-discovery",
+        "types"
       ],
-      "category_name": "Interview Prep",
-      "assigned_workers": [
+      "category_name": "Exploration",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
         {
-          "name": "Learner",
-          "email": "learner@example.com",
-          "role": "Student"
+          "predecessor_task_id": 3,
+          "type": "FS",
+          "lag_days": 0
         }
       ],
+      "required_roles": [
+        {
+          "role": "UX Researcher",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 3: Kickoff & Discovery: P3. Success Indicators"
+      ],
+      "expected_output": "A summary of main learner segments and their goals, constraints, and what ‘success’ means for each segment.",
+      "goal": "Ensure roadmap flows and content work for multiple learner intents.",
+      "tools": [
+        "Google Docs"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 8,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "UX Researcher",
+        "acceptance_criteria": [
+          "A summary of main learner segments and their goals, constraints, and what ‘success’ means for each segment."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 9,
+      "task_name": "Research & IA: U2. Pain Points & Needs",
+      "description": "Key frustrations and what learners are trying to accomplish.",
+      "start_date": "2025-12-20",
+      "end_date": "2025-12-22",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 6,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "exploration",
+        "user-discovery",
+        "pain-points"
+      ],
+      "category_name": "Exploration",
       "parent_task_id": null,
-      "creator_id": "learner@example.com",
-      "created_date": "2025-12-12T00:00:00Z",
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 8,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "UX Researcher",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 8: Research & IA: U1. Summary of Learner Types"
+      ],
+      "expected_output": "A prioritized list of pain points and user needs statements, with links to supporting evidence from survey/research.",
+      "goal": "Translate research into actionable requirements for design and implementation.",
+      "tools": [
+        "Google Docs"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 6,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "UX Researcher",
+        "acceptance_criteria": [
+          "A prioritized list of pain points and user needs statements, with links to supporting evidence from survey/research."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 10,
+      "task_name": "Research & IA: U3. Decision / Learning Journey Notes",
+      "description": "How learners currently choose courses and what they struggle with.",
+      "start_date": "2025-12-22",
+      "end_date": "2025-12-24",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 6,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "exploration",
+        "user-discovery",
+        "journey"
+      ],
+      "category_name": "Exploration",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
       "completed_date": null,
       "comments": [],
       "attachments": [],
@@ -431,7 +744,2309 @@
           "type": "FS",
           "lag_days": 0
         }
-      ]
+      ],
+      "required_roles": [
+        {
+          "role": "UX Researcher",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 9: Research & IA: U2. Pain Points & Needs"
+      ],
+      "expected_output": "Decision journey notes (or a lightweight journey map) describing how learners choose courses/paths, including key drop-off points.",
+      "goal": "Inform roadmap navigation and content presentation so users can decide quickly and confidently.",
+      "tools": [
+        "Miro",
+        "Google Docs"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 6,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "UX Researcher",
+        "acceptance_criteria": [
+          "Decision journey notes (or a lightweight journey map) describing how learners choose courses/paths, including key drop-off points."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 11,
+      "task_name": "Research & IA: Run Survey Pilot",
+      "description": "Publish the short forum survey (from pm-qa-roadmap.md) and run a 10–20 person pilot.",
+      "start_date": "2025-12-26",
+      "end_date": "2026-01-02",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 8,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "exploration",
+        "survey",
+        "pilot"
+      ],
+      "category_name": "Exploration",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 10,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "UX Researcher",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 10: Research & IA: U3. Decision / Learning Journey Notes"
+      ],
+      "expected_output": "A published survey pilot (questions + intro text) and a pilot summary (10–20 responses) capturing what to change before broad release.",
+      "goal": "De-risk the main survey by validating clarity, length, and usefulness of questions.",
+      "tools": [
+        "Google Forms",
+        "Google Sheets"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 8,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "UX Researcher",
+        "acceptance_criteria": [
+          "A published survey pilot (questions + intro text) and a pilot summary (10–20 responses) capturing what to change before broad release."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 12,
+      "task_name": "Design Concepts: CW1. Journey Concepts",
+      "description": "Early outlines of different roadmap formats: Linear, branching, graph, quiz-based.",
+      "start_date": "2026-01-03",
+      "end_date": "2026-01-10",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 20,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "creation",
+        "workshop",
+        "concepts"
+      ],
+      "category_name": "Creation",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 5,
+          "type": "FS",
+          "lag_days": 0
+        },
+        {
+          "predecessor_task_id": 10,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Designer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 5: Research & IA: IA2. Relationship Map",
+        "Complete task 10: Research & IA: U3. Decision / Learning Journey Notes"
+      ],
+      "expected_output": "A set of journey concepts (3–5) describing how users pick a path, see next steps, and understand prerequisites/content gaps (linear, branching, graph, quiz-based, etc.).",
+      "goal": "Generate candidate UX models to test before committing to a single design direction.",
+      "tools": [
+        "Figma",
+        "Miro"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 20,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Designer",
+        "acceptance_criteria": [
+          "A set of journey concepts (3–5) describing how users pick a path, see next steps, and understand prerequisites/content gaps (linear, branching, graph, quiz-based, etc.)."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 13,
+      "task_name": "Design Concepts: CW2. Key Insights & Preferences",
+      "description": "Notes on what resonated, didn’t, and should be explored next.",
+      "start_date": "2026-01-10",
+      "end_date": "2026-01-12",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 6,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "creation",
+        "workshop",
+        "insights"
+      ],
+      "category_name": "Creation",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 12,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "UX Researcher",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 12: Design Concepts: CW1. Journey Concepts"
+      ],
+      "expected_output": "A summary of key insights (what resonated and what didn’t) and an updated list of hypotheses/questions to explore next.",
+      "goal": "Capture learnings from concept exploration and narrow toward a direction that best fits user needs.",
+      "tools": [
+        "Google Docs"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 6,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "UX Researcher",
+        "acceptance_criteria": [
+          "A summary of key insights (what resonated and what didn’t) and an updated list of hypotheses/questions to explore next."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 14,
+      "task_name": "Design Concepts: CW3. Workshop Summary",
+      "description": "Short recap for community transparency.",
+      "start_date": "2026-01-12",
+      "end_date": "2026-01-13",
+      "priority": "Medium",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 2,
+      "actual_hours": 0,
+      "is_critical_path": false,
+      "tags": [
+        "creation",
+        "workshop",
+        "summary"
+      ],
+      "category_name": "Creation",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 13,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Project Manager",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "Project planning",
+        "Stakeholder communication",
+        "Requirements"
+      ],
+      "requisites": [
+        "Complete task 13: Design Concepts: CW2. Key Insights & Preferences"
+      ],
+      "expected_output": "A workshop recap suitable for community sharing, including decisions made, rationale, and next steps; link to key artifacts.",
+      "goal": "Provide transparency and alignment for contributors and stakeholders.",
+      "tools": [
+        "Google Docs",
+        "GitHub"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 2,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Project Manager",
+        "acceptance_criteria": [
+          "A workshop recap suitable for community sharing, including decisions made, rationale, and next steps; link to key artifacts."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 15,
+      "task_name": "Prototype & Validate: PR1. Low-Fidelity Prototypes",
+      "description": "Light sketches or mockups of different roadmap formats.",
+      "start_date": "2026-01-14",
+      "end_date": "2026-01-28",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 30,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "validation",
+        "prototypes",
+        "low-fidelity"
+      ],
+      "category_name": "Validation",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 13,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Designer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 13: Design Concepts: CW2. Key Insights & Preferences"
+      ],
+      "expected_output": "Low-fidelity prototypes (screens + flow) representing the best candidate formats, suitable for quick usability feedback.",
+      "goal": "Validate the core UX model quickly before investing in implementation.",
+      "tools": [
+        "Figma"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 30,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Designer",
+        "acceptance_criteria": [
+          "Low-fidelity prototypes (screens + flow) representing the best candidate formats, suitable for quick usability feedback."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 16,
+      "task_name": "Prototype & Validate: PR2. Quick Feedback Round",
+      "description": "Short, informal input from learners or community.",
+      "start_date": "2026-01-28",
+      "end_date": "2026-02-04",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 10,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "validation",
+        "feedback",
+        "quick"
+      ],
+      "category_name": "Validation",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 15,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "UX Researcher",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 15: Prototype & Validate: PR1. Low-Fidelity Prototypes"
+      ],
+      "expected_output": "A feedback log (top issues, quotes, and preferences) plus a prioritized list of changes to the prototypes and requirements.",
+      "goal": "Incorporate real learner input to reduce the risk of shipping the wrong UX.",
+      "tools": [
+        "Google Sheets",
+        "Google Docs"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 10,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "UX Researcher",
+        "acceptance_criteria": [
+          "A feedback log (top issues, quotes, and preferences) plus a prioritized list of changes to the prototypes and requirements."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 17,
+      "task_name": "Prototype & Validate: PR3. Early Recommendation / Direction",
+      "description": "Summary of which format(s) should move forward and why.",
+      "start_date": "2026-02-04",
+      "end_date": "2026-02-06",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 4,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "validation",
+        "recommendation",
+        "direction"
+      ],
+      "category_name": "Validation",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 16,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Project Manager",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "Project planning",
+        "Stakeholder communication",
+        "Requirements"
+      ],
+      "requisites": [
+        "Complete task 16: Prototype & Validate: PR2. Quick Feedback Round"
+      ],
+      "expected_output": "A recommendation memo selecting the direction to move forward (and why), including MVP scope boundaries and key tradeoffs.",
+      "goal": "Lock direction and scope so engineering can execute efficiently.",
+      "tools": [
+        "Google Docs",
+        "GitHub"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 4,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Project Manager",
+        "acceptance_criteria": [
+          "A recommendation memo selecting the direction to move forward (and why), including MVP scope boundaries and key tradeoffs."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 18,
+      "task_name": "Implementation: IP1. Roadmap Guidelines",
+      "description": "Description of how the chosen roadmap format should work.",
+      "start_date": "2026-02-07",
+      "end_date": "2026-02-21",
+      "priority": "Critical",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 20,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "delivery",
+        "guidelines",
+        "roadmap"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 17,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Designer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 17: Prototype & Validate: PR3. Early Recommendation / Direction"
+      ],
+      "expected_output": "A roadmap guidelines document describing the chosen format behavior, information architecture rules, and examples (edge cases included).",
+      "goal": "Provide a single source of truth for design, content, and engineering.",
+      "tools": [
+        "Google Docs"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 20,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Designer",
+        "acceptance_criteria": [
+          "A roadmap guidelines document describing the chosen format behavior, information architecture rules, and examples (edge cases included)."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 19,
+      "task_name": "Implementation: IP2. Updated Course IA",
+      "description": "Clean and structured overview of all courses.",
+      "start_date": "2026-02-21",
+      "end_date": "2026-03-14",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 30,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "delivery",
+        "ia",
+        "courses"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 18,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Content Strategist",
+          "skills": [],
+          "capacity": 1
+        },
+        {
+          "role": "Backend Developer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "Technical writing",
+        "Content strategy",
+        "Community enablement",
+        "API design",
+        "Data modeling",
+        "Security basics"
+      ],
+      "requisites": [
+        "Complete task 18: Implementation: IP1. Roadmap Guidelines"
+      ],
+      "expected_output": "An updated course IA: structured overview of all courses with normalized metadata and mapping into the roadmap primitives.",
+      "goal": "Ensure roadmap navigation can reliably reference and organize content.",
+      "tools": [
+        "Google Sheets"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 30,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Content Strategist",
+        "acceptance_criteria": [
+          "An updated course IA: structured overview of all courses with normalized metadata and mapping into the roadmap primitives."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 20,
+      "task_name": "Implementation: IP3. Simple Integration Plan",
+      "description": "Where the roadmap will appear and how learners access it.",
+      "start_date": "2026-03-14",
+      "end_date": "2026-03-21",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 10,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "delivery",
+        "integration",
+        "plan"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 19,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Frontend Developer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "JavaScript",
+        "HTML/CSS",
+        "UI engineering"
+      ],
+      "requisites": [
+        "Complete task 19: Implementation: IP2. Updated Course IA"
+      ],
+      "expected_output": "A simple integration plan describing where the roadmap UI surfaces (landing/course/dashboard), entry points, and the end-to-end user flows for discovery → selection → next steps.",
+      "goal": "Define a clear integration surface and user flow so implementation work stays focused and consistent.",
+      "tools": [
+        "Google Docs",
+        "GitHub"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 10,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Frontend Developer",
+        "acceptance_criteria": [
+          "A simple integration plan describing where the roadmap UI surfaces (landing/course/dashboard), entry points, and the end-to-end user flows for discovery → selection → next steps."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 21,
+      "task_name": "Implementation: Roadmap UI Component",
+      "description": "Build the interactive Roadmap UI (landing page + course page integration + dashboard entry).",
+      "start_date": "2026-03-21",
+      "end_date": "2026-04-18",
+      "priority": "Critical",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 40,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "delivery",
+        "ui",
+        "component"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 20,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Frontend Developer",
+          "skills": [],
+          "capacity": 1
+        },
+        {
+          "role": "Designer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "JavaScript",
+        "HTML/CSS",
+        "UI engineering",
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 20: Implementation: IP3. Simple Integration Plan"
+      ],
+      "expected_output": "A working roadmap UI component (behind a feature flag) integrated into the landing page, course pages, and dashboard entry; include minimal docs and demo steps.",
+      "goal": "Deliver the core UI experience learners will use to choose a path and see next steps.",
+      "tools": [
+        "Node.js",
+        "GitHub"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 40,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Frontend Developer",
+        "acceptance_criteria": [
+          "A working roadmap UI component (behind a feature flag) integrated into the landing page, course pages, and dashboard entry; include minimal docs and demo steps."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 22,
+      "task_name": "Implementation: Backend / Data Endpoints",
+      "description": "Create course metadata, simple API endpoints, and event tracking.",
+      "start_date": "2026-03-21",
+      "end_date": "2026-04-18",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 30,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "delivery",
+        "backend",
+        "data"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 19,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Backend Developer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "API design",
+        "Data modeling",
+        "Security basics"
+      ],
+      "requisites": [
+        "Complete task 19: Implementation: IP2. Updated Course IA"
+      ],
+      "expected_output": "A roadmap data contract (schema) plus backend endpoints for reading roadmap/course metadata; include basic endpoint documentation.",
+      "goal": "Provide stable data access for the roadmap UI and future analytics.",
+      "tools": [
+        "Node.js",
+        "GitHub"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 30,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Backend Developer",
+        "acceptance_criteria": [
+          "A roadmap data contract (schema) plus backend endpoints for reading roadmap/course metadata; include basic endpoint documentation."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 23,
+      "task_name": "Implementation: IP4. Success Metrics Instrumentation",
+      "description": "Add events for time_to_first_enroll, path_start_rate, etc.",
+      "start_date": "2026-04-18",
+      "end_date": "2026-04-25",
+      "priority": "Medium",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 8,
+      "actual_hours": 0,
+      "is_critical_path": false,
+      "tags": [
+        "delivery",
+        "metrics",
+        "instrumentation"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 21,
+          "type": "FS",
+          "lag_days": 0
+        },
+        {
+          "predecessor_task_id": 22,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Backend Developer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "API design",
+        "Data modeling",
+        "Security basics"
+      ],
+      "requisites": [
+        "Complete task 21: Implementation: Roadmap UI Component",
+        "Complete task 22: Implementation: Backend / Data Endpoints"
+      ],
+      "expected_output": "Instrumentation of agreed success metrics (events + payloads) such as path_start_rate and time_to_first_enroll, with a verification checklist.",
+      "goal": "Enable measurement of adoption and usability so the team can iterate with data.",
+      "tools": [
+        "Analytics Platform",
+        "GitHub"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 8,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Backend Developer",
+        "acceptance_criteria": [
+          "Instrumentation of agreed success metrics (events + payloads) such as path_start_rate and time_to_first_enroll, with a verification checklist."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 24,
+      "task_name": "Implementation: IP5. UI Improvement Recommendations",
+      "description": "Quick wins for immediate navigation fixes.",
+      "start_date": "2026-04-25",
+      "end_date": "2026-05-02",
+      "priority": "Medium",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 6,
+      "actual_hours": 0,
+      "is_critical_path": false,
+      "tags": [
+        "delivery",
+        "ui",
+        "improvements"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 21,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Designer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 21: Implementation: Roadmap UI Component"
+      ],
+      "expected_output": "A list of quick-win UI improvements (with acceptance criteria) to address immediate navigation and discoverability issues.",
+      "goal": "Capture and deliver small improvements that increase usability while longer work continues.",
+      "tools": [
+        "GitHub",
+        "Google Docs"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 6,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Designer",
+        "acceptance_criteria": [
+          "A list of quick-win UI improvements (with acceptance criteria) to address immediate navigation and discoverability issues."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 25,
+      "task_name": "Launch & Measure: Launch Plan & Roll-out",
+      "description": "Feature-flagged rollout, staging demo, and go-live.",
+      "start_date": "2026-05-03",
+      "end_date": "2026-05-10",
+      "priority": "Critical",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 12,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "launch",
+        "rollout",
+        "measure"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 23,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Project Manager",
+          "skills": [],
+          "capacity": 1
+        },
+        {
+          "role": "Frontend Developer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "Project planning",
+        "Stakeholder communication",
+        "Requirements",
+        "JavaScript",
+        "HTML/CSS",
+        "UI engineering"
+      ],
+      "requisites": [
+        "Complete task 23: Implementation: IP4. Success Metrics Instrumentation"
+      ],
+      "expected_output": "A feature-flagged rollout plan with staging demo steps, go-live checklist, and rollback plan.",
+      "goal": "Ship safely with controlled rollout and clear operational steps.",
+      "tools": [
+        "GitHub",
+        "Google Docs"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 12,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Project Manager",
+        "acceptance_criteria": [
+          "A feature-flagged rollout plan with staging demo steps, go-live checklist, and rollback plan."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 26,
+      "task_name": "Launch & Measure: Monitoring & Iteration",
+      "description": "Track KPIs, post-launch bug triage, and iterate based on data.",
+      "start_date": "2026-05-10",
+      "end_date": "2026-06-14",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 20,
+      "actual_hours": 0,
+      "is_critical_path": false,
+      "tags": [
+        "launch",
+        "monitoring",
+        "iteration"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 25,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Project Manager",
+          "skills": [],
+          "capacity": 1
+        },
+        {
+          "role": "UX Researcher",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "Project planning",
+        "Stakeholder communication",
+        "Requirements",
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 25: Launch & Measure: Launch Plan & Roll-out"
+      ],
+      "expected_output": "A monitoring checklist and iteration process: KPI dashboard links, triage workflow, and an ordered backlog of post-launch improvements.",
+      "goal": "Sustain the feature after launch by fixing bugs quickly and iterating based on metrics.",
+      "tools": [
+        "Analytics Platform",
+        "GitHub"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 20,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Project Manager",
+        "acceptance_criteria": [
+          "A monitoring checklist and iteration process: KPI dashboard links, triage workflow, and an ordered backlog of post-launch improvements."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 27,
+      "task_name": "PM: Create GitHub Project Board & Labels",
+      "description": "Create a GitHub Project board, `roadmap` and `phase:X` labels, and seed initial issues for P1,P2,P3. Expected output: project board URL, 3 seeded issues, label list.",
+      "start_date": "2025-12-14",
+      "end_date": "2025-12-15",
+      "priority": "Critical",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 3,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "setup",
+        "triage"
+      ],
+      "category_name": "Discovery",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 1,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Project Manager",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "Project planning",
+        "Stakeholder communication",
+        "Requirements"
+      ],
+      "requisites": [
+        "Complete task 1: Kickoff & Discovery: P1. Short Problem Statement"
+      ],
+      "expected_output": "A GitHub Project board set up for the initiative, plus agreed labels (e.g., roadmap, phase:discovery, phase:delivery) and a small set of seeded issues.",
+      "goal": "Enable contributors to coordinate work transparently with a lightweight workflow.",
+      "tools": [
+        "GitHub"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 3,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Project Manager",
+        "acceptance_criteria": [
+          "A GitHub Project board set up for the initiative, plus agreed labels (e.g., roadmap, phase:discovery, phase:delivery) and a small set of seeded issues."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 28,
+      "task_name": "PM: Create Issues from Task Template",
+      "description": "Create GitHub issues for top-level tasks (IA1..IP5) with acceptance criteria and owners. Expected output: issue list linked to project board.",
+      "start_date": "2025-12-15",
+      "end_date": "2025-12-16",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 4,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "setup",
+        "triage",
+        "issues"
+      ],
+      "category_name": "Discovery",
+      "parent_task_id": 27,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 27,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Project Manager",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "Project planning",
+        "Stakeholder communication",
+        "Requirements"
+      ],
+      "requisites": [
+        "Complete task 27: PM: Create GitHub Project Board & Labels"
+      ],
+      "expected_output": "GitHub issues created from this task plan (top-level and critical subtasks), each with clear description, acceptance criteria, labels, and dependencies noted.",
+      "goal": "Make work claimable and trackable via standard GitHub contribution workflows.",
+      "tools": [
+        "GitHub"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 4,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Project Manager",
+        "acceptance_criteria": [
+          "GitHub issues created from this task plan (top-level and critical subtasks), each with clear description, acceptance criteria, labels, and dependencies noted."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 29,
+      "task_name": "UX: Draft Forum Survey Message",
+      "description": "Create a ready-to-post survey message and Google Form export using `pm-qa-roadmap.md`. Expected output: survey text, form link, pilot plan.",
+      "start_date": "2025-12-15",
+      "end_date": "2025-12-17",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 4,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "survey",
+        "research"
+      ],
+      "category_name": "Exploration",
+      "parent_task_id": 11,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 2,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "UX Researcher",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 2: Kickoff & Discovery: P2. Key Unknowns"
+      ],
+      "expected_output": "A ready-to-post forum message for the survey plus a published form draft aligned to pm-qa-roadmap.md (with pilot instructions).",
+      "goal": "Increase response rate and collect higher-quality inputs with clear messaging and an easy-to-run survey.",
+      "tools": [
+        "Google Docs",
+        "Google Forms"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 4,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "UX Researcher",
+        "acceptance_criteria": [
+          "A ready-to-post forum message for the survey plus a published form draft aligned to pm-qa-roadmap.md (with pilot instructions)."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 30,
+      "task_name": "UX: Publish Survey & Recruit Pilot Users",
+      "description": "Post survey to forum, recruit 10–20 pilot participants, and collect responses. Expected output: survey responses CSV and metadata.",
+      "start_date": "2025-12-18",
+      "end_date": "2026-01-02",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 8,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "survey",
+        "pilot"
+      ],
+      "category_name": "Exploration",
+      "parent_task_id": 11,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 29,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "UX Researcher",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 29: UX: Draft Forum Survey Message"
+      ],
+      "expected_output": "Survey published and recruitment executed; export of responses (CSV) and a simple tracking sheet describing recruitment channels and counts.",
+      "goal": "Collect pilot data from real community members to validate assumptions and guide the MVP.",
+      "tools": [
+        "Google Forms",
+        "Google Sheets"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 8,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "UX Researcher",
+        "acceptance_criteria": [
+          "Survey published and recruitment executed; export of responses (CSV) and a simple tracking sheet describing recruitment channels and counts."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 31,
+      "task_name": "UX: Analyze Survey Responses",
+      "description": "Synthesize pilot results into top insights, quotes, and prioritized unknowns. Expected output: short analysis doc and tags mapped to IA deliverables.",
+      "start_date": "2026-01-03",
+      "end_date": "2026-01-09",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 8,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "research",
+        "analysis"
+      ],
+      "category_name": "Exploration",
+      "parent_task_id": 11,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 30,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "UX Researcher",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 30: UX: Publish Survey & Recruit Pilot Users"
+      ],
+      "expected_output": "A pilot survey analysis summary (themes, simple charts, representative quotes) and a mapped set of implications for IA/design/implementation tasks.",
+      "goal": "Turn survey responses into prioritized decisions and clarified requirements.",
+      "tools": [
+        "Google Sheets",
+        "Google Docs"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 8,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "UX Researcher",
+        "acceptance_criteria": [
+          "A pilot survey analysis summary (themes, simple charts, representative quotes) and a mapped set of implications for IA/design/implementation tasks."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 32,
+      "task_name": "Design: Export Design Assets & Specs",
+      "description": "Produce final Figma frames, component specs, and developer-ready assets. Expected output: Figma file link, annotated specs, tokens.",
+      "start_date": "2026-02-07",
+      "end_date": "2026-02-21",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 16,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "design",
+        "handoff"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": 18,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 18,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Designer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 18: Implementation: IP1. Roadmap Guidelines"
+      ],
+      "expected_output": "A developer-ready design package: final frames, component specs, states, tokens, and exported assets.",
+      "goal": "Unblock implementation by making design intent explicit and easy to apply.",
+      "tools": [
+        "Figma"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 16,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Designer",
+        "acceptance_criteria": [
+          "A developer-ready design package: final frames, component specs, states, tokens, and exported assets."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 33,
+      "task_name": "Design: Accessibility & A11y Review",
+      "description": "Run accessibility checklist, color contrast, keyboard navigation, and ARIA roles. Expected output: A11y checklist with fixes.",
+      "start_date": "2026-02-21",
+      "end_date": "2026-02-25",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 6,
+      "actual_hours": 0,
+      "is_critical_path": false,
+      "tags": [
+        "a11y",
+        "design"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": 32,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 32,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Designer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 32: Design: Export Design Assets & Specs"
+      ],
+      "expected_output": "An accessibility review checklist and a list of issues/fixes covering contrast, keyboard navigation, focus states, and ARIA labeling.",
+      "goal": "Ensure the roadmap UI is accessible and reduce rework late in the release.",
+      "tools": [
+        "Figma",
+        "WCAG Reference"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 6,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Designer",
+        "acceptance_criteria": [
+          "An accessibility review checklist and a list of issues/fixes covering contrast, keyboard navigation, focus states, and ARIA labeling."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 34,
+      "task_name": "Frontend: Component Scaffold & Feature Flag",
+      "description": "Create a feature-flagged scaffold for the Roadmap component (styling + routing + placeholder data). Expected output: branch with scaffold and feature flag.",
+      "start_date": "2026-03-01",
+      "end_date": "2026-03-07",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 8,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "frontend",
+        "scaffold"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": 21,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 20,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Frontend Developer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "JavaScript",
+        "HTML/CSS",
+        "UI engineering"
+      ],
+      "requisites": [
+        "Complete task 20: Implementation: IP3. Simple Integration Plan"
+      ],
+      "expected_output": "A feature-flagged scaffold for the roadmap component (routing + styling + placeholder data) in a PR with build/lint passing.",
+      "goal": "Create a safe foundation for incremental UI development and testing.",
+      "tools": [
+        "Node.js",
+        "GitHub"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 8,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Frontend Developer",
+        "acceptance_criteria": [
+          "A feature-flagged scaffold for the roadmap component (routing + styling + placeholder data) in a PR with build/lint passing."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 35,
+      "task_name": "Frontend: Implement UI Interactions & Unit Tests",
+      "description": "Implement core interactions, state management, and unit tests for components. Expected output: passing unit tests and component PR.",
+      "start_date": "2026-03-08",
+      "end_date": "2026-03-21",
+      "priority": "Critical",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 24,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "frontend",
+        "tests"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": 21,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 34,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Frontend Developer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "JavaScript",
+        "HTML/CSS",
+        "UI engineering"
+      ],
+      "requisites": [
+        "Complete task 34: Frontend: Component Scaffold & Feature Flag"
+      ],
+      "expected_output": "Core roadmap UI interactions implemented (navigation, state management, edge cases) with unit tests passing and changes delivered via PR.",
+      "goal": "Deliver functional interactions with confidence via automated unit coverage.",
+      "tools": [
+        "Node.js",
+        "GitHub"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 24,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Frontend Developer",
+        "acceptance_criteria": [
+          "Core roadmap UI interactions implemented (navigation, state management, edge cases) with unit tests passing and changes delivered via PR."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 36,
+      "task_name": "Frontend: Integration & E2E Tests (Playwright)",
+      "description": "Add Playwright scenarios for roadmap flow (view, start path, view gap). Expected output: passing E2E tests in CI.",
+      "start_date": "2026-03-22",
+      "end_date": "2026-03-31",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 12,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "tests",
+        "e2e"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": 21,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 35,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Frontend Developer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "JavaScript",
+        "HTML/CSS",
+        "UI engineering"
+      ],
+      "requisites": [
+        "Complete task 35: Frontend: Implement UI Interactions & Unit Tests"
+      ],
+      "expected_output": "Playwright end-to-end test scenarios for critical roadmap flows running in CI with reliable, passing results.",
+      "goal": "Validate the integrated experience end-to-end and prevent regressions.",
+      "tools": [
+        "Playwright",
+        "GitHub Actions"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 12,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Frontend Developer",
+        "acceptance_criteria": [
+          "Playwright end-to-end test scenarios for critical roadmap flows running in CI with reliable, passing results."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 37,
+      "task_name": "Backend: Data Model & Seed Scripts",
+      "description": "Design schema for course metadata and skill tags, write seed scripts for staging. Expected output: schema docs and seed data script.",
+      "start_date": "2026-03-01",
+      "end_date": "2026-03-14",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 16,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "backend",
+        "data"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": 19,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 19,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Backend Developer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "API design",
+        "Data modeling",
+        "Security basics"
+      ],
+      "requisites": [
+        "Complete task 19: Implementation: IP2. Updated Course IA"
+      ],
+      "expected_output": "A documented data model for course metadata and skill tags plus seed scripts/fixtures suitable for staging and local development.",
+      "goal": "Provide consistent data to support UI development and testing.",
+      "tools": [
+        "Node.js",
+        "GitHub"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 16,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Backend Developer",
+        "acceptance_criteria": [
+          "A documented data model for course metadata and skill tags plus seed scripts/fixtures suitable for staging and local development."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 38,
+      "task_name": "Backend: Implement API Endpoints & Unit Tests",
+      "description": "Implement read endpoints for roadmap data and write unit tests. Expected output: documented endpoints and passing tests.",
+      "start_date": "2026-03-15",
+      "end_date": "2026-04-04",
+      "priority": "Critical",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 24,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "backend",
+        "api",
+        "tests"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": 22,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 37,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Backend Developer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "API design",
+        "Data modeling",
+        "Security basics"
+      ],
+      "requisites": [
+        "Complete task 37: Backend: Data Model & Seed Scripts"
+      ],
+      "expected_output": "Roadmap read API endpoints implemented with unit tests and minimal endpoint documentation.",
+      "goal": "Enable the frontend to consume roadmap data reliably.",
+      "tools": [
+        "Node.js",
+        "GitHub"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 24,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Backend Developer",
+        "acceptance_criteria": [
+          "Roadmap read API endpoints implemented with unit tests and minimal endpoint documentation."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 39,
+      "task_name": "Backend: Analytics Events & Dashboard",
+      "description": "Define event payloads, send events to analytics, and create a simple KPI dashboard. Expected output: event schema and dashboard link.",
+      "start_date": "2026-04-04",
+      "end_date": "2026-04-18",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 12,
+      "actual_hours": 0,
+      "is_critical_path": false,
+      "tags": [
+        "metrics",
+        "analytics"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": 23,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 38,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Backend Developer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "API design",
+        "Data modeling",
+        "Security basics"
+      ],
+      "requisites": [
+        "Complete task 38: Backend: Implement API Endpoints & Unit Tests"
+      ],
+      "expected_output": "Analytics event payloads defined and emitted, plus a simple KPI dashboard link showing adoption and engagement trends.",
+      "goal": "Make roadmap usage measurable to guide future iterations.",
+      "tools": [
+        "Analytics Platform"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 12,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Backend Developer",
+        "acceptance_criteria": [
+          "Analytics event payloads defined and emitted, plus a simple KPI dashboard link showing adoption and engagement trends."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 40,
+      "task_name": "QA: Staging Deployment & Smoke Tests",
+      "description": "Deploy branch to staging, run smoke tests and script-based usability checks. Expected output: staging URL and test results.",
+      "start_date": "2026-04-19",
+      "end_date": "2026-04-25",
+      "priority": "Critical",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 8,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "qa",
+        "staging"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 36,
+          "type": "FS",
+          "lag_days": 0
+        },
+        {
+          "predecessor_task_id": 38,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Frontend Developer",
+          "skills": [],
+          "capacity": 1
+        },
+        {
+          "role": "Backend Developer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "JavaScript",
+        "HTML/CSS",
+        "UI engineering",
+        "API design",
+        "Data modeling",
+        "Security basics"
+      ],
+      "requisites": [
+        "Complete task 36: Frontend: Integration & E2E Tests (Playwright)",
+        "Complete task 38: Backend: Implement API Endpoints & Unit Tests"
+      ],
+      "expected_output": "A staging deployment URL and a smoke test report (including any issues found and fixes/mitigations).",
+      "goal": "Verify release readiness in a production-like environment before rollout.",
+      "tools": [
+        "Playwright",
+        "GitHub"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 8,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Frontend Developer",
+        "acceptance_criteria": [
+          "A staging deployment URL and a smoke test report (including any issues found and fixes/mitigations)."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 41,
+      "task_name": "Docs: Runbook & Release Notes",
+      "description": "Write deployment runbook, rollback plan and release notes for the feature. Expected output: runbook doc and release notes.",
+      "start_date": "2026-04-20",
+      "end_date": "2026-04-30",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 6,
+      "actual_hours": 0,
+      "is_critical_path": false,
+      "tags": [
+        "docs",
+        "runbook"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": null,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 40,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Project Manager",
+          "skills": [],
+          "capacity": 1
+        },
+        {
+          "role": "Frontend Developer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "Project planning",
+        "Stakeholder communication",
+        "Requirements",
+        "JavaScript",
+        "HTML/CSS",
+        "UI engineering"
+      ],
+      "requisites": [
+        "Complete task 40: QA: Staging Deployment & Smoke Tests"
+      ],
+      "expected_output": "A deployment runbook, rollback plan, and release notes published in the repo (or docs) and linked from the project board.",
+      "goal": "Make the release maintainable and safe for future contributors.",
+      "tools": [
+        "Markdown",
+        "GitHub"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 6,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Project Manager",
+        "acceptance_criteria": [
+          "A deployment runbook, rollback plan, and release notes published in the repo (or docs) and linked from the project board."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 42,
+      "task_name": "Launch: Canary Rollout",
+      "description": "Perform a controlled canary rollout to a subset of users, monitor for errors and KPI movement. Expected output: rollout notes and KPI snapshot.",
+      "start_date": "2026-05-03",
+      "end_date": "2026-05-07",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 8,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "launch",
+        "canary"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": 25,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 41,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Project Manager",
+          "skills": [],
+          "capacity": 1
+        },
+        {
+          "role": "Frontend Developer",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "Project planning",
+        "Stakeholder communication",
+        "Requirements",
+        "JavaScript",
+        "HTML/CSS",
+        "UI engineering"
+      ],
+      "requisites": [
+        "Complete task 41: Docs: Runbook & Release Notes"
+      ],
+      "expected_output": "A canary rollout executed per plan, with monitoring notes and a KPI snapshot captured after the rollout window.",
+      "goal": "Reduce launch risk by rolling out gradually and validating stability and impact.",
+      "tools": [
+        "Analytics Platform"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 8,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Project Manager",
+        "acceptance_criteria": [
+          "A canary rollout executed per plan, with monitoring notes and a KPI snapshot captured after the rollout window."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
+    },
+    {
+      "task_id": 43,
+      "task_name": "PM: Post-Launch Metrics Review & Backlog",
+      "description": "Review KPIs after rollout, create prioritized iteration backlog and assign owners. Expected output: metrics report and backlog of improvements.",
+      "start_date": "2026-05-08",
+      "end_date": "2026-06-14",
+      "priority": "High",
+      "status": "Not Started",
+      "progress_percentage": 0,
+      "estimated_hours": 20,
+      "actual_hours": 0,
+      "is_critical_path": false,
+      "tags": [
+        "monitoring",
+        "iteration"
+      ],
+      "category_name": "Delivery",
+      "parent_task_id": 26,
+      "created_date": "2025-12-14T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 25,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "required_roles": [
+        {
+          "role": "Project Manager",
+          "skills": [],
+          "capacity": 1
+        },
+        {
+          "role": "UX Researcher",
+          "skills": [],
+          "capacity": 1
+        }
+      ],
+      "skills_required": [
+        "Project planning",
+        "Stakeholder communication",
+        "Requirements",
+        "UX research",
+        "Information architecture",
+        "Wireframing"
+      ],
+      "requisites": [
+        "Complete task 25: Launch & Measure: Launch Plan & Roll-out"
+      ],
+      "expected_output": "A post-launch metrics review summary and a prioritized backlog of improvements with clear next actions and owners-to-be.",
+      "goal": "Close the loop after rollout and drive the next iteration cycle.",
+      "tools": [
+        "Google Docs",
+        "GitHub",
+        "Analytics Platform"
+      ],
+      "complexity": "Medium",
+      "time_estimate_hours": 20,
+      "self_assign_instructions": "Comment on linked issue to claim the task and add your GitHub handle.",
+      "tracking": {
+        "reviewer_role": "Project Manager",
+        "acceptance_criteria": [
+          "A post-launch metrics review summary and a prioritized backlog of improvements with clear next actions and owners-to-be."
+        ],
+        "verification_steps": [
+          "Peer review output against goal + expected_output",
+          "Confirm dependencies are satisfied (if any)"
+        ]
+      },
+      "assignee_capacity": 1
     }
+  ],
+  "required_fields": [
+    "project.name",
+    "tasks[].task_id",
+    "tasks[].task_name",
+    "tasks[].description",
+    "tasks[].start_date",
+    "tasks[].end_date",
+    "tasks[].priority",
+    "tasks[].status",
+    "tasks[].estimated_hours",
+    "tasks[].category_name"
+  ],
+  "optional_fields": [
+    "project.description",
+    "project.budget",
+    "tasks[].progress_percentage",
+    "tasks[].actual_hours",
+    "tasks[].is_critical_path",
+    "tasks[].tags",
+    "tasks[].assigned_workers",
+    "tasks[].parent_task_id",
+    "tasks[].creator_id",
+    "tasks[].created_date",
+    "tasks[].completed_date",
+    "tasks[].comments",
+    "tasks[].attachments",
+    "tasks[].dependencies",
+    "categories",
+    "workers"
   ]
 }

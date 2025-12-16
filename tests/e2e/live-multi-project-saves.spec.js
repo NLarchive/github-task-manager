@@ -72,9 +72,11 @@ async function getRepoInfo(page) {
 }
 
 async function unlockProject(page, password) {
-  // Click the lock indicator to open password modal
+  // Click the lock indicator to open password modal (make robust against transient layout)
   const lockIndicator = page.locator('.auth-indicator.locked');
-  await lockIndicator.click();
+  await lockIndicator.scrollIntoViewIfNeeded();
+  await lockIndicator.waitFor({ state: 'visible', timeout: TIMEOUT });
+  await lockIndicator.click({ force: true });
 
   // Wait for password modal
   await page.waitForSelector('#passwordModal', { state: 'visible', timeout: TIMEOUT });

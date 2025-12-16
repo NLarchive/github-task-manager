@@ -168,7 +168,8 @@ class TemplateAutomation {
       })
       .map(worker => ({
         name: worker.name,
-        email: worker.email,
+        email: worker.email || '',
+        worker_id: worker.worker_id || '',
         role: worker.role,
         match_score: this.calculateSkillMatch(task.tags, worker.skills)
       }))

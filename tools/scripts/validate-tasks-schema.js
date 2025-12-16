@@ -155,8 +155,8 @@ function validateProjectFile(projectId, tasksJson) {
       }
     }
 
-    // Timestamp pollution (skip for intentional test tasks)
-    if (task.is_test !== true && hasTimestampPollution(task.task_name)) {
+    // Timestamp pollution
+    if (hasTimestampPollution(task.task_name)) {
       errors.push(`${prefix}.task_name contains an embedded timestamp-like number (10+ digits): "${task.task_name}"`);
     }
 
