@@ -1,30 +1,233 @@
+
 {
-  "project": {
-    "name": "First Graph - Learning Template",
-    "description": "Minimal TaskDB for the First Graph template (local dev).",
-    "start_date": "2025-12-16",
-    "end_date": "2026-01-16",
-    "status": "Not Started",
-    "budget": 0
-  },
-  "categories": [
-    { "name": "Example", "parent_category_name": null },
-    { "name": "Documentation", "parent_category_name": null }
-  ],
-  "workers": [
-    { "name": "Public User", "email": "public@example.com", "role": "Collaborator", "skills": ["Graph"], "hourly_rate": 0 }
-  ],
-  "tasks": [
-    {
-      "task_id": 1,
-      "task_name": "Add First Graph Template",
-      "description": "Add the interactive First Graph template files and verify local loading in the Task Manager UI.",
-      "start_date": "2025-12-16",
-      "end_date": "2025-12-17",
-      "priority": "Low",
-      "status": "Not Started",
-      "estimated_hours": 1,
-      "category_name": "Example"
-    }
-  ]
+	"description": "A small but feature-rich graph to learn nodes, links, layers, and common graph structures (tree, star, DAG, cycle) using the existing interactions.",
+	"rawNodes": [
+		{ "id": "profile", "properties": { "name": "First Graph: Learn Graphs", "layer": 0 }, "labels": ["Person", "Domain"] },
+
+		{ "id": "basics", "properties": { "name": "Graph Basics", "layer": 1 }, "labels": ["Domain"] },
+		{ "id": "structures", "properties": { "name": "Graph Structures", "layer": 1 }, "labels": ["Domain"] },
+		{ "id": "interactions", "properties": { "name": "How To Use This Graph", "layer": 1 }, "labels": ["Domain"] },
+
+		{ "id": "concept-node", "properties": { "name": "Node (vertex)", "layer": 1, "parent": "basics" }, "labels": ["Concept"] },
+		{ "id": "concept-edge", "properties": { "name": "Edge (link)", "layer": 1, "parent": "basics" }, "labels": ["Concept"] },
+		{ "id": "concept-direction", "properties": { "name": "Directed vs undirected", "layer": 1, "parent": "basics" }, "labels": ["Concept"] },
+		{ "id": "concept-weight", "properties": { "name": "Weight / cost", "layer": 1, "parent": "basics" }, "labels": ["Concept"] },
+		{ "id": "concept-labels", "properties": { "name": "Labels / types", "layer": 1, "parent": "basics" }, "labels": ["Concept"] },
+
+		{ "id": "ui-hover", "properties": { "name": "Hover = highlight neighbors", "layer": 1, "parent": "interactions" }, "labels": ["UI"] },
+		{ "id": "ui-click", "properties": { "name": "Click = open details", "layer": 1, "parent": "interactions" }, "labels": ["UI"] },
+		{ "id": "ui-search", "properties": { "name": "Search = find & focus", "layer": 1, "parent": "interactions" }, "labels": ["UI"] },
+		{ "id": "ui-zoom", "properties": { "name": "Zoom / pan", "layer": 1, "parent": "interactions" }, "labels": ["UI"] },
+		{ "id": "ui-reset", "properties": { "name": "Reset view", "layer": 1, "parent": "interactions" }, "labels": ["UI"] },
+
+		{ "id": "structure-tree", "properties": { "name": "Tree (hierarchy)", "layer": 2 }, "labels": ["Domain"] },
+		{ "id": "structure-star", "properties": { "name": "Star (hub & spokes)", "layer": 2 }, "labels": ["Domain"] },
+		{ "id": "structure-dag", "properties": { "name": "DAG (dependency graph)", "layer": 2 }, "labels": ["Domain"] },
+		{ "id": "structure-cycle", "properties": { "name": "Cycle (feedback loop)", "layer": 2 }, "labels": ["Domain"] },
+
+		{ "id": "tree-root", "properties": { "name": "Root", "layer": 2, "parent": "structure-tree" }, "labels": ["Example"] },
+		{ "id": "tree-branch-a", "properties": { "name": "Branch A", "layer": 2, "parent": "structure-tree" }, "labels": ["Example"] },
+		{ "id": "tree-branch-b", "properties": { "name": "Branch B", "layer": 2, "parent": "structure-tree" }, "labels": ["Example"] },
+		{ "id": "tree-leaf-a1", "properties": { "name": "Leaf A1", "layer": 2, "parent": "structure-tree" }, "labels": ["Example"] },
+		{ "id": "tree-leaf-b1", "properties": { "name": "Leaf B1", "layer": 2, "parent": "structure-tree" }, "labels": ["Example"] },
+
+		{ "id": "star-spoke-1", "properties": { "name": "Spoke 1", "layer": 2, "parent": "structure-star" }, "labels": ["Example"] },
+		{ "id": "star-spoke-2", "properties": { "name": "Spoke 2", "layer": 2, "parent": "structure-star" }, "labels": ["Example"] },
+		{ "id": "star-spoke-3", "properties": { "name": "Spoke 3", "layer": 2, "parent": "structure-star" }, "labels": ["Example"] },
+		{ "id": "star-spoke-4", "properties": { "name": "Spoke 4", "layer": 2, "parent": "structure-star" }, "labels": ["Example"] },
+
+		{ "id": "dag-a", "properties": { "name": "Task A", "layer": 2, "parent": "structure-dag" }, "labels": ["Example"] },
+		{ "id": "dag-b", "properties": { "name": "Task B", "layer": 2, "parent": "structure-dag" }, "labels": ["Example"] },
+		{ "id": "dag-c", "properties": { "name": "Task C", "layer": 2, "parent": "structure-dag" }, "labels": ["Example"] },
+		{ "id": "dag-d", "properties": { "name": "Task D", "layer": 2, "parent": "structure-dag" }, "labels": ["Example"] },
+
+		{ "id": "cycle-1", "properties": { "name": "State 1", "layer": 2, "parent": "structure-cycle" }, "labels": ["Example"] },
+		{ "id": "cycle-2", "properties": { "name": "State 2", "layer": 2, "parent": "structure-cycle" }, "labels": ["Example"] },
+		{ "id": "cycle-3", "properties": { "name": "State 3", "layer": 2, "parent": "structure-cycle" }, "labels": ["Example"] },
+
+		{ "id": "usecase-hierarchy", "properties": { "name": "Use Case: Hierarchies", "layer": 3 }, "labels": ["Domain"] },
+		{ "id": "usecase-hub", "properties": { "name": "Use Case: Hubs", "layer": 3 }, "labels": ["Domain"] },
+		{ "id": "usecase-deps", "properties": { "name": "Use Case: Dependencies", "layer": 3 }, "labels": ["Domain"] },
+		{ "id": "usecase-feedback", "properties": { "name": "Use Case: Feedback Loops", "layer": 3 }, "labels": ["Domain"] },
+
+		{ "id": "outcome", "properties": { "name": "Outcome: Pick the Right Model", "layer": 4 }, "labels": ["Domain"] }
+	],
+	"rawRelationships": [
+		{ "source": "profile", "target": "basics", "type": "HAS_FOUNDATION" },
+		{ "source": "profile", "target": "structures", "type": "HAS_FOUNDATION" },
+		{ "source": "profile", "target": "interactions", "type": "HAS_FOUNDATION" },
+
+		{ "source": "basics", "target": "concept-node", "type": "HAS_SUBCATEGORY" },
+		{ "source": "basics", "target": "concept-edge", "type": "HAS_SUBCATEGORY" },
+		{ "source": "basics", "target": "concept-direction", "type": "HAS_SUBCATEGORY" },
+		{ "source": "basics", "target": "concept-weight", "type": "HAS_SUBCATEGORY" },
+		{ "source": "basics", "target": "concept-labels", "type": "HAS_SUBCATEGORY" },
+
+		{ "source": "interactions", "target": "ui-hover", "type": "HAS_SUBCATEGORY" },
+		{ "source": "interactions", "target": "ui-click", "type": "HAS_SUBCATEGORY" },
+		{ "source": "interactions", "target": "ui-search", "type": "HAS_SUBCATEGORY" },
+		{ "source": "interactions", "target": "ui-zoom", "type": "HAS_SUBCATEGORY" },
+		{ "source": "interactions", "target": "ui-reset", "type": "HAS_SUBCATEGORY" },
+
+		{ "source": "structures", "target": "structure-tree", "type": "DEVELOPS" },
+		{ "source": "structures", "target": "structure-star", "type": "DEVELOPS" },
+		{ "source": "structures", "target": "structure-dag", "type": "DEVELOPS" },
+		{ "source": "structures", "target": "structure-cycle", "type": "DEVELOPS" },
+
+		{ "source": "structure-tree", "target": "tree-root", "type": "HAS_SUBCATEGORY" },
+		{ "source": "tree-root", "target": "tree-branch-a", "type": "HAS_SUBCATEGORY" },
+		{ "source": "tree-root", "target": "tree-branch-b", "type": "HAS_SUBCATEGORY" },
+		{ "source": "tree-branch-a", "target": "tree-leaf-a1", "type": "HAS_SUBCATEGORY" },
+		{ "source": "tree-branch-b", "target": "tree-leaf-b1", "type": "HAS_SUBCATEGORY" },
+
+		{ "source": "structure-star", "target": "star-spoke-1", "type": "HAS_SUBCATEGORY" },
+		{ "source": "structure-star", "target": "star-spoke-2", "type": "HAS_SUBCATEGORY" },
+		{ "source": "structure-star", "target": "star-spoke-3", "type": "HAS_SUBCATEGORY" },
+		{ "source": "structure-star", "target": "star-spoke-4", "type": "HAS_SUBCATEGORY" },
+
+		{ "source": "structure-dag", "target": "dag-a", "type": "HAS_SUBCATEGORY" },
+		{ "source": "structure-dag", "target": "dag-b", "type": "HAS_SUBCATEGORY" },
+		{ "source": "structure-dag", "target": "dag-c", "type": "HAS_SUBCATEGORY" },
+		{ "source": "structure-dag", "target": "dag-d", "type": "HAS_SUBCATEGORY" },
+		{ "source": "dag-a", "target": "dag-b", "type": "DEVELOPS" },
+		{ "source": "dag-a", "target": "dag-c", "type": "DEVELOPS" },
+		{ "source": "dag-b", "target": "dag-d", "type": "CREATES" },
+		{ "source": "dag-c", "target": "dag-d", "type": "CREATES" },
+
+		{ "source": "structure-cycle", "target": "cycle-1", "type": "HAS_SUBCATEGORY" },
+		{ "source": "structure-cycle", "target": "cycle-2", "type": "HAS_SUBCATEGORY" },
+		{ "source": "structure-cycle", "target": "cycle-3", "type": "HAS_SUBCATEGORY" },
+		{ "source": "cycle-1", "target": "cycle-2", "type": "LEADS_TO" },
+		{ "source": "cycle-2", "target": "cycle-3", "type": "LEADS_TO" },
+		{ "source": "cycle-3", "target": "cycle-1", "type": "LEADS_TO" },
+
+		{ "source": "structure-tree", "target": "usecase-hierarchy", "type": "CREATES" },
+		{ "source": "structure-star", "target": "usecase-hub", "type": "CREATES" },
+		{ "source": "structure-dag", "target": "usecase-deps", "type": "CREATES" },
+		{ "source": "structure-cycle", "target": "usecase-feedback", "type": "CREATES" },
+
+		{ "source": "usecase-hierarchy", "target": "outcome", "type": "LEADS_TO" },
+		{ "source": "usecase-hub", "target": "outcome", "type": "LEADS_TO" },
+		{ "source": "usecase-deps", "target": "outcome", "type": "LEADS_TO" },
+		{ "source": "usecase-feedback", "target": "outcome", "type": "LEADS_TO" },
+
+		{ "source": "concept-direction", "target": "structure-dag", "type": "DEVELOPS" },
+		{ "source": "concept-weight", "target": "usecase-deps", "type": "DEVELOPS" },
+		{ "source": "ui-search", "target": "usecase-deps", "type": "DEVELOPS" }
+	],
+	"details": {
+		"profile": {
+			"title": "First Graph: Learn Graphs",
+			"photoUrl": "images/team/profile-placeholder.svg",
+			"items": [
+				"This template is intentionally small, but it demonstrates multiple <strong>graph structures</strong> using the same UI interactions.",
+				"Try: hover a node → see neighbors; click a node → open details; search → focus; zoom/pan → explore clusters.",
+				"Goal: learn how nodes/edges/layers map to real-world models (dependencies, hierarchies, hubs, feedback)."
+			]
+		},
+
+		"basics": {
+			"title": "Graph Basics",
+			"items": [
+				"A graph is a set of <strong>nodes</strong> connected by <strong>edges</strong>.",
+				"In this UI: parent nodes are larger; child nodes inherit the parent color."
+			]
+		},
+		"concept-node": { "title": "Node (vertex)", "items": ["A distinct thing: a person, a task, a concept, a page."] },
+		"concept-edge": { "title": "Edge (link)", "items": ["A relationship between two nodes: depends-on, contains, leads-to, relates-to."] },
+		"concept-direction": { "title": "Directed vs undirected", "items": ["Dependencies are usually directed (A → B). Friendship is often undirected (A — B)."] },
+		"concept-weight": { "title": "Weight / cost", "items": ["Edges can carry numbers (time, cost, distance). Shortest-path algorithms use weights."] },
+		"concept-labels": { "title": "Labels / types", "items": ["Edge types let you encode meaning (e.g., HAS_SUBCATEGORY vs LEADS_TO)."] },
+
+		"interactions": {
+			"title": "How To Use This Graph",
+			"items": [
+				"This view is interactive. Use the menu buttons and the search box.",
+				"Tip: clicking nodes is the best way to learn—every node has a short explanation."
+			]
+		},
+		"ui-hover": { "title": "Hover = highlight neighbors", "items": ["Hover a node to highlight its immediate connections."] },
+		"ui-click": { "title": "Click = open details", "items": ["Click any node to open its details popup."] },
+		"ui-search": { "title": "Search = find & focus", "items": ["Use the menu search to jump to a node by name or detail text."] },
+		"ui-zoom": { "title": "Zoom / pan", "items": ["Scroll/pinch to zoom. Drag the background to pan."] },
+		"ui-reset": { "title": "Reset view", "items": ["Use Reset View to return to the default zoom and clear highlights."] },
+
+		"structures": {
+			"title": "Graph Structures",
+			"items": [
+				"Below are common shapes you will see in real data: trees, stars, DAGs, cycles.",
+				"These are not different UIs—just different <strong>node/edge patterns</strong>."
+			]
+		},
+		"structure-tree": { "title": "Tree (hierarchy)", "items": ["A connected structure with no cycles. Great for categories and org charts."] },
+		"tree-root": { "title": "Root", "items": ["The top of a hierarchy. Everything flows downward."] },
+		"tree-branch-a": { "title": "Branch A", "items": ["A subgroup under the root."] },
+		"tree-branch-b": { "title": "Branch B", "items": ["Another subgroup under the root."] },
+		"tree-leaf-a1": { "title": "Leaf A1", "items": ["Leaves are terminal nodes in a tree path."] },
+		"tree-leaf-b1": { "title": "Leaf B1", "items": ["Leaves are often the actionable / concrete items."] },
+
+		"structure-star": { "title": "Star (hub & spokes)", "items": ["One central node connected to many others. Common in routing, platforms, and popularity graphs."] },
+		"star-spoke-1": { "title": "Spoke 1", "items": ["A neighbor connected to the hub."] },
+		"star-spoke-2": { "title": "Spoke 2", "items": ["A neighbor connected to the hub."] },
+		"star-spoke-3": { "title": "Spoke 3", "items": ["A neighbor connected to the hub."] },
+		"star-spoke-4": { "title": "Spoke 4", "items": ["A neighbor connected to the hub."] },
+
+		"structure-dag": {
+			"title": "DAG (dependency graph)",
+			"items": [
+				"A directed acyclic graph: edges point forward and there are <strong>no cycles</strong>.",
+				"Used for build pipelines, task scheduling, and prerequisites."
+			]
+		},
+		"dag-a": { "title": "Task A", "items": ["A prerequisite feeding into multiple tasks."] },
+		"dag-b": { "title": "Task B", "items": ["Depends on A."] },
+		"dag-c": { "title": "Task C", "items": ["Also depends on A."] },
+		"dag-d": { "title": "Task D", "items": ["Combines outputs from B and C."] },
+
+		"structure-cycle": {
+			"title": "Cycle (feedback loop)",
+			"items": [
+				"Cycles mean you can return to where you started.",
+				"Sometimes desired (feedback systems), sometimes a problem (circular dependencies)."
+			]
+		},
+		"cycle-1": { "title": "State 1", "items": ["Part of a loop."] },
+		"cycle-2": { "title": "State 2", "items": ["Part of a loop."] },
+		"cycle-3": { "title": "State 3", "items": ["Part of a loop."] },
+
+		"usecase-hierarchy": { "title": "Use Case: Hierarchies", "items": ["Org charts, categories, file/folder trees, taxonomy."] },
+		"usecase-hub": { "title": "Use Case: Hubs", "items": ["Platforms, routers, central services, influencer networks."] },
+		"usecase-deps": { "title": "Use Case: Dependencies", "items": ["Task planning, build systems, prerequisites, pipelines."] },
+		"usecase-feedback": { "title": "Use Case: Feedback Loops", "items": ["Control systems, iteration cycles, reinforcing effects."] },
+
+		"outcome": {
+			"title": "Outcome: Pick the Right Model",
+			"items": [
+				"If your data is hierarchical → tree.",
+				"If you have prerequisites → DAG.",
+				"If you have a central service → star/hub.",
+				"If effects reinforce each other → cycle/loop."
+			]
+		}
+	},
+	"meta": {
+		"profileNodeId": "profile",
+		"coreNodeId": "structures",
+		"walkthroughEnabled": true,
+		"walkthroughStepsPath": "templates/first-graph/tour.json",
+		"showCvButton": false,
+		"showCoreButton": true,
+		"showProfileButton": true,
+		"legendMode": "career",
+		"menuLabels": {
+			"profile": "🏁 Start Here",
+			"core": "🧠 Graph Structures",
+			"tour": "👋 Guided Tour"
+		}
+	},
+	"configOverrides": {
+		"colorMode": "layer",
+		"sizeMode": "fixed"
+	}
 }
+
