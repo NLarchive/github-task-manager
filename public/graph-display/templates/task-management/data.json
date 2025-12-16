@@ -1,0 +1,38 @@
+{
+  "project": {
+    "name": "Task Manager v2 (Example Project)",
+    "description": "Example: a richer task plan with cross-dependencies, priority, and estimated hours. Layers are computed from dependencies."
+  },
+  "tasks": [
+    { "task_id": 1, "task_name": "Define scope & success metrics", "description": "Clarify goals, non-goals, and measurable outcomes.", "priority": "Critical", "status": "Not Started", "estimated_hours": 12, "dependencies": [] },
+    { "task_id": 2, "task_name": "Repository & CI bootstrap", "description": "Repo setup, linting, tests, and basic CI pipeline.", "priority": "High", "status": "Not Started", "estimated_hours": 6, "dependencies": [{ "predecessor_task_id": 1, "type": "FS", "lag_days": 0 }] },
+    { "task_id": 3, "task_name": "Domain model & DB schema", "description": "Design task/project schema, indexes, and migrations.", "priority": "High", "status": "Not Started", "estimated_hours": 18, "dependencies": [{ "predecessor_task_id": 1, "type": "FS", "lag_days": 0 }] },
+    { "task_id": 4, "task_name": "UX wireframes (key flows)", "description": "Core flows: login, task board, dependencies, reporting.", "priority": "High", "status": "Not Started", "estimated_hours": 14, "dependencies": [{ "predecessor_task_id": 1, "type": "FS", "lag_days": 0 }] },
+    { "task_id": 5, "task_name": "Auth API (sessions + roles)", "description": "Login, session handling, and role checks.", "priority": "Critical", "status": "Not Started", "estimated_hours": 22, "dependencies": [{ "predecessor_task_id": 2, "type": "FS", "lag_days": 0 }, { "predecessor_task_id": 3, "type": "FS", "lag_days": 0 }] },
+    { "task_id": 6, "task_name": "Projects API", "description": "CRUD for projects and membership.", "priority": "High", "status": "Not Started", "estimated_hours": 16, "dependencies": [{ "predecessor_task_id": 3, "type": "FS", "lag_days": 0 }] },
+    { "task_id": 7, "task_name": "Tasks API (CRUD)", "description": "CRUD for tasks with validation + pagination.", "priority": "Critical", "status": "Not Started", "estimated_hours": 24, "dependencies": [{ "predecessor_task_id": 3, "type": "FS", "lag_days": 0 }] },
+    { "task_id": 8, "task_name": "Dependencies API", "description": "Create/validate dependency edges; prevent cycles.", "priority": "Critical", "status": "Not Started", "estimated_hours": 20, "dependencies": [{ "predecessor_task_id": 7, "type": "FS", "lag_days": 0 }] },
+    { "task_id": 9, "task_name": "Frontend scaffold", "description": "App shell, routing, state management, API client.", "priority": "High", "status": "Not Started", "estimated_hours": 14, "dependencies": [{ "predecessor_task_id": 2, "type": "FS", "lag_days": 0 }] },
+    { "task_id": 10, "task_name": "Login UI", "description": "Login form + session persistence.", "priority": "High", "status": "Not Started", "estimated_hours": 12, "dependencies": [{ "predecessor_task_id": 5, "type": "FS", "lag_days": 0 }, { "predecessor_task_id": 9, "type": "FS", "lag_days": 0 }] },
+    { "task_id": 11, "task_name": "Project dashboard UI", "description": "Project list, creation, and navigation.", "priority": "Medium", "status": "Not Started", "estimated_hours": 14, "dependencies": [{ "predecessor_task_id": 6, "type": "FS", "lag_days": 0 }, { "predecessor_task_id": 9, "type": "FS", "lag_days": 0 }, { "predecessor_task_id": 10, "type": "FS", "lag_days": 0 }] },
+    { "task_id": 12, "task_name": "Task board UI", "description": "Create/edit tasks; status changes; quick filters.", "priority": "Critical", "status": "Not Started", "estimated_hours": 26, "dependencies": [{ "predecessor_task_id": 7, "type": "FS", "lag_days": 0 }, { "predecessor_task_id": 9, "type": "FS", "lag_days": 0 }, { "predecessor_task_id": 10, "type": "FS", "lag_days": 0 }, { "predecessor_task_id": 4, "type": "FS", "lag_days": 0 }] },
+    { "task_id": 13, "task_name": "Dependency graph UI", "description": "Render task dependency graph with layers (DAG view).", "priority": "High", "status": "Not Started", "estimated_hours": 28, "dependencies": [{ "predecessor_task_id": 8, "type": "FS", "lag_days": 0 }, { "predecessor_task_id": 12, "type": "FS", "lag_days": 0 }] },
+    { "task_id": 14, "task_name": "Critical path & scheduling", "description": "Compute critical path, highlight blockers, project timeline.", "priority": "Medium", "status": "Not Started", "estimated_hours": 18, "dependencies": [{ "predecessor_task_id": 8, "type": "FS", "lag_days": 0 }, { "predecessor_task_id": 12, "type": "FS", "lag_days": 0 }] },
+    { "task_id": 15, "task_name": "Notifications & reminders", "description": "Reminder rules, due-date alerts, and assignment mentions.", "priority": "Low", "status": "Not Started", "estimated_hours": 12, "dependencies": [{ "predecessor_task_id": 7, "type": "FS", "lag_days": 0 }, { "predecessor_task_id": 5, "type": "FS", "lag_days": 0 }] },
+    { "task_id": 16, "task_name": "Reporting (hours + progress)", "description": "Reports by priority, assignee, and progress over time.", "priority": "Medium", "status": "Not Started", "estimated_hours": 16, "dependencies": [{ "predecessor_task_id": 12, "type": "FS", "lag_days": 0 }, { "predecessor_task_id": 3, "type": "FS", "lag_days": 0 }] },
+    { "task_id": 17, "task_name": "E2E regression suite", "description": "Playwright flows across auth + CRUD + dependencies.", "priority": "High", "status": "Not Started", "estimated_hours": 20, "dependencies": [{ "predecessor_task_id": 10, "type": "FS", "lag_days": 0 }, { "predecessor_task_id": 12, "type": "FS", "lag_days": 0 }, { "predecessor_task_id": 13, "type": "FS", "lag_days": 0 }] },
+    { "task_id": 18, "task_name": "Perf & stability hardening", "description": "Profiling, load tests, caching, and API robustness.", "priority": "Medium", "status": "Not Started", "estimated_hours": 14, "dependencies": [{ "predecessor_task_id": 17, "type": "FS", "lag_days": 0 }, { "predecessor_task_id": 7, "type": "FS", "lag_days": 0 }] },
+    { "task_id": 19, "task_name": "Deployment pipeline", "description": "Staging/prod deploy, env config, migrations.", "priority": "High", "status": "Not Started", "estimated_hours": 14, "dependencies": [{ "predecessor_task_id": 2, "type": "FS", "lag_days": 0 }, { "predecessor_task_id": 17, "type": "FS", "lag_days": 0 }] },
+    { "task_id": 20, "task_name": "Release & launch checklist", "description": "Go-live checklist, monitoring, roll-back plan.", "priority": "Critical", "status": "Not Started", "estimated_hours": 8, "dependencies": [{ "predecessor_task_id": 19, "type": "FS", "lag_days": 0 }, { "predecessor_task_id": 18, "type": "FS", "lag_days": 0 }, { "predecessor_task_id": 16, "type": "FS", "lag_days": 0 }] }
+  ],
+  "meta": {
+    "legendMode": "task-management",
+    "walkthroughEnabled": true,
+    "walkthroughStepsPath": "templates/task-management/tour.json"
+  },
+  "configOverrides": {
+    "colorMode": "priority",
+    "sizeMode": "hours",
+    "taskSizing": { "minHours": 2, "maxHours": 40, "minRadius": 16, "maxRadius": 44 }
+  }
+}

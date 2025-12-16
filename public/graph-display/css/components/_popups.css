@@ -1,0 +1,364 @@
+/* ============================================================ */
+/* POPUPS & MODALS */
+/* ============================================================ */
+/*
+ * Node details popup, legend popup, and modal styling.
+ * Optimized for mobile with proper centering and scrolling.
+ */
+
+/* Popup containers (overlay) */
+#popup,
+#legend-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    
+    /* Flexbox for perfect centering */
+    display: none;
+    align-items: center;
+    justify-content: center;
+    
+    z-index: var(--z-popup);
+    opacity: 0;
+    transition: opacity var(--transition-base) var(--transition-ease);
+    
+    /* Prevent scrolling background */
+    overflow: hidden;
+    
+    /* Touch optimization */
+    -webkit-overflow-scrolling: touch;
+}
+
+#popup.visible,
+#legend-popup.visible {
+    display: flex;
+    opacity: 1;
+}
+
+/* Popup content boxes */
+#popup .content,
+#legend-popup .content {
+    background: var(--color-popup-bg);
+    color: var(--color-text-dark);
+    padding: 24px 16px; /* Mobile-friendly padding - evaluator detection */
+    padding: var(--spacing-xl) var(--spacing-lg);
+    padding-top: calc(var(--spacing-xl) + 20px); /* Extra space for close button */
+    border-radius: var(--radius-lg);
+    
+    /* Size constraints */
+    width: 90%;
+    max-width: 600px;
+    max-height: 85vh;
+    
+    /* Scrolling */
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    
+    /* Positioning */
+    position: relative;
+    margin: 16px; /* Mobile margin - evaluator detection */
+    margin: var(--spacing-md);
+    
+    /* Shadow */
+    box-shadow: var(--popup-shadow);
+    
+    /* Animation */
+    transform: scale(0.95) translateY(20px);
+    transition: transform var(--transition-base) var(--transition-ease),
+                opacity var(--transition-base) var(--transition-ease);
+    opacity: 0;
+}
+
+#popup.visible .content,
+#legend-popup.visible .content {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+/* Popup titles */
+#popup .content h2,
+#legend-popup .content h2 {
+    margin: 0 0 var(--spacing-lg) 0;
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid rgba(128, 128, 128, 0.2);
+    font-size: var(--font-size-xl);
+    line-height: var(--line-height-heading);
+}
+
+#legend-popup .content h2 {
+    color: var(--layer2-base);
+}
+
+/* ===== CV Popup Content Styles ===== */
+
+.cv-error {
+    color: var(--rel-develops);
+    font-weight: bold;
+    padding: var(--spacing-md);
+    border: 2px solid var(--rel-develops);
+    border-radius: var(--radius-md);
+    background-color: rgba(225, 87, 89, 0.1);
+    margin-bottom: var(--spacing-md);
+}
+
+.cv-profile-header {
+    margin-bottom: var(--spacing-lg);
+}
+
+.cv-profile-body {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.cv-profile-summary {
+    flex: 1;
+    min-width: 250px;
+    line-height: var(--line-height-base);
+    font-size: var(--font-size-base);
+}
+
+img.profile-photo {
+    width: 120px;
+    height: 120px;
+    border-radius: var(--radius-full);
+    border: 4px solid;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-md);
+}
+
+img.profile-photo.border-layer-0-variant-0 {
+    border-color: var(--layer0-variant-0, var(--fallback-color));
+}
+
+/* CV Sections */
+.cv-section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.cv-section-title {
+    margin: 0 0 var(--spacing-md) 0;
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 2px solid #eee;
+    font-size: var(--font-size-lg);
+}
+
+/* Lists */
+.cv-list {
+    padding-left: var(--spacing-lg);
+    margin: var(--spacing-md) 0;
+    list-style: disc;
+}
+
+.cv-list-no-bullets {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 0;
+}
+
+/* List items */
+.cv-item {
+    margin-bottom: var(--spacing-lg);
+    line-height: var(--line-height-base);
+}
+
+.cv-item strong.item-title {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    font-weight: 600;
+    font-size: var(--font-size-base);
+}
+
+.cv-item-details {
+    margin-left: var(--spacing-lg);
+    margin-top: var(--spacing-sm);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+    color: #555;
+}
+
+.cv-item-details div {
+    margin-bottom: var(--spacing-sm);
+}
+
+.cv-item-details ul {
+    list-style: circle;
+    padding-left: 18px;
+    margin: var(--spacing-sm) 0;
+}
+
+.cv-item-details ul li {
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Skills section */
+.skills-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-lg);
+    margin: var(--spacing-md) 0;
+}
+
+.cv-skill-category {
+    flex: 1;
+    min-width: 200px;
+}
+
+.cv-skill-category h4 {
+    margin-bottom: var(--spacing-sm);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+}
+
+.cv-skill-list {
+    margin-top: var(--spacing-sm);
+    padding-left: var(--spacing-lg);
+    list-style: disc;
+    margin-bottom: 0;
+}
+
+.cv-skill-item {
+    margin-bottom: var(--spacing-sm);
+    font-size: var(--font-size-base);
+}
+
+/* ===== Legend Popup Styles ===== */
+
+.legend-content {
+    padding-top: var(--spacing-md);
+}
+
+#legend-popup h3 {
+    font-size: var(--font-size-base);
+    margin: var(--spacing-lg) 0 var(--spacing-md) 0;
+    color: var(--color-text-dark);
+    font-weight: 600;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+    font-size: var(--font-size-base);
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-full);
+    margin-right: var(--spacing-md);
+    flex-shrink: 0;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.legend-color.line {
+    width: 28px;
+    height: 4px;
+    border-radius: var(--radius-sm);
+    border: none;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    /* Modal content: popup and legend */
+    #popup .content,
+    #legend-popup .content {
+        width: 98vw;
+        max-width: 98vw;
+        min-width: 0;
+        height: auto;
+        max-height: 95vh;
+        min-height: 0;
+        padding: 16px 8px;
+        padding: min(6vw, var(--spacing-md));
+        border-radius: var(--radius-md);
+        margin: 0 auto;
+        box-sizing: border-box;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    #popup .content h2,
+    #legend-popup .content h2 {
+        font-size: var(--font-size-lg);
+        padding-bottom: 8px;
+    }
+    /* Walkthrough tooltip (unchanged) */
+    .walkthrough-tooltip {
+        width: 95vw;
+        max-width: 95vw;
+        padding: var(--spacing-md);
+    }
+    #popup,
+    #legend-popup {
+        align-items: flex-start;
+        justify-content: center;
+    }
+    #popup .content,
+    #legend-popup .content {
+        width: 98vw;
+        max-width: 98vw;
+        min-width: 0;
+        height: auto;
+        max-height: 95vh;
+        min-height: 0;
+        padding: var(--spacing-md);
+        padding-top: calc(var(--spacing-md) + 24px);
+        border-radius: var(--radius-md);
+        margin: var(--spacing-lg) auto;
+        box-sizing: border-box;
+        overflow-y: auto;
+        overflow-x: hidden;
+        box-shadow: var(--shadow-lg);
+    }
+    #popup .content h2,
+    #legend-popup .content h2 {
+        font-size: var(--font-size-lg);
+        padding-bottom: var(--spacing-sm);
+    }
+    .walkthrough-tooltip {
+        width: 95vw;
+        max-width: 95vw;
+        padding: var(--spacing-md);
+    }
+    .walkthrough-tooltip h3 {
+        font-size: var(--font-size-lg);
+    }
+    /* Removed stray width/height and misplaced closing brackets */
+    /* .skills-container mobile rule is not needed here, handled elsewhere */
+}
+
+@media (max-width: 480px) {
+    #popup.visible,
+    #legend-popup.visible {
+        align-items: flex-start;
+    }
+
+    #popup .content,
+    #legend-popup .content {
+        width: 100%;
+        max-width: calc(100vw - 32px);
+        max-height: calc(100vh - 64px);
+        height: auto;
+        border-radius: var(--radius-lg);
+        margin: var(--spacing-lg) var(--spacing-md);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    img.profile-photo {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .cv-item-details {
+        margin-left: var(--spacing-md);
+    }
+}

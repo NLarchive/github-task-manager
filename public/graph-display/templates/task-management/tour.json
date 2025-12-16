@@ -1,0 +1,52 @@
+[
+  {
+    "title": "Welcome to Task Management",
+    "content": "This view is an end-to-end project plan: dependencies define a layered flow from <strong>Start → Work → End</strong>.",
+    "position": "center-bottom"
+  },
+  {
+    "title": "Project Start",
+    "content": "The Start milestone anchors tasks with no prerequisites (Layer 1).",
+    "nodeId": "project-start",
+    "position": "bottom",
+    "focus": true,
+    "hoverNode": true
+  },
+  {
+    "title": "Layering from Dependencies",
+    "content": "Each task’s layer is computed from dependency depth. Higher layers depend on earlier ones.",
+    "position": "center-bottom",
+    "focus": false
+  },
+  {
+    "title": "Critical Tasks",
+    "content": "Critical tasks are colored by priority. Open one to see prerequisites.",
+    "nodeId": "task-5",
+    "position": "right",
+    "focus": true,
+    "clickNode": true
+  },
+  {
+    "title": "Dependency Edges",
+    "content": "Dashed links show dependency types (e.g., FS). Follow arrows from prerequisites → dependent tasks.",
+    "nodeId": "task-12",
+    "position": "right",
+    "focus": true,
+    "hoverNode": true
+  },
+  {
+    "title": "Project End",
+    "content": "Terminal tasks (no dependents) flow into the End milestone.",
+    "nodeId": "project-end",
+    "position": "top",
+    "focus": true,
+    "hoverNode": true
+  },
+  {
+    "title": "Search & Compare",
+    "content": "Use the Menu to search tasks (by name) and compare this structure with TaskDB roadmaps.",
+    "target": "#menu-panel",
+    "position": "bottom-left",
+    "searchDemo": "Dependency"
+  }
+]

@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "oneOf": [
+    {
+      "title": "Career template schema",
+      "type": "object",
+      "required": ["rawNodes", "rawRelationships", "details"],
+      "properties": {
+        "rawNodes": { "type": "array" },
+        "rawRelationships": { "type": "array" },
+        "details": { "type": "object" },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "walkthroughEnabled": { "type": "boolean" },
+            "walkthroughStepsPath": { "type": "string" },
+            "walkthroughSteps": { "type": "array" }
+          }
+        },
+        "configOverrides": { "type": "object" }
+      }
+    },
+    {
+      "title": "Task-management template schema",
+      "type": "object",
+      "required": ["project", "tasks"],
+      "properties": {
+        "project": { "type": "object" },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["task_id", "task_name"],
+            "properties": {
+              "task_id": { "type": "integer" },
+              "task_name": { "type": "string" },
+              "priority": { "type": "string" },
+              "estimated_hours": { "type": ["number", "integer"] },
+              "dependencies": { "type": "array" }
+            }
+          }
+        },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "walkthroughEnabled": { "type": "boolean" },
+            "walkthroughStepsPath": { "type": "string" },
+            "walkthroughSteps": { "type": "array" }
+          }
+        },
+        "configOverrides": { "type": "object" }
+      }
+    }
+  ]
+}

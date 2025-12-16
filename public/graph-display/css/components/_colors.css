@@ -1,0 +1,182 @@
+/* ============================================================ */
+/* COLOR UTILITIES & CLASSES */
+/* ============================================================ */
+/*
+ * Dynamic color classes for text, borders, and backgrounds.
+ * Applied by JavaScript based on node layer and variant.
+ */
+
+/* Text color classes (for contrast) */
+.text-light { color: var(--color-text-light) !important; }
+.text-dark { color: var(--color-text-dark) !important; }
+
+/* Force dark text for nodes and title modules */
+.node text,
+.cv-section-title,
+h2,
+h3,
+h4,
+strong,
+.title-module {
+    color: var(--color-text-dark) !important;
+}
+
+/* ===== Title/Heading Color Rules ===== */
+/* Layer 0 (Profile) */
+h2.title-layer-0.color-variant-0,
+h3.title-layer-0.color-variant-0,
+h4.title-layer-0.color-variant-0,
+strong.title-layer-0.color-variant-0 { 
+    color: var(--layer0-variant-0, var(--fallback-color)); 
+}
+
+/* Layer 1 (Foundations) */
+h2.title-layer-1.color-variant-0,
+h3.title-layer-1.color-variant-0,
+h4.title-layer-1.color-variant-0,
+strong.title-layer-1.color-variant-0 { 
+    color: var(--layer1-variant-0, var(--fallback-color)); 
+}
+
+h2.title-layer-1.color-variant-1,
+h3.title-layer-1.color-variant-1,
+h4.title-layer-1.color-variant-1,
+strong.title-layer-1.color-variant-1 { 
+    color: var(--layer1-variant-1, var(--fallback-color)); 
+}
+
+h2.title-layer-1.color-variant-2,
+h3.title-layer-1.color-variant-2,
+h4.title-layer-1.color-variant-2,
+strong.title-layer-1.color-variant-2 { 
+    color: var(--layer1-variant-2, var(--fallback-color)); 
+}
+
+h2.title-layer-1.color-variant-3,
+h3.title-layer-1.color-variant-3,
+h4.title-layer-1.color-variant-3,
+strong.title-layer-1.color-variant-3 { 
+    color: var(--layer1-variant-3, var(--fallback-color)); 
+}
+
+h2.title-layer-1.color-variant-4,
+h3.title-layer-1.color-variant-4,
+h4.title-layer-1.color-variant-4,
+strong.title-layer-1.color-variant-4 { 
+    color: var(--layer1-variant-4, var(--fallback-color)); 
+}
+
+/* Layer 2 (Skills) */
+h2.title-layer-2.color-variant-0,
+h3.title-layer-2.color-variant-0,
+h4.title-layer-2.color-variant-0,
+strong.title-layer-2.color-variant-0 { 
+    color: var(--layer2-variant-0, var(--fallback-color)); 
+}
+
+h2.title-layer-2.color-variant-1,
+h3.title-layer-2.color-variant-1,
+h4.title-layer-2.color-variant-1,
+strong.title-layer-2.color-variant-1 { 
+    color: var(--layer2-variant-1, var(--fallback-color)); 
+}
+
+h2.title-layer-2.color-variant-2,
+h3.title-layer-2.color-variant-2,
+h4.title-layer-2.color-variant-2,
+strong.title-layer-2.color-variant-2 { 
+    color: var(--layer2-variant-2, var(--fallback-color)); 
+}
+
+h2.title-layer-2.color-variant-3,
+h3.title-layer-2.color-variant-3,
+h4.title-layer-2.color-variant-3,
+strong.title-layer-2.color-variant-3 { 
+    color: var(--layer2-variant-3, var(--fallback-color)); 
+}
+
+h2.title-layer-2.color-variant-4,
+h3.title-layer-2.color-variant-4,
+h4.title-layer-2.color-variant-4,
+strong.title-layer-2.color-variant-4 { 
+    color: var(--layer2-variant-4, var(--fallback-color)); 
+}
+
+/* Layer 3 (Impact) */
+h2.title-layer-3.color-variant-0,
+h3.title-layer-3.color-variant-0,
+h4.title-layer-3.color-variant-0,
+strong.title-layer-3.color-variant-0 { 
+    color: var(--layer3-variant-0, var(--fallback-color)); 
+}
+
+h2.title-layer-3.color-variant-1,
+h3.title-layer-3.color-variant-1,
+h4.title-layer-3.color-variant-1,
+strong.title-layer-3.color-variant-1 { 
+    color: var(--layer3-variant-1, var(--fallback-color)); 
+}
+
+h2.title-layer-3.color-variant-2,
+h3.title-layer-3.color-variant-2,
+h4.title-layer-3.color-variant-2,
+strong.title-layer-3.color-variant-2 { 
+    color: var(--layer3-variant-2, var(--fallback-color)); 
+}
+
+h2.title-layer-3.color-variant-3,
+h3.title-layer-3.color-variant-3,
+h4.title-layer-3.color-variant-3,
+strong.title-layer-3.color-variant-3 { 
+    color: var(--layer3-variant-3, var(--fallback-color)); 
+}
+
+h2.title-layer-3.color-variant-4,
+h3.title-layer-3.color-variant-4,
+h4.title-layer-3.color-variant-4,
+strong.title-layer-3.color-variant-4 { 
+    color: var(--layer3-variant-4, var(--fallback-color)); 
+}
+
+/* Layer 4 (Outcome) */
+h2.title-layer-4.color-variant-0,
+h3.title-layer-4.color-variant-0,
+h4.title-layer-4.color-variant-0,
+strong.title-layer-4.color-variant-0 { 
+    color: var(--layer4-variant-0, var(--fallback-color)); 
+}
+
+h2.title-layer-4.color-variant-1,
+h3.title-layer-4.color-variant-1,
+h4.title-layer-4.color-variant-1,
+strong.title-layer-4.color-variant-1 { 
+    color: var(--layer4-variant-1, var(--fallback-color)); 
+}
+
+h2.title-layer-4.color-variant-2,
+h3.title-layer-4.color-variant-2,
+h4.title-layer-4.color-variant-2,
+strong.title-layer-4.color-variant-2 { 
+    color: var(--layer4-variant-2, var(--fallback-color)); 
+}
+
+h2.title-layer-4.color-variant-3,
+h3.title-layer-4.color-variant-3,
+h4.title-layer-4.color-variant-3,
+strong.title-layer-4.color-variant-3 { 
+    color: var(--layer4-variant-3, var(--fallback-color)); 
+}
+
+h2.title-layer-4.color-variant-4,
+h3.title-layer-4.color-variant-4,
+h4.title-layer-4.color-variant-4,
+strong.title-layer-4.color-variant-4 { 
+    color: var(--layer4-variant-4, var(--fallback-color)); 
+}
+
+/* ===== Border Color Classes ===== */
+.border-layer-0-variant-0 { 
+    border-color: var(--layer0-variant-0, var(--fallback-color)) !important; 
+}
+
+/* Add more as needed for specific use cases */

@@ -1,0 +1,28 @@
+{
+  "name": "Interactive Career Graph (Template)",
+  "short_name": "CareerGraph",
+  "description": "Template: interactive graph-based CV/portfolio. Replace the sample data with your own.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4e79a7",
+  "orientation": "portrait-primary",
+  "scope": "./",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "images/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "images/favicon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["business", "productivity", "analytics"],
+  "screenshots": []
+}

@@ -1,0 +1,51 @@
+/* ============================================================ */
+/* Interactive Career Graph - MAIN STYLESHEET (Template) */
+/* ============================================================ */
+/*
+ * Modular CSS architecture for easy maintenance and editing.
+ * Import order matters - variables first, utilities last.
+ * 
+ * Created: 2025
+ * Version: 2.0 - Modular Architecture
+ * Optimized for: iPhone, iPad, Desktop
+ * 
+ * File Structure:
+ * - _variables.css:     CSS custom properties and theme configuration
+ * - _base.css:          Reset, typography, and base element styles
+ * - _accessibility.css: Skip links and accessibility features
+ * - _buttons.css:       All button components and interactions
+ * - _header.css:        Header and profile button
+ * - _graph.css:         D3 graph visualization styles
+ * - _menu.css:          Menu panel and search box
+ * - _popups.css:        Modal popups and CV content
+ * - _tooltip.css:       Hover tooltips
+ * - _walkthrough.css:   Interactive tour overlay
+ * - _colors.css:        Dynamic color utilities
+ * - _responsive.css:    Mobile and responsive breakpoints
+ */
+
+/* ===== 1. Variables & Configuration ===== */
+@import url('components/_variables.css');
+
+/* ===== 2. Base Styles ===== */
+@import url('components/_base.css');
+
+/* ===== 3. Accessibility ===== */
+@import url('components/_accessibility.css');
+
+/* ===== 4. Components ===== */
+@import url('components/_buttons.css');
+@import url('components/_header.css');
+@import url('components/_graph.css');
+@import url('components/_menu.css');
+@import url('components/_popups.css');
+@import url('components/_tooltip.css');
+@import url('components/_walkthrough.css');
+
+/* ===== 5. Utilities ===== */
+@import url('components/_colors.css');
+@import url('components/_responsive.css');
+
+/* ============================================================ */
+/* END OF MAIN STYLESHEET */
+/* ============================================================ */

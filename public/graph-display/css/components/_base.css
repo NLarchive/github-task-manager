@@ -1,0 +1,138 @@
+/* ============================================================ */
+/* BASE RESET & TYPOGRAPHY */
+/* ============================================================ */
+/*
+ * Modern CSS reset and base styles.
+ * Applies to all elements and sets foundational typography.
+ */
+
+/* Modern CSS Reset */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    /* Prevent text size adjustment on orientation change */
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Improved font rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+    color: var(--color-text);
+    background-color: var(--color-background);
+    margin: 0;
+    overflow: hidden; /* Prevent body scroll */
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    /* Prevent user selection on UI elements (allow on content) */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on iOS */
+    /* Performance optimizations */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
+
+/* Allow text selection in content areas */
+p, 
+article, 
+.seo-content, 
+#popup-content,
+.cv-item-details,
+.cv-profile-summary {
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+    line-height: var(--line-height-heading);
+    font-weight: 600;
+    margin: 0;
+}
+
+h1 { font-size: var(--font-size-xxl); }
+h2 { font-size: var(--font-size-xl); }
+h3 { font-size: var(--font-size-lg); }
+h4, h5, h6 { font-size: var(--font-size-base); }
+
+/* Links */
+a {
+    color: var(--color-secondary);
+    text-decoration: none;
+    transition: color var(--transition-fast) ease;
+}
+
+a:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+}
+
+a:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+/* Lists */
+ul, ol {
+    margin: 0;
+    padding: 0;
+}
+
+/* Images */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Visually hidden but accessible (for screen readers & SEO) */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+    white-space: nowrap;
+}
+
+/* SEO content - hidden visually, available to search engines */
+.seo-content {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+    white-space: nowrap;
+    top: 0;
+    left: 0;
+    z-index: -9999;
+    pointer-events: none;
+}
+
+.seo-content *, 
+.seo-content p, 
+.seo-content h2, 
+.seo-content a {
+    color: var(--color-background) !important;
+    background-color: transparent !important;
+}

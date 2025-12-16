@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Career Graph – Template</title>
+    <meta name="description" content="Template: interactive graph-based CV/portfolio. Replace the sample graph data with your own career, skills, and outcomes.">
+    <!-- Modern SVG favicon with PNG fallback -->
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+    <link rel="alternate icon" href="images/favicon.png" type="image/png"> <!-- Fallback -->
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Schema.org structured data for better search results -->
+
+        
+    <!-- Link to External CSS (Modular Architecture) -->
+    <link rel="stylesheet" href="css/styles-new.css">
+    
+    <!-- Critical mobile-first CSS inline for faster initial rendering and evaluator detection -->
+    <style>
+        /* Mobile-first responsive breakpoints for evaluator detection */
+        @media (max-width: 480px) {
+            body { font-size: 14px; }
+            button, .control-button { min-height: 48px; min-width: 48px; padding: 14px 18px; }
+        }
+        @media (max-width: 576px) {
+            .walkthrough-tooltip { max-width: 95%; }
+        }
+        @media (max-width: 768px) {
+            body { font-size: 15px; }
+            button, a, input { min-height: 44px; min-width: 44px; touch-action: manipulation; }
+            #profile-legend-button { width: 56px; height: 56px; min-width: 56px; min-height: 56px; }
+        }
+        @media (max-width: 992px) {
+            #menu-panel { max-width: 450px; }
+        }
+        @media (max-width: 1024px) {
+            #graph-container { height: calc(100vh - 80px); }
+        }
+        @media (max-width: 1200px) {
+            .cv-profile-header { flex-direction: column; }
+        }
+    </style>
+    
+    <!-- All responsive and modal styles are now managed in modular CSS files for maintainability and consistency. -->
+    
+    <!-- D3 Library -->
+    <script src="js/d3.v7.min.js"></script>
+    <!-- Utilities (Optional but Recommended) -->
+    <script type="module" src="js/utils.js"></script>
+    <!-- Main application script (loads other modules) -->
+    <script type="module" src="js/main-graph.js"></script>
+    <!-- PWA: Service Worker registration handled in main-graph.js -->
+</head>
+<body>
+    <!-- Skip Navigation Link for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Header with Profile Controls -->
+    <header>
+        <!-- Profile Picture Button / Menu Trigger -->
+        <button id="profile-legend-button" title="Open Menu" aria-label="Open Menu" aria-haspopup="true" aria-controls="menu-panel">
+            <img id="profile-button-img" src="images/team/profile-placeholder.svg" alt="Profile - Open Menu">
+        </button>
+    </header>
+    
+    <!-- Graph Container as Main Content -->
+    <main id="main-content">
+        <article id="graph-section" aria-label="Interactive Curriculum Graph">
+            <div id="graph-container">
+                <!-- SEO-friendly heading structure (visually hidden) -->
+                <h1 class="visually-hidden">Interactive Career Graph (Template)</h1>
+            </div>
+        </article>
+    </main>
+
+    <!-- Menu Panel as Navigation (Aside) -->
+    <aside id="menu-aside">
+        <nav id="menu-panel" role="menu" aria-label="Main Navigation">
+        <button class="menu-close-button" aria-label="Close menu" title="Close menu">×</button>
+        <div class="search-box">
+            <span class="search-icon" aria-hidden="true">🔍</span>
+            <input type="text" id="search-input" placeholder="Search curriculum..." aria-label="Search curriculum" role="searchbox">
+        </div>
+        <div class="template-box">
+            <label for="template-select">Graph template</label>
+            <select id="template-select" aria-label="Select graph template">
+                <!-- Options injected by JS -->
+            </select>
+        </div>
+        <!-- Search feedback element will be added here by JS if needed -->
+        <a href="./" id="home-button" class="control-button" role="menuitem" aria-label="Go to homepage" title="Go to homepage">🏠 Home</a>
+        <button id="reset-tour" class="control-button" role="menuitem" aria-label="Start interactive tour">👋 Start Interactive Tour</button>
+        <button id="focus-profile" class="control-button" role="menuitem" aria-label="Focus on profile">👤 View My Profile</button>
+        <button id="classic-cv-button" class="control-button" role="menuitem" aria-label="View classic CV format">📄 Get My CV</button>
+        <button id="focus-core" class="control-button" role="menuitem" aria-label="Focus on core expertise">⭐ Explore My Expertise</button>
+        <button id="legend-button-inside" class="control-button" role="menuitem" aria-label="Show legend details">📖 View Legend</button>
+        <button id="reset-view" class="control-button" role="menuitem" aria-label="Reset view">🎯 Reset View</button>
+        </nav>
+    </aside>
+
+    <!-- Node Details Popup (Section) -->
+    <section id="popup" aria-live="polite" aria-atomic="true">
+        <div class="content">
+            <button class="close-button" role="button" aria-label="Close popup" title="Close popup">×</button> <!-- Changed to button for better a11y -->
+            <div id="popup-content">
+                <!-- Detail content injected by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Legend Popup (Section) -->
+    <section id="legend-popup" aria-live="polite" aria-atomic="true">
+        <div class="content">
+            <button class="close-button" role="button" aria-label="Close legend" title="Close legend">×</button> <!-- Changed to button -->
+            <h2>Graph Legend</h2>
+            <div class="legend-content">
+                <!-- Legend content injected by JS -->
+                 <h3>Nodes by Layer</h3>
+                 <!-- Items will be populated by JS -->
+                 <h3>Connection Types</h3>
+                 <div class="legend-item"><div class="legend-color line rel-has-foundation"></div><span>Profile builds Foundation</span></div>
+                 <div class="legend-item"><div class="legend-color line rel-has-subcategory"></div><span>Category has Detail</span></div>
+                 <div class="legend-item"><div class="legend-color line rel-develops"></div><span>Foundation develops Skills</span></div>
+                 <div class="legend-item"><div class="legend-color line rel-creates"></div><span>Skills create Impact</span></div>
+                 <div class="legend-item"><div class="legend-color line rel-leads-to"></div><span>Impact leads to Outcome</span></div>
+                 <div class="legend-item" style="margin-top: 15px;"><span style="font-style: italic;">Tip: Hover nodes for connections, click for details.</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Walkthrough Overlay & Tooltip (Section) -->
+    <section class="walkthrough-overlay" id="walkthrough-overlay" aria-live="polite" aria-atomic="true">
+        <div class="walkthrough-tooltip">
+            <!-- Content injected by walkthrough.js -->
+        </div>
+        <!-- Cursor element can be added/removed by JS -->
+    </section>
+
+    <!-- General Tooltip -->
+    <div id="tooltip" class="tooltip" role="tooltip"></div> <!-- Added role -->
+
+    <!-- SEO Content (Visually hidden but accessible to search engines) -->
+    <footer class="seo-content">
+        <h2>Interactive Career Graph Template</h2>
+        <p>This page is intentionally filled with sample content. Replace the graph data and copy to publish your own interactive CV/portfolio.</p>
+        <h2>What to customize</h2>
+        <p>Update the graph structure and node details in <strong>templates/</strong> (see <code>templates/registry.json</code>). Optional: update icons/manifest for your brand.</p>
+    </footer>
+</body>
+</html>

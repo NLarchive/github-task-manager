@@ -1,0 +1,40 @@
+{
+  "rawNodes": [
+    { "id": "profile", "properties": { "name": "Your Name (Template)", "layer": 0 }, "labels": ["Person", "Domain"] },
+    { "id": "education", "properties": { "name": "Education", "layer": 1 }, "labels": ["Domain"] },
+    { "id": "experience", "properties": { "name": "Experience", "layer": 1 }, "labels": ["Domain"] },
+    { "id": "community-impact", "properties": { "name": "Community / Teaching", "layer": 1 }, "labels": ["Domain"] }
+  ],
+  "rawRelationships": [
+    { "source": "profile", "target": "education", "type": "HAS_FOUNDATION" },
+    { "source": "profile", "target": "experience", "type": "HAS_FOUNDATION" },
+    { "source": "profile", "target": "community-impact", "type": "HAS_FOUNDATION" }
+  ],
+  "details": {
+    "profile": {
+      "title": "Your Name (Template)",
+      "photoUrl": "images/team/profile-placeholder.svg",
+      "items": [
+        "<strong>Role / Headline</strong> — one line value proposition.",
+        "Add 2–5 short summary bullets here (keep it scannable)."
+      ]
+    },
+    "education": { "title": "Education", "items": ["Add degrees, certifications, and key training."] },
+    "experience": { "title": "Professional Experience", "items": ["Add roles, companies, and the impact you delivered."] },
+    "community-impact": { "title": "Community / Teaching", "items": ["Add volunteering, mentoring, talks, and open source."] }
+  },
+  "meta": {
+    "profileNodeId": "profile",
+    "coreNodeId": "core-expertise",
+    "walkthroughEnabled": true,
+    "walkthroughStepsPath": "templates/career-lite/tour.json",
+    "showCvButton": true,
+    "showCoreButton": true,
+    "showProfileButton": true,
+    "legendMode": "career"
+  },
+  "configOverrides": {
+    "colorMode": "layer",
+    "sizeMode": "fixed"
+  }
+}

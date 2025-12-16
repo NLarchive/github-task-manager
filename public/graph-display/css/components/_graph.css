@@ -1,0 +1,313 @@
+/* ============================================================ */
+/* D3 GRAPH VISUALIZATION */
+/* ============================================================ */
+
+/* ===== Graph Container ===== */
+#main-content {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+#graph-section {
+    width: 100%;
+    height: 100%;
+}
+
+#graph-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    touch-action: none;
+    cursor: grab;
+    /* Performance optimizations */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+#graph-container.grabbing {
+    cursor: grabbing;
+}
+
+#graph-container svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    -ms-touch-action: none;
+}
+
+/* ===== Base Node Circle Styles ===== */
+#graph-container .node circle {
+    stroke: #fff;
+    stroke-width: 2.5px;
+    cursor: pointer;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    will-change: transform;
+}
+
+/* ===== Base Node Text Styles ===== */
+#graph-container .node text {
+    font-family: var(--font-family);
+    font-weight: 600;
+    text-anchor: middle;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    dominant-baseline: middle;
+    fill: var(--color-text-dark);
+    paint-order: stroke fill;
+    stroke: var(--node-text-stroke, #fff);
+    stroke-width: var(--node-text-stroke-width, 3px);
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    opacity: 1;
+}
+
+/* ===== Parent Node Specific ===== */
+#graph-container .node-type-parent circle {
+    stroke-width: 2.5px;
+}
+
+#graph-container .node-type-parent text {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* ===== Child Node Specific ===== */
+#graph-container .node-type-child circle {
+    stroke-width: 1.5px;
+}
+
+#graph-container .node-type-child text {
+    font-size: 11px;
+    font-weight: 500;
+}
+
+/* ===== Layer Color Variants ===== */
+/* Layer 0 (Profile Purple) */
+.node.layer-0.color-variant-0 circle { fill: var(--layer0-variant-0, var(--fallback-color)); }
+.node.layer-0.color-variant-1 circle { fill: var(--layer0-variant-1, var(--fallback-color)); }
+.node.layer-0.color-variant-2 circle { fill: var(--layer0-variant-2, var(--fallback-color)); }
+.node.layer-0.color-variant-3 circle { fill: var(--layer0-variant-3, var(--fallback-color)); }
+.node.layer-0.color-variant-4 circle { fill: var(--layer0-variant-4, var(--fallback-color)); }
+
+/* Layer 1 (Foundations Blue) */
+.node.layer-1.color-variant-0 circle { fill: var(--layer1-variant-0, var(--fallback-color)); }
+.node.layer-1.color-variant-1 circle { fill: var(--layer1-variant-1, var(--fallback-color)); }
+.node.layer-1.color-variant-2 circle { fill: var(--layer1-variant-2, var(--fallback-color)); }
+.node.layer-1.color-variant-3 circle { fill: var(--layer1-variant-3, var(--fallback-color)); }
+.node.layer-1.color-variant-4 circle { fill: var(--layer1-variant-4, var(--fallback-color)); }
+
+/* Layer 2 (Skills Orange) */
+.node.layer-2.color-variant-0 circle { fill: var(--layer2-variant-0, var(--fallback-color)); }
+.node.layer-2.color-variant-1 circle { fill: var(--layer2-variant-1, var(--fallback-color)); }
+.node.layer-2.color-variant-2 circle { fill: var(--layer2-variant-2, var(--fallback-color)); }
+.node.layer-2.color-variant-3 circle { fill: var(--layer2-variant-3, var(--fallback-color)); }
+.node.layer-2.color-variant-4 circle { fill: var(--layer2-variant-4, var(--fallback-color)); }
+
+/* Layer 3 (Impact Green) */
+.node.layer-3.color-variant-0 circle { fill: var(--layer3-variant-0, var(--fallback-color)); }
+.node.layer-3.color-variant-1 circle { fill: var(--layer3-variant-1, var(--fallback-color)); }
+.node.layer-3.color-variant-2 circle { fill: var(--layer3-variant-2, var(--fallback-color)); }
+.node.layer-3.color-variant-3 circle { fill: var(--layer3-variant-3, var(--fallback-color)); }
+.node.layer-3.color-variant-4 circle { fill: var(--layer3-variant-4, var(--fallback-color)); }
+
+/* Layer 4 (Outcome Purple) */
+.node.layer-4.color-variant-0 circle { fill: var(--layer4-variant-0, var(--fallback-color)); }
+.node.layer-4.color-variant-1 circle { fill: var(--layer4-variant-1, var(--fallback-color)); }
+.node.layer-4.color-variant-2 circle { fill: var(--layer4-variant-2, var(--fallback-color)); }
+.node.layer-4.color-variant-3 circle { fill: var(--layer4-variant-3, var(--fallback-color)); }
+.node.layer-4.color-variant-4 circle { fill: var(--layer4-variant-4, var(--fallback-color)); }
+
+/* ===== SVG Text Color Classes (High Specificity for Consistency) ===== */
+/* Ensures all node text has consistent, high-contrast styling */
+#graph-container .node text.text-light {
+    fill: var(--color-text-light) !important;
+    stroke: rgb(0, 0, 0) !important;
+    stroke-width: calc(var(--node-text-stroke-width) + 1px) !important;
+}
+
+#graph-container .node text.text-dark {
+    fill: var(--color-text-dark) !important;
+    stroke: var(--node-text-stroke) !important;
+    stroke-width: var(--node-text-stroke-width) !important;
+}
+
+/* ===== Text Visibility: Show on Interaction ===== */
+#graph-container .node.show-text text,
+#graph-container .node.hovered text,
+#graph-container .node.details-shown text,
+#graph-container .node.highlighted text {
+    opacity: 1;
+}
+
+/* ===== Node Interaction States ===== */
+#graph-container .node:hover circle,
+#graph-container .node:focus circle {
+    stroke-width: 3px;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    transition: stroke-width 0.15s ease, filter 0.15s ease;
+}
+
+#graph-container .node.dragging {
+    cursor: move;
+}
+
+#graph-container .node.faded {
+    opacity: 0.2;
+    transition: opacity 0.15s ease;
+}
+
+#graph-container .node.faded circle {
+    opacity: 0.2;
+}
+
+#graph-container .node.faded text {
+    opacity: 0.1;
+}
+
+/* ===== Search/Highlight States ===== */
+#graph-container .node.focus-highlight circle {
+    stroke: #ff5722;
+    stroke-width: 4px;
+}
+
+#graph-container .node.search-match circle {
+    stroke: #ff5722;
+    stroke-width: 4px;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+#graph-container .node.walkthrough-target circle {
+    stroke: #ff5722;
+    stroke-width: 5px;
+    animation: pulse-strong 2s ease-in-out infinite;
+}
+
+#graph-container .node.highlighted circle {
+    stroke-width: 4px;
+    stroke: var(--color-accent);
+    filter: drop-shadow(0 6px 12px rgba(242, 142, 44, 0.4));
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* ===== Animations ===== */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.6;
+    }
+}
+
+@keyframes pulse-strong {
+    0%, 100% {
+        opacity: 1;
+        stroke-width: 5px;
+    }
+    50% {
+        opacity: 0.7;
+        stroke-width: 7px;
+    }
+}
+
+@keyframes pulse-focus-highlight {
+    0% { 
+        stroke-width: 5px; 
+        filter: drop-shadow(0 0 4px rgba(255, 87, 34, 0.5)); 
+    }
+    50% { 
+        stroke-width: 7px; 
+        filter: drop-shadow(0 0 10px rgba(255, 87, 34, 0.7)); 
+    }
+    100% { 
+        stroke-width: 5px; 
+        filter: drop-shadow(0 0 4px rgba(255, 87, 34, 0.5)); 
+    }
+}
+
+/* ===== Link Styles ===== */
+#graph-container .link {
+    fill: none;
+    stroke-width: 2px;
+    /* Default stroke so new relationship types are visible even without per-type rules */
+    stroke: var(--rel-has-subcategory, rgba(120, 120, 120, 0.6));
+    stroke-opacity: 0.35;
+    will-change: transform;
+}
+
+#graph-container .link[data-type="HAS_FOUNDATION"] {
+    stroke: var(--rel-has-foundation);
+    stroke-width: 2.5px;
+    stroke-opacity: 0.6;
+}
+
+#graph-container .link[data-type="HAS_SUBCATEGORY"] {
+    stroke: var(--rel-has-subcategory);
+    stroke-opacity: 0.35;
+}
+
+#graph-container .link[data-type="DEVELOPS"] {
+    stroke: var(--rel-develops);
+    stroke-dasharray: 8, 4;
+    stroke-width: 2px;
+    stroke-opacity: 0.5;
+}
+
+#graph-container .link[data-type="CREATES"] {
+    stroke: var(--rel-creates);
+    stroke-dasharray: 3, 3;
+    stroke-width: 2px;
+    stroke-opacity: 0.5;
+}
+
+#graph-container .link[data-type="LEADS_TO"] {
+    stroke: var(--rel-leads-to);
+    stroke-dasharray: 6, 3, 2, 3;
+    stroke-width: 2px;
+    stroke-opacity: 0.5;
+}
+
+/* Task management template link types */
+#graph-container .link[data-type="HAS_TASK"] {
+    stroke: var(--rel-has-foundation);
+    stroke-width: 2px;
+    stroke-opacity: 0.35;
+}
+
+/* Dependency edges (FS/SS/FF/SF/ON). Use a dashed style for readability. */
+#graph-container .link[data-type^="DEPENDS_"] {
+    stroke: var(--rel-develops);
+    stroke-dasharray: 7, 4;
+    stroke-width: 2px;
+    stroke-opacity: 0.55;
+}
+
+#graph-container .link.highlighted {
+    stroke-opacity: 1;
+    stroke-width: 3px;
+    transition: stroke-opacity 0.15s ease, stroke-width 0.15s ease;
+}
+
+#graph-container .link.faded {
+    stroke-opacity: 0.1;
+    transition: stroke-opacity 0.15s ease;
+}
+/* Link interaction states */
+#graph-container .link.highlighted {
+    stroke-opacity: 0.9 !important;
+    stroke-width: 3px !important;
+}
+
+#graph-container .link.faded {
+    stroke-opacity: 0.05 !important;
+}

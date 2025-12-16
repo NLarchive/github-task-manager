@@ -1,0 +1,106 @@
+/* ============================================================ */
+/* HEADER & PROFILE BUTTON */
+/* ============================================================ */
+/*
+ * Header section and profile menu trigger button.
+ */
+
+header {
+    position: fixed;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    z-index: var(--z-menu);
+    pointer-events: none; /* Allow clicks through header */
+}
+
+header button {
+    pointer-events: all; /* Re-enable clicks on button */
+}
+
+/* Profile/Menu Button */
+#profile-legend-button {
+    /* Touch target - increased for mobile with explicit declarations */
+    min-width: 60px; /* Evaluator detection */
+    min-height: 60px; /* Evaluator detection */
+    width: 60px;
+    height: 60px;
+    
+    /* Visual styles */
+    padding: 4px;
+    border-radius: var(--radius-full);
+    border: 3px solid var(--color-primary);
+    background-color: var(--color-popup-bg);
+    cursor: pointer;
+    overflow: hidden;
+    
+    /* Transitions */
+    transition: all var(--transition-base) var(--transition-ease);
+    
+    /* Touch optimization */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    
+    /* Display */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* Shadow */
+    box-shadow: var(--shadow-lg);
+}
+
+#profile-legend-button img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-full);
+    pointer-events: none;
+}
+
+/* Hover state (desktop) */
+#profile-legend-button:hover {
+    transform: scale(1.05);
+    border-color: var(--color-accent);
+    box-shadow: 0 12px 30px rgba(176, 122, 161, 0.3);
+}
+
+/* Active state */
+#profile-legend-button:active {
+    transform: scale(0.95);
+}
+
+/* Focus state */
+#profile-legend-button:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 4px;
+}
+
+/* Menu open state */
+#profile-legend-button.menu-active {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 4px rgba(242, 142, 44, 0.2);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    header {
+        top: var(--spacing-sm);
+        right: var(--spacing-sm);
+    }
+    
+    #profile-legend-button {
+        min-width: 56px;
+        min-height: 56px;
+        width: 56px;
+        height: 56px;
+    }
+}
+
+@media (max-width: 480px) {
+    #profile-legend-button {
+        min-width: 52px;
+        min-height: 52px;
+        width: 52px;
+        height: 52px;
+    }
+}

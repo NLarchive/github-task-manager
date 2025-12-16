@@ -1,0 +1,27 @@
+[
+  {
+    "title": "Welcome (Lite)",
+    "content": "This is the minimal Career example (Foundations only). Use it to compare against the full Career graph and Project graphs.",
+    "position": "center-bottom"
+  },
+  {
+    "title": "Profile",
+    "content": "The entry point for your CV summary.",
+    "nodeId": "profile",
+    "position": "bottom",
+    "focus": true,
+    "clickNode": true
+  },
+  {
+    "title": "Foundations",
+    "content": "Education, Experience, and Community connect directly from the profile.",
+    "nodeId": "education",
+    "position": "bottom",
+    "focus": true,
+    "hoverNode": true
+  },
+  {
+    "title": "Compare",
+    "content": "Switch templates to compare: Career (full) shows the layered pipeline; Task Management shows start-to-end project execution."
+  }
+]

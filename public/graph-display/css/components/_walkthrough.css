@@ -1,0 +1,199 @@
+/* ============================================================ */
+/* WALKTHROUGH OVERLAY */
+/* ============================================================ */
+/*
+ * Interactive tour/walkthrough overlay and tooltip.
+ */
+
+.walkthrough-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: var(--z-walkthrough);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity var(--transition-base) ease;
+}
+
+.walkthrough-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+/* Walkthrough tooltip */
+.walkthrough-tooltip {
+    background-color: var(--color-popup-bg);
+    color: var(--color-text-dark);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    max-width: 500px;
+    width: 90%;
+    box-shadow: var(--shadow-lg);
+    position: fixed;
+    animation: slideUp var(--transition-base) var(--transition-ease);
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.walkthrough-tooltip h3 {
+    margin: 0 0 var(--spacing-md) 0;
+    font-size: var(--font-size-xl);
+    color: var(--color-primary);
+}
+
+.walkthrough-tooltip p {
+    margin: 0 0 var(--spacing-md) 0;
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+}
+
+.walkthrough-tooltip em {
+    color: var(--color-accent);
+    font-style: italic;
+}
+
+.walkthrough-tooltip strong {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+/* Walkthrough buttons container */
+.walkthrough-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.walkthrough-button {
+    min-width: 100px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+}
+
+.walkthrough-skip {
+    background-color: transparent;
+    color: #888;
+    border: 1px solid #ccc;
+}
+
+.walkthrough-skip:hover {
+    background-color: #f0f0f0;
+    color: var(--color-text-dark);
+}
+
+/* Animated cursor for walkthrough */
+.walkthrough-cursor {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    background-color: var(--color-accent);
+    border: 3px solid white;
+    border-radius: var(--radius-full);
+    pointer-events: none;
+    z-index: calc(var(--z-walkthrough) + 1);
+    box-shadow: 0 4px 12px rgba(242, 142, 44, 0.6);
+    animation: cursorPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes cursorPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.7;
+    }
+}
+
+/* Walkthrough cursor animation */
+@keyframes point-animation {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+/* Walkthrough node highlight animation */
+@keyframes pulse-walkthrough-highlight {
+    0% { 
+        stroke-width: 5px; 
+        filter: drop-shadow(0 0 4px var(--node-highlight-stroke)); 
+    }
+    50% { 
+        stroke-width: 7px; 
+        filter: drop-shadow(0 0 10px var(--node-highlight-stroke)); 
+    }
+    100% { 
+        stroke-width: 5px; 
+        filter: drop-shadow(0 0 4px var(--node-highlight-stroke)); 
+    }
+}
+
+/* Walkthrough element highlight */
+.walkthrough-element-highlight {
+    outline: 3px solid var(--node-highlight-stroke) !important;
+    outline-offset: 3px !important;
+    border-radius: var(--radius-md);
+}
+
+/* Mobile optimizations - Adopt Modal Pattern */
+@media (max-width: 768px) {
+    .walkthrough-overlay.active {
+        align-items: flex-start;
+        justify-content: center;
+    }
+
+    .walkthrough-tooltip {
+        position: relative !important;
+        left: auto !important;
+        top: auto !important;
+        bottom: auto !important;
+        transform: none !important;
+        width: 95%;
+        max-width: 95%;
+        margin: var(--spacing-lg) auto;
+        padding: var(--spacing-lg);
+    }
+}
+
+@media (max-width: 480px) {
+    .walkthrough-overlay.active {
+        padding: 0;
+    }
+
+    .walkthrough-tooltip {
+        width: calc(100% - var(--spacing-md) * 2);
+        max-width: calc(100% - var(--spacing-md) * 2);
+        margin: var(--spacing-lg) var(--spacing-md);
+        padding: var(--spacing-md);
+        padding-top: var(--spacing-lg);
+    }
+
+    .walkthrough-tooltip h3 {
+        font-size: var(--font-size-lg);
+    }
+
+    .walkthrough-buttons {
+        justify-content: space-between;
+    }
+
+    .walkthrough-button {
+        flex: 1;
+        min-width: auto;
+    }
+}

@@ -1,0 +1,66 @@
+[
+  {
+    "title": "Welcome!",
+    "content": "This is the full Career template. It’s structured as a pipeline: <strong>Foundations → Skills → Impact → Outcomes</strong>.",
+    "position": "center-bottom"
+  },
+  {
+    "title": "Profile",
+    "content": "Start here: summary + links. This is your entry point.",
+    "nodeId": "profile",
+    "position": "bottom",
+    "focus": true,
+    "clickNode": true
+  },
+  {
+    "title": "Foundations",
+    "content": "These nodes anchor your story (education, experience, community).",
+    "nodeId": "experience",
+    "position": "bottom",
+    "focus": true,
+    "hoverNode": true
+  },
+  {
+    "title": "Skills & Expertise",
+    "content": "Skills grow from foundations. Your expertise becomes input to your impact.",
+    "nodeId": "core-expertise",
+    "position": "bottom",
+    "focus": true,
+    "hoverNode": true
+  },
+  {
+    "title": "Impact",
+    "content": "Impact nodes represent measurable change produced by your skills.",
+    "nodeId": "business-impact",
+    "position": "top",
+    "focus": true,
+    "hoverNode": true
+  },
+  {
+    "title": "Outcomes",
+    "content": "Outcomes are the end results (the “so what”).",
+    "nodeId": "positive-outcome",
+    "position": "top",
+    "focus": true,
+    "hoverNode": true
+  },
+  {
+    "title": "Explore Details",
+    "content": "Click any node to open details. This is where the narrative lives.",
+    "nodeId": "people-analytics",
+    "position": "right",
+    "focus": true,
+    "clickNode": true
+  },
+  {
+    "title": "Search",
+    "content": "Use the Menu panel to search and highlight matching nodes.",
+    "target": "#menu-panel",
+    "position": "bottom-left",
+    "searchDemo": "Dashboard"
+  },
+  {
+    "title": "Done",
+    "content": "That’s it. Customize the template, then compare it to the Task Management and TaskDB views."
+  }
+]

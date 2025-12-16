@@ -1,0 +1,14 @@
+[
+  {
+    "id": "ai-career-roadmap-tasks",
+    "name": "AI Career Roadmap (TaskDB)",
+    "type": "task-management",
+    "path": "/tasksDB/ai-career-roadmap/tasks.json"
+  },
+  {
+    "id": "github-task-manager-tasks",
+    "name": "GitHub Task Manager (TaskDB)",
+    "type": "task-management",
+    "path": "/tasksDB/github-task-manager/tasks.json"
+  }
+]

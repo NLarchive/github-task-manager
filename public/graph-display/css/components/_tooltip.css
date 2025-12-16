@@ -1,0 +1,67 @@
+/* ============================================================ */
+/* TOOLTIP */
+/* ============================================================ */
+/*
+ * Hover tooltip styles.
+ */
+
+#tooltip {
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.9);
+    color: var(--color-text-light);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+    pointer-events: none;
+    z-index: var(--z-tooltip);
+    white-space: nowrap;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    transition: opacity var(--transition-fast) ease;
+    max-width: 300px;
+    word-wrap: break-word;
+    white-space: normal;
+}
+
+#tooltip.visible {
+    opacity: 1;
+}
+
+/* Tooltip color indicators */
+#tooltip.tooltip-layer-0 { border-left: 4px solid var(--layer0-base); }
+#tooltip.tooltip-layer-1 { border-left: 4px solid var(--layer1-base); }
+#tooltip.tooltip-layer-2 { border-left: 4px solid var(--layer2-base); }
+#tooltip.tooltip-layer-3 { border-left: 4px solid var(--layer3-base); }
+#tooltip.tooltip-layer-4 { border-left: 4px solid var(--layer4-base); }
+
+/* Tooltip indicator swatch */
+.tooltip-layer-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+    vertical-align: middle;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.tooltip-type {
+    font-size: 0.9em;
+    opacity: 0.7;
+    display: block;
+    margin-top: 2px;
+}
+
+.tooltip strong {
+    color: #333;
+}
+
+/* Tooltip indicator colors */
+.tooltip-layer-indicator.layer-0.color-variant-0 { background-color: var(--layer0-variant-0, var(--fallback-color)); }
+.tooltip-layer-indicator.layer-1.color-variant-0 { background-color: var(--layer1-variant-0, var(--fallback-color)); }
+.tooltip-layer-indicator.layer-1.color-variant-1 { background-color: var(--layer1-variant-1, var(--fallback-color)); }
+.tooltip-layer-indicator.layer-2.color-variant-0 { background-color: var(--layer2-variant-0, var(--fallback-color)); }
+.tooltip-layer-indicator.layer-2.color-variant-1 { background-color: var(--layer2-variant-1, var(--fallback-color)); }
+.tooltip-layer-indicator.layer-3.color-variant-0 { background-color: var(--layer3-variant-0, var(--fallback-color)); }
+.tooltip-layer-indicator.layer-3.color-variant-1 { background-color: var(--layer3-variant-1, var(--fallback-color)); }
+.tooltip-layer-indicator.layer-4.color-variant-0 { background-color: var(--layer4-variant-0, var(--fallback-color)); }
