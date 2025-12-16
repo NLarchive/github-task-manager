@@ -47,9 +47,9 @@ class TaskManagerApp {
         const baseDir = (typeof window !== 'undefined' && window.location && window.location.pathname)
             ? window.location.pathname.replace(/\/[^\/]*$/, '/')
             : '/';
-        // Normalize common local dev path mistakes (some dev servers expose the site under '/public/')
-        const baseDirNormalized = baseDir.replace(/\/public\//, '/');
-        return `${baseDirNormalized}graph-display/index.html?${qp.toString()}`;
+        // Keep the computed base directory (including '/public/' when present).
+        // `ensureGraphIframeLoaded()` already tries multiple candidates for robustness.
+        return `${baseDir}graph-display/index.html?${qp.toString()}`;
     }
 
     async ensureGraphIframeLoaded() {

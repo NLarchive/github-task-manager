@@ -415,7 +415,16 @@ class TaskDatabase {
         try {
           const basePath = (gh && gh.BASE_PATH) ? String(gh.BASE_PATH) : '';
           const localPath = String(tasksFile || '').replace(/^public\//i, '');
-          const fetchUrl = basePath ? `${basePath}/${localPath}` : `/${localPath}`;
+          // When running on GitHub Pages the site is often hosted under a subpath (e.g. '/<repo>/').
+          // When running via Live Server, the app may be under '/public/'. Use the current directory
+          // as a safe default when BASE_PATH is not provided.
+          const currentDir = (typeof window !== 'undefined' && window.location && window.location.pathname)
+            ? window.location.pathname.replace(/\/[^\/]*$/, '/')
+            : '/';
+          const normalizedBase = basePath
+            ? (basePath.endsWith('/') ? basePath : `${basePath}/`)
+            : currentDir;
+          const fetchUrl = `${normalizedBase}${localPath}`;
           console.log('Attempting local fetch from URL:', fetchUrl);
 
           const response = await fetch(fetchUrl);

@@ -410,6 +410,13 @@ export async function initTemplates() {
     try {
         // Determine base path of the current document (e.g., '/graph-display/') so relative template files resolve correctly
         const basePath = (window.location && window.location.pathname) ? window.location.pathname.replace(/\/[^\/]*$/, '/') : './';
+        // Site root for templates that use absolute-like paths (e.g. '/tasksDB/...').
+        // This keeps things working on GitHub Pages subpaths (e.g. '/<repo>/graph-display/')
+        // and when serving the repo root via Live Server (pages under '/public/...').
+        const siteRootRaw = basePath.endsWith('/graph-display/')
+            ? (basePath.slice(0, -'/graph-display/'.length) || '/')
+            : basePath;
+        const siteRoot = siteRootRaw.endsWith('/') ? siteRootRaw : `${siteRootRaw}/`;
         const registryUrl = `${basePath}templates/registry.json`;
         const r = await fetch(registryUrl, { cache: 'no-store' });
         if (!r.ok) throw new Error(`Failed to load registry: ${r.status}`);
@@ -425,9 +432,11 @@ export async function initTemplates() {
                     continue;
                 }
 
-                const dataUrl = (typeof entry.path === 'string' && (entry.path.startsWith('http://') || entry.path.startsWith('https://') || entry.path.startsWith('/')))
+                const dataUrl = (typeof entry.path === 'string' && (entry.path.startsWith('http://') || entry.path.startsWith('https://')))
                     ? entry.path
-                    : `${basePath}templates/${entry.path}`;
+                    : (typeof entry.path === 'string' && entry.path.startsWith('/'))
+                        ? `${siteRoot}${entry.path.replace(/^\//, '')}`
+                        : `${basePath}templates/${entry.path}`;
                 const res = await fetch(dataUrl, { cache: 'no-store' });
                 if (!res.ok) {
                     console.warn('Skipping template (fetch failed):', entry.id, res.status);
