@@ -35,7 +35,7 @@ var PROJECTS_CONFIG = [
     label: 'First Graph',
     // Store and serve tasks from this repository's TaskDB
     owner: 'nlarchive',
-    repo: 'first-graph',
+    repo: 'github-task-manager',
     branch: 'main',
     tasksRoot: 'public/tasksDB'
   }

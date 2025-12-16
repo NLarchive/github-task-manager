@@ -1,0 +1,30 @@
+{
+  "project": {
+    "name": "First Graph - Learning Template",
+    "description": "Minimal TaskDB for the First Graph template (local dev).",
+    "start_date": "2025-12-16",
+    "end_date": "2026-01-16",
+    "status": "Not Started",
+    "budget": 0
+  },
+  "categories": [
+    { "name": "Example", "parent_category_name": null },
+    { "name": "Documentation", "parent_category_name": null }
+  ],
+  "workers": [
+    { "name": "Public User", "email": "public@example.com", "role": "Collaborator", "skills": ["Graph"], "hourly_rate": 0 }
+  ],
+  "tasks": [
+    {
+      "task_id": 1,
+      "task_name": "Add First Graph Template",
+      "description": "Add the interactive First Graph template files and verify local loading in the Task Manager UI.",
+      "start_date": "2025-12-16",
+      "end_date": "2025-12-17",
+      "priority": "Low",
+      "status": "Not Started",
+      "estimated_hours": 1,
+      "category_name": "Example"
+    }
+  ]
+}
