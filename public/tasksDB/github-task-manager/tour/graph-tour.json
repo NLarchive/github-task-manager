@@ -1,0 +1,34 @@
+[
+  {
+    "title": "Welcome to the Project Graph",
+    "content": "This view layers tasks by dependency depth (Start → End). Use it to see sequencing and blockers at a glance.",
+    "position": "center-bottom"
+  },
+  {
+    "nodeId": "project-start",
+    "title": "Start",
+    "content": "Layer 1 tasks have no prerequisites.",
+    "position": "bottom",
+    "focus": true,
+    "hoverNode": true,
+    "clickNode": true
+  },
+  {
+    "nodeId": "task-1",
+    "title": "Open a Task",
+    "content": "Click a node to see details, owners/roles, and dependency info.",
+    "position": "bottom",
+    "focus": true,
+    "hoverNode": true,
+    "clickNode": true
+  },
+  {
+    "nodeId": "project-end",
+    "title": "End",
+    "content": "Everything ultimately flows into this milestone.",
+    "position": "bottom",
+    "focus": true,
+    "hoverNode": true,
+    "clickNode": true
+  }
+]
