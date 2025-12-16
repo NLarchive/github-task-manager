@@ -1742,13 +1742,57 @@ document.addEventListener("DOMContentLoaded", async () => {
         const requestedTemplateId = getInitialTemplateId();
 
         if (templateSelect) {
-            templateSelect.innerHTML = availableTemplates
+            // If parent exposes a PROJECTS_CONFIG (centralized projects list), inject project options at the top
+            let projectOptionsHtml = '';
+            try {
+                const parentProjects = (window.parent && window.parent.PROJECTS_CONFIG) ? window.parent.PROJECTS_CONFIG : (window.PROJECTS_CONFIG || []);
+                if (Array.isArray(parentProjects) && parentProjects.length) {
+                    projectOptionsHtml += `<optgroup label="Projects">`;
+                    parentProjects.forEach(p => {
+                        const label = (p && p.label) ? p.label : p.id;
+                        projectOptionsHtml += `<option value="project:${p.id}">Project: ${label}</option>`;
+                    });
+                    projectOptionsHtml += `</optgroup>`;
+                }
+            } catch (e) {
+                console.warn('Could not read parent PROJECTS_CONFIG:', e);
+            }
+
+            templateSelect.innerHTML = projectOptionsHtml + availableTemplates
                 .map(t => `<option value="${t.id}">${t.name}</option>`)
                 .join('');
             templateSelect.value = requestedTemplateId;
+
             templateSelect.addEventListener('change', () => {
-                setSelectedTemplateId(templateSelect.value);
-                window.location.reload();
+                const val = templateSelect.value || '';
+                if (val.startsWith('project:')) {
+                    // User selected a project — notify parent to switch project
+                    const projectId = val.split(':')[1];
+                    try {
+                        window.parent.postMessage({ type: 'setActiveProject', projectId }, '*');
+                    } catch (e) {
+                        console.warn('Unable to post setActiveProject to parent', e);
+                    }
+                } else {
+                    // Regular template selection
+                    setSelectedTemplateId(val);
+                    window.location.reload();
+                }
+            });
+
+            // Listen for project changes signalled from parent
+            window.addEventListener('message', (e) => {
+                try {
+                    if (!e || !e.data) return;
+                    if (e.data.type === 'projectChanged') {
+                        const pid = e.data.projectId;
+                        const projVal = `project:${pid}`;
+                        const opt = Array.from(templateSelect.options).find(o => o.value === projVal);
+                        if (opt) {
+                            templateSelect.value = projVal;
+                        }
+                    }
+                } catch (err) {/* noop */}
             });
         }
 

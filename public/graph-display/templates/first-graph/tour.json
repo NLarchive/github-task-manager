@@ -1,0 +1,72 @@
+
+[
+	{
+		"title": "Welcome!",
+		"content": "This small graph is designed to teach <strong>graph structure</strong> using the same interactions you’ll use for larger graphs.",
+		"position": "center-bottom"
+	},
+	{
+		"title": "Start Here",
+		"content": "Click nodes to open details. Hover nodes to highlight neighbors.",
+		"nodeId": "profile",
+		"position": "bottom",
+		"focus": true,
+		"hoverNode": true,
+		"clickNode": true
+	},
+	{
+		"title": "Graph Basics",
+		"content": "These concepts explain what you’re seeing (nodes, edges, direction, weights, types).",
+		"nodeId": "basics",
+		"position": "bottom",
+		"focus": true,
+		"hoverNode": true
+	},
+	{
+		"title": "Try Search",
+		"content": "Open the menu and search for <em>Task D</em> or <em>Leaf A1</em> to jump around.",
+		"target": "#menu-panel",
+		"position": "bottom-left",
+		"focus": false
+	},
+	{
+		"title": "Graph Structures",
+		"content": "This node connects to multiple structure patterns below.",
+		"nodeId": "structures",
+		"position": "bottom",
+		"focus": true,
+		"hoverNode": true
+	},
+	{
+		"title": "Tree",
+		"content": "A hierarchy: root → branches → leaves. Great for categorization.",
+		"nodeId": "structure-tree",
+		"position": "bottom",
+		"focus": true,
+		"hoverNode": true
+	},
+	{
+		"title": "DAG",
+		"content": "A dependency graph: edges flow forward with no cycles.",
+		"nodeId": "structure-dag",
+		"position": "bottom",
+		"focus": true,
+		"hoverNode": true
+	},
+	{
+		"title": "Cycle",
+		"content": "A feedback loop. Sometimes useful, sometimes a circular-dependency bug.",
+		"nodeId": "structure-cycle",
+		"position": "bottom",
+		"focus": true,
+		"hoverNode": true
+	},
+	{
+		"title": "Outcome",
+		"content": "Follow the use-case nodes to reach the outcome summary.",
+		"nodeId": "outcome",
+		"position": "bottom",
+		"focus": true
+	}
+]
+

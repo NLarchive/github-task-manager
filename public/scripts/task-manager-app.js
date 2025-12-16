@@ -157,15 +157,30 @@ class TaskManagerApp {
         this.loadUserName();
         this.updateAccessIndicator(); // Initialize access indicator
 
-        // Listen for exit requests from embedded graph iframe (postMessage)
+        // Listen for postMessage events from the embedded graph iframe
         window.addEventListener('message', (e) => {
             try {
-                if (!e || !e.data || e.data.type !== 'exitGraphView') return;
+                if (!e || !e.data || !e.source) return;
+                // Ensure message is coming from the graph iframe for sensitive actions
                 const frame = document.getElementById('graphFrame');
-                if (frame && e.source !== frame.contentWindow) return; // only accept from graph iframe
-                if (this.viewMode === 'graph') this.setViewMode('list');
+                const isFromGraphFrame = frame && frame.contentWindow && e.source === frame.contentWindow;
+
+                // Exit graph request
+                if (e.data.type === 'exitGraphView') {
+                    if (this.viewMode === 'graph') this.setViewMode('list');
+                    return;
+                }
+
+                // Request to change active project (from graph iframe)
+                if (e.data.type === 'setActiveProject' && isFromGraphFrame) {
+                    const projectId = String(e.data.projectId || '').trim().replace(/[^a-zA-Z0-9_-]/g, '');
+                    if (projectId) {
+                        this.setActiveProject(projectId);
+                    }
+                    return;
+                }
+
             } catch (err) {
-                // non-fatal
                 console.warn('Error handling message event', err);
             }
         });
@@ -321,6 +336,16 @@ class TaskManagerApp {
 
         // Keep embedded graph in sync with project switching.
         this.ensureGraphIframeLoaded();
+
+        // Notify the iframe (if loaded) that the active project changed so it can update its UI
+        try {
+            const frame = document.getElementById('graphFrame');
+            if (frame && frame.contentWindow) {
+                frame.contentWindow.postMessage({ type: 'projectChanged', projectId: safeProject }, '*');
+            }
+        } catch (err) {
+            // Non-fatal
+        }
     }
 
     getAvailableCategoryNames() {

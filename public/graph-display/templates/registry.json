@@ -1,5 +1,11 @@
 [
   {
+    "id": "first-graph",
+    "name": "First Graph (Learn Graphs)",
+    "type": "career",
+    "path": "first-graph/data.json"
+  },
+  {
     "id": "ai-career-roadmap-tasks",
     "name": "AI Career Roadmap (TaskDB)",
     "type": "task-management",
