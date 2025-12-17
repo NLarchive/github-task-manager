@@ -362,3 +362,128 @@ img.profile-photo.border-layer-0-variant-0 {
         margin-left: var(--spacing-md);
     }
 }
+
+/* ============================================================ */
+/* GUIDE PANEL - Graph Types Education */
+/* ============================================================ */
+
+#guide-panel {
+    position: fixed;
+    top: 0;
+    right: -450px;
+    width: 450px;
+    max-width: 90vw;
+    height: 100%;
+    background: var(--color-popup-bg);
+    color: var(--color-text-dark);
+    box-shadow: -2px 0 12px rgba(0, 0, 0, 0.3);
+    z-index: calc(var(--z-popup) - 1);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    transition: right var(--transition-base) var(--transition-ease);
+}
+
+#guide-panel.visible {
+    right: 0;
+}
+
+#guide-panel .guide-close-button {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    font-size: 28px;
+    color: var(--color-text-dark);
+    cursor: pointer;
+    z-index: 1;
+    padding: 8px 12px;
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#guide-panel .guide-close-button:hover {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+
+#guide-panel .guide-content {
+    padding: 48px 24px 24px;
+}
+
+#guide-panel h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: var(--color-text-dark);
+}
+
+.guide-structure {
+    margin-bottom: 32px;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 8px;
+    border-left: 4px solid rgba(0, 0, 0, 0.1);
+}
+
+.guide-structure h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+    color: var(--color-text-dark);
+}
+
+.guide-structure p {
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 8px 0;
+    color: var(--color-text-dark);
+}
+
+.guide-structure ul {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0;
+}
+
+.guide-structure li {
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 8px 0;
+    padding-left: 20px;
+    position: relative;
+    color: var(--color-text-dark);
+}
+
+.guide-structure li:before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: rgba(0, 0, 0, 0.4);
+}
+
+.guide-example {
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--color-text-dark);
+    border-left: 3px solid rgba(0, 0, 0, 0.2);
+}
+
+/* Mobile responsive guide panel */
+@media (max-width: 768px) {
+    #guide-panel {
+        width: 100%;
+        right: -100%;
+    }
+    
+    #guide-panel .guide-content {
+        padding: 56px 16px 24px;
+    }
+}

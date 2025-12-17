@@ -1,13 +1,12 @@
-
 [
 	{
-		"title": "Welcome!",
-		"content": "This small graph is designed to teach <strong>graph structure</strong> using the same interactions you’ll use for larger graphs.",
+		"title": "🎉 Welcome to Graph Learning!",
+		"content": "This interactive graph teaches you how to <strong>understand and work with graphs</strong>. A graph is simply <strong>nodes</strong> (things) connected by <strong>edges</strong> (relationships). We'll cover common structures and advanced patterns like cliques, bipartite graphs, weighted paths, and centrality.",
 		"position": "center-bottom"
 	},
 	{
-		"title": "Start Here",
-		"content": "Click nodes to open details. Hover nodes to highlight neighbors.",
+		"title": "🏁 Start Here: Profile",
+		"content": "Click this node to see the three main branches: <strong>Basics</strong>, <strong>Structures</strong>, and <strong>Interactions</strong>. Use search to jump around—try 'Path Node 1' or 'Clique A1'.",
 		"nodeId": "profile",
 		"position": "bottom",
 		"focus": true,
@@ -15,58 +14,99 @@
 		"clickNode": true
 	},
 	{
-		"title": "Graph Basics",
-		"content": "These concepts explain what you’re seeing (nodes, edges, direction, weights, types).",
+		"title": "📚 Graph Basics: Foundation",
+		"content": "Nodes, edges, direction, weights, and labels. We will also demonstrate: cliques (fully connected groups), bipartite partitions, community structure, and measures like centrality (hub detection).",
 		"nodeId": "basics",
 		"position": "bottom",
 		"focus": true,
 		"hoverNode": true
 	},
 	{
-		"title": "Try Search",
-		"content": "Open the menu and search for <em>Task D</em> or <em>Leaf A1</em> to jump around.",
+		"title": "🔍 Try the Search Feature",
+		"content": "Open the menu and search for <em>Path Node 1</em> or <em>Clique A1</em>. Search zooms and focuses results so you can inspect specific patterns quickly.",
 		"target": "#menu-panel",
 		"position": "bottom-left",
 		"focus": false
 	},
 	{
-		"title": "Graph Structures",
-		"content": "This node connects to multiple structure patterns below.",
+		"title": "🗂️ Graph Structures Hub",
+		"content": "This hub points to many structures. Hover 'Graph Structures' then click different structure nodes to focus examples: Trees, Stars, DAGs, Cycles, Bipartite, Cliques, Communities, and Weighted Paths.",
 		"nodeId": "structures",
 		"position": "bottom",
 		"focus": true,
 		"hoverNode": true
 	},
 	{
-		"title": "Tree",
-		"content": "A hierarchy: root → branches → leaves. Great for categorization.",
+		"title": "🌳 Tree: Hierarchy",
+		"content": "Root → Branch → Leaf. Use for clear parent-child classification (org charts, categories). Click the example nodes and follow the path down.",
 		"nodeId": "structure-tree",
 		"position": "bottom",
 		"focus": true,
 		"hoverNode": true
 	},
 	{
-		"title": "DAG",
-		"content": "A dependency graph: edges flow forward with no cycles.",
+		"title": "⭐ Star & Centrality",
+		"content": "Hub nodes have high centrality—many direct connections. Look at 'Centrality: High Degree Node' and see how hubs connect across communities.",
+		"nodeId": "centrality",
+		"position": "bottom",
+		"focus": true,
+		"hoverNode": true
+	},
+	{
+		"title": "📋 DAG: Dependencies",
+		"content": "Directed, acyclic flows used for build graphs and task pipelines. Follow Task A → B/C → D to see how dependencies compose.",
 		"nodeId": "structure-dag",
 		"position": "bottom",
 		"focus": true,
 		"hoverNode": true
 	},
 	{
-		"title": "Cycle",
-		"content": "A feedback loop. Sometimes useful, sometimes a circular-dependency bug.",
+		"title": "🔄 Cycle: Feedback Loop",
+		"content": "Loops can be desired (feedback) or problematic (circular dependencies). Find the cycle nodes and hover to see how the loop closes.",
 		"nodeId": "structure-cycle",
 		"position": "bottom",
 		"focus": true,
 		"hoverNode": true
 	},
 	{
-		"title": "Outcome",
-		"content": "Follow the use-case nodes to reach the outcome summary.",
-		"nodeId": "outcome",
+		"title": "🧩 Bipartite Graphs & Matching",
+		"content": "Two partitions connect only across sets. Search for 'Bip Left 1' and 'Bip Right 1'—practice forming matches (applicants↔jobs). Bipartite graphs power recommendations and matching systems.",
+		"nodeId": "bip-left-1",
+		"position": "bottom",
+		"focus": true,
+		"hoverNode": true
+	},
+	{
+		"title": "🔺 Cliques & Communities",
+		"content": "Cliques are fully connected groups. Communities are dense subgraphs with sparse cross-links. Find 'Clique A1' and 'Community A1' to explore both patterns.",
+		"nodeId": "clique-1",
+		"position": "bottom",
+		"focus": true,
+		"hoverNode": true
+	},
+	{
+		"title": "🔎 Shortest Path & Weighted Edges",
+		"content": "Use the path example (Path Node 1 → Path Node 4) to compare weighted routes. Lower-weight edges make a route more attractive when finding shortest paths.",
+		"nodeId": "path-1",
+		"position": "bottom",
+		"focus": true,
+		"hoverNode": true
+	},
+	{
+		"title": "💡 Centrality & Influence",
+		"content": "Central nodes are critical for information flow. Click the 'Centrality' node to see how it connects multiple areas—the hub is a single point of failure but also a powerful lever.",
+		"nodeId": "centrality",
 		"position": "bottom",
 		"focus": true
+	},
+	{
+		"title": "🎯 Apply What You Learned",
+		"content": "Try the tasks: match bipartite pairs, identify cliques/communities, find the shortest path, and pick which model best fits a problem in the real world.",
+		"position": "center-bottom"
+	},
+	{
+		"title": "✨ Wrap-up",
+		"content": "You've now seen richer structures and learned how to inspect them with the UI. Complete the exercises for hands-on practice. Happy graphing!",
+		"position": "center-bottom"
 	}
 ]
-

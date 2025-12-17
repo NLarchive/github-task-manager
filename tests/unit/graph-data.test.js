@@ -80,4 +80,59 @@ describe('Graph Data Module', () => {
     expect(requested.some(u => u.endsWith('/public/tasksDB/github-task-manager/tasks.json'))).toBe(true);
     expect(requested.some(u => u.endsWith('/public/tasksDB/ai-career-roadmap/tasks.json'))).toBe(true);
   });
+
+  it('loads embedded graphTemplate when requested via ?template=... and registers it', async () => {
+    const filePath = path.join(__dirname, '../../public/graph-display/js/graph-data.js');
+    let src = fs.readFileSync(filePath, 'utf8');
+    src = src.replace(/^import\s.+$/mg, '');
+    src = src.replace(/^export\s+/mg, '');
+
+    const requested = [];
+    const mockFetch = async (url) => {
+      requested.push(String(url));
+
+      if (String(url).endsWith('/public/graph-display/templates/registry.json')) {
+        return { ok: true, json: async () => ([]) };
+      }
+
+      // When asked for the TaskDB tasks.json for first-graph, return a payload with graphTemplate
+      if (String(url).endsWith('/public/tasksDB/first-graph/tasks.json')) {
+        return {
+          ok: true,
+          json: async () => ({
+            project: { name: 'First Graph' },
+            tasks: [],
+            graphTemplate: {
+              description: 'Embedded Graph',
+              rawNodes: [ { id: 'n1', properties: { name: 'Node 1', layer: 1 }, labels: ['Domain'] } ],
+              rawRelationships: []
+            }
+          })
+        };
+      }
+
+      return { ok: false, status: 404, json: async () => ({}) };
+    };
+
+    const windowMock = {
+      location: {
+        pathname: '/public/graph-display/index.html',
+        hostname: '127.0.0.1',
+        search: '?template=first-graph-tasks'
+      }
+    };
+
+    const fn = new Function('window', 'fetch', 'console', src + '\nreturn { initTemplates: typeof initTemplates, getAvailableTemplates: typeof getAvailableTemplates, loadTemplate: typeof loadTemplate };');
+    const res = fn(windowMock, mockFetch, console);
+
+    // Run initTemplates() and then inspect available templates
+    await res.initTemplates();
+
+    const available = res.getAvailableTemplates();
+    expect(available.some(t => t.id === 'first-graph-tasks')).toBe(true);
+
+    const loaded = res.loadTemplate('first-graph-tasks');
+    expect(loaded.nodes.length).toBeGreaterThan(0);
+    expect(loaded.template.name).toMatch(/First Graph|Learning Graph/);
+  });
 });

@@ -1154,7 +1154,7 @@ class CurriculumGraph {
 
         menuPanel.addEventListener('click', (e) => {
             const btn = e.target.closest('button.control-button');
-            if (btn && btn.id !== 'legend-button-inside') {
+            if (btn && btn.id !== 'legend-button-inside' && btn.id !== 'graph-guide-button') {
                 setTimeout(() => toggleMenu(false), 150);
             }
         });
@@ -1358,6 +1358,7 @@ class CurriculumGraph {
         const tourBtn = getBtn("reset-tour");
         const profileBtn = getBtn("focus-profile");
         const cvBtn = getBtn("classic-cv-button");
+        const guideBtn = getBtn("graph-guide-button");
 
         if (resetBtn) resetBtn.addEventListener("click", () => this.resetViewAndSearch());
         if (coreBtn) coreBtn.addEventListener("click", () => this.coreNodeId && this.focusOnNode(this.coreNodeId));
@@ -1390,6 +1391,19 @@ class CurriculumGraph {
                  } else { console.error("Walkthrough instance not found."); }
              });
         } else console.warn("Reset Tour button (#reset-tour) not found.");
+
+        if (guideBtn) {
+             guideBtn.addEventListener("click", () => {
+                 console.log("Graph Guide button clicked.");
+                 this.toggleGraphGuide();
+             });
+        } else console.warn("Graph Guide button (#graph-guide-button) not found.");
+
+        // Setup guide panel close button
+        const guideCloseBtn = document.querySelector(".guide-close-button");
+        if (guideCloseBtn) {
+             guideCloseBtn.addEventListener("click", () => this.toggleGraphGuide());
+        }
     }
 
     /** Reset graph view, zoom, clear search, and close popups */
@@ -1434,7 +1448,94 @@ class CurriculumGraph {
         }
     }
 
-    /** Zoom and pan the graph to focus on a specific node */
+    /** Toggle the graph types guide panel */
+    toggleGraphGuide() {
+        const guidePanel = document.getElementById("guide-panel");
+        if (!guidePanel) return;
+
+        const isVisible = guidePanel.classList.contains("visible");
+        if (isVisible) {
+            guidePanel.classList.remove("visible");
+        } else {
+            this.populateGuidePanel();
+            guidePanel.classList.add("visible");
+        }
+    }
+
+    /** Populate the guide panel with graph structure information */
+    populateGuidePanel() {
+        const structuresContainer = document.getElementById("guide-structures");
+        if (!structuresContainer) return;
+
+        // Extract unique graph structure nodes from details
+        const structureGuides = {};
+
+        // Define structure patterns to identify
+        const structurePatterns = {
+            'structure-tree': {
+                title: '🌳 Tree (Hierarchy)',
+                description: 'A connected structure with no cycles. Great for categories and organizational charts.',
+                characteristics: ['Root node at top', 'Branches and sub-branches', 'Terminal leaf nodes', 'No circular paths'],
+                useCases: ['Org charts', 'File systems', 'Categories', 'Taxonomies']
+            },
+            'structure-star': {
+                title: '⭐ Star (Hub & Spokes)',
+                description: 'One central node connected to many others. Common in routing, platforms, and popularity graphs.',
+                characteristics: ['Central hub node', 'Multiple spokes radiating out', 'All communication through hub', 'Star-shaped layout'],
+                useCases: ['Routing networks', 'Platform ecosystems', 'Social influencers', 'Central services']
+            },
+            'structure-dag': {
+                title: '📊 DAG (Dependency Graph)',
+                description: 'A directed acyclic graph: edges point forward with no cycles. Used for dependencies and pipelines.',
+                characteristics: ['Directed edges', 'No circular paths', 'Multiple paths possible', 'Topological ordering'],
+                useCases: ['Build pipelines', 'Task scheduling', 'Prerequisites', 'Project dependencies']
+            },
+            'structure-cycle': {
+                title: '🔄 Cycle (Feedback Loop)',
+                description: 'Cycles mean you can return to where you started. Sometimes desired, sometimes a problem.',
+                characteristics: ['Circular paths', 'Feedback loops', 'State transitions', 'Returns to start'],
+                useCases: ['Control systems', 'Iteration cycles', 'Reinforcing effects', 'Circular dependencies']
+            }
+        };
+
+        let html = '';
+
+        Object.entries(structurePatterns).forEach(([key, structure]) => {
+            html += `
+                <div class="guide-structure">
+                    <h3>${structure.title}</h3>
+                    <p>${structure.description}</p>
+                    
+                    <strong>Key Characteristics:</strong>
+                    <ul>
+                        ${structure.characteristics.map(char => `<li>${char}</li>`).join('')}
+                    </ul>
+                    
+                    <strong>Real-World Use Cases:</strong>
+                    <ul>
+                        ${structure.useCases.map(usecase => `<li>${usecase}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        });
+
+        // Add interaction guide
+        html += `
+            <div class="guide-structure" style="margin-top: 32px; padding-top: 24px; border-top: 2px solid rgba(0,0,0,0.1);">
+                <h3>🎮 How to Interact</h3>
+                <ul>
+                    <li><strong>Hover:</strong> Highlight connected nodes</li>
+                    <li><strong>Click:</strong> View detailed information</li>
+                    <li><strong>Search:</strong> Find nodes by name or details</li>
+                    <li><strong>Zoom:</strong> Use scroll or pinch to zoom in/out</li>
+                    <li><strong>Pan:</strong> Drag to move around the graph</li>
+                    <li><strong>Reset:</strong> Return to default view</li>
+                </ul>
+            </div>
+        `;
+
+        structuresContainer.innerHTML = html;
+    }    /** Zoom and pan the graph to focus on a specific node */
     focusOnNode(nodeId) {
         if (!nodeId) return;
         const nodeData = this.nodeMap.get(nodeId);

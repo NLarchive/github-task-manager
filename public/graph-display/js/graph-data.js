@@ -252,6 +252,23 @@ export async function initTemplates() {
 
             const entry = { id: requested, name: `${projectId} (TaskDB)`, type: 'task-management', path: dataUrl };
 
+            // If TaskDB has an embedded career-style graph (graphTemplate), use that instead of task-dependency flow
+            if (data && data.graphTemplate && Array.isArray(data.graphTemplate.rawNodes) && Array.isArray(data.graphTemplate.rawRelationships)) {
+                const { nodes, links } = convertCypherToGraph({ rawNodes: data.graphTemplate.rawNodes, rawRelationships: data.graphTemplate.rawRelationships });
+                const tpl = {
+                    id: entry.id,
+                    name: `${projectId} (Learning Graph)`,
+                    description: data.graphTemplate.description || data.description || entry.name,
+                    nodes,
+                    links,
+                    details: data.graphTemplate.details || {},
+                    meta: { ...(data.graphTemplate.meta || {}) },
+                    configOverrides: data.graphTemplate.configOverrides || {}
+                };
+                TEMPLATE_REGISTRY.set(entry.id, tpl);
+                return;
+            }
+
             // Reuse the same builder logic as registry-loaded task-management entries.
             const built = (function buildFromData() {
                 const resolveProjectIdFromPath = (p) => {

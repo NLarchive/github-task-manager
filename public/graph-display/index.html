@@ -95,6 +95,7 @@
         <button id="focus-profile" class="control-button" role="menuitem" aria-label="Focus on profile">👤 View My Profile</button>
         <button id="classic-cv-button" class="control-button" role="menuitem" aria-label="View classic CV format">📄 Get My CV</button>
         <button id="focus-core" class="control-button" role="menuitem" aria-label="Focus on core expertise">⭐ Explore My Expertise</button>
+        <button id="graph-guide-button" class="control-button" role="menuitem" aria-label="View graph types guide">📚 Graph Guide</button>
         <button id="legend-button-inside" class="control-button" role="menuitem" aria-label="Show legend details">📖 View Legend</button>
         <button id="reset-view" class="control-button" role="menuitem" aria-label="Reset view">🎯 Reset View</button>
         <button id="exitGraphViewBtn" class="control-button" role="menuitem" aria-label="Close graph view">← Close Graph</button>
@@ -138,6 +139,15 @@
         </div>
         <!-- Cursor element can be added/removed by JS -->
     </section>
+
+    <!-- Graph Guide Panel (Sidebar for graph structure education) -->
+    <aside id="guide-panel" class="guide-panel" aria-label="Graph Types Guide">
+        <button class="guide-close-button" aria-label="Close guide" title="Close guide">×</button>
+        <div class="guide-content">
+            <h2>📚 Graph Types Guide</h2>
+            <div id="guide-structures"></div>
+        </div>
+    </aside>
 
     <!-- General Tooltip -->
     <div id="tooltip" class="tooltip" role="tooltip"></div> <!-- Added role -->

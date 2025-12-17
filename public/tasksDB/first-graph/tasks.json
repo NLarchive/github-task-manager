@@ -15,18 +15,139 @@
 	"tasks": [
 		{
 			"task_id": 1,
-			"task_name": "Complete First Graph Learning Tour",
+			"task_name": "🎯 Start Here: Graph Fundamentals",
 			"worker_name": "Public User",
 			"category": "Examples",
-			"description": "Follow the interactive walkthrough to learn graph concepts and structures.",
-			"status": "In Progress",
+			"description": "Learn what makes a graph: nodes (things) connected by edges (relationships). Explore the 5 core concepts: nodes, edges, direction, weight, and labels. Use the graph UI to click on each concept node and understand how they relate.",
+			"status": "Completed",
+			"date_created": "2025-12-16",
+			"date_updated": "2025-12-16",
+			"priority": "High"
+		},
+		{
+			"task_id": 2,
+			"task_name": "🌳 Learn Tree Structure (Hierarchy)",
+			"worker_name": "Public User",
+			"category": "Examples",
+			"description": "Explore the tree pattern: root → branches → leaves. Click on 'Tree' node, then hover to highlight Root, Branches, and Leaves. Try searching for 'Leaf' to jump between examples. Real-world use: org charts, file systems, taxonomies.",
+			"status": "Not Started",
+			"date_created": "2025-12-16",
+			"date_updated": "2025-12-16",
+			"priority": "High"
+		},
+		{
+			"task_id": 3,
+			"task_name": "⭐ Learn Star Structure (Hub & Spokes)",
+			"worker_name": "Public User",
+			"category": "Examples",
+			"description": "Study the star pattern: one central hub connected to many spokes. Click 'Star' node and explore Spoke 1-4. Notice how all flow through the center. Real-world use: platforms, routers, social media hubs, centralized services.",
+			"status": "Not Started",
+			"date_created": "2025-12-16",
+			"date_updated": "2025-12-16",
+			"priority": "High"
+		},
+		{
+			"task_id": 4,
+			"task_name": "📋 Learn DAG Structure (Dependency Graph)",
+			"worker_name": "Public User",
+			"category": "Examples",
+			"description": "Understand DAG: directed edges flowing forward with no cycles. Click 'DAG' node and trace the path: Task A → Task B & Task C → Task D. Each edge shows a dependency. Real-world use: build pipelines, task scheduling, prerequisite chains.",
+			"status": "Not Started",
+			"date_created": "2025-12-16",
+			"date_updated": "2025-12-16",
+			"priority": "High"
+		},
+		{
+			"task_id": 5,
+			"task_name": "🔄 Learn Cycle Structure (Feedback Loop)",
+			"worker_name": "Public User",
+			"category": "Examples",
+			"description": "Discover cycles: State 1 → State 2 → State 3 → State 1. Click 'Cycle' and hover to see the loop close back on itself. Real-world use: control systems, iterative processes, reinforcing feedback, circular dependencies (sometimes a bug!).",
+			"status": "Not Started",
+			"date_created": "2025-12-16",
+			"date_updated": "2025-12-16",
+			"priority": "High"
+		},
+		{
+			"task_id": 6,
+			"task_name": "🎮 Master Graph Interactions",
+			"worker_name": "Public User",
+			"category": "Examples",
+			"description": "Practice all UI features: (1) Hover any node to highlight neighbors. (2) Click to open details. (3) Use menu search to find 'Task D' or 'Leaf'. (4) Scroll to zoom, drag to pan. (5) Click 'Reset View' to return. Try each on different structures.",
+			"status": "Not Started",
+			"date_created": "2025-12-16",
+			"date_updated": "2025-12-16",
+			"priority": "Medium"
+		},
+		{
+			"task_id": 7,
+			"task_name": "🔗 Understand Node Properties & Edge Types",
+			"worker_name": "Public User",
+			"category": "Examples",
+			"description": "Learn how nodes have properties (layer, parent) and edges have types (HAS_SUBCATEGORY, DEVELOPS, CREATES, LEADS_TO). Click concept nodes to see how direction matters: (A → B) is different from (A — B). These encode meaning.",
+			"status": "Not Started",
+			"date_created": "2025-12-16",
+			"date_updated": "2025-12-16",
+			"priority": "Medium"
+		},
+		{
+			"task_id": 8,
+			"task_name": "🎯 Map Use Cases to Structures",
+			"worker_name": "Public User",
+			"category": "Examples",
+			"description": "For each structure, follow its path to a use case. Tree → Hierarchies (org charts). Star → Hubs (platforms). DAG → Dependencies (build systems). Cycle → Feedback Loops (control systems). Each leads to 'Pick the Right Model'. Match your problem to the right structure.",
+			"status": "Not Started",
+			"date_created": "2025-12-16",
+			"date_updated": "2025-12-16",
+			"priority": "High"
+		},
+		{
+			"task_id": 9,
+			"task_name": "🧠 Challenge: Design Your Own Graph",
+			"worker_name": "Public User",
+			"category": "Examples",
+			"description": "Pick a real-world scenario (team org, build pipeline, social network, feedback loop). Identify nodes and edges. Determine structure (tree/star/DAG/cycle). Sketch it. Then explore this graph and find similar patterns to learn from.",
+			"status": "Not Started",
+			"date_created": "2025-12-16",
+			"date_updated": "2025-12-16",
+			"priority": "Medium"
+		},
+		{
+			"task_id": 10,
+			"task_name": "✅ Complete Interactive Learning Tour",
+			"worker_name": "Public User",
+			"category": "Examples",
+			"description": "Follow the guided tour (click 'Guided Tour' in menu) for a step-by-step walkthrough. Tour covers: start here, basics, structures, search feature, tree/DAG/cycle examples, and the decision outcome. Completes the full learning journey.",
+			"status": "Not Started",
+			"date_created": "2025-12-16",
+			"date_updated": "2025-12-16",
+			"priority": "High"
+		},
+		{
+			"task_id": 11,
+			"task_name": "🧩 Bipartite & Matching Exercise",
+			"worker_name": "Public User",
+			"category": "Examples",
+			"description": "Explore the bipartite pattern: two node sets with edges only between sets. Practice matching left→right pairs and think about real-world examples: job applicants → companies, users → products.",
+			"status": "Not Started",
+			"date_created": "2025-12-16",
+			"date_updated": "2025-12-16",
+			"priority": "Medium"
+		},
+		{
+			"task_id": 12,
+			"task_name": "🔎 Shortest Path & Centrality",
+			"worker_name": "Public User",
+			"category": "Examples",
+			"description": "Use the path example to explore edge weights and find short/long routes. Identify the most central node (highest degree) and see how centrality helps find hubs or critical nodes in networks.",
+			"status": "Not Started",
 			"date_created": "2025-12-16",
 			"date_updated": "2025-12-16",
 			"priority": "High"
 		}
 	],
 	"graphTemplate": {
-		"description": "A small but feature-rich graph to learn nodes, links, layers, and common graph structures (tree, star, DAG, cycle) using the existing interactions.",
+		"description": "A comprehensive interactive graph teaching all graph fundamentals: nodes, edges, layers, structures (tree, star, DAG, cycle), use cases, and decision-making.",
 		"rawNodes": [
 			{ "id": "profile", "properties": { "name": "First Graph: Learn Graphs", "layer": 0 }, "labels": ["Person", "Domain"] },
 
@@ -71,6 +192,26 @@
 			{ "id": "cycle-2", "properties": { "name": "State 2", "layer": 2, "parent": "structure-cycle" }, "labels": ["Example"] },
 			{ "id": "cycle-3", "properties": { "name": "State 3", "layer": 2, "parent": "structure-cycle" }, "labels": ["Example"] },
 
+		{ "id": "bip-left-1", "properties": { "name": "Bip Left 1", "layer": 2, "parent": "structure-star" }, "labels": ["Example"] },
+		{ "id": "bip-left-2", "properties": { "name": "Bip Left 2", "layer": 2, "parent": "structure-star" }, "labels": ["Example"] },
+		{ "id": "bip-right-1", "properties": { "name": "Bip Right 1", "layer": 2, "parent": "structure-star" }, "labels": ["Example"] },
+		{ "id": "bip-right-2", "properties": { "name": "Bip Right 2", "layer": 2, "parent": "structure-star" }, "labels": ["Example"] },
+
+		{ "id": "clique-1", "properties": { "name": "Clique A1", "layer": 2 }, "labels": ["Example"] },
+		{ "id": "clique-2", "properties": { "name": "Clique A2", "layer": 2 }, "labels": ["Example"] },
+		{ "id": "clique-3", "properties": { "name": "Clique A3", "layer": 2 }, "labels": ["Example"] },
+
+		{ "id": "community-a-1", "properties": { "name": "Community A1", "layer": 2 }, "labels": ["Example"] },
+		{ "id": "community-a-2", "properties": { "name": "Community A2", "layer": 2 }, "labels": ["Example"] },
+		{ "id": "community-b-1", "properties": { "name": "Community B1", "layer": 2 }, "labels": ["Example"] },
+		{ "id": "community-b-2", "properties": { "name": "Community B2", "layer": 2 }, "labels": ["Example"] },
+
+		{ "id": "path-1", "properties": { "name": "Path Node 1", "layer": 2 }, "labels": ["Example"] },
+		{ "id": "path-2", "properties": { "name": "Path Node 2", "layer": 2 }, "labels": ["Example"] },
+		{ "id": "path-3", "properties": { "name": "Path Node 3", "layer": 2 }, "labels": ["Example"] },
+		{ "id": "path-4", "properties": { "name": "Path Node 4", "layer": 2 }, "labels": ["Example"] },
+
+		{ "id": "centrality", "properties": { "name": "Centrality: High Degree Node", "layer": 2 }, "labels": ["Example"] },
 			{ "id": "usecase-hierarchy", "properties": { "name": "Use Case: Hierarchies", "layer": 3 }, "labels": ["Domain"] },
 			{ "id": "usecase-hub", "properties": { "name": "Use Case: Hubs", "layer": 3 }, "labels": ["Domain"] },
 			{ "id": "usecase-deps", "properties": { "name": "Use Case: Dependencies", "layer": 3 }, "labels": ["Domain"] },
@@ -126,7 +267,24 @@
 			{ "source": "cycle-1", "target": "cycle-2", "type": "LEADS_TO" },
 			{ "source": "cycle-2", "target": "cycle-3", "type": "LEADS_TO" },
 			{ "source": "cycle-3", "target": "cycle-1", "type": "LEADS_TO" },
+		{ "source": "bip-left-1", "target": "bip-right-1", "type": "BIPARTITE" },
+		{ "source": "bip-left-1", "target": "bip-right-2", "type": "BIPARTITE" },
+		{ "source": "bip-left-2", "target": "bip-right-1", "type": "BIPARTITE" },
 
+		{ "source": "clique-1", "target": "clique-2", "type": "CONNECTED" },
+		{ "source": "clique-1", "target": "clique-3", "type": "CONNECTED" },
+		{ "source": "clique-2", "target": "clique-3", "type": "CONNECTED" },
+
+		{ "source": "community-a-1", "target": "community-a-2", "type": "RELATED" },
+		{ "source": "community-b-1", "target": "community-b-2", "type": "RELATED" },
+		{ "source": "community-a-1", "target": "community-b-1", "type": "CROSS" },
+
+		{ "source": "path-1", "target": "path-2", "type": "WEIGHTED_5" },
+		{ "source": "path-2", "target": "path-3", "type": "WEIGHTED_2" },
+		{ "source": "path-3", "target": "path-4", "type": "WEIGHTED_8" },
+
+		{ "source": "centrality", "target": "star-spoke-1", "type": "CONNECTS" },
+		{ "source": "centrality", "target": "clique-1", "type": "CONNECTS" },
 			{ "source": "structure-tree", "target": "usecase-hierarchy", "type": "CREATES" },
 			{ "source": "structure-star", "target": "usecase-hub", "type": "CREATES" },
 			{ "source": "structure-dag", "target": "usecase-deps", "type": "CREATES" },
@@ -220,7 +378,26 @@
 			"cycle-1": { "title": "State 1", "items": ["Part of a loop."] },
 			"cycle-2": { "title": "State 2", "items": ["Part of a loop."] },
 			"cycle-3": { "title": "State 3", "items": ["Part of a loop."] },
+		"bip-left-1": { "title": "Bipartite Left 1", "items": ["Left partition node. Bipartite graphs connect nodes only across partitions, useful for matching problems (applicants↔jobs). Try finding match pairs."] },
+		"bip-left-2": { "title": "Bipartite Left 2", "items": ["Left partition node."] },
+		"bip-right-1": { "title": "Bipartite Right 1", "items": ["Right partition node."] },
+		"bip-right-2": { "title": "Bipartite Right 2", "items": ["Right partition node."] },
 
+		"clique-1": { "title": "Clique A1", "items": ["A node in a fully connected group (clique). Cliques show tight communities where everyone connects to everyone."] },
+		"clique-2": { "title": "Clique A2", "items": ["A node in a fully connected group (clique)."] },
+		"clique-3": { "title": "Clique A3", "items": ["A node in a fully connected group (clique)."] },
+
+		"community-a-1": { "title": "Community A1", "items": ["Part of a dense community. Community detection groups nodes by internal connectivity."] },
+		"community-a-2": { "title": "Community A2", "items": ["Part of a dense community."] },
+		"community-b-1": { "title": "Community B1", "items": ["A node in a different community."] },
+		"community-b-2": { "title": "Community B2", "items": ["A node in a different community."] },
+
+		"path-1": { "title": "Path Node 1", "items": ["Start of a path used to demonstrate weighted shortest paths."] },
+		"path-2": { "title": "Path Node 2", "items": ["Middle path node (lower weight edge here encourages shortest paths through this node)."] },
+		"path-3": { "title": "Path Node 3", "items": ["Middle path node (higher weight edge here discourages shortest path)."] },
+		"path-4": { "title": "Path Node 4", "items": ["End of path."] },
+
+		"centrality": { "title": "Centrality: High Degree Node", "items": ["A node connected to many others. Centrality helps find hubs and critical infrastructure in networks."] },
 			"usecase-hierarchy": { "title": "Use Case: Hierarchies", "items": ["Org charts, categories, file/folder trees, taxonomy."] },
 			"usecase-hub": { "title": "Use Case: Hubs", "items": ["Platforms, routers, central services, influencer networks."] },
 			"usecase-deps": { "title": "Use Case: Dependencies", "items": ["Task planning, build systems, prerequisites, pipelines."] },
@@ -240,7 +417,7 @@
 			"profileNodeId": "profile",
 			"coreNodeId": "structures",
 			"walkthroughEnabled": true,
-			"walkthroughStepsPath": "templates/first-graph/tour.json",
+			"walkthroughStepsPath": "../tour/graph-tour.json",
 			"showCvButton": false,
 			"showCoreButton": true,
 			"showProfileButton": true,
