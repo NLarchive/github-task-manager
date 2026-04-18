@@ -95,43 +95,52 @@
     color: var(--layer2-base);
 }
 
-/* ===== Dependency link buttons inside node detail popup ===== */
-#popup .content .dep-link {
+/* ===== Unified task-node-btn: used for dep (depends-on), leads-to, and subtask lists ===== */
+.task-node-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 6px 0;
+}
+#popup .content .task-node-btn {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 3px 9px;
+    gap: 5px;
+    padding: 3px 10px;
     margin: 2px 3px 2px 0;
     font-size: 0.82rem;
     background: rgba(78, 121, 167, 0.12);
     border: 1px solid rgba(78, 121, 167, 0.32);
-    border-radius: 5px;
+    border-radius: 10px;
     color: var(--color-secondary, #4e79a7);
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s, opacity 0.15s;
     font-family: inherit;
 }
 
-#popup .content .dep-link:hover,
-#popup .content .dep-link:focus-visible {
+#popup .content .task-node-btn[data-node-id]:hover,
+#popup .content .task-node-btn[data-node-id]:focus-visible {
     background: rgba(78, 121, 167, 0.26);
     border-color: var(--color-secondary, #4e79a7);
     outline: none;
     filter: brightness(1.15);
 }
 
-/* Status-aware dep buttons */
-#popup .content .dep-link.dep-status-done {
-    opacity: 0.45;
-    filter: grayscale(0.7);
-    text-decoration: line-through;
-}
-#popup .content .dep-link.dep-status-in-progress {
-    animation: btn-pulse 2s infinite ease-in-out;
+/* Buttons without a navigable node (inline subtasks) show default cursor */
+#popup .content .task-node-btn:not([data-node-id]) {
+    cursor: default;
 }
 
-/* Hours badge inside dep-link buttons */
-#popup .content .dep-link .dep-hours {
+/* Name span: truncate long names */
+#popup .content .task-node-btn .tn-name {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Hours badge */
+#popup .content .task-node-btn .tn-hours {
     font-size: 0.7rem;
     font-weight: 700;
     opacity: 0.75;
@@ -142,44 +151,13 @@
     white-space: nowrap;
 }
 
-/* ===== Subtask node-like buttons ===== */
-.subtask-node-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    padding: 6px 0;
-}
-#popup .content .subtask-node-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 10px;
-    font-size: 0.8rem;
-    background: rgba(100, 100, 100, 0.15);
-    border: 1px solid rgba(100, 100, 100, 0.3);
-    border-radius: 12px;
-    color: #fff;
-    cursor: default;
-    font-family: inherit;
-    transition: opacity 0.15s, filter 0.15s;
-}
-#popup .content .subtask-node-btn .st-name {
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-#popup .content .subtask-node-btn .st-hours {
-    font-size: 0.72rem;
-    opacity: 0.85;
-    font-weight: 600;
-}
-#popup .content .subtask-node-btn.st-status-done {
+/* Status-aware modifiers */
+#popup .content .task-node-btn.task-node-status-done {
     opacity: 0.4;
     filter: grayscale(0.7);
     text-decoration: line-through;
 }
-#popup .content .subtask-node-btn.st-status-in-progress {
+#popup .content .task-node-btn.task-node-status-in-progress {
     animation: btn-pulse 2s infinite ease-in-out;
 }
 

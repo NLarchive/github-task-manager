@@ -1329,38 +1329,25 @@ class CurriculumGraph {
 
         contentDiv.innerHTML = contentHtml;
 
-        // Apply priority colors and status classes to dep-link and subtask-node-btn buttons
+        // Apply priority colours and status classes to all task-node-btn buttons (deps, leads-to, subtasks)
         const priorityColors = this.config.priorityColorsHex || {};
-        contentDiv.querySelectorAll('.dep-link[data-dep-priority]').forEach(btn => {
-            const p = btn.getAttribute('data-dep-priority');
-            const s = btn.getAttribute('data-dep-status') || '';
-            const h = btn.getAttribute('data-dep-hours') || '';
+        contentDiv.querySelectorAll('.task-node-btn[data-priority]').forEach(btn => {
+            const p = btn.getAttribute('data-priority');
+            const s = btn.getAttribute('data-status') || '';
             if (priorityColors[p]) {
                 btn.style.backgroundColor = priorityColors[p];
                 btn.style.color = '#fff';
                 btn.style.borderColor = priorityColors[p];
             }
-            if (s === 'done' || s === 'completed') btn.classList.add('dep-status-done');
-            else if (s === 'in-progress') btn.classList.add('dep-status-in-progress');
-            if (h && h !== '0') btn.setAttribute('title', `${btn.getAttribute('title') || btn.textContent} (${h}h)`);
-        });
-        contentDiv.querySelectorAll('.subtask-node-btn[data-st-priority]').forEach(btn => {
-            const p = btn.getAttribute('data-st-priority');
-            const s = btn.getAttribute('data-st-status') || '';
-            if (priorityColors[p]) {
-                btn.style.backgroundColor = priorityColors[p];
-                btn.style.color = '#fff';
-                btn.style.borderColor = priorityColors[p];
-            }
-            if (s === 'done' || s === 'completed') btn.classList.add('st-status-done');
-            else if (s === 'in-progress') btn.classList.add('st-status-in-progress');
+            if (s === 'done' || s === 'completed') btn.classList.add('task-node-status-done');
+            else if (s === 'in-progress') btn.classList.add('task-node-status-in-progress');
         });
 
-        // Wire dependency link buttons → navigate to target node, open its modal, keep it selected
-        contentDiv.querySelectorAll('.dep-link').forEach(btn => {
+        // Wire all task-node-btn buttons that have a target node → navigate via openNodeModal
+        contentDiv.querySelectorAll('.task-node-btn[data-node-id]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const targetNodeId = btn.getAttribute('data-dep-node-id');
+                const targetNodeId = btn.getAttribute('data-node-id');
                 if (targetNodeId) {
                     this.hideNodeDetails();
                     this.openNodeModal(targetNodeId);

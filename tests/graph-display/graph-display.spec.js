@@ -42,7 +42,7 @@ test.describe('graph-display task-management template', () => {
     const popup = page.locator('#popup');
     await expect(popup).toHaveClass(/visible/);
 
-    const depButton = page.locator('#popup .dep-link').first();
+    const depButton = page.locator('#popup .task-node-btn[data-node-id]').first();
     await expect(depButton).toBeVisible();
     await depButton.click();
 

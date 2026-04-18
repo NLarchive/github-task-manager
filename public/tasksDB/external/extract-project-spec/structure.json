@@ -1,0 +1,555 @@
+{
+  "rawNodes": [
+    {
+      "id": "root",
+      "labels": [
+        "Domain"
+      ],
+      "properties": {
+        "name": "extract_project_spec",
+        "layer": 0
+      }
+    },
+    {
+      "id": "dir:parsers",
+      "labels": [
+        "Domain"
+      ],
+      "properties": {
+        "name": "parsers",
+        "layer": 1,
+        "parent": "root"
+      }
+    },
+    {
+      "id": "dir:tests",
+      "labels": [
+        "Domain"
+      ],
+      "properties": {
+        "name": "tests",
+        "layer": 1,
+        "parent": "root"
+      }
+    },
+    {
+      "id": "dir:tests/__snapshots__",
+      "labels": [
+        "Domain"
+      ],
+      "properties": {
+        "name": "__snapshots__",
+        "layer": 2,
+        "parent": "dir:tests"
+      }
+    },
+    {
+      "id": "file:README.md",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "name": "README.md",
+        "layer": 3,
+        "parent": "root",
+        "summary": "extract_project_spec",
+        "defCount": 10
+      }
+    },
+    {
+      "id": "file:parsers/css_parser.py",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "name": "css_parser.py",
+        "layer": 3,
+        "parent": "dir:parsers",
+        "summary": "Extracts named sections (from /* === ... === */ or /* --- ... --- */ banners), CSS custom properties from :root, SCSS mixins/functions, and key top-level selectors from CSS / SCSS / SASS files.…",
+        "defCount": 10
+      }
+    },
+    {
+      "id": "file:parsers/csv_parser.py",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "name": "csv_parser.py",
+        "layer": 3,
+        "parent": "dir:parsers",
+        "summary": "Extracts column headers from the first data row of CSV, TSV, and similar delimiter-separated value files. Returns list of dicts: name, type, parent, signature, docstring, line type = 'csv-column'…",
+        "defCount": 4
+      }
+    },
+    {
+      "id": "file:parsers/html_parser.py",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "name": "html_parser.py",
+        "layer": 3,
+        "parent": "dir:parsers",
+        "summary": "Extracts page title, meta tags (description, keywords, author, og:*), headings (h1-h3), and landmark sections from HTML / HTM files using Python's built-in html.parser. Returns list of dicts: name,…",
+        "defCount": 9
+      }
+    },
+    {
+      "id": "file:parsers/js_parser.py",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "name": "js_parser.py",
+        "layer": 3,
+        "parent": "dir:parsers",
+        "summary": "Extracts functions, arrow functions, classes, class methods, and their JSDoc comments from JavaScript and TypeScript source files using regex-based scanning. Returns list of dicts: name, type,…",
+        "defCount": 17
+      }
+    },
+    {
+      "id": "file:parsers/json_parser.py",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "name": "json_parser.py",
+        "layer": 3,
+        "parent": "dir:parsers",
+        "summary": "Extracts top-level keys and structure summary from JSON files. Returns list of dicts: name, type, parent, signature, docstring, line type = 'json-key' | 'json-array'",
+        "defCount": 2
+      }
+    },
+    {
+      "id": "file:parsers/md_parser.py",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "name": "md_parser.py",
+        "layer": 3,
+        "parent": "dir:parsers",
+        "summary": "Extracts YAML front-matter fields and ATX/setext heading structure (H1–H4) from Markdown files. Returns list of dicts: name, type, parent, signature, docstring, line type ∈ {'frontmatter',…",
+        "defCount": 8
+      }
+    },
+    {
+      "id": "file:parsers/php_parser.py",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "name": "php_parser.py",
+        "layer": 3,
+        "parent": "dir:parsers",
+        "summary": "Extracts classes, interfaces, traits, methods, functions, and constants from PHP source files using regex-based scanning. Recovers PHPDoc blocks (/** ... */) as docstrings. Handles PHP 8 attributes…",
+        "defCount": 12
+      }
+    },
+    {
+      "id": "file:parsers/python_parser.py",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "name": "python_parser.py",
+        "layer": 3,
+        "parent": "dir:parsers",
+        "summary": "Extracts classes, methods, functions, and constants from Python files using the built-in ast module with full signature support (type annotations, return types). Adapted from the project's example…",
+        "defCount": 4
+      }
+    },
+    {
+      "id": "file:parsers/sql_parser.py",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "name": "sql_parser.py",
+        "layer": 3,
+        "parent": "dir:parsers",
+        "summary": "Extracts CREATE TABLE, CREATE VIEW, CREATE PROCEDURE, CREATE FUNCTION, and CREATE INDEX statements from SQL files, along with preceding single-line (--) comments that serve as documentation. Returns…",
+        "defCount": 4
+      }
+    },
+    {
+      "id": "file:parsers/yaml_parser.py",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "name": "yaml_parser.py",
+        "layer": 3,
+        "parent": "dir:parsers",
+        "summary": "Extracts top-level keys, GitHub-Actions jobs, and workflow triggers from YAML files (.yml / .yaml). Uses PyYAML when available; falls back to a lightweight regex-based scan so the tool works without…",
+        "defCount": 5
+      }
+    },
+    {
+      "id": "file:tests/conftest.py",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "name": "conftest.py",
+        "layer": 3,
+        "parent": "dir:tests",
+        "summary": "Shared pytest fixtures for the extract_project_spec test suite. Fixtures -------- repo_root Absolute path to the web-github-task-manager repo root. extractor_root Absolute path to…",
+        "defCount": 10
+      }
+    },
+    {
+      "id": "file:tests/test_app.py",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "name": "test_app.py",
+        "layer": 3,
+        "parent": "dir:tests",
+        "summary": "",
+        "defCount": 29
+      }
+    },
+    {
+      "id": "file:tests/test_contracts.py",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "name": "test_contracts.py",
+        "layer": 3,
+        "parent": "dir:tests",
+        "summary": "Contract tests using Pydantic v2 models. Each model precisely defines what ``parse_file_report()`` must always return. A schema mismatch raises a ``ValidationError`` immediately, catching silent…",
+        "defCount": 32
+      }
+    },
+    {
+      "id": "file:tests/test_parsers.py",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "name": "test_parsers.py",
+        "layer": 3,
+        "parent": "dir:tests",
+        "summary": "",
+        "defCount": 12
+      }
+    },
+    {
+      "id": "file:tests/test_property.py",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "name": "test_property.py",
+        "layer": 3,
+        "parent": "dir:tests",
+        "summary": "Property-based tests using Hypothesis. These tests generate hundreds of random file contents and verify that the extractor: (a) never raises an unhandled exception, (b) always returns output that…",
+        "defCount": 16
+      }
+    },
+    {
+      "id": "file:tests/test_snapshots.py",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "name": "test_snapshots.py",
+        "layer": 3,
+        "parent": "dir:tests",
+        "summary": "Regression snapshot tests using syrupy. On the first run, syrupy writes the actual output to ``tests/__snapshots__/``. Every subsequent run diffs against that snapshot — any silent change in…",
+        "defCount": 10
+      }
+    },
+    {
+      "id": "file:tests/__snapshots__/test_snapshots.ambr",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "name": "test_snapshots.ambr",
+        "layer": 3,
+        "parent": "dir:tests/__snapshots__",
+        "summary": "",
+        "defCount": 0
+      }
+    }
+  ],
+  "rawRelationships": [
+    {
+      "source": "root",
+      "target": "dir:parsers",
+      "type": "HAS_SUBCATEGORY"
+    },
+    {
+      "source": "root",
+      "target": "dir:tests",
+      "type": "HAS_SUBCATEGORY"
+    },
+    {
+      "source": "dir:tests",
+      "target": "dir:tests/__snapshots__",
+      "type": "HAS_SUBCATEGORY"
+    },
+    {
+      "source": "root",
+      "target": "file:README.md",
+      "type": "HAS_FOUNDATION"
+    },
+    {
+      "source": "dir:parsers",
+      "target": "file:parsers/css_parser.py",
+      "type": "HAS_FOUNDATION"
+    },
+    {
+      "source": "dir:parsers",
+      "target": "file:parsers/csv_parser.py",
+      "type": "HAS_FOUNDATION"
+    },
+    {
+      "source": "dir:parsers",
+      "target": "file:parsers/html_parser.py",
+      "type": "HAS_FOUNDATION"
+    },
+    {
+      "source": "dir:parsers",
+      "target": "file:parsers/js_parser.py",
+      "type": "HAS_FOUNDATION"
+    },
+    {
+      "source": "dir:parsers",
+      "target": "file:parsers/json_parser.py",
+      "type": "HAS_FOUNDATION"
+    },
+    {
+      "source": "dir:parsers",
+      "target": "file:parsers/md_parser.py",
+      "type": "HAS_FOUNDATION"
+    },
+    {
+      "source": "dir:parsers",
+      "target": "file:parsers/php_parser.py",
+      "type": "HAS_FOUNDATION"
+    },
+    {
+      "source": "dir:parsers",
+      "target": "file:parsers/python_parser.py",
+      "type": "HAS_FOUNDATION"
+    },
+    {
+      "source": "dir:parsers",
+      "target": "file:parsers/sql_parser.py",
+      "type": "HAS_FOUNDATION"
+    },
+    {
+      "source": "dir:parsers",
+      "target": "file:parsers/yaml_parser.py",
+      "type": "HAS_FOUNDATION"
+    },
+    {
+      "source": "dir:tests",
+      "target": "file:tests/conftest.py",
+      "type": "HAS_FOUNDATION"
+    },
+    {
+      "source": "dir:tests",
+      "target": "file:tests/test_app.py",
+      "type": "HAS_FOUNDATION"
+    },
+    {
+      "source": "dir:tests",
+      "target": "file:tests/test_contracts.py",
+      "type": "HAS_FOUNDATION"
+    },
+    {
+      "source": "dir:tests",
+      "target": "file:tests/test_parsers.py",
+      "type": "HAS_FOUNDATION"
+    },
+    {
+      "source": "dir:tests",
+      "target": "file:tests/test_property.py",
+      "type": "HAS_FOUNDATION"
+    },
+    {
+      "source": "dir:tests",
+      "target": "file:tests/test_snapshots.py",
+      "type": "HAS_FOUNDATION"
+    },
+    {
+      "source": "dir:tests/__snapshots__",
+      "target": "file:tests/__snapshots__/test_snapshots.ambr",
+      "type": "HAS_FOUNDATION"
+    }
+  ],
+  "details": {
+    "root": {
+      "title": "extract_project_spec",
+      "items": [
+        "<strong>Files:</strong> 18"
+      ]
+    },
+    "file:README.md": {
+      "title": "README.md",
+      "items": [
+        "extract_project_spec",
+        "<strong>Definitions:</strong> 10"
+      ]
+    },
+    "file:parsers/css_parser.py": {
+      "title": "parsers/css_parser.py",
+      "items": [
+        "Extracts named sections (from /* === ... === */ or /* --- ... --- */ banners), CSS custom properties from :root, SCSS mixins/functions, and key top-level selectors from CSS / SCSS / SASS files.…",
+        "<strong>Definitions:</strong> 10",
+        "<strong>Imports:</strong> re, typing",
+        "<strong>Flow:</strong> transform"
+      ]
+    },
+    "file:parsers/csv_parser.py": {
+      "title": "parsers/csv_parser.py",
+      "items": [
+        "Extracts column headers from the first data row of CSV, TSV, and similar delimiter-separated value files. Returns list of dicts: name, type, parent, signature, docstring, line type = 'csv-column'…",
+        "<strong>Definitions:</strong> 4",
+        "<strong>Imports:</strong> __future__, csv, io, re, typing",
+        "<strong>Flow:</strong> transform"
+      ]
+    },
+    "file:parsers/html_parser.py": {
+      "title": "parsers/html_parser.py",
+      "items": [
+        "Extracts page title, meta tags (description, keywords, author, og:*), headings (h1-h3), and landmark sections from HTML / HTM files using Python's built-in html.parser. Returns list of dicts: name,…",
+        "<strong>Definitions:</strong> 9",
+        "<strong>Imports:</strong> html.parser, typing",
+        "<strong>Flow:</strong> transform"
+      ]
+    },
+    "file:parsers/js_parser.py": {
+      "title": "parsers/js_parser.py",
+      "items": [
+        "Extracts functions, arrow functions, classes, class methods, and their JSDoc comments from JavaScript and TypeScript source files using regex-based scanning. Returns list of dicts: name, type,…",
+        "<strong>Definitions:</strong> 17",
+        "<strong>Imports:</strong> re, typing",
+        "<strong>Flow:</strong> transform"
+      ]
+    },
+    "file:parsers/json_parser.py": {
+      "title": "parsers/json_parser.py",
+      "items": [
+        "Extracts top-level keys and structure summary from JSON files. Returns list of dicts: name, type, parent, signature, docstring, line type = 'json-key' | 'json-array'",
+        "<strong>Definitions:</strong> 2",
+        "<strong>Imports:</strong> __future__, json, typing",
+        "<strong>Flow:</strong> transform"
+      ]
+    },
+    "file:parsers/md_parser.py": {
+      "title": "parsers/md_parser.py",
+      "items": [
+        "Extracts YAML front-matter fields and ATX/setext heading structure (H1–H4) from Markdown files. Returns list of dicts: name, type, parent, signature, docstring, line type ∈ {'frontmatter',…",
+        "<strong>Definitions:</strong> 8",
+        "<strong>Imports:</strong> re, typing",
+        "<strong>Flow:</strong> transform"
+      ]
+    },
+    "file:parsers/php_parser.py": {
+      "title": "parsers/php_parser.py",
+      "items": [
+        "Extracts classes, interfaces, traits, methods, functions, and constants from PHP source files using regex-based scanning. Recovers PHPDoc blocks (/** ... */) as docstrings. Handles PHP 8 attributes…",
+        "<strong>Definitions:</strong> 12",
+        "<strong>Imports:</strong> re, typing",
+        "<strong>Flow:</strong> transform"
+      ]
+    },
+    "file:parsers/python_parser.py": {
+      "title": "parsers/python_parser.py",
+      "items": [
+        "Extracts classes, methods, functions, and constants from Python files using the built-in ast module with full signature support (type annotations, return types). Adapted from the project's example…",
+        "<strong>Definitions:</strong> 4",
+        "<strong>Imports:</strong> ast, typing",
+        "<strong>Flow:</strong> transform"
+      ]
+    },
+    "file:parsers/sql_parser.py": {
+      "title": "parsers/sql_parser.py",
+      "items": [
+        "Extracts CREATE TABLE, CREATE VIEW, CREATE PROCEDURE, CREATE FUNCTION, and CREATE INDEX statements from SQL files, along with preceding single-line (--) comments that serve as documentation. Returns…",
+        "<strong>Definitions:</strong> 4",
+        "<strong>Imports:</strong> re, typing",
+        "<strong>Flow:</strong> transform"
+      ]
+    },
+    "file:parsers/yaml_parser.py": {
+      "title": "parsers/yaml_parser.py",
+      "items": [
+        "Extracts top-level keys, GitHub-Actions jobs, and workflow triggers from YAML files (.yml / .yaml). Uses PyYAML when available; falls back to a lightweight regex-based scan so the tool works without…",
+        "<strong>Definitions:</strong> 5",
+        "<strong>Imports:</strong> __future__, re, typing, yaml",
+        "<strong>Flow:</strong> transform"
+      ]
+    },
+    "file:tests/conftest.py": {
+      "title": "tests/conftest.py",
+      "items": [
+        "Shared pytest fixtures for the extract_project_spec test suite. Fixtures -------- repo_root Absolute path to the web-github-task-manager repo root. extractor_root Absolute path to…",
+        "<strong>Definitions:</strong> 10",
+        "<strong>Imports:</strong> __future__, os, tempfile, typing, pytest, app",
+        "<strong>Flow:</strong> transform"
+      ]
+    },
+    "file:tests/test_app.py": {
+      "title": "tests/test_app.py",
+      "items": [
+        "<strong>Definitions:</strong> 29",
+        "<strong>Imports:</strong> os, tempfile, unittest, app",
+        "<strong>Flow:</strong> input → transform → state → output"
+      ]
+    },
+    "file:tests/test_contracts.py": {
+      "title": "tests/test_contracts.py",
+      "items": [
+        "Contract tests using Pydantic v2 models. Each model precisely defines what ``parse_file_report()`` must always return. A schema mismatch raises a ``ValidationError`` immediately, catching silent…",
+        "<strong>Definitions:</strong> 32",
+        "<strong>Imports:</strong> __future__, os, typing, pytest, pydantic, app, re",
+        "<strong>Flow:</strong> transform → output"
+      ]
+    },
+    "file:tests/test_parsers.py": {
+      "title": "tests/test_parsers.py",
+      "items": [
+        "<strong>Definitions:</strong> 12",
+        "<strong>Imports:</strong> importlib, tempfile, unittest, os",
+        "<strong>Flow:</strong> transform → state"
+      ]
+    },
+    "file:tests/test_property.py": {
+      "title": "tests/test_property.py",
+      "items": [
+        "Property-based tests using Hypothesis. These tests generate hundreds of random file contents and verify that the extractor: (a) never raises an unhandled exception, (b) always returns output that…",
+        "<strong>Definitions:</strong> 16",
+        "<strong>Imports:</strong> __future__, os, string, pytest, hypothesis, app",
+        "<strong>Flow:</strong> transform"
+      ]
+    },
+    "file:tests/test_snapshots.py": {
+      "title": "tests/test_snapshots.py",
+      "items": [
+        "Regression snapshot tests using syrupy. On the first run, syrupy writes the actual output to ``tests/__snapshots__/``. Every subsequent run diffs against that snapshot — any silent change in…",
+        "<strong>Definitions:</strong> 10",
+        "<strong>Imports:</strong> __future__, os, typing, pytest, syrupy.assertion, app",
+        "<strong>Flow:</strong> transform → output"
+      ]
+    },
+    "file:tests/__snapshots__/test_snapshots.ambr": {
+      "title": "tests/__snapshots__/test_snapshots.ambr",
+      "items": [
+        "<strong>Definitions:</strong> 0"
+      ]
+    }
+  },
+  "meta": {
+    "walkthroughEnabled": false
+  },
+  "configOverrides": {}
+}

@@ -661,7 +661,7 @@ function resolveProjectEndMode(project, terminalTasks) {
     return 'milestone';
 }
 
-function buildProjectEndDetails(project, terminalTasks) {
+function buildProjectEndDetails(project, terminalTasks, totalProjectHours = 0) {
     const endConfig = resolveProjectEndConfig(project);
     const endMode = resolveProjectEndMode(project, terminalTasks);
     const terminalNames = terminalTasks
@@ -707,6 +707,7 @@ function buildProjectEndDetails(project, terminalTasks) {
         title: `End: ${project.name}`,
         items: [
             terminalSummary,
+            totalProjectHours > 0 ? `<strong>Total estimated hours:</strong> ${totalProjectHours}h` : null,
             `<strong>End node type:</strong> ${endTypeLabel}`,
             `<strong>Delivery meaning:</strong> ${endConfig.summary || generatedMeaning}`,
             `<strong>What happens next:</strong> ${endConfig.next_step || generatedNextStep}`,
@@ -831,12 +832,22 @@ function buildTaskManagementTemplate(entry, data, options = {}) {
     ];
 
     const links = [];
+    // Dynamic total hours: sum task own hours + inline subtask hours across all tasks
+    const totalProjectHours = tasks.reduce((sum, t) => {
+        const own = Number(t.estimated_hours) || 0;
+        const sub = Array.isArray(t.subtasks)
+            ? t.subtasks.reduce((s, st) => s + (Number(st?.estimated_hours) || 0), 0)
+            : 0;
+        return sum + own + sub;
+    }, 0);
+
     const details = {
         [projectStartNodeId]: {
             title: `Start: ${project.name}`,
             items: [
                 project.description || '',
                 `<strong>Tasks:</strong> ${tasks.length} | <strong>Status:</strong> ${project.status || 'Not Started'}`,
+                totalProjectHours > 0 ? `<strong>Total estimated hours:</strong> ${totalProjectHours}h` : null,
                 project.start_date ? `<strong>Timeline:</strong> ${project.start_date}${project.end_date ? ' → ' + project.end_date : ''}` : null,
                 project.budget ? `<strong>Budget:</strong> ${project.budget}` : null
             ].filter(Boolean)
@@ -861,7 +872,7 @@ function buildTaskManagementTemplate(entry, data, options = {}) {
         const successors = successorsByTaskId.get(taskId);
         return !successors || successors.size === 0;
     });
-    details[projectEndNodeId] = buildProjectEndDetails(project, terminalTasks);
+    details[projectEndNodeId] = buildProjectEndDetails(project, terminalTasks, totalProjectHours);
 
     for (const task of tasks) {
         const taskId = task?.task_id;
@@ -901,17 +912,31 @@ function buildTaskManagementTemplate(entry, data, options = {}) {
         const predecessorNames = predecessorPairs.map(p => p.name);
         const cycleNote = cycleNodes.has(taskId) ? '<strong>Warning:</strong> dependency cycle detected.' : null;
 
-        // Render dependency names as clickable buttons with priority color so the popup can focus the target node
+        // Render dependency names as clickable task-node-btn buttons
         const depsHtml = predecessorPairs.length
             ? `<strong>Depends on:</strong> ${predecessorPairs.map(p => {
                 const depTask = taskById.get(p.id);
                 const depPriority = normalizePriority(depTask?.priority);
                 const depStatus = (depTask?.status || 'Not Started').toLowerCase().replace(/\s+/g, '-');
                 const depHours = Number(depTask?.estimated_hours) || 0;
-                const depHoursLabel = depHours ? ` <span class="dep-hours">${depHours}h</span>` : '';
-                return `<button class="dep-link" data-dep-node-id="${p.nodeId}" data-dep-priority="${depPriority}" data-dep-status="${depStatus}" data-dep-hours="${depHours}" title="Go to: ${p.name} (${depPriority}, ${depHours}h)">${p.name}${depHoursLabel}</button>`;
+                const depHoursLabel = depHours ? ` <span class="tn-hours">${depHours}h</span>` : '';
+                return `<button class="task-node-btn" data-node-id="${p.nodeId}" data-priority="${depPriority}" data-status="${depStatus}" data-hours="${depHours}" title="Go to: ${p.name} (${depPriority}, ${depHours}h)"><span class="tn-name">${p.name}</span>${depHoursLabel}</button>`;
               }).join(' ')}`
             : '<strong>Depends on:</strong> none';
+
+        // Render successor names as clickable task-node-btn buttons ("Leads to")
+        const successorIds = successorsByTaskId.get(taskId);
+        const leadsToHtml = successorIds && successorIds.size > 0
+            ? `<strong>Leads to:</strong> ${[...successorIds].map(succId => {
+                const succTask = taskById.get(succId);
+                const succPriority = normalizePriority(succTask?.priority);
+                const succStatus = (succTask?.status || 'Not Started').toLowerCase().replace(/\s+/g, '-');
+                const succHours = Number(succTask?.estimated_hours) || 0;
+                const succHoursLabel = succHours ? ` <span class="tn-hours">${succHours}h</span>` : '';
+                const succName = escapeHtml(succTask?.task_name || String(succId));
+                return `<button class="task-node-btn" data-node-id="${idToNodeId(succId)}" data-priority="${succPriority}" data-status="${succStatus}" data-hours="${succHours}" title="Go to: ${succTask?.task_name || succId} (${succPriority}, ${succHours}h)"><span class="tn-name">${succName}</span>${succHoursLabel}</button>`;
+              }).join(' ')}`
+            : null;
 
         // Build acceptance criteria dropdown
         const ac = Array.isArray(task.acceptance_criteria) ? task.acceptance_criteria.filter(Boolean) : [];
@@ -929,29 +954,38 @@ function buildTaskManagementTemplate(entry, data, options = {}) {
                 estimated_hours: subtask.estimated_hours || (typeof task.estimated_hours === 'number' ? Math.round(task.estimated_hours / Math.max(rawSubtasks.length, 1)) : 0)
             }));
         const subtasksDetailHtml = enrichedSubtasks.length > 0
-            ? `<details class="popup-dropdown"><summary><strong>Sub-tasks</strong> <span class="popup-dropdown-count">(${enrichedSubtasks.length})</span></summary><div class="subtask-node-list">${enrichedSubtasks.map(s => {
+            ? `<details class="popup-dropdown"><summary><strong>Sub-tasks</strong> <span class="popup-dropdown-count">(${enrichedSubtasks.length})</span></summary><div class="task-node-list">${enrichedSubtasks.map(s => {
                 const sName = escapeHtml(String(s.task_name));
                 const sPriority = normalizePriority(s.priority);
                 const sStatusNorm = (s.status || 'Not Started').toLowerCase().replace(/\s+/g, '-');
                 const sHours = s.estimated_hours ? `${s.estimated_hours}h` : '';
                 const titleBits = [s.description, s.category_name ? `Category: ${s.category_name}` : '', s.due_date ? `Due: ${s.due_date}` : ''].filter(Boolean);
                 const titleAttr = titleBits.length > 0 ? ` title="${escapeHtml(titleBits.join(' | '))}"` : '';
-                return `<button class="subtask-node-btn" data-st-priority="${sPriority}" data-st-status="${sStatusNorm}"${titleAttr}><span class="st-name">${sName}</span>${sHours ? `<span class="st-hours">${sHours}</span>` : ''}</button>`;
+                return `<button class="task-node-btn" data-priority="${sPriority}" data-status="${sStatusNorm}"${titleAttr}><span class="tn-name">${sName}</span>${sHours ? `<span class="tn-hours">${sHours}</span>` : ''}</button>`;
             }).join('')}</div></details>`
             : null;
 
         const supplementalDetailItems = buildTaskSupplementalDetailItems(task);
 
+        // Sum estimated hours across task + inline subtasks for display
+        const taskOwnHours = Number(task.estimated_hours) || 0;
+        const subtaskHoursSum = enrichedSubtasks.reduce((s, st) => s + (Number(st.estimated_hours) || 0), 0);
+        const totalTaskHours = taskOwnHours + subtaskHoursSum;
+        const hoursLabel = subtaskHoursSum > 0
+            ? `${taskOwnHours} + ${subtaskHoursSum} subtask = ${totalTaskHours}h total`
+            : `${taskOwnHours}`;
+
         details[taskNodeId] = {
             title: task.task_name || `Task ${taskId}`,
             items: [
                 `<strong>Priority:</strong> ${normalizedPriority} | <strong>Status:</strong> ${task.status || 'Not Started'}`,
-                `<strong>Estimated hours:</strong> ${Number(task.estimated_hours) || 0}`,
+                `<strong>Estimated hours:</strong> ${hoursLabel}`,
                 `<strong>Dependency layer:</strong> ${layer}`,
                 task.category_name ? `<strong>Category:</strong> ${task.category_name}` : null,
                 ...supplementalDetailItems,
                 task.description ? `<strong>Description:</strong> ${task.description}` : null,
                 depsHtml,
+                leadsToHtml,
                 cycleNote,
                 acHtml,
                 subtasksDetailHtml

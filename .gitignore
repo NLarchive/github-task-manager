@@ -5,7 +5,8 @@ digital-income-tasks
 # Dependencies
 node_modules/
 package-lock.json
-
+extract_project_spec
+.venv
 # Token files - NEVER COMMIT THESE
 public/config/github-token.local.js
 public/config/github-token.js
