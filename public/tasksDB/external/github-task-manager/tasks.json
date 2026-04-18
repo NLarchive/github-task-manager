@@ -5,7 +5,15 @@
     "start_date": "2025-12-08",
     "end_date": "2026-01-31",
     "status": "In Progress",
-    "budget": 15000
+    "budget": 15000,
+    "graph_end": {
+      "mode": "loop",
+      "summary": "This graph closes the current delivery scope, then returns the system to its ongoing maintenance, validation, and contributor-support cycle.",
+      "next_step": "After the terminal delivery tasks complete, shift into release health checks, issue triage, contributor feedback, and the next planning iteration.",
+      "success_signal": "Terminal tasks are shipped, documentation is current, and the live system can be monitored without reopening the same delivery chain.",
+      "owner": "Maintainers / project leads",
+      "maintenance_rhythm": "Review deployment health, validation scripts, and incoming issues each iteration before opening the next delivery graph."
+    }
   },
   "categories": [
     {
@@ -127,7 +135,7 @@
       "start_date": "2025-12-10",
       "end_date": "2025-12-11",
       "priority": "Critical",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 4,
       "actual_hours": 4,
@@ -168,10 +176,16 @@
       "task_id": 2,
       "task_name": "Update Task Form with All Required Fields",
       "description": "Add form inputs for all non-automatable task fields from template schema. Include fields for: task_name, description, status, priority, start_date, end_date, estimated_hours, category_name, tags, assigned_workers, dependencies, parent_task_id, is_critical_path. Auto-populate task_id, created_date, and creator_id.",
+      "acceptance_criteria": [
+        "All schema fields have corresponding form inputs",
+        "task_id, created_date, creator_id are auto-populated",
+        "Validation errors show before submission",
+        "Form resets after successful creation"
+      ],
       "start_date": "2025-12-10",
       "end_date": "2025-12-12",
       "priority": "Critical",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 8,
       "actual_hours": 7,
@@ -193,6 +207,55 @@
       "creator_id": "system@example.com",
       "created_date": "2025-12-10T09:00:00Z",
       "completed_date": null,
+      "subtasks": [
+        {
+          "task_name": "Add text inputs for task_name and description",
+          "status": "Done",
+          "estimated_hours": 1,
+          "priority": "Critical"
+        },
+        {
+          "task_name": "Add dropdowns for status, priority, category",
+          "status": "Done",
+          "estimated_hours": 2,
+          "priority": "High"
+        },
+        {
+          "task_name": "Add date pickers for start_date and end_date",
+          "status": "Done",
+          "estimated_hours": 1,
+          "priority": "High"
+        },
+        {
+          "task_name": "Add tags input with chip UI",
+          "status": "Done",
+          "estimated_hours": 2,
+          "priority": "Medium"
+        },
+        {
+          "task_name": "Add dependency selector with type dropdown",
+          "status": "Done",
+          "estimated_hours": 2,
+          "priority": "High",
+          "subtasks": [
+            {
+              "task_name": "Build predecessor task picker",
+              "status": "Done",
+              "estimated_hours": 1
+            },
+            {
+              "task_name": "Add dependency type selector (FS/SS/FF/SF)",
+              "status": "Done",
+              "estimated_hours": 0.5
+            },
+            {
+              "task_name": "Add lag_days input",
+              "status": "Done",
+              "estimated_hours": 0.5
+            }
+          ]
+        }
+      ],
       "comments": [],
       "attachments": [],
       "dependencies": [
@@ -210,7 +273,7 @@
       "start_date": "2025-12-11",
       "end_date": "2025-12-13",
       "priority": "High",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 6,
       "actual_hours": 5,
@@ -249,7 +312,7 @@
       "start_date": "2025-12-13",
       "end_date": "2025-12-15",
       "priority": "High",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 8,
       "actual_hours": 8,
@@ -285,10 +348,17 @@
       "task_id": 5,
       "task_name": "Implement Task Dependencies & Critical Path",
       "description": "Add UI controls for defining task dependencies with types (FS, SS, FF, SF) and lag_days. Implement critical path visualization. Validate dependency chains to prevent circular dependencies.",
+      "acceptance_criteria": [
+        "Dependency type selector supports FS, SS, FF, SF",
+        "Lag days field accepts positive integers",
+        "Circular dependency detection prevents invalid chains",
+        "Critical path highlighted visually on the graph",
+        "Dependency links render correctly between nodes"
+      ],
       "start_date": "2025-12-14",
       "end_date": "2025-12-17",
       "priority": "High",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 10,
       "actual_hours": 10,
@@ -310,6 +380,38 @@
       "creator_id": "system@example.com",
       "created_date": "2025-12-10T09:00:00Z",
       "completed_date": "2025-12-11T16:00:00Z",
+      "subtasks": [
+        {
+          "task_name": "Build dependency type UI (FS/SS/FF/SF)",
+          "status": "Done",
+          "estimated_hours": 3,
+          "priority": "High"
+        },
+        {
+          "task_name": "Implement circular dependency validator",
+          "status": "Done",
+          "estimated_hours": 3,
+          "priority": "High",
+          "subtasks": [
+            {
+              "task_name": "Build task dependency graph traversal",
+              "status": "Done",
+              "estimated_hours": 1.5
+            },
+            {
+              "task_name": "Add cycle detection algorithm",
+              "status": "Done",
+              "estimated_hours": 1.5
+            }
+          ]
+        },
+        {
+          "task_name": "Implement critical path highlighting",
+          "status": "Done",
+          "estimated_hours": 4,
+          "priority": "High"
+        }
+      ],
       "comments": [],
       "attachments": [],
       "dependencies": [
@@ -327,7 +429,7 @@
       "start_date": "2025-12-15",
       "end_date": "2025-12-18",
       "priority": "High",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 12,
       "actual_hours": 12,
@@ -366,7 +468,7 @@
       "start_date": "2025-12-16",
       "end_date": "2025-12-19",
       "priority": "High",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 8,
       "actual_hours": 6,
@@ -452,10 +554,16 @@
       "task_id": 9,
       "task_name": "Deploy to GitHub Pages",
       "description": "Setup GitHub Actions workflow to deploy the task manager to GitHub Pages. Configure environment variables for GitHub token. Test public access and collaboration features on live deployment.",
+      "acceptance_criteria": [
+        "GitHub Actions workflow triggers on push to main",
+        "Token injected from repo secrets at deploy time",
+        "Public URL serves the app correctly",
+        "All CRUD operations work on live deployment"
+      ],
       "start_date": "2025-12-20",
       "end_date": "2025-12-23",
       "priority": "Critical",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 6,
       "actual_hours": 5,
@@ -477,6 +585,43 @@
       "creator_id": "system@example.com",
       "created_date": "2025-12-10T09:00:00Z",
       "completed_date": "2025-12-23T18:00:00Z",
+      "subtasks": [
+        {
+          "task_name": "Create deploy.yml GitHub Actions workflow",
+          "status": "Done",
+          "estimated_hours": 2,
+          "priority": "Critical"
+        },
+        {
+          "task_name": "Configure environment secrets injection",
+          "status": "Done",
+          "estimated_hours": 1,
+          "priority": "High"
+        },
+        {
+          "task_name": "Smoke test live deployment",
+          "status": "Done",
+          "estimated_hours": 2,
+          "priority": "High",
+          "subtasks": [
+            {
+              "task_name": "Verify task list renders",
+              "status": "Done",
+              "estimated_hours": 0.5
+            },
+            {
+              "task_name": "Verify CRUD operations",
+              "status": "Done",
+              "estimated_hours": 1
+            },
+            {
+              "task_name": "Verify password protection gate",
+              "status": "Done",
+              "estimated_hours": 0.5
+            }
+          ]
+        }
+      ],
       "comments": [],
       "attachments": [],
       "dependencies": [
@@ -539,7 +684,7 @@
       "start_date": "2025-12-11",
       "end_date": "2025-12-11",
       "priority": "High",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 3,
       "actual_hours": 3,
@@ -572,7 +717,7 @@
       "start_date": "2025-12-11",
       "end_date": "2025-12-12",
       "priority": "Medium",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 1,
       "actual_hours": 1,
@@ -604,7 +749,7 @@
       "start_date": "2025-12-12",
       "end_date": "2025-12-13",
       "priority": "High",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 2,
       "actual_hours": 2,
@@ -653,7 +798,7 @@
       "start_date": "2025-12-11",
       "end_date": "2025-12-11",
       "priority": "Medium",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 1,
       "actual_hours": 1,
@@ -685,7 +830,7 @@
       "start_date": "2025-12-11",
       "end_date": "2025-12-11",
       "priority": "Medium",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 2,
       "actual_hours": 2,
@@ -714,10 +859,16 @@
       "task_id": 16,
       "task_name": "Add Password Protection for Modifications",
       "description": "Implement a simple password gate for all modification actions (create, edit, delete tasks). Users can view tasks and dashboard freely, but must enter a shared password before making changes. GitHub Pages uses a repo Secret injected at deploy time; local dev is unlocked by default.",
+      "acceptance_criteria": [
+        "View-only operations work without password",
+        "Create/edit/delete blocked without correct password",
+        "Password persists in sessionStorage",
+        "Local dev unlocked by default"
+      ],
       "start_date": "2025-12-11",
       "end_date": "2025-12-12",
       "priority": "High",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 3,
       "actual_hours": 3,
@@ -739,6 +890,32 @@
       "creator_id": "system@example.com",
       "created_date": "2025-12-11T21:00:00Z",
       "completed_date": "2025-12-12T12:00:00Z",
+      "subtasks": [
+        {
+          "task_name": "Create password prompt modal",
+          "status": "Done",
+          "estimated_hours": 1,
+          "priority": "High"
+        },
+        {
+          "task_name": "Wire password check to all mutation actions",
+          "status": "Done",
+          "estimated_hours": 1,
+          "priority": "High"
+        },
+        {
+          "task_name": "Add sessionStorage persistence",
+          "status": "Done",
+          "estimated_hours": 0.5,
+          "priority": "Medium"
+        },
+        {
+          "task_name": "Add config toggle for local dev bypass",
+          "status": "Done",
+          "estimated_hours": 0.5,
+          "priority": "Medium"
+        }
+      ],
       "comments": [],
       "attachments": [],
       "dependencies": []
@@ -750,7 +927,7 @@
       "start_date": "2025-12-12",
       "end_date": "2025-12-13",
       "priority": "High",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 6,
       "actual_hours": 6,
@@ -790,7 +967,7 @@
       "start_date": "2025-12-13",
       "end_date": "2025-12-15",
       "priority": "High",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 8,
       "actual_hours": 8,
@@ -830,7 +1007,7 @@
       "start_date": "2025-12-13",
       "end_date": "2025-12-14",
       "priority": "High",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 4,
       "actual_hours": 4,
@@ -866,10 +1043,16 @@
       "task_id": 20,
       "task_name": "Implement Commit Format Validation CI",
       "description": "Add automated CI checks to validate all commits match the TaskDB|action|id|name|summary format. Create tools/scripts/validate-commit-format.js that parses recent commits and enforces the structured subject format. Add GitHub Actions workflow to run on PRs and nightly. Report compliance metrics.",
+      "acceptance_criteria": [
+        "validate-commit-format.js parses git log output",
+        "Non-compliant commits flagged with line number",
+        "GitHub Actions workflow runs on PR and nightly",
+        "Compliance percentage reported in CI output"
+      ],
       "start_date": "2025-12-15",
       "end_date": "2025-12-17",
       "priority": "High",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 6,
       "actual_hours": 6,
@@ -892,6 +1075,26 @@
       "creator_id": "system@example.com",
       "created_date": "2025-12-14T16:00:00Z",
       "completed_date": "2025-12-17T18:00:00Z",
+      "subtasks": [
+        {
+          "task_name": "Build commit message parser",
+          "status": "Done",
+          "estimated_hours": 2,
+          "priority": "High"
+        },
+        {
+          "task_name": "Create GitHub Actions workflow",
+          "status": "Done",
+          "estimated_hours": 2,
+          "priority": "High"
+        },
+        {
+          "task_name": "Add compliance metrics reporter",
+          "status": "Done",
+          "estimated_hours": 2,
+          "priority": "Medium"
+        }
+      ],
       "comments": [],
       "attachments": [],
       "dependencies": [
@@ -910,7 +1113,7 @@
       "start_date": "2025-12-17",
       "end_date": "2025-12-18",
       "priority": "High",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 4,
       "actual_hours": 4,
@@ -951,7 +1154,7 @@
       "start_date": "2025-12-15",
       "end_date": "2025-12-15",
       "priority": "Medium",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 2,
       "actual_hours": 2,
@@ -985,7 +1188,7 @@
       "start_date": "2025-12-15",
       "end_date": "2025-12-15",
       "priority": "Medium",
-      "status": "Completed",
+      "status": "Done",
       "progress_percentage": 100,
       "estimated_hours": 2,
       "actual_hours": 2,
@@ -1010,6 +1213,493 @@
           "lag_days": 0
         }
       ]
+    },
+    {
+      "task_id": 24,
+      "task_name": "Node Visual States (Completed=Grey, In-Progress=Pulse)",
+      "description": "Update graph node rendering so nodes reflect task status: Completed tasks render greyed/desaturated with reduced opacity; In Progress tasks show a pulsing/irradiated aura (CSS animation + SVG glow). Not Started tasks remain static. Apply changes to the graph-display component and list nodes, add CSS variables and a feature toggle. Include unit and E2E tests to verify visual states.",
+      "acceptance_criteria": [
+        "Done tasks render greyed/desaturated",
+        "In Progress tasks show pulsing aura animation",
+        "Not Started tasks remain static default styling",
+        "CSS variables allow customizing visual states",
+        "Feature toggle enables/disables status rendering",
+        "E2E test verifies each visual state"
+      ],
+      "start_date": "2025-12-17",
+      "end_date": "2025-12-18",
+      "priority": "High",
+      "status": "Done",
+      "progress_percentage": 100,
+      "estimated_hours": 6,
+      "actual_hours": 6,
+      "is_critical_path": false,
+      "tags": [
+        "frontend",
+        "visualization",
+        "ux",
+        "graph-display"
+      ],
+      "category_name": "Frontend Development",
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer"
+        }
+      ],
+      "parent_task_id": null,
+      "creator_id": "system@example.com",
+      "created_date": "2025-12-17T09:00:00Z",
+      "completed_date": "2025-12-18T18:00:00Z",
+      "subtasks": [
+        {
+          "task_name": "Add CSS classes for Done/In-Progress/Not-Started states",
+          "status": "Done",
+          "estimated_hours": 2,
+          "priority": "High"
+        },
+        {
+          "task_name": "Implement pulse animation for In-Progress nodes",
+          "status": "Done",
+          "estimated_hours": 1.5,
+          "priority": "High",
+          "subtasks": [
+            {
+              "task_name": "Create CSS keyframe animation",
+              "status": "Done",
+              "estimated_hours": 0.5
+            },
+            {
+              "task_name": "Add SVG glow filter",
+              "status": "Done",
+              "estimated_hours": 0.5
+            },
+            {
+              "task_name": "Wire animation to status class",
+              "status": "Done",
+              "estimated_hours": 0.5
+            }
+          ]
+        },
+        {
+          "task_name": "Implement greyed/desaturated style for Done nodes",
+          "status": "Done",
+          "estimated_hours": 1,
+          "priority": "High"
+        },
+        {
+          "task_name": "Write E2E tests for visual states",
+          "status": "Done",
+          "estimated_hours": 1.5,
+          "priority": "Medium"
+        }
+      ],
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 17,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ]
+    },
+    {
+      "task_id": 25,
+      "task_name": "Graph Task Editing UI (Edit from Graph Modal)",
+      "description": "Add an Edit button to graph node modals to open a pre-populated task edit form. Edits should respect the password protection gate and save back to the runtime store. Update `graph-display` to support in-place editing flow, add unit tests for modal behavior, and add Playwright E2E tests to verify edit/update persistence and UI gating.",
+      "start_date": "2025-12-17",
+      "end_date": "2025-12-19",
+      "priority": "High",
+      "status": "In Progress",
+      "progress_percentage": 0,
+      "estimated_hours": 8,
+      "actual_hours": 0,
+      "is_critical_path": false,
+      "tags": [
+        "frontend",
+        "graph-display",
+        "ux",
+        "edit"
+      ],
+      "category_name": "Frontend Development",
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer"
+        }
+      ],
+      "parent_task_id": null,
+      "creator_id": "system@example.com",
+      "created_date": "2025-12-17T10:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 24,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ]
+    },
+    {
+      "task_id": 26,
+      "task_name": "create and mcp endpoint",
+      "description": "Create a new API endpoint /api/create-mcp that accepts a POST request with a list of task IDs and marks them as critical path tasks (is_critical_path=true). Validate input, update tasks.json, and return success/failure response.",
+      "start_date": "2025-12-18",
+      "end_date": "2025-12-19",
+      "priority": "High",
+      "status": "In Progress",
+      "progress_percentage": 0,
+      "estimated_hours": 5,
+      "actual_hours": 0,
+      "is_critical_path": false,
+      "tags": [
+        "backend",
+        "api",
+        "critical-path"
+      ],
+      "category_name": "Backend Development",
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "",
+          "role": "Full Stack Developer"
+        }
+      ],
+      "parent_task_id": null,
+      "creator_id": "",
+      "created_date": "2025-12-18T09:00:00Z",
+      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 21,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ]
+    },
+    {
+      "task_id": 27,
+      "task_name": "Popup Dropdown Menus for Acceptance Criteria & Subtasks",
+      "description": "Add collapsible <details> dropdown sections inside node popup modals to display acceptance_criteria and subtasks arrays from tasks.json. Each dropdown shows a count badge, styled with .popup-dropdown component. Acceptance criteria render as bullet lists; subtasks show name, status, and estimated hours.",
+      "start_date": "2026-04-12",
+      "end_date": "2026-04-12",
+      "priority": "Medium",
+      "status": "Done",
+      "progress_percentage": 100,
+      "estimated_hours": 3,
+      "actual_hours": 2,
+      "is_critical_path": false,
+      "tags": [
+        "frontend",
+        "graph-display",
+        "ux",
+        "popup"
+      ],
+      "category_name": "Frontend Development",
+      "assigned_workers": [
+        {
+          "name": "AI Copilot",
+          "email": "ai@example.com",
+          "role": "Developer"
+        }
+      ],
+      "acceptance_criteria": [
+        "Popup shows acceptance_criteria as collapsible dropdown with count badge",
+        "Popup shows subtasks as collapsible dropdown with name/status/hours per subtask",
+        "Dropdowns use <details class='popup-dropdown'> component",
+        "Empty arrays produce no dropdown section"
+      ],
+      "parent_task_id": null,
+      "creator_id": "ai@example.com",
+      "created_date": "2026-04-12T10:00:00Z",
+      "completed_date": "2026-04-12T12:00:00Z",
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 24,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "subtasks": [
+        {
+          "name": "Add acceptance_criteria dropdown HTML to buildTaskManagementTemplate",
+          "status": "Done",
+          "estimated_hours": 1
+        },
+        {
+          "name": "Add subtasks dropdown HTML to buildTaskManagementTemplate",
+          "status": "Done",
+          "estimated_hours": 1
+        },
+        {
+          "name": "Create .popup-dropdown CSS component",
+          "status": "Done",
+          "estimated_hours": 0.5
+        },
+        {
+          "name": "Add unit tests for dropdown rendering",
+          "status": "Done",
+          "estimated_hours": 0.5
+        }
+      ]
+    },
+    {
+      "task_id": 28,
+      "task_name": "Inline Subtask Drill-Down Navigation with Parent & Successor Nav",
+      "description": "Enable recursive drill-down into inline subtasks directly from node popup. Clicking '📂 View Subtasks' on a task that has subtasks[] in tasks.json builds a temporary subgraph from those subtasks. The subgraph start node shows a '↩ Parent Task Name' button that navigates back to the parent graph and opens the parent task modal. The subgraph end node shows 'Next tasks in parent graph' buttons for successor tasks. Breadcrumbs track navigation depth. Supports recursive nesting (subtasks within subtasks).",
+      "start_date": "2026-04-12",
+      "end_date": "2026-04-13",
+      "priority": "High",
+      "status": "Done",
+      "progress_percentage": 100,
+      "estimated_hours": 8,
+      "actual_hours": 6,
+      "is_critical_path": true,
+      "tags": [
+        "frontend",
+        "graph-display",
+        "navigation",
+        "subtasks",
+        "ux"
+      ],
+      "category_name": "Frontend Development",
+      "assigned_workers": [
+        {
+          "name": "AI Copilot",
+          "email": "ai@example.com",
+          "role": "Developer"
+        }
+      ],
+      "acceptance_criteria": [
+        "Clicking View Subtasks on a task with inline subtasks builds a subgraph and renders it in place",
+        "Breadcrumbs show the navigation path to the current subgraph level",
+        "Start node of subgraph has a back-to-parent button that navigates up and opens parent task modal",
+        "End node of subgraph shows successor task buttons that navigate up and open successor modal",
+        "Recursive drill-down works (subtask of subtask of subtask)",
+        "No broken 'Task Sub-graphs' sidebar folder or virtual module entries",
+        "resolveTaskSubtaskTargets prioritizes inline subtasks over explicit paths"
+      ],
+      "parent_task_id": null,
+      "creator_id": "ai@example.com",
+      "created_date": "2026-04-12T14:00:00Z",
+      "completed_date": "2026-04-13T10:00:00Z",
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 27,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "subtasks": [
+        {
+          "name": "Build buildInlineSubgraphData to convert subtasks into temporary graph data",
+          "status": "Done",
+          "estimated_hours": 2
+        },
+        {
+          "name": "Build resolveTaskSubtaskTargets with priority: inline > explicit > none",
+          "status": "Done",
+          "estimated_hours": 1
+        },
+        {
+          "name": "Add parent context to subtaskStack entries (parentTaskNodeId, parentSuccessors)",
+          "status": "Done",
+          "estimated_hours": 1
+        },
+        {
+          "name": "Implement start-node parent-nav button with openNodeModal after navigateToDepth",
+          "status": "Done",
+          "estimated_hours": 1
+        },
+        {
+          "name": "Implement end-node successor-nav buttons",
+          "status": "Done",
+          "estimated_hours": 1
+        },
+        {
+          "name": "Remove broken virtual sidebar modules and Task Sub-graphs folder",
+          "status": "Done",
+          "estimated_hours": 0.5
+        },
+        {
+          "name": "Add Playwright E2E tests for recursive drill-down and parent/sibling nav",
+          "status": "Done",
+          "estimated_hours": 1.5
+        }
+      ]
+    },
+    {
+      "task_id": 29,
+      "task_name": "tasks.json Format Validation Test Suite",
+      "description": "Create a comprehensive test suite that walks all public/tasksDB/ project folders recursively, discovers every tasks.json file, and validates format correctness: valid JSON, project metadata, task required fields, enum values, dependency integrity, subtask/acceptance_criteria array format, date formats, and duplicate detection. Provides actionable feedback for any format issues found.",
+      "start_date": "2026-04-13",
+      "end_date": "2026-04-13",
+      "priority": "Medium",
+      "status": "Done",
+      "progress_percentage": 100,
+      "estimated_hours": 3,
+      "actual_hours": 2,
+      "is_critical_path": false,
+      "tags": [
+        "testing",
+        "validation",
+        "schema",
+        "quality"
+      ],
+      "category_name": "Testing",
+      "assigned_workers": [
+        {
+          "name": "AI Copilot",
+          "email": "ai@example.com",
+          "role": "Developer"
+        }
+      ],
+      "acceptance_criteria": [
+        "Test suite discovers all tasks.json files under public/tasksDB/ recursively",
+        "Validates JSON parsing, project metadata, task structure, enums, dates, dependencies",
+        "Detects duplicate task_ids and task_names",
+        "Validates subtasks[] and acceptance_criteria[] array format",
+        "Tests run on github-task-manager and test-tasks projects",
+        "Provides clear error messages with file path and field location"
+      ],
+      "parent_task_id": null,
+      "creator_id": "ai@example.com",
+      "created_date": "2026-04-13T10:00:00Z",
+      "completed_date": "2026-04-13T12:00:00Z",
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 28,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "subtasks": [
+        {
+          "name": "Implement recursive tasks.json file discovery",
+          "status": "Done",
+          "estimated_hours": 0.5
+        },
+        {
+          "name": "Implement validateTasksJson with all field checks",
+          "status": "Done",
+          "estimated_hours": 1
+        },
+        {
+          "name": "Add per-project dynamic test generation",
+          "status": "Done",
+          "estimated_hours": 0.5
+        },
+        {
+          "name": "Add graph-builder integration test (subtask targets link correctly)",
+          "status": "Done",
+          "estimated_hours": 1
+        }
+      ]
+    },
+    {
+      "task_id": 30,
+      "task_name": "Priority-Colored Dependency & Subtask Buttons with Status Animations",
+      "description": "Enhance popup modal rendering so Depends on buttons and Sub-task buttons display with the same priority color as their referenced nodes. In-progress items pulse/blink, done items are faded with line-through, not-started remain static. Sub-task buttons are rendered as node-like pill elements with hours badge. Start node details replaced hardcoded graph legend with dynamic project summary (task count, status, timeline). Category-based sidebar modules auto-generated for flat projects without navigation.modules config.",
+      "start_date": "2026-04-13",
+      "end_date": "2026-04-13",
+      "priority": "High",
+      "status": "Done",
+      "progress_percentage": 100,
+      "estimated_hours": 5,
+      "actual_hours": 4,
+      "is_critical_path": true,
+      "tags": [
+        "ui",
+        "graph",
+        "popup",
+        "colors",
+        "animation",
+        "sidebar"
+      ],
+      "category_name": "Frontend Development",
+      "assigned_workers": [
+        {
+          "name": "AI Copilot",
+          "email": "ai@example.com",
+          "role": "Developer"
+        }
+      ],
+      "acceptance_criteria": [
+        "Depends on buttons show the priority color of the referenced task node",
+        "Depends on buttons for done tasks are faded with line-through",
+        "Depends on buttons for in-progress tasks pulse with box-shadow animation",
+        "Sub-tasks rendered as colored pill buttons with priority color background",
+        "Sub-tasks show hours badge when available",
+        "Sub-task buttons pulse if in-progress, fade if done",
+        "Start node popup shows project description, task count, status, timeline instead of hardcoded graph legend",
+        "Flat projects without navigation.modules get category-based sidebar entries",
+        "Category sidebar items highlight matching tasks and dim non-matching ones",
+        "Subtask data enriched from parent: priority, status, category, assigned worker inherited when not set"
+      ],
+      "parent_task_id": null,
+      "creator_id": "ai@example.com",
+      "created_date": "2026-04-13T13:00:00Z",
+      "completed_date": "2026-04-13T17:00:00Z",
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 29,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "subtasks": [
+        {
+          "name": "Replace hardcoded start node graph legend with dynamic project summary",
+          "status": "Done",
+          "estimated_hours": 0.5
+        },
+        {
+          "name": "Add priority/status data attributes to dep-link buttons in graph-data.js",
+          "status": "Done",
+          "estimated_hours": 0.5
+        },
+        {
+          "name": "Render subtasks as node-like pill buttons with color/status/hours",
+          "status": "Done",
+          "estimated_hours": 1
+        },
+        {
+          "name": "Enrich subtask data from parent task fields",
+          "status": "Done",
+          "estimated_hours": 0.5
+        },
+        {
+          "name": "Apply priority colors and status CSS classes in showNodeDetails",
+          "status": "Done",
+          "estimated_hours": 1
+        },
+        {
+          "name": "Generate category-based sidebar modules for flat projects",
+          "status": "Done",
+          "estimated_hours": 0.5
+        },
+        {
+          "name": "Add CSS for dep-status-done, dep-status-in-progress, subtask-node-btn, btn-pulse, category-dimmed",
+          "status": "Done",
+          "estimated_hours": 1
+        }
+      ]
     }
+
   ]
 }

@@ -50,7 +50,7 @@ export function getStepsForTemplate(templateId, nodes = [], details = {}, meta =
 
     if (dependencyGraphTask) steps.push(nodeStep(dependencyGraphTask.id, dependencyGraphTask.label, 'This task is about rendering the dependency graph (UI).', { clickNode: true }));
 
-    if (end) steps.push(nodeStep(end.id, `Project Milestone: ${end.label}`, 'Terminal tasks flow into this milestone.'));
+    if (end) steps.push(nodeStep(end.id, `Project Milestone: ${end.label}`, 'Open this milestone to see which terminal tasks converge here and whether the graph truly finishes, hands off, or loops into ongoing maintenance.'));
 
     steps.push({ title: 'Explore & Filter', content: 'Use the menu to search, filter by priority, or export views.', target: '#menu-panel', position: 'bottom-left' });
 

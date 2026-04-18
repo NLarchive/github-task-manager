@@ -25,7 +25,26 @@
       "type": "object",
       "required": ["project", "tasks"],
       "properties": {
-        "project": { "type": "object" },
+        "project": {
+          "type": "object",
+          "properties": {
+            "graph_end": {
+              "type": "object",
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": ["milestone", "handoff", "loop", "checkpoint"]
+                },
+                "summary": { "type": "string" },
+                "next_step": { "type": "string" },
+                "next_graph": { "type": "string" },
+                "success_signal": { "type": "string" },
+                "owner": { "type": "string" },
+                "maintenance_rhythm": { "type": "string" }
+              }
+            }
+          }
+        },
         "tasks": {
           "type": "array",
           "items": {

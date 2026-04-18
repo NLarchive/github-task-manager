@@ -31,9 +31,18 @@ function sanitizeProjectId(s) {
 }
 
 function loadProjectTasks(projectId) {
-  const tasksPath = path.join(__dirname, '../../public/tasksDB', projectId, 'tasks.json');
-  const content = fs.readFileSync(tasksPath, 'utf8');
-  return { tasksPath, data: JSON.parse(content) };
+  const tasksDbRoot = path.join(__dirname, '../../public/tasksDB');
+  // Auto-discover scope
+  for (const scope of ['external', 'local', '']) {
+    const tasksPath = scope
+      ? path.join(tasksDbRoot, scope, projectId, 'tasks.json')
+      : path.join(tasksDbRoot, projectId, 'tasks.json');
+    if (fs.existsSync(tasksPath)) {
+      const content = fs.readFileSync(tasksPath, 'utf8');
+      return { tasksPath, data: JSON.parse(content) };
+    }
+  }
+  throw new Error(`tasks.json not found for project "${projectId}" in external/, local/, or root.`);
 }
 
 function isNonEmptyString(v) {

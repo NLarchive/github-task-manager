@@ -19,7 +19,7 @@
 			"worker_name": "Public User",
 			"category": "Examples",
 			"description": "Learn what makes a graph: nodes (things) connected by edges (relationships). Explore the 5 core concepts: nodes, edges, direction, weight, and labels. Use the graph UI to click on each concept node and understand how they relate.",
-			"status": "Completed",
+			"status": "Done",
 			"date_created": "2025-12-16",
 			"date_updated": "2025-12-16",
 			"priority": "High"

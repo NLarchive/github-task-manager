@@ -21,15 +21,17 @@ const ALLOWED_ORIGINS = [
 ];
 
 // Only allow writes to these paths (regex patterns)
-// Supports both repo layouts:
-// - github-task-manager: public/tasksDB/<projectId>/...
-// - ai-career-roadmap: tasksDB/<projectId>/...
+// Supports both current scoped layouts and legacy one-level layouts:
+// - public/tasksDB/external/<projectId>/...
+// - public/tasksDB/local/<projectId>/...
+// - public/tasksDB/<projectId>/...           (legacy)
+// - tasksDB/<projectId>/...                  (legacy)
 const ALLOWED_PATHS = [
-  /^(?:public\/)?tasksDB\/[a-zA-Z0-9_-]+\/tasks\.json$/,
-  /^(?:public\/)?tasksDB\/[a-zA-Z0-9_-]+\/tasks\.csv$/,
-  /^(?:public\/)?tasksDB\/[a-zA-Z0-9_-]+\/state\/[a-zA-Z0-9_-]+\.json$/,
-  /^(?:public\/)?tasksDB\/[a-zA-Z0-9_-]+\/history\/[a-zA-Z0-9_-]+\.json$/,
-  /^(?:public\/)?tasksDB\/[a-zA-Z0-9_-]+\/history\/[a-zA-Z0-9_-]+\.ndjson$/
+  /^(?:public\/)?tasksDB\/(?:(?:external|local)\/)?[a-zA-Z0-9_-]+\/tasks\.json$/,
+  /^(?:public\/)?tasksDB\/(?:(?:external|local)\/)?[a-zA-Z0-9_-]+\/tasks\.csv$/,
+  /^(?:public\/)?tasksDB\/(?:(?:external|local)\/)?[a-zA-Z0-9_-]+\/state\/[a-zA-Z0-9_-]+\.json$/,
+  /^(?:public\/)?tasksDB\/(?:(?:external|local)\/)?[a-zA-Z0-9_-]+\/history\/[a-zA-Z0-9_-]+\.json$/,
+  /^(?:public\/)?tasksDB\/(?:(?:external|local)\/)?[a-zA-Z0-9_-]+\/history\/[a-zA-Z0-9_-]+\.ndjson$/
 ];
 
 function getTokenForProject(projectId, env) {
@@ -59,11 +61,25 @@ function safeProjectId(value) {
   return String(value || '').trim().replace(/[^a-zA-Z0-9_-]/g, '');
 }
 
+function normalizeScope(value) {
+  const scope = String(value || '').trim().replace(/^\/+|\/+$/g, '');
+  return scope === 'external' || scope === 'local' ? scope : '';
+}
+
+function getProjectBasePath(cfg) {
+  const root = String((cfg && cfg.tasksRoot) || 'public/tasksDB').replace(/\/+$/g, '');
+  const scope = normalizeScope(cfg && cfg.scope);
+  const id = safeProjectId(cfg && cfg.id);
+  if (!id) return root;
+  if (!scope) return `${root}/${id}`;
+  return root.endsWith(`/${scope}`) ? `${root}/${id}` : `${root}/${scope}/${id}`;
+}
+
 function getProjectConfig(projectId, env) {
   const id = safeProjectId(projectId);
   if (!id) return null;
 
-  // Optional env override: JSON mapping { "projectId": { owner, repo, branch, tasksRoot } }
+  // Optional env override: JSON mapping { "projectId": { owner, repo, branch, tasksRoot, scope } }
   const raw = env && env.PROJECTS_JSON ? String(env.PROJECTS_JSON) : '';
   if (raw) {
     try {
@@ -72,6 +88,7 @@ function getProjectConfig(projectId, env) {
       if (cfg && cfg.owner && cfg.repo) {
         return {
           id,
+          scope: normalizeScope(cfg.scope) || 'external',
           owner: String(cfg.owner),
           repo: String(cfg.repo),
           branch: String(cfg.branch || 'main'),
@@ -85,8 +102,8 @@ function getProjectConfig(projectId, env) {
 
   // Defaults (kept in sync with public/config/template-config.js)
   const defaults = {
-    'github-task-manager': { owner: 'nlarchive', repo: 'github-task-manager', branch: 'main', tasksRoot: 'public/tasksDB' },
-    'ai-career-roadmap': { owner: 'nlarchive', repo: 'ai-career-roadmap', branch: 'main', tasksRoot: 'tasksDB' }
+    'github-task-manager': { owner: 'nlarchive', repo: 'github-task-manager', branch: 'main', tasksRoot: 'public/tasksDB', scope: 'external' },
+    'ai-career-roadmap': { owner: 'nlarchive', repo: 'github-task-manager', branch: 'main', tasksRoot: 'public/tasksDB', scope: 'external' }
   };
 
   const base = defaults[id];
@@ -221,8 +238,8 @@ function diffTasks(oldTasks, newTasks) {
 async function appendNdjsonEvents(projectId, token, events, env) {
   if (!Array.isArray(events) || events.length === 0) return;
   // Default: keep old behavior if project config cannot be resolved.
-  const cfg = getProjectConfig(projectId, env) || { owner: 'nlarchive', repo: 'github-task-manager', branch: 'main', tasksRoot: 'public/tasksDB' };
-  const historyPath = `${cfg.tasksRoot}/${cfg.id}/history/changes.ndjson`;
+  const cfg = getProjectConfig(projectId, env) || { id: safeProjectId(projectId), owner: 'nlarchive', repo: 'github-task-manager', branch: 'main', tasksRoot: 'public/tasksDB', scope: 'external' };
+  const historyPath = `${getProjectBasePath(cfg)}/history/changes.ndjson`;
   const existing = await getFileContentAndShaForRepo(cfg, historyPath, token);
   const existingContent = existing && typeof existing.content === 'string' ? existing.content : '';
 
@@ -271,7 +288,7 @@ async function handleGetTaskHistory(request, env, origin) {
     const token = getTokenForProject(projectId, env);
     if (!token) return jsonResponse({ error: 'GitHub token not configured' }, origin, 500);
 
-    const historyPath = `${cfg.tasksRoot}/${cfg.id}/history/changes.ndjson`;
+    const historyPath = `${getProjectBasePath(cfg)}/history/changes.ndjson`;
     const existing = await getFileContentAndShaForRepo(cfg, historyPath, token);
     const content = existing && typeof existing.content === 'string' ? existing.content : '';
     if (!content.trim()) return jsonResponse({ items: [] }, origin);
@@ -323,7 +340,7 @@ async function handleTasksUpdate(request, env, origin) {
 
     // Ensure the file path is scoped to the selected project + its configured root.
     // Prevents a client from writing github-task-manager paths while claiming another projectId.
-    const expectedPrefix = `${cfg.tasksRoot}/${cfg.id}/`;
+    const expectedPrefix = `${getProjectBasePath(cfg)}/`;
     if (!String(filePath).startsWith(expectedPrefix)) {
       return jsonResponse({ error: `File path must start with ${expectedPrefix}` }, origin, 403);
     }

@@ -10,11 +10,15 @@
 //   Keep sensitive values in access-secret.* (client gate) and/or Worker environment variables.
 
 // Global variable expected by `template-config.js`
-// Shape: Array<{ id, label, owner, repo, branch, tasksRoot }>
+// Shape: Array<{ id, label, scope, owner, repo, branch, tasksRoot }>
+//   scope: 'external' = deployed to GitHub Pages / live apps
+//          'local'    = local development / test fixtures
 var PROJECTS_CONFIG = [
+  // --- External (deployed) ---
   {
     id: 'github-task-manager',
     label: 'GitHub Task Manager',
+    scope: 'external',
     owner: 'nlarchive',
     repo: 'github-task-manager',
     branch: 'main',
@@ -23,8 +27,7 @@ var PROJECTS_CONFIG = [
   {
     id: 'ai-career-roadmap',
     label: 'AI Career Roadmap (learn.deeplearning.ai)',
-    // Store and serve roadmap tasks from this repository's TaskDB
-    // so the UI can load them via same-origin fetch on localhost and GitHub Pages.
+    scope: 'external',
     owner: 'nlarchive',
     repo: 'github-task-manager',
     branch: 'main',
@@ -33,7 +36,26 @@ var PROJECTS_CONFIG = [
   {
     id: 'first-graph',
     label: 'First Graph',
-    // Store and serve tasks from this repository's TaskDB
+    scope: 'external',
+    owner: 'nlarchive',
+    repo: 'github-task-manager',
+    branch: 'main',
+    tasksRoot: 'public/tasksDB'
+  },
+  // --- Local (dev / test) ---
+  {
+    id: 'test-tasks',
+    label: 'Test Tasks (Fixture)',
+    scope: 'local',
+    owner: 'nlarchive',
+    repo: 'github-task-manager',
+    branch: 'main',
+    tasksRoot: 'public/tasksDB'
+  },
+  {
+    id: 'web-e2e-bussines',
+    label: 'ACME-OS — E2E Business OS',
+    scope: 'local',
     owner: 'nlarchive',
     repo: 'github-task-manager',
     branch: 'main',

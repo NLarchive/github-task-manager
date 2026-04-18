@@ -96,8 +96,8 @@ Then visit: http://localhost:8000
    - Use responsibly and monitor for misuse
 
 3. **Database Location**:
-   - Tasks are stored in: `/public/tasksDB/<projectId>/tasks.json` (default: `/public/tasksDB/github-task-manager/tasks.json`)
-   - Also available as CSV: `/public/tasksDB/tasks.csv`
+   - Tasks are stored in: `/public/tasksDB/<scope>/<projectId>/tasks.json` (default: `/public/tasksDB/external/github-task-manager/tasks.json`)
+   - Derived CSV/state files live alongside each project folder (for example `/public/tasksDB/external/github-task-manager/tasks.csv`)
    - Both are version controlled for audit trail
 
 4. **Future Updates**:

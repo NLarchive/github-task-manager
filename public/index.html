@@ -19,9 +19,11 @@
                     <span id="tasksInfo" class="tasks-info">TasksFile: -</span>
                     <label for="projectSelect" class="project-select-label">Project:</label>
                     <select id="projectSelect" class="project-select" aria-label="Select project"></select>
+                    <button type="button" id="folderProjectLoadBtn" class="btn-secondary folder-project-trigger" title="Open a local project folder from your system">📂 Open Local Folder</button>
                     <div id="accessIndicator" class="auth-indicator locked" onclick="app.toggleAuthIndicator()" title="Click to unlock for editing">
                         🔒 <span>Read-Only</span>
                     </div>
+                    <div id="folderProjectLoadResult" class="folder-project-result" hidden></div>
                 </div>
             </div>
         </header>
@@ -39,7 +41,7 @@
                 </section>
 
                 <section class="controls">
-                    <button onclick="showAddTaskModal()" class="btn-primary">+ Add New Task</button>
+                    <button id="addTaskBtn" onclick="showAddTaskModal()" class="btn-primary">+ Add New Task</button>
                     <button onclick="loadTasks()" class="btn-secondary">🔄 Refresh</button>
                     <button onclick="exportToCSV()" class="btn-secondary">📥 Export CSV</button>
                     <button type="button" onclick="app.openIssuesSyncModal()" class="btn-secondary" data-testid="sync-issues">🐙 Sync Issues</button>
@@ -56,7 +58,7 @@
                             <option value="In Progress">In Progress</option>
                             <option value="On Hold">On Hold</option>
                             <option value="Blocked">Blocked</option>
-                            <option value="Completed">Completed</option>
+                            <option value="Done">Done</option>
                             <option value="Cancelled">Cancelled</option>
                             <option value="Pending Review">Pending Review</option>
                         </select>
@@ -83,13 +85,29 @@
                         <h3>In Progress</h3>
                         <p id="inProgressTasks">0</p>
                     </div>
-                    <div class="stat-card" data-status="Completed" data-testid="stat-completed" role="button" tabindex="0" aria-label="Filter: Completed">
-                        <h3>Completed</h3>
+                    <div class="stat-card" data-status="Done" data-testid="stat-completed" role="button" tabindex="0" aria-label="Filter: Done">
+                        <h3>Done</h3>
                         <p id="doneTasks">0</p>
                     </div>
                 </section>
 
                 <section class="tasks-section">
+                    <div id="projectNavigationShell" class="project-navigation-shell" style="display: none;" data-testid="project-nav-shell">
+                        <div class="project-navigation-bar">
+                            <div class="project-navigation-copy">
+                                <div id="projectContextEyebrow" class="project-context-eyebrow">Project Taskflow</div>
+                                <h2 id="projectContextTitle" class="project-context-title">Root Project</h2>
+                                <p id="projectContextDescription" class="project-context-description"></p>
+                            </div>
+                            <div class="project-navigation-actions">
+                                <button type="button" id="projectNavToggleBtn" class="btn-secondary" onclick="app.toggleProjectNavigationPanel()" data-testid="project-nav-toggle" aria-expanded="false">Browse Modules</button>
+                                <button type="button" id="projectNavUpBtn" class="btn-secondary" onclick="app.clearModuleView()" data-testid="project-nav-up">Up</button>
+                                <button type="button" id="projectNavRootBtn" class="btn-secondary" onclick="app.clearModuleView()" data-testid="project-nav-root">Root</button>
+                            </div>
+                        </div>
+                        <div id="projectContextFlow" class="project-context-flow"></div>
+                        <div id="projectNavigationPanel" class="project-navigation-panel" hidden data-testid="project-nav-panel"></div>
+                    </div>
                     <div id="timelineView" class="timeline-view" style="display: none;" data-testid="timeline-view"></div>
                     <div id="graphView" class="graph-view" style="display: none;" data-testid="graph-view">
                         <iframe id="graphFrame" class="graph-frame" title="Project Graph View" loading="lazy"></iframe>
@@ -134,7 +152,7 @@
                                 <option value="In Progress">In Progress</option>
                                 <option value="On Hold">On Hold</option>
                                 <option value="Blocked">Blocked</option>
-                                <option value="Completed">Completed</option>
+                                <option value="Done">Done</option>
                                 <option value="Cancelled">Cancelled</option>
                                 <option value="Pending Review">Pending Review</option>
                             </select>
@@ -401,7 +419,9 @@
     <!-- Rest of the scripts -->
     <script src="scripts/template-validator.js"></script>
     <script src="scripts/template-automation.js"></script>
-    <script src="tasksDB/task-database.js"></script>
+    <script src="scripts/folder-project-service.js"></script>
+    <script src="scripts/folder-project-ui.js"></script>
+    <script src="scripts/task-database.js"></script>
     <script src="scripts/task-manager-app.js"></script>
 </body>
 </html>

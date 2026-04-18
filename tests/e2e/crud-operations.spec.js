@@ -92,6 +92,17 @@ test.describe('GitHub Task Manager - Create Task', () => {
     
     const estimatedHours = await page.inputValue('[id="taskEstimatedHours"]');
     expect(estimatedHours).toBeTruthy();
+
+    // Dates should default: start = today, end = 7 days later
+    const startVal = await page.inputValue('[id="taskStartDate"]');
+    const endVal = await page.inputValue('[id="taskEndDate"]');
+    expect(startVal).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(endVal).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    const start = new Date(`${startVal}T00:00:00`);
+    const end = new Date(`${endVal}T00:00:00`);
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const diffDays = Math.round((end.getTime() - start.getTime()) / msPerDay);
+    expect(diffDays).toBe(7);
   });
 });
 

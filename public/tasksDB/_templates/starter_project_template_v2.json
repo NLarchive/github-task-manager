@@ -1,0 +1,416 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "template_type": "project_task_template",
+  "version": "3.0",
+  "description": "Agentic project task template for TaskManager. Designed for AI agent readability: flat, consistent, enum-validated, minimal redundancy.",
+  "enums": {
+    "status": [
+      "Not Started",
+      "In Progress",
+      "Blocked",
+      "In Review",
+      "Done",
+      "Cancelled"
+    ],
+    "project_status": [
+      "Not Started",
+      "Planning",
+      "In Progress",
+      "On Hold",
+      "Completed",
+      "Cancelled"
+    ],
+    "priority": [
+      "Critical",
+      "High",
+      "Medium",
+      "Low"
+    ],
+    "complexity": [
+      "Very Low",
+      "Low",
+      "Medium",
+      "High",
+      "Very High"
+    ],
+    "dependency_type": [
+      "FS",
+      "SS",
+      "FF",
+      "SF"
+    ],
+    "risk_probability": [
+      "Low",
+      "Medium",
+      "High"
+    ],
+    "risk_impact": [
+      "Low",
+      "Medium",
+      "High",
+      "Critical"
+    ],
+    "risk_score": [
+      "Low",
+      "Medium",
+      "High",
+      "Critical"
+    ],
+    "risk_status": [
+      "Open",
+      "Mitigated",
+      "Closed"
+    ],
+    "change_status": [
+      "Pending",
+      "Approved",
+      "Rejected"
+    ],
+    "milestone_status": [
+      "Not Started",
+      "In Progress",
+      "Achieved",
+      "Missed"
+    ],
+    "sprint_status": [
+      "Not Started",
+      "Active",
+      "Completed"
+    ],
+    "worker_role": [
+      "Project Manager",
+      "Developer",
+      "Designer",
+      "QA Engineer",
+      "DevOps",
+      "Business Analyst",
+      "Stakeholder",
+      "Other"
+    ]
+  },
+  "project": {
+    "name": "Starter Project",
+    "description": "Short description of the project goals and scope",
+    "start_date": "2026-04-01",
+    "end_date": "2026-04-30",
+    "status": "Not Started",
+    "timezone": "UTC",
+    "currency": "USD",
+    "budget": 0,
+    "budget_spent": 0,
+    "graph_end": {
+      "mode": "handoff",
+      "summary": "This graph closes the scoped build work, then hands the outcome to a downstream release, operations, or follow-on delivery graph.",
+      "next_step": "After the terminal tasks finish, move the deliverable into the next tracked workflow instead of reopening the same dependency chain.",
+      "next_graph": "Release readiness or live operations graph",
+      "success_signal": "Terminal tasks are complete, acceptance criteria are met, and the handoff owner can continue without missing dependencies.",
+      "owner": "Project Manager",
+      "maintenance_rhythm": "Only needed when this end node represents a loop back into monitoring or maintenance."
+    },
+    "project_manager": {
+      "name": "Alice Example",
+      "email": "alice@example.com"
+    },
+    "stakeholders": [
+      {
+        "name": "Bob Stakeholder",
+        "email": "bob@example.com",
+        "role": "Stakeholder"
+      }
+    ],
+    "tags": [
+      "starter",
+      "example"
+    ],
+    "milestones": [
+      {
+        "name": "Project Kickoff",
+        "due_date": "2026-04-01",
+        "description": "Initial project setup complete",
+        "status": "Not Started",
+        "linked_task_names": [
+          "Setup project repository"
+        ]
+      },
+      {
+        "name": "MVP Delivery",
+        "due_date": "2026-04-30",
+        "description": "Minimum viable product delivered",
+        "status": "Not Started",
+        "linked_task_names": []
+      }
+    ],
+    "sprints": [
+      {
+        "name": "Sprint 1",
+        "start_date": "2026-04-01",
+        "end_date": "2026-04-14",
+        "goal": "Complete project setup and DB schema",
+        "status": "Not Started"
+      }
+    ],
+    "risks": [
+      {
+        "name": "Key developer unavailability",
+        "description": "Primary developer may become unavailable due to illness or resignation",
+        "probability": "Low",
+        "impact": "High",
+        "score": "Medium",
+        "mitigation_plan": "Cross-train a second developer; maintain up-to-date documentation",
+        "owner": "Alice Example",
+        "status": "Open"
+      }
+    ],
+    "change_log": [
+      {
+        "change_id": "CHG-001",
+        "date": "2026-04-10",
+        "requested_by": "Bob Stakeholder",
+        "description": "Example change request \u2014 remove or replace with real entries",
+        "impact": "Describe schedule, budget, or scope impact",
+        "status": "Pending",
+        "approved_by": null
+      }
+    ],
+    "closure": {
+      "actual_end_date": null,
+      "delivered_on_time": null,
+      "delivered_on_budget": null,
+      "lessons_learned": [],
+      "sign_off_by": null,
+      "sign_off_date": null
+    }
+  },
+  "categories": [
+    {
+      "name": "General",
+      "description": "General tasks not fitting other categories",
+      "parent_category_name": null
+    },
+    {
+      "name": "Backend",
+      "description": "Server-side development tasks",
+      "parent_category_name": null
+    },
+    {
+      "name": "Frontend",
+      "description": "Client-side development tasks",
+      "parent_category_name": null
+    }
+  ],
+  "workers": [
+    {
+      "name": "Alice Example",
+      "email": "alice@example.com",
+      "role": "Developer",
+      "skills": [
+        "PHP",
+        "JavaScript"
+      ],
+      "hourly_rate": 50.0,
+      "weekly_capacity_hours": 40,
+      "timezone": "UTC"
+    },
+    {
+      "name": "Carlos Example",
+      "email": "carlos@example.com",
+      "role": "QA Engineer",
+      "skills": [
+        "Testing",
+        "Automation"
+      ],
+      "hourly_rate": 40.0,
+      "weekly_capacity_hours": 40,
+      "timezone": "UTC"
+    }
+  ],
+  "tasks": [
+    {
+      "task_name": "Setup project repository",
+      "description": "Create repository, README, branch strategy, and initial scaffolding",
+      "acceptance_criteria": [
+        "Repository is created and accessible to all team members",
+        "README includes setup instructions",
+        "Branch protection rules are configured"
+      ],
+      "category_name": "General",
+      "sprint_name": "Sprint 1",
+      "start_date": "2026-04-01",
+      "end_date": "2026-04-02",
+      "due_date": "2026-04-02",
+      "priority": "High",
+      "complexity": "Low",
+      "status": "Not Started",
+      "blocker_reason": null,
+      "progress_percentage": 0,
+      "estimated_hours": 4,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "setup",
+        "repo"
+      ],
+      "assigned_workers": [
+        {
+          "name": "Alice Example",
+          "email": "alice@example.com",
+          "role": "Developer"
+        }
+      ],
+      "reviewer": {
+        "name": "Carlos Example",
+        "email": "carlos@example.com"
+      },
+      "dependencies": [],
+      "subtasks": [
+        {
+          "name": "Create GitHub repo",
+          "status": "Not Started",
+          "assigned_to": "Alice Example",
+          "estimated_hours": 1,
+          "due_date": "2026-04-01"
+        },
+        {
+          "name": "Write initial README",
+          "status": "Not Started",
+          "assigned_to": "Alice Example",
+          "estimated_hours": 1,
+          "due_date": "2026-04-01"
+        },
+        {
+          "name": "Configure branch protection rules",
+          "status": "Not Started",
+          "assigned_to": "Alice Example",
+          "estimated_hours": 1,
+          "due_date": "2026-04-02"
+        }
+      ],
+      "attachments": [],
+      "links": [
+        {
+          "label": "GitHub Organization",
+          "url": "https://github.com/example-org"
+        }
+      ],
+      "comments": []
+    },
+    {
+      "task_name": "Create database schema",
+      "description": "Design and add initial migrations, schema files, and seed data",
+      "acceptance_criteria": [
+        "All entity relationships are documented in an ERD",
+        "Migrations run without errors on a fresh database",
+        "Seed data is available for local development"
+      ],
+      "category_name": "Backend",
+      "sprint_name": "Sprint 1",
+      "start_date": "2026-04-03",
+      "end_date": "2026-04-07",
+      "due_date": "2026-04-07",
+      "priority": "Medium",
+      "complexity": "Medium",
+      "status": "Not Started",
+      "blocker_reason": null,
+      "progress_percentage": 0,
+      "estimated_hours": 16,
+      "actual_hours": 0,
+      "is_critical_path": true,
+      "tags": [
+        "database",
+        "schema",
+        "backend"
+      ],
+      "assigned_workers": [
+        {
+          "name": "Alice Example",
+          "email": "alice@example.com",
+          "role": "Developer"
+        }
+      ],
+      "reviewer": {
+        "name": "Carlos Example",
+        "email": "carlos@example.com"
+      },
+      "dependencies": [
+        {
+          "predecessor_task_name": "Setup project repository",
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "subtasks": [
+        {
+          "name": "Draft ERD diagram",
+          "status": "Not Started",
+          "assigned_to": "Alice Example",
+          "estimated_hours": 3,
+          "due_date": "2026-04-04"
+        },
+        {
+          "name": "Write migration files",
+          "status": "Not Started",
+          "assigned_to": "Alice Example",
+          "estimated_hours": 8,
+          "due_date": "2026-04-06"
+        },
+        {
+          "name": "Add seed data script",
+          "status": "Not Started",
+          "assigned_to": "Alice Example",
+          "estimated_hours": 3,
+          "due_date": "2026-04-07"
+        }
+      ],
+      "attachments": [],
+      "links": [],
+      "comments": []
+    }
+  ],
+  "required_fields": [
+    "project.name",
+    "project.start_date",
+    "project.end_date",
+    "project.status",
+    "project.timezone",
+    "project.currency",
+    "project.project_manager",
+    "tasks[].task_name",
+    "tasks[].start_date",
+    "tasks[].end_date",
+    "tasks[].due_date",
+    "tasks[].priority",
+    "tasks[].status",
+    "tasks[].progress_percentage"
+  ],
+  "optional_fields": [
+    "project.description",
+    "project.budget",
+    "project.budget_spent",
+    "project.stakeholders",
+    "project.tags",
+    "project.milestones",
+    "project.sprints",
+    "project.risks",
+    "project.change_log",
+    "project.closure",
+    "tasks[].description",
+    "tasks[].acceptance_criteria",
+    "tasks[].category_name",
+    "tasks[].sprint_name",
+    "tasks[].complexity",
+    "tasks[].blocker_reason",
+    "tasks[].estimated_hours",
+    "tasks[].actual_hours",
+    "tasks[].is_critical_path",
+    "tasks[].tags",
+    "tasks[].assigned_workers",
+    "tasks[].reviewer",
+    "tasks[].dependencies",
+    "tasks[].subtasks",
+    "tasks[].attachments",
+    "tasks[].links",
+    "tasks[].comments",
+    "categories",
+    "workers"
+  ]
+}

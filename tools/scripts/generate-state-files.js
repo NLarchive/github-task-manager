@@ -1,8 +1,8 @@
 /**
  * generate-state-files.js
  * -----------------------
- * Generates derived state JSON files from public/tasksDB/<project>/tasks.json
- * Output: public/tasksDB/<project>/state/*.json
+ * Generates derived state JSON files from public/tasksDB/<scope>/<project>/tasks.json
+ * Output: public/tasksDB/<scope>/<project>/state/*.json
  * Usage: node tools/scripts/generate-state-files.js <projectId>
  */
 const fs = require('fs');
@@ -33,25 +33,33 @@ function generateStateData(tasks) {
     tasks_by_status: byStatus
   };
 
-  const makeStatusPayload = (status) => ({
+  const makeStatusPayload = (status, aliases = []) => ({
     status,
     generated_at: now,
-    tasks: byStatus[status] || []
+    tasks: [status, ...aliases].flatMap((value) => byStatus[value] || [])
   });
 
   return {
     summary,
     notStarted: makeStatusPayload('Not Started'),
     inProgress: makeStatusPayload('In Progress'),
-    completed: makeStatusPayload('Completed')
+    completed: makeStatusPayload('Done', ['Completed'])
   };
 }
 
 function main() {
   const repoRoot = path.join(__dirname, '..', '..');
   const projectId = (process.argv[2] || 'github-task-manager').replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
-  const tasksJsonPath = path.join(repoRoot, 'public', 'tasksDB', projectId, 'tasks.json');
-  const stateDir = path.join(repoRoot, 'public', 'tasksDB', projectId, 'state');
+  const tasksDbRoot = path.join(repoRoot, 'public', 'tasksDB');
+  // Auto-discover scope
+  let projectDir = null;
+  for (const scope of ['external', 'local', '']) {
+    const candidate = scope ? path.join(tasksDbRoot, scope, projectId) : path.join(tasksDbRoot, projectId);
+    if (fs.existsSync(path.join(candidate, 'tasks.json'))) { projectDir = candidate; break; }
+  }
+  if (!projectDir) { console.error(`tasks.json not found for project: ${projectId}`); process.exit(1); }
+  const tasksJsonPath = path.join(projectDir, 'tasks.json');
+  const stateDir = path.join(projectDir, 'state');
 
   if (!fs.existsSync(tasksJsonPath)) {
     console.error(`tasks.json not found at: ${tasksJsonPath}`);

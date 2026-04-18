@@ -6,7 +6,7 @@
  */
 
 // Assuming graph-data.js, cv-generator.js, walkthrough.js are in the same 'js' directory
-import { initTemplates, getAvailableTemplates, getDefaultTemplateId, loadTemplate } from './graph-data.js';
+import { initTemplates, ensureDynamicTaskTemplate, getAvailableTemplates, getDefaultTemplateId, loadTemplate, buildInlineTaskSubgraphTemplatePublic, buildProjectTaskTemplatePublic } from './graph-data.js';
 import { generateClassicCV } from './cv-generator.js';
 import Walkthrough from './walkthrough.js';
 import { resolveStepsForTemplate } from './shared/tours.js';
@@ -89,7 +89,9 @@ const config = {
     },
     // Max number of color variants per layer supported by the CSS
     // (e.g., if CSS has .color-variant-0 to .color-variant-4, this should be 5)
-    maxColorVariants: 5
+    maxColorVariants: 5,
+    // Feature Toggles
+    showStatusVisuals: true
     // REMOVED touchHoverDuration
 };
 
@@ -224,6 +226,7 @@ class CurriculumGraph {
             n.fillHex = null;
             n.nodeRadius = null;
             n.parentRef = null;
+            n.status = n.status || 'Not Started'; // Ensure status exists for visual states
             if (!this.details[n.id]) {
                 console.warn(`Details missing for node ID: ${n.id}. Using label.`);
                 this.details[n.id] = { title: n.label || n.id || 'Unknown', items: ['No details.'] };
@@ -567,8 +570,17 @@ class CurriculumGraph {
             .selectAll(".node")
             .data(this.data.nodes, d => d.id) // Key function for object constancy
             .join("g")
-             // Apply multiple classes for styling: base, type, layer, color variant
-            .attr("class", d => `node node-type-${d.type} node-layer-${d.layer} layer-${d.layer} color-variant-${d.colorVariantIndex}`)
+             // Apply multiple classes for styling: base, type, layer, color variant, and status
+            .attr("class", d => {
+                const baseClasses = `node node-type-${d.type} node-layer-${d.layer} layer-${d.layer} color-variant-${d.colorVariantIndex}`;
+                if (this.config.showStatusVisuals && d.status) {
+                    const normalizedStatus = d.status.toLowerCase().replace(/\s+/g, '-');
+                    const legacyStatusClass = normalizedStatus === 'done' ? ' node-status-completed' : '';
+                    const statusClass = `node-status-${normalizedStatus}`;
+                    return `${baseClasses} ${statusClass}${legacyStatusClass}`;
+                }
+                return baseClasses;
+            })
             .attr("data-id", d => d.id) // Store ID for selection
             .attr("tabindex", "0") // Make focusable
             .attr("role", "button") // Semantics for accessibility
@@ -823,6 +835,7 @@ class CurriculumGraph {
             }
 
             console.log(`Click/Tap detected on ${d.id}, showing details.`);
+            event.stopPropagation(); // Prevent bubbling to SVG background deselect handler
             handleShowDetails(event, d); // Call unified handler
         });
 
@@ -852,6 +865,7 @@ class CurriculumGraph {
             if (event.changedTouches?.length > 1) {
                 return;
             }
+            event.stopPropagation(); // Prevent bubbling to SVG background deselect handler
             handleShowDetails(event, d);
         });
 
@@ -1051,6 +1065,11 @@ class CurriculumGraph {
 
     /** Setup menu panel, legend popup, and their interactions */
      setupMenuAndLegend() {
+        // Guard: only wire event listeners once — re-init after submodule navigation
+        // would otherwise add duplicate handlers causing open+close on every click.
+        if (this._menuWired) return;
+        this._menuWired = true;
+
         // Get references to UI elements
     const profileBtn = document.getElementById("profile-legend-button");
     const menuPanel = document.getElementById("menu-panel");
@@ -1122,7 +1141,7 @@ class CurriculumGraph {
         legendCloseBtn.addEventListener("click", () => togglePopup(legendPopup, false));
         legendPopup.addEventListener("click", (e) => { if (e.target === legendPopup) togglePopup(legendPopup, false); });
 
-        nodePopupCloseBtn.addEventListener("click", () => this.hideNodeDetails()); // Use dedicated hide function
+        nodePopupCloseBtn.addEventListener("click", () => this.hideNodeDetails());
         nodePopup.addEventListener("click", (e) => { if (e.target === nodePopup) this.hideNodeDetails(); });
 
         profileBtn.addEventListener("click", () => toggleMenu());
@@ -1272,10 +1291,124 @@ class CurriculumGraph {
             if (details.items?.length > 0) {
                  itemsHtml = `<ul>${details.items.map(item => `<li>${item}</li>`).join("")}</ul>`;
             }
-              contentHtml = `<h2 class="${titleClasses}"${titleStyle}>${details.title || node.label || node.id}</h2>${photoHtml}${itemsHtml}`;
+            // Subtask navigation button
+            let subtaskBtn = '';
+            const subtaskPath = String(node.subtasksPath || '').trim()
+                || String(Array.isArray(node.subtasksTargets) && node.subtasksTargets[0]?.path ? node.subtasksTargets[0].path : '').trim();
+            if (subtaskPath) {
+                subtaskBtn = `<button class="subtask-dive-btn" data-subtasks-path="${subtaskPath.replace(/"/g, '&quot;')}" data-node-label="${(details.title || node.label || '').replace(/"/g, '&quot;')}">📂 View Subtasks</button>`;
+            }
+
+            // Subgraph context for parent/successor navigation
+            const _ctx = typeof window._getSubtaskContext === 'function' ? window._getSubtaskContext() : null;
+            const _inSubgraph = _ctx && _ctx.depth > 1;
+
+            // Parent navigation button (visible on start node when inside a subgraph)
+            let parentNavBtn = '';
+            if (_inSubgraph && node.templateType === 'project-start') {
+                const _pName = _ctx.parentTaskName || 'Parent task';
+                const _pId = (_ctx.parentTaskNodeId || '').replace(/"/g, '&quot;');
+                parentNavBtn = `<button class="subtask-dive-btn parent-nav-btn" data-parent-node-id="${_pId}">↩ ${_pName.replace(/</g, '&lt;')}</button>`;
+            } else if (window.__activeModulePath && node.templateType === 'project-start') {
+                parentNavBtn = `<button class="subtask-dive-btn parent-nav-btn">↩ Navigate to Parent</button>`;
+            }
+
+            // Successor navigation buttons (visible on end node when inside a subgraph)
+            let successorBtns = '';
+            if (_inSubgraph && node.templateType === 'project-end' && _ctx.parentSuccessors.length > 0) {
+                const sibHtml = _ctx.parentSuccessors.map(s => {
+                    const sId = (s.nodeId || '').replace(/"/g, '&quot;');
+                    const sLabel = (s.label || s.nodeId || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    return `<button class="subtask-dive-btn sibling-nav-btn" data-sibling-node-id="${sId}">➡ ${sLabel}</button>`;
+                }).join('');
+                successorBtns = `<div style="margin-top:8px"><strong>Next tasks in parent graph:</strong>${sibHtml}</div>`;
+            }
+
+              contentHtml = `<h2 class="${titleClasses}"${titleStyle}>${details.title || node.label || node.id}</h2>${photoHtml}${itemsHtml}${parentNavBtn}${subtaskBtn}${successorBtns}`;
         }
 
         contentDiv.innerHTML = contentHtml;
+
+        // Apply priority colors and status classes to dep-link and subtask-node-btn buttons
+        const priorityColors = this.config.priorityColorsHex || {};
+        contentDiv.querySelectorAll('.dep-link[data-dep-priority]').forEach(btn => {
+            const p = btn.getAttribute('data-dep-priority');
+            const s = btn.getAttribute('data-dep-status') || '';
+            const h = btn.getAttribute('data-dep-hours') || '';
+            if (priorityColors[p]) {
+                btn.style.backgroundColor = priorityColors[p];
+                btn.style.color = '#fff';
+                btn.style.borderColor = priorityColors[p];
+            }
+            if (s === 'done' || s === 'completed') btn.classList.add('dep-status-done');
+            else if (s === 'in-progress') btn.classList.add('dep-status-in-progress');
+            if (h && h !== '0') btn.setAttribute('title', `${btn.getAttribute('title') || btn.textContent} (${h}h)`);
+        });
+        contentDiv.querySelectorAll('.subtask-node-btn[data-st-priority]').forEach(btn => {
+            const p = btn.getAttribute('data-st-priority');
+            const s = btn.getAttribute('data-st-status') || '';
+            if (priorityColors[p]) {
+                btn.style.backgroundColor = priorityColors[p];
+                btn.style.color = '#fff';
+                btn.style.borderColor = priorityColors[p];
+            }
+            if (s === 'done' || s === 'completed') btn.classList.add('st-status-done');
+            else if (s === 'in-progress') btn.classList.add('st-status-in-progress');
+        });
+
+        // Wire dependency link buttons → navigate to target node, open its modal, keep it selected
+        contentDiv.querySelectorAll('.dep-link').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const targetNodeId = btn.getAttribute('data-dep-node-id');
+                if (targetNodeId) {
+                    this.hideNodeDetails();
+                    this.openNodeModal(targetNodeId);
+                }
+            });
+        });
+
+        // Wire parent navigation button click
+        const parentBtn = contentDiv.querySelector('.parent-nav-btn');
+        if (parentBtn) {
+            parentBtn.addEventListener('click', () => {
+                const parentNodeId = parentBtn.getAttribute('data-parent-node-id');
+                this.hideNodeDetails();
+                if (parentNodeId && typeof window._navigateToParentAndOpenModal === 'function') {
+                    window._navigateToParentAndOpenModal(parentNodeId);
+                } else if (typeof window._navigateToDepth === 'function') {
+                    window._navigateToDepth(-1);
+                }
+            });
+        }
+
+        // Wire successor/sibling navigation buttons click (end node in subgraph)
+        contentDiv.querySelectorAll('.sibling-nav-btn').forEach(sibBtn => {
+            sibBtn.addEventListener('click', () => {
+                const sibNodeId = sibBtn.getAttribute('data-sibling-node-id');
+                this.hideNodeDetails();
+                if (sibNodeId && typeof window._navigateToParentAndOpenModal === 'function') {
+                    window._navigateToParentAndOpenModal(sibNodeId);
+                }
+            });
+        });
+
+        // Wire subtask button click
+        contentDiv.querySelectorAll('.subtask-dive-btn[data-subtasks-path]').forEach(subBtn => {
+            subBtn.addEventListener('click', () => {
+                const spath = subBtn.getAttribute('data-subtasks-path');
+                const label = subBtn.getAttribute('data-node-label');
+                if (spath && typeof window._subtaskNavigate === 'function') {
+                    // Extract projectId from URL params for context
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const currentTemplateId = urlParams.get('template') || '';
+                    const projectId = currentTemplateId.endsWith('-tasks') ? currentTemplateId.slice(0, -'-tasks'.length) : currentTemplateId;
+                    this.hideNodeDetails();
+                    window._subtaskNavigate(spath, projectId, label);
+                }
+            });
+        });
+
         this.displayPopup(popup);
     }
 
@@ -1291,32 +1424,33 @@ class CurriculumGraph {
     }
 
 
-    /** Hide node details popup, cleanup persistent state, and manage focus return */
-    hideNodeDetails() {
-        const popup = document.getElementById("popup");
-        if (!popup || !popup.classList.contains('visible')) return;
-
-        console.log("hideNodeDetails triggered.");
-
-        const closeBtn = popup.querySelector(".close-button");
-        const elementToFocusAfter = this.lastFocusedElementBeforePopup;
-
-        // --- CLEANUP PERSISTENT GRAPH STATE ---
+    clearSelectedNodeState() {
         this.node?.classed("faded", false);
         this.link?.classed("highlighted faded", false);
         this.node?.filter('.details-shown-for')
             .classed('details-shown-for', false)
             .each(d => {
-                 // Clear temp state if it was somehow left on this node
                  if (this.currentlyInteractedNodeId === d.id) {
                       d3.select(this.node.filter(n => n.id === d.id).node()).classed('is-interacted', false);
-                      this.currentlyInteractedNodeId = null;
                  }
-                 // Force remove neighbor state from its neighbors
                  const { neighborsSelection } = this.getNodeAndNeighbors(d);
                  neighborsSelection?.classed('is-neighbor', false);
             });
-        // --- END GRAPH STATE CLEANUP ---
+        this.node?.classed("is-interacted is-neighbor", false);
+        this.currentlyInteractedNodeId = null;
+    }
+
+    /** Hide node details popup. Selection persists unless clearSelection is explicitly requested. */
+    hideNodeDetails({ clearSelection = false } = {}) {
+        const popup = document.getElementById("popup");
+        const isVisible = Boolean(popup && popup.classList.contains('visible'));
+        if (clearSelection) this.clearSelectedNodeState();
+        if (!popup || !isVisible) return;
+
+        console.log("hideNodeDetails triggered.");
+
+        const closeBtn = popup.querySelector(".close-button");
+        const elementToFocusAfter = this.lastFocusedElementBeforePopup;
 
         popup.classList.remove("visible");
 
@@ -1346,6 +1480,16 @@ class CurriculumGraph {
         this.svg.call(this.zoom);
         this.svg.on("dblclick.zoom", null); // Disable double-click zoom
         
+        // Deselect node when clicking on graph background (not on a node or link)
+        this.svg.on("click.bg", (event) => {
+            const tag = event.target?.tagName?.toLowerCase();
+            if (tag === 'svg' || tag === 'g') {
+                if (this.node?.filter('.details-shown-for').node()) {
+                    this.hideNodeDetails({ clearSelection: true });
+                }
+            }
+        });
+
         // Ensure touch events work properly
         this.svg.style("touch-action", "none");
     }
@@ -1411,7 +1555,7 @@ class CurriculumGraph {
         console.log("Resetting view and search...");
 
         // --- Close UI Elements First ---
-        this.hideNodeDetails(); // Closes node popup and cleans graph state
+        this.hideNodeDetails({ clearSelection: true });
         const legendPopup = document.getElementById("legend-popup");
         if (legendPopup?.classList.contains("visible")) {
              legendPopup.querySelector(".close-button")?.click(); // Consistent focus return
@@ -1574,6 +1718,77 @@ class CurriculumGraph {
                 console.warn(`Could not apply focus: Missing target node, SVG, or zoom.`);
             }
         }); // End onStable
+    }
+
+    /**
+     * Apply persistent node-selected state (same logic as handleShowDetails) without
+     * a triggering DOM event. Used by dep-link clicks and sidebar tree navigation.
+     */
+    _openNodeDetails(d) {
+        if (!d || !d.id) return;
+
+        // 1. Clear previous persistent state
+        this.node?.filter('.details-shown-for').each((oldData, i, nodes) => {
+            if (oldData.id !== d.id) {
+                const oldEl = d3.select(nodes[i]);
+                oldEl.classed('details-shown-for', false);
+                if (this.currentlyInteractedNodeId === oldData.id) oldEl.classed('is-interacted', false);
+                const { neighborsSelection: oldNbrs } = this.getNodeAndNeighbors(oldData);
+                oldNbrs?.classed('is-neighbor', false);
+            }
+        });
+        this.node?.classed('faded', false);
+        this.link?.classed('highlighted faded', false);
+        this.node?.classed('is-interacted is-neighbor', false);
+        this.currentlyInteractedNodeId = null;
+
+        // 2. Apply persistent state to target node
+        const targetEl = this.node?.filter(n => n.id === d.id);
+        if (!targetEl || targetEl.empty()) return;
+        targetEl.classed('details-shown-for', true);
+        const { neighborsSelection, neighborIds, connectedLinks } = this.getNodeAndNeighbors(d);
+        neighborsSelection?.classed('is-neighbor', true);
+
+        // 3. Highlight connected nodes / fade others
+        const visibleIds = new Set([...neighborIds, d.id]);
+        this.node?.classed('faded', n => !visibleIds.has(n.id));
+        this.link?.classed('highlighted', l => connectedLinks.has(l))
+                  .classed('faded', l => !connectedLinks.has(l));
+        targetEl.raise();
+
+        // 4. Show popup
+        this.showNodeDetails(d);
+        this.hideTooltip();
+    }
+
+    /**
+     * Pan & zoom to a node by ID, then open its detail modal and keep it selected
+     * with a permanent blink. Used by dep-link buttons and the sidebar tree view.
+     */
+    openNodeModal(nodeId) {
+        if (!nodeId) return;
+        const nodeData = this.nodeMap.get(nodeId);
+        if (!nodeData) { console.warn(`openNodeModal: node not found: ${nodeId}`); return; }
+
+        this.onStable(() => {
+            if (nodeData.x === undefined || isNaN(nodeData.x)) return;
+
+            const scale = this.config.animation.focusScale;
+            const x = this.width / 2 - nodeData.x * scale;
+            const y = this.height / 2 - nodeData.y * scale;
+            const transform = d3.zoomIdentity.translate(x, y).scale(scale);
+            const targetNodeSelection = this.node?.filter(d => d.id === nodeId);
+
+            if (targetNodeSelection && !targetNodeSelection.empty() && this.svg && this.zoom) {
+                targetNodeSelection.raise();
+                this.svg.transition().duration(this.config.animation.duration)
+                    .call(this.zoom.transform, transform)
+                    .on('end', () => this._openNodeDetails(nodeData));
+            } else {
+                // Fallback: just open details without panning
+                this._openNodeDetails(nodeData);
+            }
+        });
     }
 
     /** Simulation tick function: Update node and link positions */
@@ -1804,7 +2019,8 @@ class CurriculumGraph {
 document.addEventListener("DOMContentLoaded", async () => {
     console.log("DOM Ready. Initializing Graph...");
 
-    if (isEmbeddedMode()) {
+    const embedMode = isEmbeddedMode();
+    if (embedMode) {
         document.body.classList.add('embed');
         const home = document.getElementById('home-button');
         if (home) home.style.display = 'none';
@@ -1839,29 +2055,65 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
         const templateSelect = document.getElementById('template-select');
-        const availableTemplates = getAvailableTemplates();
         const requestedTemplateId = getInitialTemplateId();
+        const folderProjectService = window.FolderProjectService;
+        if (folderProjectService && typeof folderProjectService.listProjects === 'function') {
+            const storedFolderProjects = folderProjectService.listProjects();
+            for (const projectRecord of storedFolderProjects) {
+                if (projectRecord && projectRecord.templateId) {
+                    await ensureDynamicTaskTemplate(projectRecord.templateId);
+                }
+            }
+        }
+        await ensureDynamicTaskTemplate(requestedTemplateId);
+        const availableTemplates = getAvailableTemplates();
 
         if (templateSelect) {
-            // If parent exposes a PROJECTS_CONFIG (centralized projects list), inject project options at the top
+            // If parent exposes a PROJECTS_CONFIG (centralized projects list), inject project options grouped by scope
             let projectOptionsHtml = '';
             try {
                 const parentProjects = (window.parent && window.parent.PROJECTS_CONFIG) ? window.parent.PROJECTS_CONFIG : (window.PROJECTS_CONFIG || []);
                 if (Array.isArray(parentProjects) && parentProjects.length) {
-                    projectOptionsHtml += `<optgroup label="Projects">`;
+                    const scopeLabels = { external: 'External Projects', local: 'Local Projects' };
+                    const grouped = {};
                     parentProjects.forEach(p => {
-                        const label = (p && p.label) ? p.label : p.id;
-                        projectOptionsHtml += `<option value="project:${p.id}">Project: ${label}</option>`;
+                        const scope = (p && p.scope) || 'external';
+                        if (!grouped[scope]) grouped[scope] = [];
+                        grouped[scope].push(p);
                     });
-                    projectOptionsHtml += `</optgroup>`;
+                    for (const scope of ['external', 'local']) {
+                        const items = grouped[scope];
+                        if (!items || !items.length) continue;
+                        projectOptionsHtml += `<optgroup label="${scopeLabels[scope] || scope}">`;
+                        items.forEach(p => {
+                            const label = (p && p.label) ? p.label : p.id;
+                            projectOptionsHtml += `<option value="project:${p.id}">Project: ${label}</option>`;
+                        });
+                        projectOptionsHtml += `</optgroup>`;
+                    }
                 }
             } catch (e) {
                 console.warn('Could not read parent PROJECTS_CONFIG:', e);
             }
 
-            templateSelect.innerHTML = projectOptionsHtml + availableTemplates
-                .map(t => `<option value="${t.id}">${t.name}</option>`)
-                .join('');
+            let rootOptionsHtml;
+            if (embedMode) {
+                const active = availableTemplates.find(t => t.id === requestedTemplateId);
+                if (active) {
+                    rootOptionsHtml = `<option value="${active.id}">${active.name}</option>`;
+                } else if (availableTemplates.length) {
+                    const fallback = availableTemplates[0];
+                    rootOptionsHtml = `<option value="${fallback.id}">${fallback.name}</option>`;
+                } else {
+                    rootOptionsHtml = '<option value="">No templates available</option>';
+                }
+            } else {
+                rootOptionsHtml = availableTemplates
+                    .map(t => `<option value="${t.id}">${t.name}</option>`)
+                    .join('') || '<option value="">No templates available</option>';
+            }
+
+            templateSelect.innerHTML = rootOptionsHtml + projectOptionsHtml;
             templateSelect.value = requestedTemplateId;
 
             templateSelect.addEventListener('change', () => {
@@ -1896,6 +2148,41 @@ document.addEventListener("DOMContentLoaded", async () => {
                 } catch (err) {/* noop */}
             });
         }
+
+        // ── Load from local folder picker ─────────────────────────────────────
+        const folderPathLoad = document.getElementById('folder-path-load');
+        const folderPathResult = document.getElementById('folder-path-result');
+        if (folderPathLoad && window.FolderProjectUI && typeof window.FolderProjectUI.bindFolderProjectPicker === 'function') {
+            window.FolderProjectUI.bindFolderProjectPicker({
+                trigger: folderPathLoad,
+                result: folderPathResult,
+                idleLabel: '📂 Browse Folder',
+                loadingLabel: 'Opening...',
+                successMessage: (projectRecord) => `Loaded <strong>${projectRecord.label || projectRecord.id}</strong> (${projectRecord.fileCount || 0} task file${projectRecord.fileCount === 1 ? '' : 's'})`,
+                onProjectLoaded: async (projectRecord) => {
+                    await ensureDynamicTaskTemplate(projectRecord.templateId);
+                    setSelectedTemplateId(projectRecord.templateId);
+
+                    if (templateSelect) {
+                        const hasOption = Array.from(templateSelect.options).some(option => option.value === projectRecord.templateId);
+                        if (!hasOption) {
+                            const option = document.createElement('option');
+                            option.value = projectRecord.templateId;
+                            option.textContent = `${projectRecord.label || projectRecord.id} (Local Folder)`;
+                            templateSelect.appendChild(option);
+                        }
+                        templateSelect.value = projectRecord.templateId;
+                    }
+
+                    const nextUrl = new URL(window.location.href);
+                    nextUrl.searchParams.set('template', projectRecord.templateId);
+                    nextUrl.searchParams.delete('module');
+                    nextUrl.searchParams.delete('moduleProject');
+                    window.location.href = nextUrl.toString();
+                }
+            });
+        }
+        // ── End local folder picker ───────────────────────────────────────────
 
         const { template, nodes, links, details, configOverrides } = loadTemplate(requestedTemplateId);
         setSelectedTemplateId(template.id);
@@ -2022,6 +2309,646 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         }
          // --- End Walkthrough Init ---
+
+        // --- Subtask Navigation Engine ---
+        const INLINE_TASK_ID_PREFIX = '__inline_task_id__:';
+        const subtaskStack = [{
+            kind: 'root',
+            label: template?.name || 'Root Project',
+            template: Object.assign({}, template, { nodes, links, details }),
+            templateId: template?.id || '',
+            projectId: getCurrentProjectId(),
+            activeModulePath: ''
+        }];
+
+        function getCurrentProjectId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const templateId = urlParams.get('template') || '';
+            return templateId.endsWith('-tasks') ? templateId.slice(0, -'-tasks'.length) : templateId;
+        }
+
+        function notifyParentActiveModuleChange(modulePath, projectId, label = '') {
+            try {
+                if (!window.parent || window.parent === window) return;
+                window.parent.postMessage({
+                    type: 'activeModuleChanged',
+                    projectId: projectId || getCurrentProjectId(),
+                    modulePath: modulePath || '',
+                    label: label || ''
+                }, '*');
+            } catch (error) {
+                console.warn('Unable to notify parent about active module change', error);
+            }
+        }
+
+        function isInlineSubtaskPath(modulePath) {
+            return String(modulePath || '').trim().startsWith(INLINE_TASK_ID_PREFIX);
+        }
+
+        function syncModuleUrl(modulePath, projectId) {
+            const url = new URL(window.location.href);
+            if (modulePath) {
+                url.searchParams.set('module', modulePath);
+                if (projectId) url.searchParams.set('moduleProject', projectId);
+            } else {
+                url.searchParams.delete('module');
+                url.searchParams.delete('moduleProject');
+            }
+            window.history.replaceState({}, '', url.toString());
+        }
+
+        function renderTemplateInPlace(tpl) {
+            if (!window.graphInstance || typeof window.graphInstance.preprocessData !== 'function') return false;
+
+            window.graphInstance.data = { nodes: tpl.nodes, links: tpl.links };
+            window.graphInstance.details = tpl.details;
+            window.graphInstance.nodeMap = new Map(tpl.nodes.map(n => [n.id, n]));
+            window.graphInstance.template = tpl;
+            window.graphInstance.profileNodeId = tpl?.meta?.profileNodeId || 'profile';
+            window.graphInstance.coreNodeId = tpl?.meta?.coreNodeId || 'core-expertise';
+            window.graphInstance.legendMode = (tpl.meta && tpl.meta.legendMode) || 'task-management';
+            window.graphInstance.isStable = false;
+            window.graphInstance.onStableCallbacks = [];
+            window.graphInstance.preprocessData();
+            window.graphInstance.init();
+            if (tpl.meta && typeof applyMenu === 'function') applyMenu(tpl.meta);
+            if (typeof window.__refreshSidebarTaskTree === 'function') window.__refreshSidebarTaskTree();
+            return true;
+        }
+
+        function restoreGraphState(state) {
+            if (!state?.template) return;
+            window.__activeModulePath = state.activeModulePath || '';
+            syncModuleUrl(window.__activeModulePath, state.projectId || getCurrentProjectId());
+            if (typeof window.__markActiveModuleInSidebar === 'function') window.__markActiveModuleInSidebar();
+            renderBreadcrumbs();
+            notifyParentActiveModuleChange(window.__activeModulePath, state.projectId || getCurrentProjectId(), state.label || '');
+
+            if (!renderTemplateInPlace(state.template)) {
+                window.location.reload();
+            }
+        }
+
+        // Populate the modules sidebar from template.meta.modules
+        function initModulesSidebar(meta) {
+            const sidebar = document.getElementById('modules-sidebar');
+            const sidebarContent = document.getElementById('modules-sidebar-content');
+            const sidebarToggle = document.getElementById('modules-sidebar-toggle');
+            const sidebarClose = sidebar && sidebar.querySelector('.modules-sidebar-close');
+
+            const modules = meta && Array.isArray(meta.modules) ? meta.modules : [];
+            if (!modules.length || !sidebar || !sidebarContent || !sidebarToggle) return;
+
+            const escapeHtml = (value) => String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+
+            const treeRoot = { folders: new Map(), modules: [] };
+            const categoryModules = [];
+            const sortedModules = [...modules].sort((a, b) => String(a.path || '').localeCompare(String(b.path || '')));
+
+            for (const moduleEntry of sortedModules) {
+                const normalizedPath = String(moduleEntry.path || '').replace(/\\/g, '/').replace(/^\/+/, '');
+
+                // Skip inline subtask virtual entries — they are not sidebar items
+                if (normalizedPath.startsWith('__inline_task_id__:')) continue;
+
+                // Category-based virtual modules go to a separate section
+                if (normalizedPath.startsWith('__category__:')) {
+                    categoryModules.push({ ...moduleEntry, normalizedPath });
+                    continue;
+                }
+
+                const folderParts = normalizedPath.split('/').filter(Boolean).slice(0, -1);
+                let cursor = treeRoot;
+                folderParts.forEach((segment) => {
+                    if (!cursor.folders.has(segment)) {
+                        cursor.folders.set(segment, { folders: new Map(), modules: [] });
+                    }
+                    cursor = cursor.folders.get(segment);
+                });
+                cursor.modules.push({ ...moduleEntry, normalizedPath });
+            }
+
+            const renderTree = (node, depth = 0) => {
+                let html = '';
+                const folders = Array.from(node.folders.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+                const leaves = [...node.modules].sort((a, b) => String(a.label || a.name || '').localeCompare(String(b.label || b.name || '')));
+
+                const renderLeaf = (moduleEntry, displayLabel = '') => {
+                    const badge = moduleEntry.type ? `<span class="modules-item-badge">${escapeHtml(moduleEntry.type)}</span>` : '';
+                    return `
+                        <button class="modules-tree-leaf modules-item" data-module-path="${encodeURIComponent(moduleEntry.normalizedPath)}" title="${escapeHtml(moduleEntry.normalizedPath)}">
+                            <span class="modules-tree-leaf-name">${escapeHtml(displayLabel || moduleEntry.label || moduleEntry.name || moduleEntry.normalizedPath)}</span>
+                            ${badge}
+                        </button>`;
+                };
+
+                folders.forEach(([folderName, childNode]) => {
+                    const isSingleLeaf = childNode.folders.size === 0 && childNode.modules.length === 1;
+                    if (isSingleLeaf) {
+                        html += renderLeaf(childNode.modules[0], folderName);
+                        return;
+                    }
+                    const deptAttr = depth >= 2 ? ` data-dept="${escapeHtml(folderName)}"` : '';
+                    html += `
+                        <details class="modules-tree-folder" open data-depth="${depth}">
+                            <summary class="modules-tree-summary"${deptAttr}>
+                                <span class="modules-tree-folder-icon">▾</span>
+                                <span class="modules-tree-folder-name">${escapeHtml(folderName)}</span>
+                            </summary>
+                            <div class="modules-tree-children">
+                                ${renderTree(childNode, depth + 1)}
+                            </div>
+                        </details>`;
+                });
+
+                leaves.forEach((moduleEntry) => {
+                    html += renderLeaf(moduleEntry);
+                });
+
+                return html;
+            };
+
+            const hasRealModules = treeRoot.folders.size > 0 || treeRoot.modules.length > 0;
+            const hasCategoryModules = categoryModules.length > 0;
+
+            // Separate parent-task hierarchy modules from category modules
+            const parentTaskModules = [];
+            const pureCategoryModules = [];
+            for (const m of categoryModules) {
+                if (m.normalizedPath.startsWith('__parent_task__:')) {
+                    parentTaskModules.push(m);
+                } else {
+                    pureCategoryModules.push(m);
+                }
+            }
+
+            const hasParentTasks = parentTaskModules.length > 0;
+            const hasPureCategories = pureCategoryModules.length > 0;
+
+            // Render parent-task hierarchy as a folder-like tree
+            const renderParentTaskSection = () => {
+                if (!hasParentTasks) return '';
+                const sorted = [...parentTaskModules].sort((a, b) => String(a.label || '').localeCompare(String(b.label || '')));
+                return `<div class="modules-section-body">${sorted.map(m => {
+                    const countBadge = m.subtaskCount ? `<span class="modules-item-count">${m.subtaskCount}</span>` : '';
+                    const catBadge = m.category ? `<span class="modules-item-badge">${escapeHtml(m.category)}</span>` : '';
+                    return `<button class="modules-tree-leaf modules-item" data-module-path="${encodeURIComponent(m.normalizedPath)}" title="${escapeHtml(m.label || m.name)}">
+                        <span class="modules-tree-leaf-name">${escapeHtml(m.label || m.name)}</span>
+                        ${catBadge}${countBadge}
+                    </button>`;
+                }).join('')}</div>`;
+            };
+
+            // Build category section — collapsible when real modules also exist, inline when they are the only navigation
+            const renderCategorySection = (inline = false) => {
+                if (!hasPureCategories) return '';
+                const catItems = [...pureCategoryModules].sort((a, b) => String(a.label || '').localeCompare(String(b.label || '')));
+                const catButtons = catItems.map(m =>
+                    `<button class="modules-tree-leaf modules-item modules-category-item" data-module-path="${encodeURIComponent(m.normalizedPath)}" title="Filter: ${escapeHtml(m.label || m.name)}">
+                        <span class="modules-tree-leaf-name">${escapeHtml(m.label || m.name)}</span>
+                        <span class="modules-item-count">${m.taskIds ? m.taskIds.length : ''}</span>
+                    </button>`
+                ).join('');
+                if (inline) {
+                    // flat project — show categories as the primary Modules view (no collapsible wrapper)
+                    return `<div class="modules-dept-header">📂 By Category</div><div class="modules-section-body">${catButtons}</div>`;
+                }
+                return `<details class="modules-section-group">
+                    <summary class="modules-section-summary">🏷️ Categories</summary>
+                    <div class="modules-section-body">${catButtons}</div>
+                </details>`;
+            };
+
+            // Build modules hierarchy section
+            const renderModulesSection = () => {
+                if (!hasRealModules) return '';
+                return `<div class="modules-section-body">${renderTree(treeRoot)}</div>`;
+            };
+
+            const isFlatOnly = !hasRealModules && !hasParentTasks && hasPureCategories;
+
+            sidebarContent.innerHTML = `
+                <button class="modules-root-link" data-module-path="" title="View full project graph">🗂️ <span>Root Project</span></button>
+                ${hasRealModules ? renderModulesSection() : ''}
+                ${hasParentTasks ? renderParentTaskSection() : ''}
+                ${hasPureCategories ? renderCategorySection(isFlatOnly && !hasParentTasks) : ''}
+                ${!hasRealModules && !hasParentTasks && !hasPureCategories ? '<p class="tree-empty">No modules found.</p>' : ''}`;
+
+
+            const markActiveModule = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const activeModule = window.__activeModulePath || urlParams.get('module') || '';
+                sidebarContent.querySelectorAll('.modules-item').forEach(btn => {
+                    const p = decodeURIComponent(btn.getAttribute('data-module-path') || '');
+                    btn.classList.toggle('active', p === activeModule);
+                });
+                const rootLink = sidebarContent.querySelector('.modules-root-link');
+                if (rootLink) rootLink.classList.toggle('active', !activeModule);
+            };
+
+            // ── Module navigation click handlers ─────────────────────────────────
+            sidebarContent.querySelectorAll('[data-module-path]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const rawPath = btn.getAttribute('data-module-path');
+                    const modulePath = rawPath ? decodeURIComponent(rawPath) : '';
+                    // On mobile only: close sidebar after navigating; desktop keeps sidebar open
+                    if (window.innerWidth < 768) sidebar.classList.remove('sidebar-open');
+                    if (!modulePath) {
+                        // Navigate to root project / clear category filter
+                        window.__activeModulePath = '';
+                        window.__activeCategoryFilter = '';
+                        markActiveModule();
+                        // Clear any category highlight
+                        if (graphInstance) {
+                            graphInstance.svg?.selectAll('.node').classed('category-dimmed', false);
+                            graphInstance.svg?.selectAll('.link').classed('category-dimmed', false);
+                        }
+                        if (subtaskStack && subtaskStack.length > 1) {
+                            notifyParentActiveModuleChange('', getCurrentProjectId(), '');
+                            navigateToDepth(-1);
+                        }
+                        return;
+                    }
+                    // Category-based virtual modules — highlight matching tasks
+                    if (modulePath.startsWith('__category__:')) {
+                        const catName = modulePath.slice('__category__:'.length);
+                        window.__activeCategoryFilter = catName;
+                        window.__activeModulePath = modulePath;
+                        markActiveModule();
+                        // Dim non-matching tasks, highlight matching ones
+                        if (graphInstance) {
+                            const catModule = modules.find(m => m.path === modulePath);
+                            const catTaskIds = catModule?.taskIds ? new Set(catModule.taskIds.map(id => `task-${id}`)) : new Set();
+                            graphInstance.svg?.selectAll('.node').each(function(d) {
+                                const el = d3.select(this);
+                                const isMatch = catTaskIds.has(d.id) || d.id === 'project-start' || d.id === 'project-end';
+                                el.classed('category-dimmed', !isMatch);
+                            });
+                        }
+                        return;
+                    }
+                    // Parent-task virtual module — open that task's popup/subtask view
+                    if (modulePath.startsWith('__parent_task__:')) {
+                        const taskId = modulePath.slice('__parent_task__:'.length);
+                        window.__activeModulePath = modulePath;
+                        markActiveModule();
+                        const nodeId = `task-${taskId}`;
+                        // Focus the node in the graph and open its popup
+                        if (graphInstance) {
+                            graphInstance.openNodeModal?.(nodeId);
+                        }
+                        return;
+                    }
+                    // Extract projectId from URL params
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const templateId = urlParams.get('template') || '';
+                    const projectId = templateId.endsWith('-tasks') ? templateId.slice(0, -'-tasks'.length) : templateId;
+                    window.__activeModulePath = modulePath;
+                    markActiveModule();
+                    window._subtaskNavigate(modulePath, projectId, btn.textContent.trim());
+                });
+            });
+            markActiveModule();
+
+            // ── Task Tree tab ─────────────────────────────────────────────────────
+            const treeContent = document.getElementById('modules-tree-content');
+
+            function refreshTaskTree() {
+                if (!treeContent) return;
+                const taskNodes = (graphInstance?.data?.nodes || []).filter(n =>
+                    n.templateType === 'task' ||
+                    (n.type === 'parent' && n.id !== 'project-start' && n.id !== 'project-end')
+                );
+                if (!taskNodes.length) {
+                    treeContent.innerHTML = `<p class="tree-empty">No tasks in current graph.</p>`;
+                    return;
+                }
+                const tasksByLayer = new Map();
+                taskNodes.forEach(n => {
+                    const layer = n.layer ?? 1;
+                    if (!tasksByLayer.has(layer)) tasksByLayer.set(layer, []);
+                    tasksByLayer.get(layer).push(n);
+                });
+                const layers = Array.from(tasksByLayer.keys()).sort((a, b) => a - b);
+                let html = '';
+                layers.forEach(layer => {
+                    const items = tasksByLayer.get(layer);
+                    html += `<div class="tree-layer"><div class="tree-layer-label">Layer ${layer}</div>`;
+                    items.forEach(node => {
+                        const statusKey = (node.status || '').toLowerCase().replace(/\s+/g, '-');
+                        const icon = (statusKey === 'completed' || statusKey === 'done') ? '✓' : statusKey === 'in-progress' ? '▶' : '○';
+                        html += `<button class="tree-task-btn tree-status-${statusKey}" data-node-id="${escapeHtml(node.id)}" title="${escapeHtml(node.label)}">
+                            <span class="tree-task-icon">${icon}</span>
+                            <span class="tree-task-name">${escapeHtml(node.label || node.id)}</span>
+                        </button>`;
+                    });
+                    html += `</div>`;
+                });
+                treeContent.innerHTML = html;
+                treeContent.querySelectorAll('.tree-task-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const nodeId = btn.getAttribute('data-node-id');
+                        if (!nodeId) return;
+                        if (window.innerWidth < 768) sidebar.classList.remove('sidebar-open');
+                        graphInstance?.openNodeModal(nodeId);
+                    });
+                });
+            }
+
+            // ── Tab switching ─────────────────────────────────────────────────────
+            const tabBtns = sidebar.querySelectorAll('.modules-sidebar-tab-btn');
+            const tabPanes = sidebar.querySelectorAll('.sidebar-tab-pane');
+            tabBtns.forEach(tabBtn => {
+                tabBtn.addEventListener('click', () => {
+                    const tab = tabBtn.getAttribute('data-tab');
+                    tabBtns.forEach(b => b.classList.toggle('active', b === tabBtn));
+                    tabPanes.forEach(pane => pane.classList.toggle('active', pane.getAttribute('data-pane') === tab));
+                    if (tab === 'tree') refreshTaskTree();
+                });
+            });
+
+            // ── Toggle button ─────────────────────────────────────────────────────
+            sidebarToggle.style.display = 'flex';
+            sidebarToggle.addEventListener('click', () => {
+                sidebar.style.display = 'flex';
+                sidebar.classList.add('sidebar-open');
+            });
+
+            // ── Close button ──────────────────────────────────────────────────────
+            if (sidebarClose) {
+                sidebarClose.addEventListener('click', () => {
+                    sidebar.classList.remove('sidebar-open');
+                });
+            }
+
+            // ── Close on outside click (mobile only) ──────────────────────────────
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth < 768 &&
+                    sidebar.classList.contains('sidebar-open') &&
+                    !sidebar.contains(e.target) &&
+                    e.target !== sidebarToggle) {
+                    sidebar.classList.remove('sidebar-open');
+                }
+            });
+
+            window.__markActiveModuleInSidebar = markActiveModule;
+            window.__refreshSidebarTaskTree = refreshTaskTree;
+        }
+
+        // Initialize sidebar once graph is ready (if template has modules)
+        if (template && template.meta && template.meta.modules) {
+            initModulesSidebar(template.meta);
+        }
+
+        function renderBreadcrumbs() {
+            let bar = document.getElementById('subtask-breadcrumb');
+            if (!bar) {
+                bar = document.createElement('nav');
+                bar.id = 'subtask-breadcrumb';
+                bar.className = 'subtask-breadcrumb';
+                const header = document.querySelector('.header') || container.parentElement;
+                if (header) header.insertAdjacentElement('afterend', bar);
+                else container.parentElement.insertBefore(bar, container);
+            }
+            if (subtaskStack.length <= 1) {
+                bar.style.display = 'none';
+                return;
+            }
+            bar.style.display = '';
+            const crumbs = [`<button data-depth="-1" class="breadcrumb-link">🏠 Root</button>`];
+            subtaskStack.slice(1).forEach((item, i) => {
+                const stackDepth = i + 1;
+                crumbs.push(`<span class="breadcrumb-sep">›</span>`);
+                if (stackDepth < subtaskStack.length - 1) {
+                    crumbs.push(`<button data-depth="${stackDepth}" class="breadcrumb-link">${item.label}</button>`);
+                } else {
+                    crumbs.push(`<span class="breadcrumb-current">${item.label}</span>`);
+                }
+            });
+            bar.innerHTML = crumbs.join('');
+            bar.querySelectorAll('.breadcrumb-link').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const depth = parseInt(btn.getAttribute('data-depth'), 10);
+                    navigateToDepth(depth);
+                });
+            });
+        }
+
+        function navigateToDepth(depth) {
+            if (depth < 0) {
+                subtaskStack.length = 1;
+                restoreGraphState(subtaskStack[0]);
+                return;
+            }
+            const target = subtaskStack[depth];
+            if (!target) return;
+            subtaskStack.length = depth + 1;
+            restoreGraphState(target);
+        }
+
+        // Expose navigateToDepth globally for popup parent-navigation button
+        window._navigateToDepth = navigateToDepth;
+
+        // Expose subgraph context for popup start/end node navigation
+        window._getSubtaskContext = function () {
+            const current = subtaskStack[subtaskStack.length - 1];
+            return {
+                depth: subtaskStack.length,
+                parentTaskNodeId: current?.parentTaskNodeId || '',
+                parentTaskName: current?.parentTaskName || '',
+                parentSuccessors: current?.parentSuccessors || []
+            };
+        };
+
+        // Navigate up to parent graph and open a specific node's modal
+        window._navigateToParentAndOpenModal = function (targetNodeId) {
+            const targetDepth = subtaskStack.length - 2;
+            navigateToDepth(targetDepth);
+            if (targetNodeId && window.graphInstance) {
+                window.graphInstance.onStable(() => {
+                    window.graphInstance.openNodeModal(targetNodeId);
+                });
+            }
+        };
+
+        window._subtaskNavigate = async function(modulePath, projectId, nodeLabel) {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const currentTemplateId = urlParams.get('template') || '';
+                const effectiveProjectId = projectId || (currentTemplateId.endsWith('-tasks') ? currentTemplateId.slice(0, -'-tasks'.length) : currentTemplateId);
+                const inlineSubtask = isInlineSubtaskPath(modulePath);
+                const currentState = subtaskStack[subtaskStack.length - 1] || subtaskStack[0];
+
+                if (!inlineSubtask && subtaskStack.length > 1) {
+                    subtaskStack.length = 1;
+                }
+
+                const basePath = (window.location && window.location.pathname)
+                    ? window.location.pathname.replace(/\/[^\/]*$/, '/')
+                    : './';
+                const siteRootRaw = basePath.endsWith('/graph-display/')
+                    ? (basePath.slice(0, -'/graph-display/'.length) || '/')
+                    : basePath;
+                const siteRoot = siteRootRaw.endsWith('/') ? siteRootRaw : `${siteRootRaw}/`;
+
+                let tpl = null;
+                let data = null;
+                let nextActiveModulePath = inlineSubtask ? (currentState?.activeModulePath || '') : modulePath;
+                let nextLabel = nodeLabel || modulePath || currentState?.label || 'Subtasks';
+
+                if (inlineSubtask) {
+                    const inlineSourceData = currentState?.template?.sourceData || window.graphInstance?.template?.sourceData;
+                    const inlineSourceEntry = currentState?.template?.sourceEntry || window.graphInstance?.template?.sourceEntry || { id: currentTemplateId, name: currentState?.label || template?.name || 'Subtasks' };
+                    tpl = buildInlineTaskSubgraphTemplatePublic(inlineSourceEntry, inlineSourceData, modulePath);
+                } else {
+                    if (window.FolderProjectService && typeof window.FolderProjectService.getModuleData === 'function') {
+                        const localModuleData = window.FolderProjectService.getModuleData(effectiveProjectId, modulePath);
+                        if (localModuleData && (Array.isArray(localModuleData.tasks) || localModuleData.template_type)) {
+                            data = localModuleData;
+                        }
+                    }
+
+                    const candidates = [
+                        `${siteRoot}api/module?project=${encodeURIComponent(effectiveProjectId)}&path=${encodeURIComponent(modulePath)}`,
+                        `${siteRoot}tasksDB/external/${effectiveProjectId}/${modulePath}`,
+                        `${siteRoot}tasksDB/local/${effectiveProjectId}/${modulePath}`,
+                        `${siteRoot}tasksDB/${effectiveProjectId}/${modulePath}`
+                    ];
+
+                    if (!data) {
+                        for (const url of candidates) {
+                            try {
+                                const res = await fetch(url, { cache: 'no-store' });
+                                if (res.ok) {
+                                    const json = await res.json();
+                                    if (json && (Array.isArray(json.tasks) || json.template_type)) { data = json; break; }
+                                }
+                            } catch { /* try next */ }
+                        }
+                    }
+
+                    if (!data) {
+                        console.warn('Module file not found:', modulePath);
+                        alert('Module file not found: ' + modulePath);
+                        return;
+                    }
+
+                    if ((!data.navigation || !Array.isArray(data.navigation.modules) || data.navigation.modules.length === 0)
+                        && template && template.meta && Array.isArray(template.meta.modules) && template.meta.modules.length > 0) {
+                        data.navigation = {
+                            ...(data.navigation || {}),
+                            modules: template.meta.modules
+                        };
+                    }
+
+                    const tasks = Array.isArray(data.tasks) ? data.tasks : [];
+                    if (!tasks.length) {
+                        console.warn('Module file has no tasks:', modulePath);
+                        renderBreadcrumbs();
+                        const contentDiv = document.getElementById('popup-content');
+                        const popup = document.getElementById('popup');
+                        if (contentDiv && popup) {
+                            contentDiv.innerHTML = `<h2>${nodeLabel || 'Module'}</h2><p>No tasks found in this module.</p>`;
+                            popup.style.display = 'flex';
+                            requestAnimationFrame(() => popup.classList.add('visible'));
+                        }
+                        return;
+                    }
+
+                    const entry = { id: `module-nav-${Date.now()}`, name: nodeLabel || modulePath, type: 'task-management', path: modulePath };
+                    tpl = buildProjectTaskTemplatePublic(entry, data);
+                }
+
+                if (!tpl) {
+                    if (!inlineSubtask) {
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('module', modulePath);
+                        url.searchParams.set('moduleProject', effectiveProjectId);
+                        window.location.href = url.toString();
+                    }
+                    return;
+                }
+
+                // Build parent context so start/end nodes in the subgraph can navigate back
+                let parentTaskNodeId = '';
+                let parentTaskName = '';
+                let parentSuccessors = [];
+                if (inlineSubtask) {
+                    const parsedId = modulePath.replace(INLINE_TASK_ID_PREFIX, '');
+                    parentTaskNodeId = `task-${parsedId}`;
+                    const parentNodes = currentState?.template?.nodes || [];
+                    const parentLinks = currentState?.template?.links || [];
+                    const parentNode = parentNodes.find(n => n.id === parentTaskNodeId);
+                    parentTaskName = parentNode?.label || nodeLabel || '';
+                    // Find successor task nodes in parent graph (tasks that the parent task links TO)
+                    const successorIds = parentLinks
+                        .filter(l => {
+                            const src = typeof l.source === 'string' ? l.source : l.source?.id;
+                            return src === parentTaskNodeId;
+                        })
+                        .map(l => typeof l.target === 'string' ? l.target : l.target?.id)
+                        .filter(id => id && id !== 'project-end');
+                    parentSuccessors = parentNodes
+                        .filter(n => successorIds.includes(n.id))
+                        .map(n => ({ nodeId: n.id, label: n.label || n.id }));
+                }
+
+                subtaskStack.push({
+                    kind: inlineSubtask ? 'inline' : 'module',
+                    label: nextLabel,
+                    template: tpl,
+                    templateId: currentTemplateId,
+                    projectId: effectiveProjectId,
+                    activeModulePath: nextActiveModulePath,
+                    parentTaskNodeId,
+                    parentTaskName,
+                    parentSuccessors
+                });
+                restoreGraphState(subtaskStack[subtaskStack.length - 1]);
+                console.log('Graph re-rendered with subgraph:', modulePath, tpl.nodes.length, 'nodes');
+
+            } catch (err) {
+                console.error('Module navigation error:', err);
+            }
+        };
+
+        const requestedModulePath = new URLSearchParams(window.location.search).get('module');
+        const requestedModuleProject = new URLSearchParams(window.location.search).get('moduleProject');
+        if (requestedModulePath) {
+            window.__activeModulePath = requestedModulePath;
+            if (typeof window.__markActiveModuleInSidebar === 'function') window.__markActiveModuleInSidebar();
+            const moduleLabel = requestedModulePath.split('/').filter(Boolean).slice(-2, -1)[0] || requestedModulePath;
+            requestAnimationFrame(() => {
+                window._subtaskNavigate(requestedModulePath, requestedModuleProject, moduleLabel);
+            });
+        }
+
+        window.addEventListener('message', (e) => {
+            try {
+                if (!e || !e.data || e.data.type !== 'syncActiveModule') return;
+
+                const nextModulePath = String(e.data.modulePath || '').trim();
+                const nextProjectId = String(e.data.projectId || getCurrentProjectId() || '').trim();
+                const nextLabel = String(e.data.label || '').trim();
+
+                if (!nextModulePath) {
+                    if (!window.__activeModulePath && !new URLSearchParams(window.location.search).get('module')) return;
+                    navigateToDepth(-1);
+                    return;
+                }
+
+                if (window.__activeModulePath === nextModulePath) return;
+                window._subtaskNavigate(nextModulePath, nextProjectId, nextLabel || nextModulePath);
+            } catch (error) {
+                console.warn('Unable to sync active module from parent', error);
+            }
+        });
+        // --- End Subtask Navigation Engine ---
 
     } catch (error) {
          console.error("Critical error during graph initialization:", error);

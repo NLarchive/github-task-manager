@@ -155,6 +155,11 @@
     transition: stroke-width 0.15s ease, filter 0.15s ease;
 }
 
+#graph-container .node:focus,
+#graph-container .node:focus-visible {
+    outline: none;
+}
+
 #graph-container .node.dragging {
     cursor: move;
 }
@@ -172,10 +177,40 @@
     opacity: 0.1;
 }
 
+/* ===== Interaction States (hover / keyboard focus persistent selection) ===== */
+/* Hover highlight uses the same darker orange requested for selected nodes. */
+#graph-container .node.is-interacted circle {
+    stroke: #ff5722;
+    stroke-width: 3.5px;
+    filter: drop-shadow(0 0 5px rgba(255, 87, 34, 0.5));
+    transition: stroke-width 0.15s ease, filter 0.15s ease;
+}
+
+/* Selected node (modal open) — permanent blinking orange-red outline */
+#graph-container .node.details-shown-for circle {
+    stroke: #ff5722;
+    stroke-width: 5px;
+    filter: drop-shadow(0 0 8px rgba(255, 87, 34, 0.7)) drop-shadow(0 0 20px rgba(255, 87, 34, 0.3));
+    animation: pulse-selected 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse-selected {
+    0%, 100% {
+        stroke-width: 5px;
+        filter: drop-shadow(0 0 6px rgba(255, 87, 34, 0.55));
+    }
+    50% {
+        stroke-width: 9px;
+        filter: drop-shadow(0 0 18px rgba(255, 87, 34, 0.95)) drop-shadow(0 0 34px rgba(255, 87, 34, 0.4));
+    }
+}
+
 /* ===== Search/Highlight States ===== */
 #graph-container .node.focus-highlight circle {
     stroke: #ff5722;
-    stroke-width: 4px;
+    stroke-width: 7px;
+    filter: drop-shadow(0 0 10px rgba(255, 87, 34, 0.85)) drop-shadow(0 0 22px rgba(255, 87, 34, 0.4));
+    animation: pulse-focus-highlight 0.65s ease-in-out 4;
 }
 
 #graph-container .node.search-match circle {
@@ -221,18 +256,9 @@
 }
 
 @keyframes pulse-focus-highlight {
-    0% { 
-        stroke-width: 5px; 
-        filter: drop-shadow(0 0 4px rgba(255, 87, 34, 0.5)); 
-    }
-    50% { 
-        stroke-width: 7px; 
-        filter: drop-shadow(0 0 10px rgba(255, 87, 34, 0.7)); 
-    }
-    100% { 
-        stroke-width: 5px; 
-        filter: drop-shadow(0 0 4px rgba(255, 87, 34, 0.5)); 
-    }
+    0%   { stroke-width: 5px;  filter: drop-shadow(0 0 6px rgba(255, 87, 34, 0.60)); opacity: 1; }
+    40%  { stroke-width: 10px; filter: drop-shadow(0 0 20px rgba(255, 87, 34, 1.0)) drop-shadow(0 0 35px rgba(255, 87, 34, 0.55)); opacity: 0.82; }
+    100% { stroke-width: 7px;  filter: drop-shadow(0 0 10px rgba(255, 87, 34, 0.85)); opacity: 1; }
 }
 
 /* ===== Link Styles ===== */
@@ -309,5 +335,51 @@
 }
 
 #graph-container .link.faded {
+    stroke-opacity: 0.05 !important;
+}
+
+/* ===== Node Status Visual States ===== */
+
+/* Completed State: Greyed/Desaturated with reduced opacity */
+#graph-container .node.node-status-completed circle,
+#graph-container .node.node-status-done circle {
+    opacity: var(--status-completed-opacity) !important;
+    filter: var(--status-completed-filter) !important;
+}
+#graph-container .node.node-status-completed text,
+#graph-container .node.node-status-done text {
+    opacity: 0.6 !important;
+}
+
+/* In Progress State: Pulsing/Irradiated aura (CSS animation + SVG glow) */
+#graph-container .node.node-status-in-progress circle {
+    animation: pulse-in-progress 2.5s infinite ease-in-out;
+    filter: drop-shadow(var(--status-in-progress-glow));
+}
+
+@keyframes pulse-in-progress {
+    0% {
+        filter: drop-shadow(0 0 5px var(--status-in-progress-aura));
+        stroke-width: 2px;
+    }
+    50% {
+        filter: drop-shadow(0 0 18px var(--status-in-progress-glow));
+        stroke-width: 4px;
+    }
+    100% {
+        filter: drop-shadow(0 0 5px var(--status-in-progress-aura));
+        stroke-width: 2px;
+    }
+}
+
+/* Not Started tasks remain static (default styles) */
+
+/* Category filter dimming */
+#graph-container .node.category-dimmed {
+    opacity: 0.15;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+#graph-container .link.category-dimmed {
     stroke-opacity: 0.05 !important;
 }

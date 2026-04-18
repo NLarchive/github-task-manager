@@ -28,7 +28,7 @@
   "meta": {
     "legendMode": "task-management",
     "walkthroughEnabled": true,
-    "walkthroughStepsPath": "templates/task-management/tour.json"
+    "walkthroughStepsPath": "../tasksDB/_examples/task-management/tour.json"
   },
   "configOverrides": {
     "colorMode": "priority",

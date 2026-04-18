@@ -88,7 +88,7 @@ All tasks must conform to the template validation schema defined in:
 
 The complete task history is maintained in git commits:
 - View history: `git log public/tasksDB/`
-- Restore previous version: `git checkout <commit> public/tasksDB/github-task-manager/tasks.json`
+- Restore previous version: `git checkout <commit> public/tasksDB/external/github-task-manager/tasks.json`
 
 ## Integration Points
 

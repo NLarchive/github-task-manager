@@ -112,6 +112,118 @@ describe('ENUMS Validation', () => {
     expect(ENUMS.DEPENDENCY_TYPES).toContain('FF');
     expect(ENUMS.DEPENDENCY_TYPES).toContain('SF');
   });
+
+  it('should have "In Review" in TASK_STATUS (v3)', () => {
+    expect(ENUMS.TASK_STATUS).toContain('In Review');
+  });
+
+  it('should have "Done" in TASK_STATUS (v3)', () => {
+    expect(ENUMS.TASK_STATUS).toContain('Done');
+  });
+
+  it('should have "Planning" in PROJECT_STATUS (v3)', () => {
+    expect(ENUMS.PROJECT_STATUS).toContain('Planning');
+  });
+
+  it('should have COMPLEXITY enum (v3)', () => {
+    expect(Array.isArray(ENUMS.COMPLEXITY)).toBeTruthy();
+    expect(ENUMS.COMPLEXITY).toContain('Low');
+    expect(ENUMS.COMPLEXITY).toContain('Medium');
+    expect(ENUMS.COMPLEXITY).toContain('High');
+    expect(ENUMS.COMPLEXITY).toContain('Very Low');
+    expect(ENUMS.COMPLEXITY).toContain('Very High');
+  });
+
+  it('should have RISK_STATUS enum (v3)', () => {
+    expect(Array.isArray(ENUMS.RISK_STATUS)).toBeTruthy();
+    expect(ENUMS.RISK_STATUS).toContain('Open');
+    expect(ENUMS.RISK_STATUS).toContain('Mitigated');
+    expect(ENUMS.RISK_STATUS).toContain('Closed');
+  });
+
+  it('should have MILESTONE_STATUS enum (v3)', () => {
+    expect(Array.isArray(ENUMS.MILESTONE_STATUS)).toBeTruthy();
+    expect(ENUMS.MILESTONE_STATUS).toContain('Achieved');
+    expect(ENUMS.MILESTONE_STATUS).toContain('Missed');
+  });
+
+  it('should have SPRINT_STATUS enum (v3)', () => {
+    expect(Array.isArray(ENUMS.SPRINT_STATUS)).toBeTruthy();
+    expect(ENUMS.SPRINT_STATUS).toContain('Active');
+  });
+
+  it('should have WORKER_ROLE enum (v3)', () => {
+    expect(Array.isArray(ENUMS.WORKER_ROLE)).toBeTruthy();
+    expect(ENUMS.WORKER_ROLE).toContain('Developer');
+    expect(ENUMS.WORKER_ROLE).toContain('QA Engineer');
+  });
+});
+
+describe('v3 Defaults', () => {
+  it('should have due_date default as null in TASK defaults', () => {
+    expect(TEMPLATE_CONFIG.DEFAULTS.TASK.due_date).toBe(null);
+  });
+
+  it('should have subtasks default as empty array in TASK defaults', () => {
+    expect(Array.isArray(TEMPLATE_CONFIG.DEFAULTS.TASK.subtasks)).toBeTruthy();
+    expect(TEMPLATE_CONFIG.DEFAULTS.TASK.subtasks.length).toBe(0);
+  });
+
+  it('should have links default as empty array in TASK defaults', () => {
+    expect(Array.isArray(TEMPLATE_CONFIG.DEFAULTS.TASK.links)).toBeTruthy();
+  });
+
+  it('should have acceptance_criteria default as empty array in TASK defaults', () => {
+    expect(Array.isArray(TEMPLATE_CONFIG.DEFAULTS.TASK.acceptance_criteria)).toBeTruthy();
+  });
+
+  it('should have timezone default as UTC in PROJECT defaults', () => {
+    expect(TEMPLATE_CONFIG.DEFAULTS.PROJECT.timezone).toBe('UTC');
+  });
+
+  it('should have currency default as USD in PROJECT defaults', () => {
+    expect(TEMPLATE_CONFIG.DEFAULTS.PROJECT.currency).toBe('USD');
+  });
+
+  it('should have budget_spent default as 0 in PROJECT defaults', () => {
+    expect(TEMPLATE_CONFIG.DEFAULTS.PROJECT.budget_spent).toBe(0);
+  });
+});
+
+describe('v3 Optional Fields', () => {
+  it('should include due_date in OPTIONAL_FIELDS.TASK', () => {
+    expect(TEMPLATE_CONFIG.OPTIONAL_FIELDS.TASK).toContain('due_date');
+  });
+
+  it('should include subtasks in OPTIONAL_FIELDS.TASK', () => {
+    expect(TEMPLATE_CONFIG.OPTIONAL_FIELDS.TASK).toContain('subtasks');
+  });
+
+  it('should include links in OPTIONAL_FIELDS.TASK', () => {
+    expect(TEMPLATE_CONFIG.OPTIONAL_FIELDS.TASK).toContain('links');
+  });
+
+  it('should include acceptance_criteria in OPTIONAL_FIELDS.TASK', () => {
+    expect(TEMPLATE_CONFIG.OPTIONAL_FIELDS.TASK).toContain('acceptance_criteria');
+  });
+
+  it('should include due_date in OPTIONAL_INPUT field categories', () => {
+    expect(TEMPLATE_CONFIG.FIELD_CATEGORIES.OPTIONAL_INPUT).toContain('due_date');
+  });
+});
+
+describe('STATUS_NORMALIZATION v3', () => {
+  it('should have "in review" normalization', () => {
+    expect(TEMPLATE_CONFIG.STATUS_NORMALIZATION['in review']).toBe('In Review');
+  });
+
+  it('should have "in_review" normalization', () => {
+    expect(TEMPLATE_CONFIG.STATUS_NORMALIZATION['in_review']).toBe('In Review');
+  });
+
+  it('should have "done" normalization to "Done"', () => {
+    expect(TEMPLATE_CONFIG.STATUS_NORMALIZATION['done']).toBe('Done');
+  });
 });
 
 describe('GITHUB Configuration', () => {
@@ -129,8 +241,8 @@ describe('GITHUB Configuration', () => {
     expect(GITHUB.BRANCH).toBe('main');
   });
 
-  it('should have TASKS_FILE set to public/tasksDB/github-task-manager/tasks.json', () => {
-    expect(GITHUB.TASKS_FILE).toBe('public/tasksDB/github-task-manager/tasks.json');
+  it('should have TASKS_FILE set to public/tasksDB/external/github-task-manager/tasks.json', () => {
+    expect(GITHUB.TASKS_FILE).toBe('public/tasksDB/external/github-task-manager/tasks.json');
   });
 
   it('should resolve project config for github-task-manager', () => {
@@ -138,6 +250,7 @@ describe('GITHUB Configuration', () => {
     const cfg = GITHUB.getProjectConfig('github-task-manager');
     expect(cfg).toBeTruthy();
     expect(cfg.id).toBe('github-task-manager');
+    expect(cfg.scope).toBe('external');
     expect(cfg.owner).toBe('nlarchive');
     expect(cfg.repo).toBe('github-task-manager');
     expect(cfg.branch).toBe('main');
@@ -156,8 +269,8 @@ describe('GITHUB Configuration', () => {
 
   it('should compute tasks file per project root', () => {
     expect(typeof GITHUB.getTasksFile).toBe('function');
-    expect(GITHUB.getTasksFile('github-task-manager')).toBe('public/tasksDB/github-task-manager/tasks.json');
-    expect(GITHUB.getTasksFile('ai-career-roadmap')).toBe('public/tasksDB/ai-career-roadmap/tasks.json');
+    expect(GITHUB.getTasksFile('github-task-manager')).toBe('public/tasksDB/external/github-task-manager/tasks.json');
+    expect(GITHUB.getTasksFile('ai-career-roadmap')).toBe('public/tasksDB/external/ai-career-roadmap/tasks.json');
   });
 });
 

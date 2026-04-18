@@ -74,15 +74,6 @@ a {
         font-size: 32px;
     }
     
-    /* Graph nodes - slightly larger for touch */
-    #graph-container .node-type-parent circle {
-        r: 32px;
-    }
-    
-    #graph-container .node-type-child circle {
-        r: 20px;
-    }
-    
         /* Ensure main content fills viewport */
         #main-content,
         #graph-container {
@@ -159,15 +150,6 @@ a {
 
 /* ===== Large Tablet Breakpoint (992px and below) ===== */
 @media (max-width: 992px) {
-    /* Adjust graph node sizes for tablets */
-    #graph-container .node-type-parent circle {
-        r: 28px;
-    }
-    
-    #graph-container .node-type-child circle {
-        r: 16px;
-    }
-    
     #graph-container .node-type-parent text {
         font-size: 12px;
     }
@@ -179,14 +161,7 @@ a {
 
 /* ===== Desktop Breakpoint (1024px and below) ===== */
 @media (max-width: 1024px) {
-    /* Additional responsive adjustments for desktop */
-    #graph-container .node-type-parent circle {
-        r: 30px;
-    }
-    
-    #graph-container .node-type-child circle {
-        r: 18px;
-    }
+    /* Node sizing delegated to JS estimated_hours computation */
 }
 
 /* ===== Large Desktop Breakpoint (1200px and below) ===== */
@@ -207,15 +182,6 @@ a {
 
 /* ===== Small Tablet Breakpoint (576px and below) ===== */
 @media (max-width: 576px) {
-    /* Further reduce node sizes */
-    #graph-container .node-type-parent circle {
-        r: 24px;
-    }
-    
-    #graph-container .node-type-child circle {
-        r: 14px;
-    }
-    
     #graph-container .node-type-parent text {
         font-size: 11px;
     }

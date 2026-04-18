@@ -23,11 +23,13 @@ git config pull.rebase true
 
 #### Editing Task Data
 
-The canonical task data source is [`public/tasksDB/<project>/tasks.json`](public/tasksDB/) (e.g., `public/tasksDB/github-task-manager/tasks.json`).
+The canonical task data source is [`public/tasksDB/<scope>/<project>/tasks.json`](public/tasksDB/) (e.g., `public/tasksDB/external/github-task-manager/tasks.json`).
+
+For graph-display integration, keep project-specific graph metadata in that same `tasks.json` file under `graphTemplate`, and keep project tours in `public/tasksDB/<scope>/<project>/tour/graph-tour.json`. Reserve `public/graph-display/templates/` for standalone demo templates and schema files, not mirrored project copies.
 
 **Important**: Do NOT commit derived files:
-- `public/tasksDB/*/state/*.json` — auto-generated state files (ignored by git)
-- `public/tasksDB/*/tasks.csv` — auto-generated CSV export (ignored by git)
+- `public/tasksDB/*/*/state/*.json` — auto-generated state files (ignored by git)
+- `public/tasksDB/*/*/tasks.csv` — auto-generated CSV export (ignored by git)
 
 These are regenerated from `tasks.json` and are excluded from version control to prevent merge conflicts.
 
@@ -46,14 +48,14 @@ See [`tests/e2e/update-task-via-ui.spec.js`](tests/e2e/update-task-via-ui.spec.j
 
 If you must edit `tasks.json` directly:
 
-1. Edit [`public/tasksDB/github-task-manager/tasks.json`](public/tasksDB/github-task-manager/tasks.json)
+1. Edit [`public/tasksDB/external/github-task-manager/tasks.json`](public/tasksDB/external/github-task-manager/tasks.json)
 2. Regenerate derived files locally:
    ```bash
    npm run tasks:regenerate-all
    ```
 3. Commit **only** the `tasks.json` change:
    ```bash
-   git add public/tasksDB/github-task-manager/tasks.json
+   git add public/tasksDB/external/github-task-manager/tasks.json
    git commit -m "Update tasks: <short description>"
    ```
 4. The derived files will stay ignored (not committed).
@@ -86,13 +88,13 @@ npm run tasks:regenerate-csv
 npm run tasks:regenerate-all
 
 # Now you can view/test with fresh state/csv
-ls public/tasksDB/github-task-manager/state/
-cat public/tasksDB/github-task-manager/tasks.csv
+ls public/tasksDB/external/github-task-manager/state/
+cat public/tasksDB/external/github-task-manager/tasks.csv
 ```
 
 #### Verify files are ignored:
 ```bash
-git check-ignore -v public/tasksDB/github-task-manager/state/* public/tasksDB/github-task-manager/tasks.csv
+git check-ignore -v public/tasksDB/external/github-task-manager/state/* public/tasksDB/external/github-task-manager/tasks.csv
 
 # Should show .gitignore rules matching these files
 ```
@@ -103,19 +105,19 @@ Only track `tasks.json` and code changes — never commit derived files:
 
 ```bash
 # Good: commit only the source JSON
-git add public/tasksDB/github-task-manager/tasks.json
+git add public/tasksDB/external/github-task-manager/tasks.json
 git commit -m "Update tasks: document token strategy"
 git push origin main
 
 # Bad: do not commit these
-git add public/tasksDB/github-task-manager/state/*
-git add public/tasksDB/github-task-manager/tasks.csv
+git add public/tasksDB/external/github-task-manager/state/*
+git add public/tasksDB/external/github-task-manager/tasks.csv
 ```
 
 If you accidentally stage them, unstage with:
 ```bash
-git reset HEAD public/tasksDB/github-task-manager/state/*
-git reset HEAD public/tasksDB/github-task-manager/tasks.csv
+git reset HEAD public/tasksDB/external/github-task-manager/state/*
+git reset HEAD public/tasksDB/external/github-task-manager/tasks.csv
 ```
 
 ### 6. Handling Merge Conflicts
@@ -124,15 +126,15 @@ If you encounter merge conflicts during rebase, prefer the remote version for de
 
 ```bash
 # Resolve conflict by accepting remote's version
-git checkout --theirs public/tasksDB/github-task-manager/state/*
-git checkout --theirs public/tasksDB/github-task-manager/tasks.csv
+git checkout --theirs public/tasksDB/external/github-task-manager/state/*
+git checkout --theirs public/tasksDB/external/github-task-manager/tasks.csv
 git add <conflicted-files>
 git rebase --continue
 ```
 
 For `tasks.json`, manually inspect and merge if needed, then:
 ```bash
-git add public/tasksDB/github-task-manager/tasks.json
+git add public/tasksDB/external/github-task-manager/tasks.json
 git rebase --continue
 ```
 

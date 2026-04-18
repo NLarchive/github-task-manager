@@ -27,7 +27,7 @@
     "profileNodeId": "profile",
     "coreNodeId": "core-expertise",
     "walkthroughEnabled": true,
-    "walkthroughStepsPath": "templates/career/tour.json",
+    "walkthroughStepsPath": "../tasksDB/_examples/career/tour.json",
     "showCvButton": true,
     "showCoreButton": true,
     "showProfileButton": true,

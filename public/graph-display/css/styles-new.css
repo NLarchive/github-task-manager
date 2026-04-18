@@ -45,6 +45,7 @@
 /* ===== 5. Utilities ===== */
 @import url('components/_colors.css');
 @import url('components/_responsive.css');
+@import url('components/_modules-sidebar.css');
 
 /* ============================================================ */
 /* END OF MAIN STYLESHEET */

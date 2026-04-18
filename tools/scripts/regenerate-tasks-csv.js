@@ -1,8 +1,8 @@
 /**
  * regenerate-tasks-csv.js
  * ------------------------
- * Generates a flattened CSV export from public/tasksDB/<project>/tasks.json
- * Output: public/tasksDB/<project>/tasks.csv
+ * Generates a flattened CSV export from public/tasksDB/<scope>/<project>/tasks.json
+ * Output: public/tasksDB/<scope>/<project>/tasks.csv
  * Usage: node tools/scripts/regenerate-tasks-csv.js <projectId>
  */
 const fs = require('fs');
@@ -19,8 +19,16 @@ function escapeCsvValue(value) {
 function main() {
   const repoRoot = path.join(__dirname, '..', '..');
   const projectId = (process.argv[2] || 'github-task-manager').replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
-  const tasksJsonPath = path.join(repoRoot, 'public', 'tasksDB', projectId, 'tasks.json');
-  const tasksCsvPath = path.join(repoRoot, 'public', 'tasksDB', projectId, 'tasks.csv');
+  const tasksDbRoot = path.join(repoRoot, 'public', 'tasksDB');
+  // Auto-discover scope
+  let projectDir = null;
+  for (const scope of ['external', 'local', '']) {
+    const candidate = scope ? path.join(tasksDbRoot, scope, projectId) : path.join(tasksDbRoot, projectId);
+    if (fs.existsSync(path.join(candidate, 'tasks.json'))) { projectDir = candidate; break; }
+  }
+  if (!projectDir) { console.error(`tasks.json not found for project: ${projectId}`); process.exit(1); }
+  const tasksJsonPath = path.join(projectDir, 'tasks.json');
+  const tasksCsvPath = path.join(projectDir, 'tasks.csv');
 
   const raw = fs.readFileSync(tasksJsonPath, 'utf8');
   const parsed = JSON.parse(raw);

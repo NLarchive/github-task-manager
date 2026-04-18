@@ -70,6 +70,17 @@ global.expect = (actual) => ({
       throw new Error(`Expected ${JSON.stringify(actual)} to contain ${JSON.stringify(expected)}`);
     }
   },
+  toMatch: (expected) => {
+    if (expected instanceof RegExp) {
+      if (!expected.test(String(actual))) {
+        throw new Error(`Expected ${JSON.stringify(actual)} to match ${expected.toString()}`);
+      }
+      return;
+    }
+    if (!String(actual).includes(String(expected))) {
+      throw new Error(`Expected ${JSON.stringify(actual)} to match ${JSON.stringify(expected)}`);
+    }
+  },
   toHaveLength: (expected) => {
     if (actual.length !== expected) {
       throw new Error(`Expected length ${expected} but got ${actual.length}`);
@@ -114,11 +125,14 @@ console.log('='.repeat(50));
 async function main() {
   // Load test files (they register tests into the queue)
   const testFiles = [
+    'graph-data.test.js',
+    'folder-project-service.test.js',
     'template-config.test.js',
     'template-validator.test.js',
     'template-automation.test.js',
     'task-database.test.js',
-    'server-api.test.js'
+    'server-api.test.js',
+    'tasks-json-format.test.js'
   ];
 
   testFiles.forEach(file => {

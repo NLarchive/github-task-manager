@@ -29,6 +29,17 @@ class TaskManagerApp {
 
         // Multi-project state
         this.activeProjectId = null;
+        this.projectPayload = null;
+        this.rootTasks = [];
+        this.currentContextTasks = [];
+        this.navigationModules = [];
+        this.moduleIndex = new Map();
+        this.moduleNameIndex = new Map();
+        this.moduleCache = new Map();
+        this.activeModuleData = null;
+        this.activeModulePath = '';
+        this.currentContextFlowSummary = { startTaskKeys: [], endTaskKeys: [], startLabels: [], endLabels: [] };
+        this.isModulePanelOpen = false;
     }
 
     getGraphTemplateIdForActiveProject() {
@@ -37,10 +48,72 @@ class TaskManagerApp {
         return `${safeProject}-tasks`;
     }
 
+    getStoredFolderProjects() {
+        if (typeof window === 'undefined' || !window.FolderProjectService || typeof window.FolderProjectService.listProjects !== 'function') {
+            return [];
+        }
+
+        return window.FolderProjectService.listProjects().map(projectRecord => ({
+            id: projectRecord.id,
+            label: projectRecord.label || projectRecord.id,
+            scope: 'folder'
+        }));
+    }
+
+    registerFolderProjectOption(projectRecord) {
+        const select = document.getElementById('projectSelect');
+        if (!select || !projectRecord || !projectRecord.id) return;
+
+        let optgroup = Array.from(select.querySelectorAll('optgroup')).find(group => group.label === 'Opened Folders');
+        if (!optgroup) {
+            optgroup = document.createElement('optgroup');
+            optgroup.label = 'Opened Folders';
+            select.appendChild(optgroup);
+        }
+
+        const existing = Array.from(optgroup.querySelectorAll('option')).find(option => option.value === projectRecord.id);
+        if (!existing) {
+            const option = document.createElement('option');
+            option.value = projectRecord.id;
+            option.textContent = projectRecord.label || projectRecord.id;
+            optgroup.appendChild(option);
+        }
+
+        select.value = projectRecord.id;
+    }
+
+    initializeFolderProjectPicker() {
+        if (typeof window === 'undefined' || !window.FolderProjectUI || typeof window.FolderProjectUI.bindFolderProjectPicker !== 'function') return;
+
+        window.FolderProjectUI.bindFolderProjectPicker({
+            trigger: 'folderProjectLoadBtn',
+            result: 'folderProjectLoadResult',
+            idleLabel: '📂 Open Local Folder',
+            loadingLabel: 'Opening...',
+            onProjectLoaded: async (projectRecord) => {
+                this.registerFolderProjectOption(projectRecord);
+
+                if (projectRecord.id === this.activeProjectId) {
+                    await this.loadTasks();
+                    this.refreshCategoryOptions();
+                    this.ensureGraphIframeLoaded();
+                } else {
+                    await this.setActiveProject(projectRecord.id);
+                }
+
+                this.showToast(`Opened local folder project: ${projectRecord.label || projectRecord.id}`, 'success');
+            }
+        });
+    }
+
     buildGraphIframeSrc() {
         const templateId = this.getGraphTemplateIdForActiveProject();
         const qp = new URLSearchParams();
         if (templateId) qp.set('template', templateId);
+        if (this.activeModulePath) {
+            qp.set('module', this.activeModulePath);
+            if (this.activeProjectId) qp.set('moduleProject', this.activeProjectId);
+        }
         qp.set('embed', '1');
         // Build a host-relative path based on the current pathname so it works both
         // locally and on GitHub Pages where the site may be hosted under a subpath.
@@ -153,6 +226,7 @@ class TaskManagerApp {
 
         this.setupEventListeners();
         this.setupProjectSelector();
+        this.initializeFolderProjectPicker();
         this.setupStatCardFilters();
         this.loadUserName();
         this.updateAccessIndicator(); // Initialize access indicator
@@ -177,6 +251,21 @@ class TaskManagerApp {
                     if (projectId) {
                         this.setActiveProject(projectId);
                     }
+                    return;
+                }
+
+                if (e.data.type === 'activeModuleChanged' && isFromGraphFrame) {
+                    const projectId = String(e.data.projectId || this.activeProjectId || '').trim().replace(/[^a-zA-Z0-9_-]/g, '');
+                    const modulePath = this.normalizeModulePath(e.data.modulePath || '');
+
+                    Promise.resolve((async () => {
+                        if (projectId && projectId !== this.activeProjectId) {
+                            await this.setActiveProject(projectId);
+                        }
+                        await this.setActiveModule(modulePath, { syncGraph: false });
+                    })()).catch((messageError) => {
+                        console.warn('Error syncing active module from graph iframe', messageError);
+                    });
                     return;
                 }
 
@@ -250,27 +339,72 @@ class TaskManagerApp {
         const select = document.getElementById('projectSelect');
         if (!select || !templateConfig || !templateConfig.GITHUB) return;
 
-        const projects = Array.isArray(templateConfig.GITHUB.PROJECTS) ? templateConfig.GITHUB.PROJECTS : [];
-        if (projects.length === 0) return;
+        const staticProjects = Array.isArray(templateConfig.GITHUB.PROJECTS) ? templateConfig.GITHUB.PROJECTS : [];
+        const getSelectableProjects = (extraProjects = []) => [
+            ...staticProjects,
+            ...this.getStoredFolderProjects(),
+            ...extraProjects
+        ];
 
-        // Populate options (id + label)
-        select.innerHTML = '';
-        for (const proj of projects) {
-            if (!proj || !proj.id) continue;
-            const opt = document.createElement('option');
-            opt.value = proj.id;
-            opt.textContent = proj.label || proj.id;
-            select.appendChild(opt);
-        }
+        const renderSelector = (projects) => {
+            if (projects.length === 0) return;
 
-        // Set current selection
-        const current = this.activeProjectId || templateConfig.GITHUB.ACTIVE_PROJECT_ID || templateConfig.GITHUB.DEFAULT_PROJECT_ID;
-        if (current) select.value = current;
+            // Group projects by scope (external / local)
+            const groups = {};
+            for (const proj of projects) {
+                if (!proj || !proj.id) continue;
+                const scope = proj.scope || 'external';
+                if (!groups[scope]) groups[scope] = [];
+                // Deduplicate by id
+                if (!groups[scope].find(p => p.id === proj.id)) groups[scope].push(proj);
+            }
+
+            select.innerHTML = '';
+            const scopeLabels = { external: 'External Projects', local: 'Local Projects', folder: 'Opened Folders' };
+            for (const scope of ['external', 'local', 'folder']) {
+                const items = groups[scope];
+                if (!items || items.length === 0) continue;
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = scopeLabels[scope] || scope;
+                for (const proj of items) {
+                    const opt = document.createElement('option');
+                    opt.value = proj.id;
+                    opt.textContent = proj.label || proj.id;
+                    optgroup.appendChild(opt);
+                }
+                select.appendChild(optgroup);
+            }
+
+            // Set current selection
+            const current = this.activeProjectId || templateConfig.GITHUB.ACTIVE_PROJECT_ID || templateConfig.GITHUB.DEFAULT_PROJECT_ID;
+            if (current) select.value = current;
+        };
+
+        renderSelector(getSelectableProjects());
 
         select.addEventListener('change', async () => {
             const nextId = (select.value || '').trim();
             await this.setActiveProject(nextId);
         });
+
+        // Discover additional local projects via /api/projects (localhost only)
+        const isLocalhost = typeof window !== 'undefined' && window.location &&
+            (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '::1');
+        if (isLocalhost) {
+            fetch('/api/projects', { cache: 'no-store' })
+                .then(r => r.ok ? r.json() : null)
+                .then(result => {
+                    if (!result || !Array.isArray(result.projects)) return;
+                    const knownIds = new Set(getSelectableProjects().map(p => p.id));
+                    const discovered = result.projects
+                        .filter(p => !knownIds.has(p.id))
+                        .map(p => ({ id: p.id, label: p.id, scope: p.scope || 'local' }));
+                    if (discovered.length > 0) {
+                        renderSelector(getSelectableProjects(discovered));
+                    }
+                })
+                .catch(() => { /* non-critical */ });
+        }
     }
 
     async setActiveProject(projectId) {
@@ -291,6 +425,15 @@ class TaskManagerApp {
         }
 
         this.activeProjectId = safeProject;
+        this.activeModulePath = '';
+        this.activeModuleData = null;
+        this.currentContextTasks = [];
+        this.currentContextFlowSummary = { startTaskKeys: [], endTaskKeys: [], startLabels: [], endLabels: [] };
+        this.navigationModules = [];
+        this.moduleIndex = new Map();
+        this.moduleNameIndex = new Map();
+        this.moduleCache.clear();
+        this.isModulePanelOpen = false;
         localStorage.setItem('taskManagerActiveProject', safeProject);
 
         templateConfig.GITHUB.ACTIVE_PROJECT_ID = safeProject;
@@ -346,6 +489,655 @@ class TaskManagerApp {
         } catch (err) {
             // Non-fatal
         }
+    }
+
+    normalizeModulePath(value) {
+        return String(value || '')
+            .trim()
+            .replace(/\\/g, '/')
+            .replace(/^\.\//, '')
+            .replace(/^\/+/, '');
+    }
+
+    normalizeModuleEntry(moduleEntry) {
+        if (!moduleEntry || typeof moduleEntry !== 'object') return null;
+
+        const normalizedPath = this.normalizeModulePath(moduleEntry.path);
+        if (!normalizedPath) return null;
+
+        return {
+            ...moduleEntry,
+            path: normalizedPath,
+            modulePath: this.normalizeModulePath(moduleEntry.modulePath || ''),
+            taskIds: Array.isArray(moduleEntry.taskIds)
+                ? moduleEntry.taskIds.filter(Boolean)
+                : (Array.isArray(moduleEntry.task_ids) ? moduleEntry.task_ids.filter(Boolean) : []),
+            startTasks: Array.isArray(moduleEntry.startTasks) ? moduleEntry.startTasks.filter(Boolean) : [],
+            endTasks: Array.isArray(moduleEntry.endTasks) ? moduleEntry.endTasks.filter(Boolean) : [],
+            pipeline: moduleEntry.pipeline && typeof moduleEntry.pipeline === 'object' ? moduleEntry.pipeline : null
+        };
+    }
+
+    getTaskKey(task) {
+        if (!task || typeof task !== 'object') return '';
+        const taskName = String(task.task_name || task.title || '').trim();
+        if (taskName) return taskName;
+
+        const rawId = task.task_id ?? task.id ?? task.taskId;
+        return rawId === null || rawId === undefined ? '' : String(rawId).trim();
+    }
+
+    getTaskCode(task) {
+        const taskKey = this.getTaskKey(task);
+        if (!taskKey) return '';
+        return taskKey.includes(':') ? taskKey.slice(0, taskKey.indexOf(':')).trim() : taskKey;
+    }
+
+    getTaskPredecessorKeys(task) {
+        if (!task || !Array.isArray(task.dependencies)) return [];
+
+        const predecessors = [];
+        for (const dependency of task.dependencies) {
+            if (!dependency || typeof dependency !== 'object') continue;
+
+            const predecessorName = String(dependency.predecessor_task_name || '').trim();
+            if (predecessorName) predecessors.push(predecessorName);
+
+            const predecessorId = dependency.predecessor_task_id;
+            if (predecessorId !== null && predecessorId !== undefined && predecessorId !== '') {
+                predecessors.push(String(predecessorId).trim());
+            }
+        }
+
+        return predecessors.filter(Boolean);
+    }
+
+    buildTaskFlowSummary(tasks = []) {
+        const taskList = Array.isArray(tasks) ? tasks.filter(task => task && typeof task === 'object') : [];
+        const canonicalKeyByAlias = new Map();
+        const labelsByKey = new Map();
+
+        taskList.forEach((task) => {
+            const taskKey = this.getTaskKey(task);
+            if (!taskKey) return;
+
+            labelsByKey.set(taskKey, String(task.task_name || task.title || taskKey));
+            canonicalKeyByAlias.set(taskKey, taskKey);
+
+            const taskCode = this.getTaskCode(task);
+            if (taskCode && !canonicalKeyByAlias.has(taskCode)) canonicalKeyByAlias.set(taskCode, taskKey);
+        });
+
+        const predecessorCount = new Map(Array.from(labelsByKey.keys(), key => [key, 0]));
+        const successorsByKey = new Map(Array.from(labelsByKey.keys(), key => [key, new Set()]));
+
+        taskList.forEach((task) => {
+            const taskKey = this.getTaskKey(task);
+            if (!taskKey || !predecessorCount.has(taskKey)) return;
+
+            const normalizedPredecessors = Array.from(new Set(
+                this.getTaskPredecessorKeys(task)
+                    .map(predecessor => canonicalKeyByAlias.get(predecessor) || predecessor)
+                    .filter(predecessor => predecessorCount.has(predecessor))
+            ));
+
+            predecessorCount.set(taskKey, normalizedPredecessors.length);
+            normalizedPredecessors.forEach((predecessor) => {
+                const successors = successorsByKey.get(predecessor);
+                if (successors) successors.add(taskKey);
+            });
+        });
+
+        const startTaskKeys = Array.from(predecessorCount.entries())
+            .filter(([, count]) => count === 0)
+            .map(([key]) => key);
+        const endTaskKeys = Array.from(successorsByKey.entries())
+            .filter(([, successors]) => !successors || successors.size === 0)
+            .map(([key]) => key);
+
+        return {
+            startTaskKeys,
+            endTaskKeys,
+            startLabels: startTaskKeys.map(key => labelsByKey.get(key) || key),
+            endLabels: endTaskKeys.map(key => labelsByKey.get(key) || key)
+        };
+    }
+
+    applyProjectTheme() {
+        if (typeof document === 'undefined' || !document.body) return;
+        const projectName = String(
+            (this.database && this.database.currentProject && this.database.currentProject.name) ||
+            (this.projectPayload && this.projectPayload.project && this.projectPayload.project.name) ||
+            ''
+        );
+        const themeKey = (this.activeProjectId === 'web-e2e-bussines' || /acme-os/i.test(projectName))
+            ? 'acme-os'
+            : 'default';
+
+        if (themeKey === 'default') {
+            delete document.body.dataset.projectTheme;
+            return;
+        }
+
+        document.body.dataset.projectTheme = themeKey;
+    }
+
+    updateTaskAuthoringAvailability() {
+        const addTaskButton = document.getElementById('addTaskBtn');
+        if (!addTaskButton) return;
+
+        const templateType = String((this.database && this.database.templateType) || '').trim();
+        const isTemplateLedger = templateType === 'project_task_template' || templateType === 'submodule_task_template';
+        const isFolderProject = !!(this.database && this.database.sourceKind === 'folder');
+
+        addTaskButton.disabled = isTemplateLedger || isFolderProject;
+        addTaskButton.classList.toggle('disabled', isTemplateLedger || isFolderProject);
+        addTaskButton.title = isFolderProject
+            ? 'Browser-opened local folders are read-only in list mode.'
+            : (isTemplateLedger ? 'Template-backed project ledgers are read-only in list mode.' : '');
+    }
+
+    syncProjectContextFromDatabase() {
+        this.projectPayload = (this.database && this.database.rawData && typeof this.database.rawData === 'object' && !Array.isArray(this.database.rawData))
+            ? this.database.rawData
+            : null;
+        this.rootTasks = Array.isArray(this.database && this.database.tasks) ? [...this.database.tasks] : [];
+        this.tasks = [...this.rootTasks];
+
+        const rawModules = (this.database && this.database.navigation && Array.isArray(this.database.navigation.modules))
+            ? this.database.navigation.modules
+            : ((this.projectPayload && this.projectPayload.navigation && Array.isArray(this.projectPayload.navigation.modules))
+                ? this.projectPayload.navigation.modules
+                : []);
+
+        this.navigationModules = rawModules
+            .map(moduleEntry => this.normalizeModuleEntry(moduleEntry))
+            .filter(Boolean);
+
+        this.moduleIndex = new Map();
+        this.moduleNameIndex = new Map();
+        this.navigationModules.forEach((moduleEntry) => {
+            this.moduleIndex.set(moduleEntry.path, moduleEntry);
+            [moduleEntry.name, moduleEntry.label].forEach((candidateName) => {
+                const normalizedName = String(candidateName || '').trim().toLowerCase();
+                if (normalizedName && !this.moduleNameIndex.has(normalizedName)) {
+                    this.moduleNameIndex.set(normalizedName, moduleEntry);
+                }
+            });
+        });
+
+        this.currentContextTasks = [...this.rootTasks];
+        this.currentContextFlowSummary = this.buildTaskFlowSummary(this.rootTasks);
+        this.applyProjectTheme();
+        this.updateTaskAuthoringAvailability();
+        this.renderProjectNavigation();
+    }
+
+    getModuleByPath(modulePath) {
+        return this.moduleIndex.get(this.normalizeModulePath(modulePath)) || null;
+    }
+
+    getModuleByName(moduleName) {
+        return this.moduleNameIndex.get(String(moduleName || '').trim().toLowerCase()) || null;
+    }
+
+    getContextBaseTasks() {
+        if (this.activeModulePath) {
+            return Array.isArray(this.currentContextTasks) ? this.currentContextTasks : [];
+        }
+        return Array.isArray(this.rootTasks) ? this.rootTasks : [];
+    }
+
+    filterTaskCollection(tasks, { status = null, priority = null } = {}) {
+        let filtered = Array.isArray(tasks) ? [...tasks] : [];
+
+        if (status) {
+            filtered = filtered.filter(task => {
+                const taskStatus = String(task && task.status || '');
+                if (status === 'Done' || status === 'Completed') {
+                    return taskStatus === 'Done' || taskStatus === 'Completed';
+                }
+                return taskStatus === String(status);
+            });
+        }
+
+        if (priority) {
+            filtered = filtered.filter(task => String(task && task.priority || '') === String(priority));
+        }
+
+        return filtered;
+    }
+
+    resolveTaskModulePath(task) {
+        if (!task || !Array.isArray(this.navigationModules) || this.navigationModules.length === 0) return null;
+
+        const taskName = String(task.task_name || task.title || '').trim();
+        if (!taskName) return null;
+
+        const lowerTaskName = taskName.toLowerCase();
+        const taskCode = this.getTaskCode(task);
+
+        const matchedByTaskId = taskCode
+            ? this.navigationModules.filter(moduleEntry => Array.isArray(moduleEntry.taskIds) && moduleEntry.taskIds.includes(taskCode))
+            : [];
+
+        const matchedByName = this.navigationModules.filter((moduleEntry) => {
+            const moduleName = String(moduleEntry.name || '').trim().toLowerCase();
+            const moduleLabel = String(moduleEntry.label || '').trim().toLowerCase();
+            return (moduleName && lowerTaskName.includes(moduleName)) || (moduleLabel && lowerTaskName.includes(moduleLabel));
+        });
+
+        if (matchedByTaskId.length === 1) return matchedByTaskId[0].path;
+        if (matchedByName.length === 1) return matchedByName[0].path;
+
+        if (matchedByTaskId.length > 1) {
+            const narrowedMatch = matchedByTaskId.filter((moduleEntry) => {
+                const moduleName = String(moduleEntry.name || '').trim().toLowerCase();
+                const moduleLabel = String(moduleEntry.label || '').trim().toLowerCase();
+                return (moduleName && lowerTaskName.includes(moduleName)) || (moduleLabel && lowerTaskName.includes(moduleLabel));
+            });
+            if (narrowedMatch.length === 1) return narrowedMatch[0].path;
+        }
+
+        return null;
+    }
+
+    supportsTaskEditing(task) {
+        const rawId = task && (task.task_id ?? task.id);
+        if (typeof rawId === 'number' && Number.isFinite(rawId)) return true;
+        return typeof rawId === 'string' && /^\d+$/.test(rawId.trim());
+    }
+
+    formatDisplayDate(value) {
+        if (!value) return '';
+        const parsedDate = new Date(value);
+        return Number.isNaN(parsedDate.getTime()) ? '' : parsedDate.toLocaleDateString();
+    }
+
+    encodeModulePath(modulePath) {
+        return encodeURIComponent(this.normalizeModulePath(modulePath));
+    }
+
+    getModuleFetchCandidates(projectId, modulePath) {
+        const normalizedPath = this.normalizeModulePath(modulePath);
+        if (!normalizedPath) return [];
+
+        const relativeModulePath = normalizedPath.split('/').map(segment => encodeURIComponent(segment)).join('/');
+        const encodedProject = encodeURIComponent(String(projectId || '').trim());
+        const currentDir = (typeof window !== 'undefined' && window.location && window.location.pathname)
+            ? window.location.pathname.replace(/\/[^\/]*$/, '/')
+            : '/';
+        const baseCandidates = [currentDir, currentDir.replace('/public/', '/'), '/'];
+        const urlCandidates = new Set();
+
+        if (typeof window !== 'undefined' && window.location && window.location.origin) {
+            urlCandidates.add(`${window.location.origin}/api/module?project=${encodedProject}&path=${encodeURIComponent(normalizedPath)}`);
+        }
+
+        baseCandidates.forEach((basePath) => {
+            const normalizedBase = String(basePath || '/').endsWith('/') ? String(basePath || '/') : `${String(basePath || '/')}/`;
+            urlCandidates.add(`${normalizedBase}api/module?project=${encodedProject}&path=${encodeURIComponent(normalizedPath)}`);
+            urlCandidates.add(`${normalizedBase}tasksDB/local/${encodedProject}/${relativeModulePath}`);
+            urlCandidates.add(`${normalizedBase}tasksDB/external/${encodedProject}/${relativeModulePath}`);
+            urlCandidates.add(`${normalizedBase}tasksDB/${encodedProject}/${relativeModulePath}`);
+        });
+
+        return Array.from(urlCandidates);
+    }
+
+    async fetchModuleData(modulePath) {
+        const normalizedPath = this.normalizeModulePath(modulePath);
+        if (!normalizedPath) return null;
+        if (this.moduleCache.has(normalizedPath)) return this.moduleCache.get(normalizedPath);
+
+        if (typeof window !== 'undefined' && window.FolderProjectService && typeof window.FolderProjectService.getModuleData === 'function') {
+            const localModuleData = window.FolderProjectService.getModuleData(this.activeProjectId, normalizedPath);
+            if (localModuleData) {
+                this.moduleCache.set(normalizedPath, localModuleData);
+                return localModuleData;
+            }
+        }
+
+        const candidates = this.getModuleFetchCandidates(this.activeProjectId, normalizedPath);
+        for (const candidate of candidates) {
+            try {
+                const response = await fetch(candidate, { cache: 'no-store' });
+                if (!response.ok) continue;
+
+                const data = await response.json();
+                if (!data || (!Array.isArray(data.tasks) && !data.template_type)) continue;
+
+                this.moduleCache.set(normalizedPath, data);
+                return data;
+            } catch {
+                // Try next candidate.
+            }
+        }
+
+        return null;
+    }
+
+    buildModuleContextTasks(moduleEntry, moduleData, modulePath = '') {
+        const normalizedPath = this.normalizeModulePath(modulePath || (moduleEntry && moduleEntry.path) || '');
+        const rootTasksByKey = new Map();
+        const rootTasksByCode = new Map();
+
+        this.rootTasks.forEach((task) => {
+            const taskKey = this.getTaskKey(task);
+            if (taskKey && !rootTasksByKey.has(taskKey)) rootTasksByKey.set(taskKey, task);
+
+            const taskCode = this.getTaskCode(task);
+            if (taskCode && !rootTasksByCode.has(taskCode)) rootTasksByCode.set(taskCode, task);
+        });
+
+        if (moduleData && Array.isArray(moduleData.tasks) && moduleData.tasks.length > 0) {
+            return moduleData.tasks.map((task) => {
+                const taskKey = this.getTaskKey(task);
+                const taskCode = this.getTaskCode(task);
+                const rootMatch = rootTasksByKey.get(taskKey) || rootTasksByCode.get(taskCode);
+                return rootMatch
+                    ? { ...task, ...rootMatch, __modulePath: normalizedPath }
+                    : { ...task, __modulePath: normalizedPath };
+            });
+        }
+
+        const moduleTaskIds = Array.isArray(moduleEntry && moduleEntry.taskIds) ? moduleEntry.taskIds : [];
+        if (moduleTaskIds.length > 0) {
+            const matchedRootTasks = this.rootTasks.filter((task) => {
+                const taskCode = this.getTaskCode(task);
+                const taskKey = this.getTaskKey(task);
+                return moduleTaskIds.includes(taskCode) || moduleTaskIds.includes(taskKey);
+            });
+            if (matchedRootTasks.length > 0) return matchedRootTasks;
+        }
+
+        return this.rootTasks.filter(task => this.resolveTaskModulePath(task) === normalizedPath);
+    }
+
+    getActiveModuleLabel() {
+        const moduleEntry = this.getModuleByPath(this.activeModulePath);
+        return String(
+            (this.activeModuleData && this.activeModuleData.module && this.activeModuleData.module.name) ||
+            (moduleEntry && (moduleEntry.label || moduleEntry.name)) ||
+            ''
+        ).trim();
+    }
+
+    syncGraphModuleState() {
+        try {
+            const frame = document.getElementById('graphFrame');
+            if (!frame || !frame.contentWindow) return;
+
+            frame.contentWindow.postMessage({
+                type: 'syncActiveModule',
+                projectId: this.activeProjectId,
+                modulePath: this.activeModulePath || '',
+                label: this.getActiveModuleLabel()
+            }, '*');
+        } catch (error) {
+            console.warn('Unable to sync active module to graph iframe', error);
+        }
+    }
+
+    async setActiveModule(modulePath, options = {}) {
+        const normalizedPath = this.normalizeModulePath(modulePath);
+        const shouldSyncGraph = options.syncGraph !== false;
+
+        if (!normalizedPath) {
+            this.activeModulePath = '';
+            this.activeModuleData = null;
+            this.currentContextTasks = [...this.rootTasks];
+            this.currentContextFlowSummary = this.buildTaskFlowSummary(this.currentContextTasks);
+            this.renderProjectNavigation();
+            this.filterTasks();
+
+            if (shouldSyncGraph) {
+                this.ensureGraphIframeLoaded();
+                this.syncGraphModuleState();
+            }
+            return;
+        }
+
+        if (normalizedPath === this.activeModulePath && !options.forceReload) {
+            this.renderProjectNavigation();
+            this.filterTasks();
+            if (shouldSyncGraph) this.syncGraphModuleState();
+            return;
+        }
+
+        const moduleEntry = this.getModuleByPath(normalizedPath);
+        const moduleData = await this.fetchModuleData(normalizedPath);
+
+        this.activeModulePath = normalizedPath;
+        this.activeModuleData = moduleData;
+        this.currentContextTasks = this.buildModuleContextTasks(moduleEntry, moduleData, normalizedPath);
+        this.currentContextFlowSummary = this.buildTaskFlowSummary(this.currentContextTasks);
+        this.renderProjectNavigation();
+        this.filterTasks();
+
+        if (shouldSyncGraph) {
+            this.ensureGraphIframeLoaded();
+            this.syncGraphModuleState();
+        }
+    }
+
+    async restoreCurrentContext(options = {}) {
+        if (this.activeModulePath && this.getModuleByPath(this.activeModulePath)) {
+            await this.setActiveModule(this.activeModulePath, { ...options, forceReload: true });
+            return;
+        }
+
+        await this.setActiveModule('', options);
+    }
+
+    openModuleView(encodedModulePath) {
+        const decodedPath = decodeURIComponent(String(encodedModulePath || ''));
+        return this.setActiveModule(decodedPath);
+    }
+
+    openModuleRelation(encodedModuleName) {
+        const decodedName = decodeURIComponent(String(encodedModuleName || ''));
+        const moduleEntry = this.getModuleByName(decodedName);
+        if (!moduleEntry) return;
+        return this.setActiveModule(moduleEntry.path);
+    }
+
+    clearModuleView() {
+        return this.setActiveModule('');
+    }
+
+    toggleProjectNavigationPanel() {
+        this.isModulePanelOpen = !this.isModulePanelOpen;
+        this.renderProjectNavigation();
+    }
+
+    renderProjectNavigation() {
+        const shell = document.getElementById('projectNavigationShell');
+        const titleEl = document.getElementById('projectContextTitle');
+        const descriptionEl = document.getElementById('projectContextDescription');
+        const eyebrowEl = document.getElementById('projectContextEyebrow');
+        const flowEl = document.getElementById('projectContextFlow');
+        const panel = document.getElementById('projectNavigationPanel');
+        const toggleBtn = document.getElementById('projectNavToggleBtn');
+        const rootBtn = document.getElementById('projectNavRootBtn');
+        const upBtn = document.getElementById('projectNavUpBtn');
+        if (!shell || !titleEl || !descriptionEl || !eyebrowEl || !flowEl || !panel || !toggleBtn || !rootBtn || !upBtn) return;
+
+        const hasNavigation = this.navigationModules.length > 0 || !!this.activeModulePath;
+        shell.style.display = hasNavigation ? '' : 'none';
+        if (!hasNavigation) return;
+
+        const projectTitle = String(
+            (this.database && this.database.currentProject && this.database.currentProject.name) ||
+            (this.projectPayload && this.projectPayload.project && this.projectPayload.project.name) ||
+            this.activeProjectId ||
+            'Project'
+        ).trim();
+        const projectDescription = String(
+            (this.projectPayload && (this.projectPayload.description || (this.projectPayload.project && this.projectPayload.project.description))) ||
+            (this.database && this.database.description) ||
+            ''
+        ).trim();
+
+        const moduleEntry = this.getModuleByPath(this.activeModulePath);
+        const moduleData = this.activeModuleData || {};
+        const modulePipeline = (moduleData.module && moduleData.module.pipeline) || (moduleEntry && moduleEntry.pipeline) || {};
+        const contextBadges = [];
+        const contextSections = [];
+        const pathLabels = [];
+        const flowSummary = this.currentContextFlowSummary || this.buildTaskFlowSummary(this.getContextBaseTasks());
+
+        const renderStaticChips = (items, extraClass = '') => {
+            const safeItems = Array.isArray(items) ? items.filter(Boolean) : [];
+            return safeItems.map(item => `<span class="project-context-chip ${extraClass}">${this.escapeHtml(String(item))}</span>`).join('');
+        };
+
+        const renderRelationChips = (items, kind) => {
+            const safeItems = Array.isArray(items) ? items.filter(Boolean) : [];
+            return safeItems.map((item) => {
+                const relatedModule = this.getModuleByName(item);
+                if (!relatedModule) {
+                    return `<span class="project-context-chip muted">${this.escapeHtml(String(item))}</span>`;
+                }
+                return `<button type="button" class="project-context-chip relation-chip ${kind}" onclick="app.openModuleRelation('${encodeURIComponent(String(item))}')">${this.escapeHtml(String(item))}</button>`;
+            }).join('');
+        };
+
+        const pushContextSection = (label, html, sectionClass = '') => {
+            if (!html) return;
+            contextSections.push(`
+                <section class="project-context-section ${sectionClass}">
+                    <h3>${this.escapeHtml(label)}</h3>
+                    <div class="project-context-chip-row">${html}</div>
+                </section>
+            `);
+        };
+
+        if (this.activeModulePath) {
+            const moduleTitle = String(
+                (moduleData.module && moduleData.module.name) ||
+                (moduleEntry && (moduleEntry.label || moduleEntry.name)) ||
+                this.activeModulePath.split('/').filter(Boolean).slice(-2, -1)[0] ||
+                this.activeModulePath
+            ).trim();
+            const moduleDescription = String(moduleData.description || (moduleEntry && moduleEntry.description) || '').trim();
+
+            eyebrowEl.textContent = 'Submodule Taskflow';
+            titleEl.textContent = moduleTitle;
+            descriptionEl.textContent = moduleDescription || 'Module details, start and finish points, and upstream/downstream links are synchronized with the graph view.';
+
+            if (moduleEntry && moduleEntry.department) contextBadges.push(moduleEntry.department);
+            if (moduleEntry && moduleEntry.type) contextBadges.push(moduleEntry.type);
+            contextBadges.push(`${this.getContextBaseTasks().length} tasks`);
+
+            const relativeModuleDir = this.normalizeModulePath((moduleEntry && moduleEntry.modulePath) || this.activeModulePath.replace(/\/[^\/]*$/, ''));
+            if (relativeModuleDir) pathLabels.push(...relativeModuleDir.split('/').filter(Boolean));
+
+            const pipelineInputs = Array.isArray(modulePipeline.input_from) ? modulePipeline.input_from.filter(Boolean) : [];
+            const pipelineOutputs = Array.isArray(modulePipeline.output_to) ? modulePipeline.output_to.filter(Boolean) : [];
+            pushContextSection('Starts With', renderStaticChips(flowSummary.startLabels, 'flow-start'));
+            pushContextSection('Finishes With', renderStaticChips(flowSummary.endLabels, 'flow-end'));
+            pushContextSection('Inputs', renderRelationChips(pipelineInputs, 'input'), 'relation-group');
+            pushContextSection('Outputs', renderRelationChips(pipelineOutputs, 'output'), 'relation-group');
+            flowEl.innerHTML = `
+                <div class="project-context-path">${renderStaticChips(pathLabels, 'path-chip')}</div>
+                <div class="project-context-badges">${renderStaticChips(contextBadges, 'meta-chip')}</div>
+                <div class="project-context-grid">${contextSections.join('')}</div>
+                <div class="project-context-note">Template-backed sublists are read-only in list mode. Use the graph or root ledger for deeper planning context.</div>
+            `;
+        } else {
+            eyebrowEl.textContent = 'Project Taskflow';
+            titleEl.textContent = projectTitle;
+            descriptionEl.textContent = projectDescription || 'Select a task card or browse the module tree to walk the project from root flow to submodule flow.';
+
+            contextBadges.push(`${this.navigationModules.length} modules`);
+            contextBadges.push(`${this.rootTasks.length} tasks`);
+            pushContextSection('Project Starts', renderStaticChips(flowSummary.startLabels, 'flow-start'));
+            pushContextSection('Project Finishes', renderStaticChips(flowSummary.endLabels, 'flow-end'));
+            flowEl.innerHTML = `
+                <div class="project-context-badges">${renderStaticChips(contextBadges, 'meta-chip')}</div>
+                <div class="project-context-grid">${contextSections.join('')}</div>
+            `;
+        }
+
+        rootBtn.disabled = !this.activeModulePath;
+        upBtn.disabled = !this.activeModulePath;
+        toggleBtn.textContent = this.isModulePanelOpen ? 'Hide Modules' : 'Browse Modules';
+        toggleBtn.setAttribute('aria-expanded', this.isModulePanelOpen ? 'true' : 'false');
+        panel.hidden = !this.isModulePanelOpen;
+
+        const treeRoot = { folders: new Map(), modules: [] };
+        this.navigationModules.forEach((moduleItem) => {
+            const parts = this.normalizeModulePath(moduleItem.path).split('/').filter(Boolean);
+            if (parts.length === 0) return;
+
+            let cursor = treeRoot;
+            parts.forEach((segment, index) => {
+                const isLeaf = index === parts.length - 1;
+                if (isLeaf) {
+                    cursor.modules.push(moduleItem);
+                    return;
+                }
+                if (!cursor.folders.has(segment)) {
+                    cursor.folders.set(segment, { folders: new Map(), modules: [] });
+                }
+                cursor = cursor.folders.get(segment);
+            });
+        });
+
+        const renderTree = (node, depth = 0) => {
+            let html = '';
+            const folderEntries = Array.from(node.folders.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+            const moduleEntries = [...node.modules].sort((a, b) => String(a.label || a.name || '').localeCompare(String(b.label || b.name || '')));
+
+            folderEntries.forEach(([folderName, childNode]) => {
+                // Collapse: if this folder has exactly one module and no sub-folders,
+                // render the module button directly without a <details> wrapper to avoid
+                // redundant "▾ crm / crm" pairs in the navigation tree.
+                const isSingleLeaf = childNode.folders.size === 0 && childNode.modules.length === 1;
+                if (isSingleLeaf) {
+                    const moduleItem = childNode.modules[0];
+                    const isActive = moduleItem.path === this.activeModulePath;
+                    const badge = moduleItem.type ? `<span class="project-modules-badge">${this.escapeHtml(String(moduleItem.type))}</span>` : '';
+                    html += `
+                        <button type="button" class="project-modules-leaf${isActive ? ' active' : ''}" title="${this.escapeHtml(moduleItem.path)}" onclick="app.openModuleView('${this.encodeModulePath(moduleItem.path)}')">
+                            <span class="project-modules-label">${this.escapeHtml(folderName)}</span>
+                            ${badge}
+                        </button>
+                    `;
+                    return;
+                }
+                html += `
+                    <details class="project-modules-folder" open data-depth="${depth}">
+                        <summary class="project-modules-summary">
+                            <span class="project-modules-folder-icon">▾</span>
+                            <span>${this.escapeHtml(folderName)}</span>
+                        </summary>
+                        <div class="project-modules-children">${renderTree(childNode, depth + 1)}</div>
+                    </details>
+                `;
+            });
+
+            moduleEntries.forEach((moduleItem) => {
+                const isActive = moduleItem.path === this.activeModulePath;
+                const badge = moduleItem.type ? `<span class="project-modules-badge">${this.escapeHtml(String(moduleItem.type))}</span>` : '';
+                html += `
+                    <button type="button" class="project-modules-leaf${isActive ? ' active' : ''}" title="${this.escapeHtml(moduleItem.path)}" onclick="app.openModuleView('${this.encodeModulePath(moduleItem.path)}')">
+                        <span class="project-modules-label">${this.escapeHtml(String(moduleItem.label || moduleItem.name || moduleItem.path))}</span>
+                        ${badge}
+                    </button>
+                `;
+            });
+
+            return html;
+        };
+
+        panel.innerHTML = `
+            <div class="project-modules-toolbar">
+                <button type="button" class="project-modules-root${!this.activeModulePath ? ' active' : ''}" onclick="app.clearModuleView()">Root Project</button>
+            </div>
+            <div class="project-modules-tree">${renderTree(treeRoot)}</div>
+        `;
     }
 
     getAvailableCategoryNames() {
@@ -892,23 +1684,35 @@ class TaskManagerApp {
         if (taskManager) {
             taskManager.style.display = 'block';
         }
+
+        const localFolderProject = (typeof window !== 'undefined' && window.FolderProjectService && typeof window.FolderProjectService.getProjectRecord === 'function')
+            ? window.FolderProjectService.getProjectRecord(this.activeProjectId)
+            : null;
         
         const repoInfo = document.getElementById('repoInfo');
         if (repoInfo) {
-            repoInfo.textContent = `Repository: ${this.config.owner}/${this.config.repo} (${this.config.branch})`;
+            repoInfo.textContent = localFolderProject
+                ? `Source: Local folder (${localFolderProject.label || localFolderProject.id})`
+                : `Repository: ${this.config.owner}/${this.config.repo} (${this.config.branch})`;
         }
 
         const workerInfo = document.getElementById('workerInfo');
         if (workerInfo) {
-            const workerUrl = (typeof window !== 'undefined' && window.TEMPLATE_CONFIG && window.TEMPLATE_CONFIG.GITHUB && window.TEMPLATE_CONFIG.GITHUB.WORKER_URL)
-                ? String(window.TEMPLATE_CONFIG.GITHUB.WORKER_URL || '')
-                : (this.getWorkerUrl ? this.getWorkerUrl() : '');
-            workerInfo.textContent = workerUrl ? `Worker: ${workerUrl}` : 'Worker: Not configured';
+            if (localFolderProject) {
+                workerInfo.textContent = 'Worker: Local folder (read-only)';
+            } else {
+                const workerUrl = (typeof window !== 'undefined' && window.TEMPLATE_CONFIG && window.TEMPLATE_CONFIG.GITHUB && window.TEMPLATE_CONFIG.GITHUB.WORKER_URL)
+                    ? String(window.TEMPLATE_CONFIG.GITHUB.WORKER_URL || '')
+                    : (this.getWorkerUrl ? this.getWorkerUrl() : '');
+                workerInfo.textContent = workerUrl ? `Worker: ${workerUrl}` : 'Worker: Not configured';
+            }
         }
 
         const tasksInfo = document.getElementById('tasksInfo');
         if (tasksInfo) {
-            const tasksFile = this.config && this.config.tasksFile ? String(this.config.tasksFile) : (window.TEMPLATE_CONFIG && window.TEMPLATE_CONFIG.GITHUB && window.TEMPLATE_CONFIG.GITHUB.TASKS_FILE ? String(window.TEMPLATE_CONFIG.GITHUB.TASKS_FILE) : '-');
+            const tasksFile = localFolderProject
+                ? String(localFolderProject.rootModuleRelative || 'tasks.json')
+                : (this.config && this.config.tasksFile ? String(this.config.tasksFile) : (window.TEMPLATE_CONFIG && window.TEMPLATE_CONFIG.GITHUB && window.TEMPLATE_CONFIG.GITHUB.TASKS_FILE ? String(window.TEMPLATE_CONFIG.GITHUB.TASKS_FILE) : '-'));
             tasksInfo.textContent = `TasksFile: ${tasksFile}`;
         }
     }
@@ -919,17 +1723,24 @@ class TaskManagerApp {
 
         this.showLoading();
         try {
-            const result = await this.database.loadTasks();
-            this.tasks = this.database.tasks;
-            this.filteredTasks = [...this.tasks];
-            this.renderTasks();
-            this.updateStats();
+            await this.database.loadTasks();
+            this.syncProjectContextFromDatabase();
+            await this.restoreCurrentContext({ syncGraph: false });
             this.showToast('Tasks loaded successfully', 'success');
         } catch (error) {
             console.error('Error loading tasks:', error);
             this.showToast('Error loading tasks: ' + error.message, 'error');
             this.tasks = [];
+            this.rootTasks = [];
+            this.currentContextTasks = [];
             this.filteredTasks = [];
+            this.navigationModules = [];
+            this.moduleIndex = new Map();
+            this.moduleNameIndex = new Map();
+            this.activeModulePath = '';
+            this.activeModuleData = null;
+            this.currentContextFlowSummary = { startTaskKeys: [], endTaskKeys: [], startLabels: [], endLabels: [] };
+            this.renderProjectNavigation();
             this.renderTasks();
         } finally {
             this.hideLoading();
@@ -1029,8 +1840,28 @@ class TaskManagerApp {
         const owner = this.config && this.config.owner ? this.config.owner : '';
         const repo = this.config && this.config.repo ? this.config.repo : '';
         const branch = this.config && this.config.branch ? this.config.branch : 'main';
-        const safeProject = String(projectId || '').replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
-        return `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/public/tasksDB/${encodeURIComponent(safeProject)}/history/changes.ndjson`;
+        let tasksFile = '';
+
+        try {
+            const templateConfig = window.TEMPLATE_CONFIG || TEMPLATE_CONFIG;
+            const gh = templateConfig && templateConfig.GITHUB ? templateConfig.GITHUB : null;
+            if (gh && typeof gh.getTasksFile === 'function') {
+                tasksFile = String(gh.getTasksFile(projectId) || '');
+            }
+        } catch {
+            // Ignore and use the fallback below.
+        }
+
+        if (!tasksFile) {
+            const safeProject = String(projectId || '').replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
+            tasksFile = `public/tasksDB/external/${safeProject}/tasks.json`;
+        }
+
+        const historyPath = String(tasksFile)
+            .replace(/\\/g, '/')
+            .replace(/\/[^\/]+$/g, '/history/changes.ndjson');
+
+        return `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/${historyPath}`;
     }
 
     applyHistoryFilter() {
@@ -1153,6 +1984,14 @@ class TaskManagerApp {
         const timelineView = document.getElementById('timelineView');
         const graphView = document.getElementById('graphView');
         const emptyState = document.getElementById('emptyState');
+        const emptyStateMessage = emptyState ? emptyState.querySelector('p') : null;
+
+        this.renderProjectNavigation();
+
+        const contextTasks = this.getContextBaseTasks();
+        const flowSummary = this.currentContextFlowSummary || this.buildTaskFlowSummary(contextTasks);
+        const startTaskKeys = new Set(Array.isArray(flowSummary.startTaskKeys) ? flowSummary.startTaskKeys : []);
+        const endTaskKeys = new Set(Array.isArray(flowSummary.endTaskKeys) ? flowSummary.endTaskKeys : []);
 
         if (this.viewMode === 'graph' && graphView) {
             if (tasksList) tasksList.style.display = 'none';
@@ -1176,6 +2015,11 @@ class TaskManagerApp {
                 timelineView.innerHTML = '';
                 timelineView.style.display = 'none';
             }
+            if (emptyStateMessage) {
+                emptyStateMessage.textContent = this.activeModulePath
+                    ? 'No tasks found in this submodule. Use the module tree to switch context or return to the root project flow.'
+                    : 'No tasks found. Click "Add New Task" to get started, or import a template above!';
+            }
             emptyState.style.display = 'block';
             return;
         }
@@ -1196,30 +2040,71 @@ class TaskManagerApp {
         tasksList.style.display = '';
         this.updateViewToggle();
 
-        tasksList.innerHTML = this.filteredTasks.map(task => `
-            <div class="task-card" onclick="app.editTask('${task.task_id || task.id}')">
-                <div class="task-header" onclick="app.editTask('${task.task_id || task.id}')">
+        tasksList.innerHTML = this.filteredTasks.map((task, index) => {
+            const displayStatus = task.status === 'Completed' ? 'Done' : (task.status || '');
+            const statusSlug = displayStatus.toLowerCase().replace(/\s+/g, '-');
+            const statusClass = displayStatus ? `status-${statusSlug}${statusSlug === 'done' ? ' status-completed' : ''}` : '';
+            const taskKey = this.getTaskKey(task);
+            const taskReference = this.supportsTaskEditing(task) ? String(task.task_id ?? task.id).trim() : '';
+            const modulePath = this.normalizeModulePath(task.__modulePath || this.resolveTaskModulePath(task) || '');
+            const showModuleAction = modulePath && modulePath !== this.activeModulePath;
+            // Card click always opens task detail modal; module navigation is only via task-actions button
+            const cardAction = `app.openTaskDetail(${index})`;
+            const cardAttributes = cardAction ? ` role="button" tabindex="0" onclick="${cardAction}"` : '';
+            const createdDate = this.formatDisplayDate(task.created_date || task.createdAt || '');
+            const dueDate = this.formatDisplayDate(task.end_date || task.due_date || '');
+            const dependencyCount = Array.isArray(task.dependencies) ? task.dependencies.length : 0;
+            const subtaskCount = Array.isArray(task.subtasks) ? task.subtasks.length : 0;
+            const linkedIssue = this.getLinkedIssue(task);
+
+            const infoBits = [];
+            if (task.assigned_workers && task.assigned_workers.length > 0) {
+                infoBits.push(`<span>👤 ${task.assigned_workers.map(worker => worker.name || worker.worker_id || worker.email).filter(Boolean).join(', ')}</span>`);
+            } else if (task.required_roles && Array.isArray(task.required_roles) && task.required_roles.length > 0) {
+                infoBits.push(`<span>🧩 Suggested: ${task.required_roles.map(role => role.role).filter(Boolean).join(', ')}</span>`);
+            }
+            if (dueDate) infoBits.push(`<span>📅 ${dueDate}</span>`);
+            if (task.estimated_hours) infoBits.push(`<span>⏱️ ${task.estimated_hours}h</span>`);
+            if (dependencyCount > 0) infoBits.push(`<span>🔗 ${dependencyCount} dependencies</span>`);
+            if (subtaskCount > 0) infoBits.push(`<span>🪜 ${subtaskCount} subtasks</span>`);
+            if (linkedIssue) infoBits.push(`<span>🐙 <a href="${linkedIssue.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">#${linkedIssue.number}</a></span>`);
+            if (createdDate) infoBits.push(`<span>🕐 ${createdDate}</span>`);
+
+            const actionBits = [];
+            if (showModuleAction) {
+                actionBits.push(`<button class="btn-secondary" onclick="event.stopPropagation(); app.openModuleView('${this.encodeModulePath(modulePath)}')">View Sublist</button>`);
+            }
+            if (taskReference) {
+                actionBits.push(`<button class="btn-secondary" onclick="event.stopPropagation(); app.editTask('${this.escapeHtml(taskReference)}')">Edit</button>`);
+                actionBits.push(`<button class="btn-danger" onclick="event.stopPropagation(); app.deleteTask('${this.escapeHtml(taskReference)}')">Delete</button>`);
+                actionBits.push(linkedIssue
+                    ? `<a class="btn-secondary" href="${linkedIssue.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Open Issue</a>`
+                    : `<button class="btn-secondary" onclick="event.stopPropagation(); app.createIssueForTask('${this.escapeHtml(taskReference)}')">Create Issue</button>`);
+            }
+
+            const readOnlyNote = !taskReference
+                ? '<div class="task-readonly-note">Template task view</div>'
+                : '';
+
+            return `
+            <div class="task-card ${statusClass}${taskReference ? '' : ' readonly'}"${cardAttributes}>
+                <div class="task-header">
                     <div>
                         <h3 class="task-title">${this.escapeHtml(task.task_name || task.title)}</h3>
                         <div class="task-meta">
-                            <span class="badge badge-status-${(task.status || '').replace(/ /g, '-').toLowerCase()}">${(task.status || '').replace(/-/g, ' ')}</span>
+                            <span class="badge badge-status-${displayStatus.replace(/ /g, '-').toLowerCase()}">${displayStatus.replace(/-/g, ' ')}</span>
                             <span class="badge badge-priority-${task.priority || 'medium'}">${task.priority || 'medium'}</span>
+                            ${startTaskKeys.has(taskKey) ? '<span class="badge badge-flow-start">Start</span>' : ''}
+                            ${endTaskKeys.has(taskKey) ? '<span class="badge badge-flow-end">Finish</span>' : ''}
                             ${task.is_critical_path ? '<span class="badge" style="background: rgba(220, 53, 69, 0.2); color: var(--danger-color);">Critical Path</span>' : ''}
+                            ${showModuleAction ? '<span class="badge badge-module-link">Sublist</span>' : ''}
                         </div>
                     </div>
                 </div>
                 ${task.description ? `<div class="task-description">${this.escapeHtml(task.description)}</div>` : ''}
                 <div class="task-footer">
                     <div class="task-info">
-                        ${task.assigned_workers && task.assigned_workers.length > 0
-                            ? `<span>👤 ${task.assigned_workers.map(w => w.name || w.worker_id || w.email).filter(Boolean).join(', ')}</span>`
-                            : (task.required_roles && Array.isArray(task.required_roles) && task.required_roles.length > 0
-                                ? `<span>🧩 Suggested: ${task.required_roles.map(r => r.role).filter(Boolean).join(', ')}</span>`
-                                : '')}
-                        ${task.end_date ? `<span>📅 ${task.end_date}</span>` : ''}
-                        ${task.estimated_hours ? `<span>⏱️ ${task.estimated_hours}h</span>` : ''}
-                        ${this.getLinkedIssue(task) ? `<span>🐙 <a href="${this.getLinkedIssue(task).url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">#${this.getLinkedIssue(task).number}</a></span>` : ''}
-                        <span>🕐 ${new Date(task.created_date || task.createdAt).toLocaleDateString()}</span>
+                        ${infoBits.join('')}
                     </div>
                     ${task.tags && task.tags.length > 0 ? `
                         <div class="task-tags">
@@ -1227,13 +2112,10 @@ class TaskManagerApp {
                         </div>
                     ` : ''}
                 </div>
-                <div class="task-actions" onclick="event.stopPropagation()">
-                    <button class="btn-secondary" onclick="app.editTask('${task.task_id || task.id}')">Edit</button>
-                    <button class="btn-danger" onclick="app.deleteTask('${task.task_id || task.id}')">Delete</button>
-                    ${this.getLinkedIssue(task) ? `<a class="btn-secondary" href="${this.getLinkedIssue(task).url}" target="_blank" rel="noopener">Open Issue</a>` : `<button class="btn-secondary" onclick="app.createIssueForTask('${task.task_id || task.id}')">Create Issue</button>`}
-                </div>
+                ${readOnlyNote}
+                ${actionBits.length > 0 ? `<div class="task-actions" onclick="event.stopPropagation()">${actionBits.join('')}</div>` : ''}
             </div>
-        `).join('');
+        `;}).join('');
     }
 
     setViewMode(mode) {
@@ -1526,7 +2408,8 @@ class TaskManagerApp {
         let imported = 0;
         const today = new Date();
         const startDate = today.toISOString().slice(0, 10);
-        const endDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        const dur = (this.automation && this.automation.config && this.automation.config.DEFAULTS && this.automation.config.DEFAULTS.TASK && this.automation.config.DEFAULTS.TASK.default_duration_days) || 7;
+        const endDate = new Date(today.getTime() + dur * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
         for (const num of selected) {
             const issue = issuesByNumber.get(num);
@@ -1566,10 +2449,8 @@ class TaskManagerApp {
 
         try {
             await this.saveTasks();
-            this.tasks = this.database.tasks;
-            this.filteredTasks = [...this.tasks];
-            this.renderTasks();
-            this.updateStats();
+            this.syncProjectContextFromDatabase();
+            await this.restoreCurrentContext({ syncGraph: false });
             await this.loadIssuesForSync();
             this.setIssuesSyncStatus(`Imported ${imported} issue(s) as tasks.`, 'success');
         } catch (e) {
@@ -1643,7 +2524,8 @@ class TaskManagerApp {
             }
 
             await this.saveTasks();
-            this.renderTasks();
+            this.syncProjectContextFromDatabase();
+            await this.restoreCurrentContext({ syncGraph: false });
             this.showToast(`Created Issue #${issue.number}`, 'success');
         } catch (e) {
             console.error('Create issue failed', e);
@@ -1653,12 +2535,18 @@ class TaskManagerApp {
         }
     }
 
-    updateStats() {
-        const stats = this.database.getStatistics();
+    updateStats(taskSource = null) {
+        const tasks = Array.isArray(taskSource) ? taskSource : this.getContextBaseTasks();
+        const stats = (this.automation && typeof this.automation.generateProjectSummary === 'function')
+            ? this.automation.generateProjectSummary({ tasks })
+            : {
+                total_tasks: tasks.length,
+                tasks_by_status: {}
+            };
         document.getElementById('totalTasks').textContent = stats.total_tasks || 0;
         document.getElementById('todoTasks').textContent = (stats.tasks_by_status && stats.tasks_by_status['Not Started']) || 0;
         document.getElementById('inProgressTasks').textContent = (stats.tasks_by_status && stats.tasks_by_status['In Progress']) || 0;
-        document.getElementById('doneTasks').textContent = (stats.tasks_by_status && stats.tasks_by_status['Completed']) || 0;
+        document.getElementById('doneTasks').textContent = ((stats.tasks_by_status && stats.tasks_by_status['Done']) || 0) + ((stats.tasks_by_status && stats.tasks_by_status['Completed']) || 0);
     }
 
     setActiveStatCard(statusValue) {
@@ -1699,13 +2587,15 @@ class TaskManagerApp {
     filterTasks() {
         const statusFilter = document.getElementById('filterStatus').value;
         const priorityFilter = document.getElementById('filterPriority').value;
+        const baseTasks = this.getContextBaseTasks();
 
-        this.filteredTasks = this.database.getTasks({
+        this.filteredTasks = this.filterTaskCollection(baseTasks, {
             status: statusFilter === 'all' ? null : statusFilter,
             priority: priorityFilter === 'all' ? null : priorityFilter
         });
 
         this.renderTasks();
+        this.updateStats(baseTasks);
         this.setActiveStatCard(statusFilter);
     }
 
@@ -1725,6 +2615,7 @@ class TaskManagerApp {
             console.error('Modal element not found!');
             return;
         }
+        this.setTaskModalReadOnly(false);
         document.getElementById('modalTitle').textContent = 'Add New Task';
         document.getElementById('taskForm').reset();
         document.getElementById('taskId').value = '';
@@ -1748,6 +2639,85 @@ class TaskManagerApp {
         }
     }
 
+    /** Open task detail by filteredTasks index (works for all task types, numeric and string IDs). */
+    openTaskDetail(taskIndex) {
+        const task = this.filteredTasks[taskIndex];
+        if (!task) return;
+        if (this.supportsTaskEditing(task)) {
+            this.editTask(String(task.task_id ?? task.id).trim());
+        } else {
+            this._openReadOnlyTask(task);
+        }
+    }
+
+    _openReadOnlyTask(task) {
+        const modal = document.getElementById('taskModal');
+        if (!modal) return;
+        this.setTaskModalReadOnly(false);
+        document.getElementById('modalTitle').textContent = 'Task Details';
+        this.refreshCategoryOptions({ preserveValue: false });
+        this.populateFormWithTask(task);
+        this.setTaskModalReadOnly(true);
+        this._injectReadOnlyDepLinks(task);
+        modal.style.display = 'block';
+    }
+
+    /**
+     * In read-only task detail: hide the deps textarea and show clickable dep-link buttons.
+     * Each button navigates to the predecessor task in the list.
+     */
+    _injectReadOnlyDepLinks(task) {
+        const depsTextarea = document.getElementById('taskDependencies');
+        const depsContainer = depsTextarea?.closest('.form-group');
+        if (!depsContainer) return;
+
+        // Remove any prior dep-link override before re-injecting
+        depsContainer.querySelector('.readonly-dep-links')?.remove();
+        depsTextarea.style.display = '';
+
+        const deps = Array.isArray(task?.dependencies) ? task.dependencies.filter(d => d && d.predecessor_task_id != null) : [];
+        if (!deps.length) return;
+
+        // Build a fast lookup map across all loaded tasks
+        const allTasks = [...(this.rootTasks || []), ...(this.currentContextTasks || [])];
+        const taskMap = new Map(allTasks.map(t => [String(t.task_id ?? t.id ?? ''), t]));
+
+        const buttons = deps.map(d => {
+            const predId = String(d.predecessor_task_id);
+            const predTask = taskMap.get(predId);
+            const name = predTask ? (predTask.task_name || predTask.title || `Task ${predId}`) : `Task ${predId}`;
+            const typeLabel = d.type || 'FS';
+            return `<button type="button" class="dep-link-btn" data-pred-id="${predId}" title="Navigate to: ${name}">${name} <span class="dep-type-badge">${typeLabel}</span></button>`;
+        }).join('');
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'readonly-dep-links';
+        wrapper.innerHTML = `<label>Depends on</label><div class="dep-links-list">${buttons}</div>`;
+
+        // Hide the raw textarea; show the pretty list instead
+        depsTextarea.style.display = 'none';
+        depsContainer.appendChild(wrapper);
+
+        wrapper.querySelectorAll('.dep-link-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const predId = btn.getAttribute('data-pred-id');
+                if (predId) this.navigateToDependency(predId);
+            });
+        });
+    }
+
+    /**
+     * Close the current modal and open the task detail for the specified predecessor task ID.
+     * Works across root tasks and the current module context.
+     */
+    navigateToDependency(predecessorId) {
+        const target = String(predecessorId ?? '');
+        const idx = this.filteredTasks.findIndex(t => String(t.task_id ?? t.id ?? '') === target);
+        if (idx < 0) return;
+        document.getElementById('taskModal').style.display = 'none';
+        setTimeout(() => this.openTaskDetail(idx), 120);
+    }
+
     _editTask(taskId) {
         const task = this.database.getTask(taskId);
         if (!task) {
@@ -1761,6 +2731,7 @@ class TaskManagerApp {
             return;
         }
 
+        this.setTaskModalReadOnly(false);
         document.getElementById('modalTitle').textContent = 'Edit Task';
         this.refreshCategoryOptions({ preserveValue: false });
         this.populateFormWithTask(task);
@@ -1774,12 +2745,57 @@ class TaskManagerApp {
         }, 100);
     }
 
+    setTaskModalReadOnly(readOnly = false) {
+        const modal = document.getElementById('taskModal');
+        const form = document.getElementById('taskForm');
+        if (!modal || !form) return;
+
+        // When leaving read-only: clean up any dep-link overlay and restore the textarea
+        if (!readOnly) {
+            form.querySelector('.readonly-dep-links')?.remove();
+            const depsTextarea = document.getElementById('taskDependencies');
+            if (depsTextarea) depsTextarea.style.display = '';
+        }
+
+        form.querySelectorAll('input, select, textarea').forEach((field) => {
+            if (field.id === 'taskId') return;
+            if (readOnly) field.setAttribute('disabled', 'disabled');
+            else field.removeAttribute('disabled');
+        });
+
+        const submitButton = form.querySelector('button[type="submit"]');
+        if (submitButton) {
+            submitButton.hidden = readOnly;
+            submitButton.disabled = readOnly;
+        }
+
+        const cancelButton = form.querySelector('.form-actions .btn-secondary');
+        if (cancelButton) {
+            cancelButton.textContent = readOnly ? 'Close' : 'Cancel';
+        }
+
+        modal.classList.toggle('modal-readonly', readOnly);
+    }
+
     populateFormWithDefaults() {
         // Set default values based on template
         document.getElementById('taskStatus').value = this.automation.config.DEFAULTS.TASK.status;
         document.getElementById('taskPriority').value = this.automation.config.DEFAULTS.TASK.priority;
         document.getElementById('taskProgress').value = this.automation.config.DEFAULTS.TASK.progress_percentage;
         document.getElementById('taskEstimatedHours').value = 8; // Default 1 day
+
+        // Default dates: start = today, end = 7 days later
+        try {
+            const today = new Date();
+            const startDate = today.toISOString().slice(0, 10);
+            const dur = (this.automation && this.automation.config && this.automation.config.DEFAULTS && this.automation.config.DEFAULTS.TASK && this.automation.config.DEFAULTS.TASK.default_duration_days) || 7;
+            const endDate = new Date(today.getTime() + dur * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+            document.getElementById('taskStartDate').value = startDate;
+            document.getElementById('taskEndDate').value = endDate;
+        } catch (e) {
+            document.getElementById('taskStartDate').value = '';
+            document.getElementById('taskEndDate').value = '';
+        }
 
         // Clear automatic fields for new tasks
         document.getElementById('displayTaskId').textContent = '--';
@@ -1792,7 +2808,7 @@ class TaskManagerApp {
         document.getElementById('taskId').value = task.task_id || task.id;
         document.getElementById('taskName').value = task.task_name || task.title;
         document.getElementById('taskDescription').value = task.description || '';
-        document.getElementById('taskStatus').value = task.status;
+        document.getElementById('taskStatus').value = task.status === 'Completed' ? 'Done' : task.status;
         document.getElementById('taskPriority').value = task.priority;
         document.getElementById('taskStartDate').value = task.start_date || '';
         document.getElementById('taskEndDate').value = task.end_date || task.dueDate || '';
@@ -1833,6 +2849,7 @@ class TaskManagerApp {
         if (modal) {
             modal.style.display = 'none';
         }
+        this.setTaskModalReadOnly(false);
         this.clearValidationMessages();
         const form = document.getElementById('taskForm');
         if (form) {
@@ -1870,9 +2887,8 @@ class TaskManagerApp {
 
         try {
             await this.saveTasks();
-            this.filteredTasks = [...this.database.tasks];
-            this.renderTasks();
-            this.updateStats();
+            this.syncProjectContextFromDatabase();
+            await this.restoreCurrentContext({ syncGraph: false });
             this.closeModal();
         } catch (error) {
             // Error already shown in saveTasks
@@ -1973,9 +2989,8 @@ class TaskManagerApp {
 
         try {
             await this.saveTasks();
-            this.filteredTasks = [...this.database.tasks];
-            this.renderTasks();
-            this.updateStats();
+            this.syncProjectContextFromDatabase();
+            await this.restoreCurrentContext({ syncGraph: false });
         } catch (error) {
             // Reload to restore state
             await this.loadTasks();
@@ -2022,10 +3037,8 @@ class TaskManagerApp {
             });
 
             if (result.success) {
-                this.tasks = this.database.tasks;
-                this.filteredTasks = [...this.tasks];
-                this.renderTasks();
-                this.updateStats();
+                this.syncProjectContextFromDatabase();
+                await this.restoreCurrentContext({ syncGraph: false });
                 this.showToast(`Imported ${result.importedCount} tasks from template`, 'success');
             } else {
                 this.showToast('Error importing template: ' + result.error, 'error');

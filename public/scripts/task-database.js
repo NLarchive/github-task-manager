@@ -1,6 +1,12 @@
 // Task Database Component
 // Handles task storage, retrieval, and synchronization with GitHub
 
+function inferProjectIdFromTasksFile(tasksFile) {
+  const normalized = String(tasksFile || '').replace(/\\/g, '/');
+  const match = normalized.match(/tasksDB\/(?:(?:external|local)\/)?([^\/]+)\/(?:tasks\.(?:json|csv)|TODO_project_task\.json)$/i);
+  return match && match[1] ? String(match[1]).trim() : '';
+}
+
 function resolveTemplateConfig() {
   if (typeof window !== 'undefined' && window.TEMPLATE_CONFIG) return window.TEMPLATE_CONFIG;
   if (typeof globalThis !== 'undefined' && globalThis.TEMPLATE_CONFIG) return globalThis.TEMPLATE_CONFIG;
@@ -24,10 +30,10 @@ function resolveActiveProjectId() {
   const fromActive = active.trim();
   if (fromActive) return fromActive;
 
-  // Best-effort: infer from TASKS_FILE (public/tasksDB/<projectId>/tasks.json)
+  // Best-effort: infer from TASKS_FILE (supports public/tasksDB/<scope>/<projectId>/tasks.json and legacy layouts)
   const tasksFile = (gh && gh.TASKS_FILE) ? String(gh.TASKS_FILE) : '';
-  const match = tasksFile.match(/tasksDB\/([^\/]+)\/(?:tasks\.(?:json|csv))/i);
-  if (match && match[1]) return match[1];
+  const inferredProjectId = inferProjectIdFromTasksFile(tasksFile);
+  if (inferredProjectId) return inferredProjectId;
 
   return 'github-task-manager';
 }
@@ -50,6 +56,43 @@ class TaskDatabase {
     this.workers = null;
     this.actor = '';
     this._lastSyncedTasksSnapshot = null;
+    this.rawData = null;
+    this.templateType = null;
+    this.navigation = null;
+    this.module = null;
+    this.description = '';
+    this.summary = null;
+    this.sourceKind = 'remote';
+    this.localSourceMeta = null;
+  }
+
+  resetLoadedMetadata() {
+    this.rawData = null;
+    this.templateType = null;
+    this.navigation = null;
+    this.module = null;
+    this.description = '';
+    this.summary = null;
+    this.sourceKind = 'remote';
+    this.localSourceMeta = null;
+  }
+
+  applyLoadedPayload(data) {
+    if (!data || Array.isArray(data)) {
+      return Array.isArray(data) ? data : [];
+    }
+
+    this.rawData = data;
+    this.templateType = data.template_type || null;
+    this.navigation = (data && typeof data.navigation === 'object') ? data.navigation : null;
+    this.module = (data && typeof data.module === 'object') ? data.module : null;
+    this.description = String(data.description || '').trim();
+    this.summary = (data && typeof data.summary === 'object') ? data.summary : null;
+    this.currentProject = data.project || this.currentProject;
+    this.categories = data.categories || this.categories;
+    this.workers = data.workers || this.workers;
+
+    return Array.isArray(data.tasks) ? data.tasks : [];
   }
 
   cloneTasksSnapshot(tasks) {
@@ -227,8 +270,12 @@ class TaskDatabase {
     const categoriesFromConfig = templateConfig && Array.isArray(templateConfig.CATEGORIES)
       ? templateConfig.CATEGORIES.map(name => ({ name, parent_category_name: null }))
       : null;
+    const baseData = (this.rawData && typeof this.rawData === 'object' && !Array.isArray(this.rawData))
+      ? { ...this.rawData }
+      : {};
 
     return {
+      ...baseData,
       project: this.currentProject || {
         name: "GitHub Task Manager - Web Application",
         description: "Build a collaborative task management system integrated with GitHub, enabling public users to manage tasks through a modern web UI with automatic task ID generation and template-based task creation.",
@@ -302,7 +349,11 @@ class TaskDatabase {
       'tasks-by-status.json': JSON.stringify(summary, null, 2),
       'tasks-not-started.json': JSON.stringify(makeStatusPayload('Not Started'), null, 2),
       'tasks-in-progress.json': JSON.stringify(makeStatusPayload('In Progress'), null, 2),
-      'tasks-completed.json': JSON.stringify(makeStatusPayload('Completed'), null, 2)
+      'tasks-completed.json': JSON.stringify({
+        status: 'Completed/Done',
+        generated_at: now,
+        tasks: [...(byStatus['Completed'] || []), ...(byStatus['Done'] || [])]
+      }, null, 2)
     };
   }
 
@@ -366,12 +417,13 @@ class TaskDatabase {
   async loadTasks() {
     try {
       let loadedTasks = null;
+      this.resetLoadedMetadata();
       const templateConfig = resolveTemplateConfig();
       const gh = (templateConfig && templateConfig.GITHUB) ? templateConfig.GITHUB : null;
       const projectId = resolveActiveProjectId();
       const tasksFile = (gh && typeof gh.getTasksFile === 'function')
         ? gh.getTasksFile(projectId)
-        : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/github-task-manager/tasks.json');
+        : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/external/github-task-manager/tasks.json');
 
       // We want GitHub Pages to reflect canonical repo state.
       // LocalStorage is useful as a fallback, but should not override remote reads on production.
@@ -379,6 +431,26 @@ class TaskDatabase {
       const host = isBrowser && window.location ? String(window.location.hostname || '') : '';
       const isLocalHost = host === 'localhost' || host === '127.0.0.1';
       const isGitHubPagesHost = host.endsWith('github.io');
+
+      // 0) Check whether the active project was opened from the browser folder picker.
+      if (!loadedTasks && typeof window !== 'undefined' && window.FolderProjectService && typeof window.FolderProjectService.getProjectRecord === 'function') {
+        try {
+          const localFolderProject = window.FolderProjectService.getProjectRecord(projectId);
+          if (localFolderProject && localFolderProject.payload) {
+            loadedTasks = this.applyLoadedPayload(localFolderProject.payload);
+            this.sourceKind = 'folder';
+            this.localSourceMeta = {
+              id: localFolderProject.id,
+              label: localFolderProject.label,
+              rootModuleRelative: localFolderProject.rootModuleRelative || 'tasks.json',
+              fileCount: localFolderProject.fileCount || 0
+            };
+            console.log('Loaded', loadedTasks.length, 'tasks from browser-selected local folder project:', projectId);
+          }
+        } catch (localFolderError) {
+          console.warn('Could not load browser-selected local folder project:', localFolderError && localFolderError.message ? localFolderError.message : localFolderError);
+        }
+      }
 
       const projectCfgForRead = (gh && typeof gh.getProjectConfig === 'function') ? gh.getProjectConfig(projectId) : null;
       const hostOwner = gh && gh.OWNER ? String(gh.OWNER) : '';
@@ -398,10 +470,7 @@ class TaskDatabase {
           if (stored) {
             const storageData = JSON.parse(stored);
             if (storageData && storageData.json && storageData.json.tasks) {
-              this.currentProject = storageData.json.project || this.currentProject;
-              this.categories = storageData.json.categories || this.categories;
-              this.workers = storageData.json.workers || this.workers;
-              loadedTasks = storageData.json.tasks;
+              loadedTasks = this.applyLoadedPayload(storageData.json);
               console.log('Loaded', loadedTasks.length, 'tasks from localStorage (project:', projectId, ', last saved:', storageData.lastSaved, ')');
             }
           }
@@ -430,10 +499,7 @@ class TaskDatabase {
           const response = await fetch(fetchUrl);
           if (response && response.ok) {
             const data = await response.json();
-            this.currentProject = data.project || this.currentProject;
-            this.categories = data.categories || this.categories;
-            this.workers = data.workers || this.workers;
-            loadedTasks = data.tasks || (Array.isArray(data) ? data : []);
+            loadedTasks = this.applyLoadedPayload(data);
             console.log('Successfully loaded', loadedTasks.length, 'tasks from local file');
           }
         } catch (fetchError) {
@@ -449,10 +515,7 @@ class TaskDatabase {
           if (stored) {
             const storageData = JSON.parse(stored);
             if (storageData && storageData.json && storageData.json.tasks) {
-              this.currentProject = storageData.json.project || this.currentProject;
-              this.categories = storageData.json.categories || this.categories;
-              this.workers = storageData.json.workers || this.workers;
-              loadedTasks = storageData.json.tasks;
+              loadedTasks = this.applyLoadedPayload(storageData.json);
               console.log('Loaded', loadedTasks.length, 'tasks from localStorage fallback (project:', projectId, ', last saved:', storageData.lastSaved, ')');
             }
           }
@@ -481,10 +544,7 @@ class TaskDatabase {
             const res = await fetch(rawUrl, { cache: 'no-store' });
             if (res && res.ok) {
               const data = await res.json();
-              this.currentProject = data.project || this.currentProject;
-              this.categories = data.categories || this.categories;
-              this.workers = data.workers || this.workers;
-              loadedTasks = data.tasks || (Array.isArray(data) ? data : []);
+              loadedTasks = this.applyLoadedPayload(data);
               console.log('Successfully loaded', loadedTasks.length, 'tasks from raw GitHub');
             }
           }
@@ -499,10 +559,7 @@ class TaskDatabase {
           console.log('Attempting GitHub API read with file path:', tasksFile);
           const { content } = await this.githubApi.getFileContent(tasksFile);
           const data = JSON.parse(content || '{}');
-          this.currentProject = data.project || this.currentProject;
-          this.categories = data.categories || this.categories;
-          this.workers = data.workers || this.workers;
-          loadedTasks = data.tasks || (Array.isArray(data) ? data : []);
+          loadedTasks = this.applyLoadedPayload(data);
           console.log('Successfully loaded', loadedTasks.length, 'tasks from GitHub API');
         } catch (apiError) {
           console.warn('GitHub API failed:', apiError && apiError.message ? apiError.message : apiError);
@@ -535,6 +592,7 @@ class TaskDatabase {
     } catch (error) {
       console.error('Error loading tasks:', error);
       this.tasks = [];
+      this.resetLoadedMetadata();
       return { success: false, error: error.message };
     }
   }
@@ -571,13 +629,17 @@ class TaskDatabase {
       'description',
       'start_date',
       'end_date',
+      'due_date',
       'priority',
+      'complexity',
       'status',
+      'sprint_name',
       'progress_percentage',
       'estimated_hours',
       'actual_hours',
       'is_critical_path',
       'category_name',
+      'blocker_reason',
       'parent_task_id',
       'creator_id',
       'created_date',
@@ -646,6 +708,10 @@ class TaskDatabase {
   // Save tasks to GitHub
   async saveTasks(message = 'Update tasks') {
     try {
+      if (this.sourceKind === 'folder') {
+        return { success: false, error: 'Local folder projects are read-only in the browser loader. Re-open the source files in the workspace if you need to edit them.' };
+      }
+
       // Block saving if duplicates exist (prevents corrupting tasks.csv and tasks.json)
       // Do this BEFORE choosing GitHub vs local persistence so behavior is consistent.
       const duplicateIds = this.getDuplicateTaskIds(this.tasks);
@@ -714,7 +780,7 @@ class TaskDatabase {
     const gh = (templateConfig && templateConfig.GITHUB) ? templateConfig.GITHUB : null;
     const tasksFile = (gh && typeof gh.getTasksFile === 'function')
       ? gh.getTasksFile(projectId)
-      : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/github-task-manager/tasks.json');
+      : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/external/github-task-manager/tasks.json');
 
     const beforeTasksSnapshot = this.cloneTasksSnapshot(this._lastSyncedTasksSnapshot || []);
 
@@ -848,7 +914,7 @@ class TaskDatabase {
       const gh = (templateConfig && templateConfig.GITHUB) ? templateConfig.GITHUB : null;
       const tasksFile = (gh && typeof gh.getTasksFile === 'function')
         ? gh.getTasksFile(resolveActiveProjectId())
-        : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/github-task-manager/tasks.json');
+        : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/external/github-task-manager/tasks.json');
 
       // Persist JSON
       const { sha: tasksSha } = await this.githubApi.getFileContent(tasksFile);

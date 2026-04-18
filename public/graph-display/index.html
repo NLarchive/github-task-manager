@@ -47,6 +47,8 @@
     
     <!-- D3 Library -->
     <script src="js/d3.v7.min.js"></script>
+    <script src="../scripts/folder-project-service.js"></script>
+    <script src="../scripts/folder-project-ui.js"></script>
     <!-- Utilities (Optional but Recommended) -->
     <script type="module" src="js/utils.js"></script>
     <!-- Main application script (loads other modules) -->
@@ -88,6 +90,13 @@
             <select id="template-select" aria-label="Select graph template">
                 <!-- Options injected by JS -->
             </select>
+        </div>
+        <div class="template-box" id="folder-path-box">
+            <label for="folder-path-load">Open local project folder</label>
+            <div class="folder-path-row">
+                <button id="folder-path-load" type="button" title="Open system folder picker">📂 Browse Folder</button>
+            </div>
+            <div id="folder-path-result" class="folder-path-result" hidden></div>
         </div>
         <!-- Search feedback element will be added here by JS if needed -->
         <a href="./" id="home-button" class="control-button" role="menuitem" aria-label="Go to homepage" title="Go to homepage">🏠 Home</a>
@@ -149,6 +158,28 @@
         </div>
     </aside>
 
+    <!-- Modules Sidebar (Project submodule tree navigation) -->
+    <aside id="modules-sidebar" class="modules-sidebar" aria-label="Project Modules" style="display:none;">
+        <div class="modules-sidebar-header">
+            <div class="modules-sidebar-tabs">
+                <button class="modules-sidebar-tab-btn active" data-tab="modules" aria-label="Browse project modules">📦 Modules</button>
+                <button class="modules-sidebar-tab-btn" data-tab="tree" aria-label="View task tree">🌳 Tree</button>
+            </div>
+            <button class="modules-sidebar-close" aria-label="Close modules sidebar" title="Close">×</button>
+        </div>
+        <div id="modules-sidebar-content" class="modules-sidebar-content sidebar-tab-pane active" data-pane="modules">
+            <!-- Injected by JS -->
+        </div>
+        <div id="modules-tree-content" class="sidebar-task-tree sidebar-tab-pane" data-pane="tree">
+            <!-- Injected by JS -->
+        </div>
+    </aside>
+
+    <!-- Toggle button to open modules sidebar (shown only when modules exist) -->
+    <button id="modules-sidebar-toggle" class="modules-sidebar-toggle" aria-label="Open modules sidebar" style="display:none;" title="Browse Modules">
+        📦
+    </button>
+
     <!-- General Tooltip -->
     <div id="tooltip" class="tooltip" role="tooltip"></div> <!-- Added role -->
 
@@ -157,7 +188,7 @@
         <h2>Interactive Career Graph Template</h2>
         <p>This page is intentionally filled with sample content. Replace the graph data and copy to publish your own interactive CV/portfolio.</p>
         <h2>What to customize</h2>
-        <p>Update the graph structure and node details in <strong>templates/</strong> (see <code>templates/registry.json</code>). Optional: update icons/manifest for your brand.</p>
+        <p>For real projects, update <strong>tasksDB/&lt;scope&gt;/&lt;project&gt;/tasks.json</strong> and optional <strong>graphTemplate</strong> data, then publish it through <code>tasksDB/registry.json</code>.</p>
     </footer>
 </body>
 </html>

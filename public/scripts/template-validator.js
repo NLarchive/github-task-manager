@@ -133,6 +133,116 @@ class TemplateValidator {
       errors.push('Project budget must be a non-negative number');
     }
 
+    // Validate budget_spent
+    if (project.budget_spent !== undefined && (typeof project.budget_spent !== 'number' || project.budget_spent < 0)) {
+      errors.push('Project budget_spent must be a non-negative number');
+    }
+
+    // Validate project_manager
+    if (project.project_manager !== undefined && project.project_manager !== null) {
+      if (typeof project.project_manager !== 'object') {
+        errors.push('Project project_manager must be an object');
+      } else {
+        if (!project.project_manager.name && !project.project_manager.email) {
+          warnings.push('Project project_manager should have a name or email');
+        }
+        if (project.project_manager.email && !this.isValidEmail(project.project_manager.email)) {
+          errors.push('Project project_manager email is invalid');
+        }
+      }
+    }
+
+    // Validate stakeholders
+    if (project.stakeholders !== undefined) {
+      if (!Array.isArray(project.stakeholders)) {
+        errors.push('Project stakeholders must be an array');
+      } else {
+        project.stakeholders.forEach((s, i) => {
+          if (!s || typeof s !== 'object') {
+            errors.push(`Project stakeholder ${i + 1}: must be an object`);
+          } else if (s.email && !this.isValidEmail(s.email)) {
+            errors.push(`Project stakeholder ${i + 1}: invalid email`);
+          }
+        });
+      }
+    }
+
+    // Validate milestones
+    if (project.milestones !== undefined) {
+      if (!Array.isArray(project.milestones)) {
+        errors.push('Project milestones must be an array');
+      } else {
+        const msEnum = this.config.ENUMS && this.config.ENUMS.MILESTONE_STATUS;
+        project.milestones.forEach((m, i) => {
+          if (!m || typeof m !== 'object') {
+            errors.push(`Project milestone ${i + 1}: must be an object`);
+            return;
+          }
+          if (!m.name) errors.push(`Project milestone ${i + 1}: missing name`);
+          if (m.due_date && !this.isValidDate(m.due_date)) errors.push(`Project milestone ${i + 1}: invalid due_date format`);
+          if (m.status && msEnum && !msEnum.includes(m.status)) errors.push(`Project milestone ${i + 1}: invalid status "${m.status}"`);
+        });
+      }
+    }
+
+    // Validate sprints
+    if (project.sprints !== undefined) {
+      if (!Array.isArray(project.sprints)) {
+        errors.push('Project sprints must be an array');
+      } else {
+        const spEnum = this.config.ENUMS && this.config.ENUMS.SPRINT_STATUS;
+        project.sprints.forEach((sp, i) => {
+          if (!sp || typeof sp !== 'object') {
+            errors.push(`Project sprint ${i + 1}: must be an object`);
+            return;
+          }
+          if (!sp.name) errors.push(`Project sprint ${i + 1}: missing name`);
+          if (sp.start_date && !this.isValidDate(sp.start_date)) errors.push(`Project sprint ${i + 1}: invalid start_date`);
+          if (sp.end_date && !this.isValidDate(sp.end_date)) errors.push(`Project sprint ${i + 1}: invalid end_date`);
+          if (sp.start_date && sp.end_date && sp.start_date > sp.end_date) errors.push(`Project sprint ${i + 1}: start_date after end_date`);
+          if (sp.status && spEnum && !spEnum.includes(sp.status)) errors.push(`Project sprint ${i + 1}: invalid status "${sp.status}"`);
+        });
+      }
+    }
+
+    // Validate risks
+    if (project.risks !== undefined) {
+      if (!Array.isArray(project.risks)) {
+        errors.push('Project risks must be an array');
+      } else {
+        const rpEnum = this.config.ENUMS && this.config.ENUMS.RISK_PROBABILITY;
+        const riEnum = this.config.ENUMS && this.config.ENUMS.RISK_IMPACT;
+        const rsEnum = this.config.ENUMS && this.config.ENUMS.RISK_STATUS;
+        project.risks.forEach((r, i) => {
+          if (!r || typeof r !== 'object') {
+            errors.push(`Project risk ${i + 1}: must be an object`);
+            return;
+          }
+          if (!r.name) errors.push(`Project risk ${i + 1}: missing name`);
+          if (r.probability && rpEnum && !rpEnum.includes(r.probability)) errors.push(`Project risk ${i + 1}: invalid probability "${r.probability}"`);
+          if (r.impact && riEnum && !riEnum.includes(r.impact)) errors.push(`Project risk ${i + 1}: invalid impact "${r.impact}"`);
+          if (r.status && rsEnum && !rsEnum.includes(r.status)) errors.push(`Project risk ${i + 1}: invalid status "${r.status}"`);
+        });
+      }
+    }
+
+    // Validate change_log
+    if (project.change_log !== undefined) {
+      if (!Array.isArray(project.change_log)) {
+        errors.push('Project change_log must be an array');
+      } else {
+        const csEnum = this.config.ENUMS && this.config.ENUMS.CHANGE_STATUS;
+        project.change_log.forEach((c, i) => {
+          if (!c || typeof c !== 'object') {
+            errors.push(`Project change_log ${i + 1}: must be an object`);
+            return;
+          }
+          if (c.date && !this.isValidDate(c.date)) errors.push(`Project change_log ${i + 1}: invalid date format`);
+          if (c.status && csEnum && !csEnum.includes(c.status)) errors.push(`Project change_log ${i + 1}: invalid status "${c.status}"`);
+        });
+      }
+    }
+
     return { errors, warnings };
   }
 
@@ -249,6 +359,109 @@ class TemplateValidator {
           errors.push(`Task dependency ${index + 1}: lag_days must be a number`);
         }
       });
+    }
+
+    // Validate due_date (v3)
+    if (task.due_date !== undefined && task.due_date !== null) {
+      if (!this.isValidDate(task.due_date)) {
+        errors.push(`Invalid task due_date format: ${task.due_date}`);
+      } else if (task.start_date && this.isValidDate(task.start_date) && task.due_date < task.start_date) {
+        errors.push('Task due_date cannot be before start_date');
+      }
+    }
+
+    // Validate complexity (v3)
+    if (task.complexity !== undefined && task.complexity !== null) {
+      const complexityEnum = this.config.ENUMS && this.config.ENUMS.COMPLEXITY;
+      if (complexityEnum && !complexityEnum.includes(task.complexity)) {
+        errors.push(`Invalid task complexity: "${task.complexity}"`);
+      }
+    }
+
+    // Validate sprint_name (v3)
+    if (task.sprint_name !== undefined && task.sprint_name !== null) {
+      if (typeof task.sprint_name !== 'string') {
+        errors.push('Task sprint_name must be a string');
+      }
+    }
+
+    // Validate blocker_reason (v3)
+    if (task.blocker_reason !== undefined && task.blocker_reason !== null) {
+      if (typeof task.blocker_reason !== 'string') {
+        errors.push('Task blocker_reason must be a string');
+      }
+    }
+
+    // Validate reviewer (v3)
+    if (task.reviewer !== undefined && task.reviewer !== null) {
+      if (typeof task.reviewer !== 'object') {
+        errors.push('Task reviewer must be an object');
+      } else {
+        if (!task.reviewer.name && !task.reviewer.email) {
+          warnings.push('Task reviewer should have a name or email');
+        }
+        if (task.reviewer.email && !this.isValidEmail(task.reviewer.email)) {
+          errors.push('Task reviewer email is invalid');
+        }
+      }
+    }
+
+    // Validate acceptance_criteria (v3)
+    if (task.acceptance_criteria !== undefined && task.acceptance_criteria !== null) {
+      if (!Array.isArray(task.acceptance_criteria)) {
+        errors.push('Task acceptance_criteria must be an array');
+      } else {
+        task.acceptance_criteria.forEach((ac, i) => {
+          if (typeof ac !== 'string') {
+            errors.push(`Task acceptance_criteria[${i}] must be a string`);
+          }
+        });
+      }
+    }
+
+    // Validate subtasks (v3)
+    if (task.subtasks !== undefined && task.subtasks !== null) {
+      if (!Array.isArray(task.subtasks)) {
+        errors.push('Task subtasks must be an array');
+      } else {
+        task.subtasks.forEach((sub, i) => {
+          if (!sub || typeof sub !== 'object') {
+            errors.push(`Task subtask ${i + 1}: must be an object`);
+            return;
+          }
+          if (!sub.name) errors.push(`Task subtask ${i + 1}: missing name`);
+          const taskStatusEnum = this.config.ENUMS && this.config.ENUMS.TASK_STATUS;
+          if (sub.status && taskStatusEnum && !taskStatusEnum.includes(sub.status)) {
+            errors.push(`Task subtask ${i + 1}: invalid status "${sub.status}"`);
+          }
+          if (sub.estimated_hours !== undefined && (typeof sub.estimated_hours !== 'number' || sub.estimated_hours < 0)) {
+            errors.push(`Task subtask ${i + 1}: estimated_hours must be a non-negative number`);
+          }
+          if (sub.due_date && !this.isValidDate(sub.due_date)) {
+            errors.push(`Task subtask ${i + 1}: invalid due_date format`);
+          }
+        });
+      }
+    }
+
+    // Validate links (v3)
+    if (task.links !== undefined && task.links !== null) {
+      if (!Array.isArray(task.links)) {
+        errors.push('Task links must be an array');
+      } else {
+        task.links.forEach((link, i) => {
+          if (!link || typeof link !== 'object') {
+            errors.push(`Task link ${i + 1}: must be an object`);
+            return;
+          }
+          if (!link.url && !link.href) {
+            errors.push(`Task link ${i + 1}: missing url`);
+          }
+          if (!link.label) {
+            warnings.push(`Task link ${i + 1}: missing label (recommended)`);
+          }
+        });
+      }
     }
 
     // Validate category exists in template

@@ -145,7 +145,7 @@ export function syncBuiltInTemplates(registry, convertFn, helpers = {}) {
     if (!registry || typeof registry.set !== 'function') return;
 
     try {
-        const careerLocal = tryRequireLocalTemplate('../templates/career-lite/data.json') || tryRequireLocalTemplate('../templates/career/data.json') || tryRequireLocalTemplate('templates/career-lite/data.json');
+        const careerLocal = tryRequireLocalTemplate('../../tasksDB/_examples/career/data.json') || tryRequireLocalTemplate('../templates/career-lite/data.json');
         if (careerLocal) {
             registry.set('career-lite', buildCareerTemplateFromData('career-lite', careerLocal.name || 'Career (Lite Template)', careerLocal, convertFn));
         }
@@ -154,7 +154,7 @@ export function syncBuiltInTemplates(registry, convertFn, helpers = {}) {
     }
 
     try {
-        const taskLocal = tryRequireLocalTemplate('../templates/task-management/data.json') || tryRequireLocalTemplate('templates/task-management/data.json');
+        const taskLocal = tryRequireLocalTemplate('../../tasksDB/_examples/task-management/data.json');
         if (taskLocal) {
             registry.set('task-management', buildTaskMgmtFromData('task-management', taskLocal.name || 'Task Management (Project)', taskLocal, helpers));
         }

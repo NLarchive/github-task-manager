@@ -45,6 +45,22 @@ class TemplateAutomation {
       }
     });
 
+    // If start/end dates are missing, default to today and 7 days later (YYYY-MM-DD)
+    if (!populated.start_date) {
+      const today = new Date();
+      populated.start_date = today.toISOString().slice(0, 10);
+    }
+    if (!populated.end_date) {
+      const start = new Date(populated.start_date + 'T00:00:00');
+      const dur = (this.config && this.config.DEFAULTS && this.config.DEFAULTS.TASK && this.config.DEFAULTS.TASK.default_duration_days) || 7;
+      const end = new Date(start.getTime() + dur * 24 * 60 * 60 * 1000);
+      populated.end_date = end.toISOString().slice(0, 10);
+    }
+    // Auto-set due_date to end_date if not provided (v3)
+    if (!populated.due_date) {
+      populated.due_date = populated.end_date;
+    }
+
     // Auto-set creation metadata
     if (this.config.AUTOMATION.AUTO_SET_CREATED_DATE && !populated.created_date) {
       populated.created_date = new Date().toISOString();
@@ -62,14 +78,19 @@ class TemplateAutomation {
       }
     }
 
-    // Set completed_date if status is completed
-    if (populated.status === 'Completed' && !populated.completed_date) {
+    // Set completed_date if status is completed or done
+    if ((populated.status === 'Completed' || populated.status === 'Done') && !populated.completed_date) {
       populated.completed_date = new Date().toISOString();
     }
 
     // Auto-set progress based on status
-    if (populated.status === 'Completed' && populated.progress_percentage === 0) {
+    if ((populated.status === 'Completed' || populated.status === 'Done') && populated.progress_percentage === 0) {
       populated.progress_percentage = 100;
+    }
+
+    // Clear blocker_reason if task is no longer blocked
+    if (populated.status && populated.status !== 'Blocked' && populated.blocker_reason) {
+      // do not clear — keep as audit trail but warn via validator
     }
 
     // Mark intentionally-created test tasks (created during E2E) if tags contain e2e-test
@@ -239,14 +260,30 @@ class TemplateAutomation {
         } else if (field === 'estimated_hours') {
           fixedTask[field] = 8; // Default 1 day
           issues.push(`Set default ${field} to 8`);
+        } else if (field === 'start_date') {
+          const today = new Date();
+          fixedTask[field] = today.toISOString().split('T')[0];
+          issues.push(`Set default ${field} to today`);
+        } else if (field === 'end_date') {
+          const today = new Date();
+          const dur = (this.config && this.config.DEFAULTS && this.config.DEFAULTS.TASK && this.config.DEFAULTS.TASK.default_duration_days) || 7;
+          const end = new Date(today.getTime() + dur * 24 * 60 * 60 * 1000);
+          fixedTask[field] = end.toISOString().split('T')[0];
+          issues.push(`Set default ${field} to ${dur} days from today`);
         } else {
           issues.push(`Missing required field: ${field}`);
         }
       }
     });
 
+    // Auto-set due_date from end_date if missing (v3)
+    if (!fixedTask.due_date && fixedTask.end_date) {
+      fixedTask.due_date = fixedTask.end_date;
+      issues.push('Set due_date from end_date');
+    }
+
     // Fix date formats
-    ['start_date', 'end_date'].forEach(field => {
+    ['start_date', 'end_date', 'due_date'].forEach(field => {
       if (fixedTask[field] && !this.validator.isValidDate(fixedTask[field])) {
         try {
           // Try to parse and reformat

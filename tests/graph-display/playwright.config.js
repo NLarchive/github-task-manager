@@ -1,6 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
-import path from 'path';
-const serverCwd = path.join(process.cwd(), 'tests', 'graph-display');
+const repoRoot = process.cwd();
 
 export default defineConfig({
   testDir: '.',
@@ -20,10 +19,13 @@ export default defineConfig({
     ? undefined
     : {
         command: 'node server.js',
-        cwd: serverCwd,
+        cwd: repoRoot,
         port: Number(process.env.PW_PORT || 3201),
         timeout: 120 * 1000,
-        reuseExistingServer: process.env.PLAYWRIGHT_REUSE_SERVER === '1'
+        reuseExistingServer: process.env.PLAYWRIGHT_REUSE_SERVER === '1',
+        env: {
+          PORT: String(Number(process.env.PW_PORT || 3201))
+        }
       },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }]
 });

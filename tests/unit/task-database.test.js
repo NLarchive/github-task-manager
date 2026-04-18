@@ -26,9 +26,9 @@ const getAutomation = new Function('TEMPLATE_CONFIG', 'TemplateValidator', autom
 const TemplateAutomation = getAutomation(TEMPLATE_CONFIG, TemplateValidator);
 
 // Load database
-const databaseContent = fs.readFileSync(path.join(__dirname, '../../public/tasksDB/task-database.js'), 'utf8');
-const getDatabase = new Function('TemplateValidator', 'TemplateAutomation', 'console', databaseContent + '\nreturn TaskDatabase;');
-const TaskDatabase = getDatabase(TemplateValidator, TemplateAutomation, console);
+const databaseContent = fs.readFileSync(path.join(__dirname, '../../public/scripts/task-database.js'), 'utf8');
+const getDatabase = new Function('TemplateValidator', 'TemplateAutomation', 'console', databaseContent + '\nreturn { TaskDatabase, resolveActiveProjectId };');
+const { TaskDatabase, resolveActiveProjectId } = getDatabase(TemplateValidator, TemplateAutomation, console);
 
 // Mock GitHub API
 class MockGitHubAPI {
@@ -60,6 +60,27 @@ describe('TaskDatabase Initialization', () => {
     const mockApi = new MockGitHubAPI();
     const db = new TaskDatabase(mockApi);
     expect(db.tasks).toHaveLength(0);
+  });
+
+  it('should infer the active project id from scoped TASKS_FILE paths', () => {
+    const previousConfig = globalThis.TEMPLATE_CONFIG;
+    globalThis.TEMPLATE_CONFIG = {
+      GITHUB: {
+        ACTIVE_PROJECT_ID: '',
+        DEFAULT_PROJECT_ID: '',
+        TASKS_FILE: 'public/tasksDB/external/github-task-manager/tasks.json'
+      }
+    };
+
+    try {
+      expect(resolveActiveProjectId()).toBe('github-task-manager');
+    } finally {
+      if (typeof previousConfig === 'undefined') {
+        delete globalThis.TEMPLATE_CONFIG;
+      } else {
+        globalThis.TEMPLATE_CONFIG = previousConfig;
+      }
+    }
   });
 });
 

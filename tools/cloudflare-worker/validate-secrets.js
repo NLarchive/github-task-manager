@@ -28,10 +28,10 @@ async function checkRepoToken({ owner, repo, branch, path }, token) {
 }
 
 (async () => {
-  const owner = 'NLarchive';
-  const repo = 'ai-career-roadmap';
+  const owner = 'nlarchive';
+  const repo = 'github-task-manager';
   const branch = 'main';
-  const path = 'tasksDB/ai-career-roadmap/tasks.json';
+  const path = 'public/tasksDB/external/ai-career-roadmap/tasks.json';
 
   const perKeys = ['GITHUB_TOKEN_AI_CAREER_ROADMAP', 'GH_TOKEN_AI_CAREER_ROADMAP'];
   const sharedKeys = ['GITHUB_TOKEN', 'GH_TOKEN'];

@@ -9,8 +9,57 @@ function parseTranslate(transform) {
 }
 
 test.describe('graph-display task-management template', () => {
+  test('dependency link opens target modal, keeps selection after close, and clears on background click', async ({ page }) => {
+    await page.goto('/graph-display/index.html?template=task-management&skipTour=true', { waitUntil: 'domcontentloaded' });
+
+    const nodes = page.locator('#graph-container g.node');
+    await expect.poll(async () => nodes.count(), { timeout: 15000 }).toBeGreaterThan(10);
+
+    const candidate = await page.evaluate(() => {
+      const graph = window.graphInstance;
+      if (!graph || !graph.details) return null;
+      for (const [sourceId, details] of Object.entries(graph.details)) {
+        const items = Array.isArray(details && details.items) ? details.items : [];
+        const joined = items.join(' ');
+        const match = joined.match(/data-dep-node-id="([^"]+)"/);
+        if (match) {
+          return { sourceId, targetId: match[1] };
+        }
+      }
+      return null;
+    });
+
+    expect(candidate).toBeTruthy();
+    expect(candidate.sourceId).toBeTruthy();
+    expect(candidate.targetId).toBeTruthy();
+
+    const sourceNode = page.locator(`#graph-container g.node[data-id="${candidate.sourceId}"]`);
+    await expect(sourceNode).toBeVisible();
+    await sourceNode.evaluate((el) => {
+      el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+    });
+
+    const popup = page.locator('#popup');
+    await expect(popup).toHaveClass(/visible/);
+
+    const depButton = page.locator('#popup .dep-link').first();
+    await expect(depButton).toBeVisible();
+    await depButton.click();
+
+    const targetNode = page.locator(`#graph-container g.node[data-id="${candidate.targetId}"]`);
+    await expect(targetNode).toHaveClass(/details-shown-for/);
+    await expect(popup).toHaveClass(/visible/);
+
+    await page.locator('#popup .close-button').click();
+    await expect(popup).not.toHaveClass(/visible/);
+    await expect(targetNode).toHaveClass(/details-shown-for/);
+
+    await page.locator('#graph-container svg').click({ position: { x: 8, y: 8 } });
+    await expect(targetNode).not.toHaveClass(/details-shown-for/);
+  });
+
   test('renders dependency links with visible strokes', async ({ page }) => {
-    await page.goto('index.html?template=task-management', { waitUntil: 'domcontentloaded' });
+    await page.goto('/graph-display/index.html?template=task-management', { waitUntil: 'domcontentloaded' });
 
     // Wait until nodes render
     const nodes = page.locator('#graph-container g.node');
@@ -29,7 +78,7 @@ test.describe('graph-display task-management template', () => {
   });
 
   test('enforces clear layer distribution: Start=layer0 only, End=final layer only, tasks layered by dependencies', async ({ page }) => {
-    await page.goto('index.html?template=task-management', { waitUntil: 'domcontentloaded' });
+    await page.goto('/graph-display/index.html?template=task-management', { waitUntil: 'domcontentloaded' });
 
     // Give the simulation a moment to settle into layer bands
     await page.waitForTimeout(2500);
@@ -112,5 +161,20 @@ test.describe('graph-display task-management template', () => {
 
     // Every dependency link should go forward by layer (and generally downward by Y)
     expect(result.failingEdges).toEqual([]);
+  });
+
+  test('shows descriptive project end details for task graphs', async ({ page }) => {
+    await page.goto('/graph-display/index.html?template=github-task-manager-tasks&skipTour=true', { waitUntil: 'domcontentloaded' });
+
+    const endNode = page.locator('#graph-container g.node[data-id="project-end"]');
+    await expect(endNode).toBeVisible({ timeout: 20000 });
+    await endNode.evaluate((el) => {
+      el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+    });
+
+    const popup = page.locator('#popup');
+    await expect(popup).toHaveClass(/visible/);
+    await expect(popup).toContainText('Terminal tasks captured here');
+    await expect(popup).toContainText('What happens next');
   });
 });

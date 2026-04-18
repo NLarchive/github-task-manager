@@ -95,6 +95,100 @@
     color: var(--layer2-base);
 }
 
+/* ===== Dependency link buttons inside node detail popup ===== */
+#popup .content .dep-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    margin: 2px 3px 2px 0;
+    font-size: 0.82rem;
+    background: rgba(78, 121, 167, 0.12);
+    border: 1px solid rgba(78, 121, 167, 0.32);
+    border-radius: 5px;
+    color: var(--color-secondary, #4e79a7);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+    font-family: inherit;
+}
+
+#popup .content .dep-link:hover,
+#popup .content .dep-link:focus-visible {
+    background: rgba(78, 121, 167, 0.26);
+    border-color: var(--color-secondary, #4e79a7);
+    outline: none;
+    filter: brightness(1.15);
+}
+
+/* Status-aware dep buttons */
+#popup .content .dep-link.dep-status-done {
+    opacity: 0.45;
+    filter: grayscale(0.7);
+    text-decoration: line-through;
+}
+#popup .content .dep-link.dep-status-in-progress {
+    animation: btn-pulse 2s infinite ease-in-out;
+}
+
+/* Hours badge inside dep-link buttons */
+#popup .content .dep-link .dep-hours {
+    font-size: 0.7rem;
+    font-weight: 700;
+    opacity: 0.75;
+    background: rgba(0,0,0,0.08);
+    border-radius: 3px;
+    padding: 0 4px;
+    margin-left: 2px;
+    white-space: nowrap;
+}
+
+/* ===== Subtask node-like buttons ===== */
+.subtask-node-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 6px 0;
+}
+#popup .content .subtask-node-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    background: rgba(100, 100, 100, 0.15);
+    border: 1px solid rgba(100, 100, 100, 0.3);
+    border-radius: 12px;
+    color: #fff;
+    cursor: default;
+    font-family: inherit;
+    transition: opacity 0.15s, filter 0.15s;
+}
+#popup .content .subtask-node-btn .st-name {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+#popup .content .subtask-node-btn .st-hours {
+    font-size: 0.72rem;
+    opacity: 0.85;
+    font-weight: 600;
+}
+#popup .content .subtask-node-btn.st-status-done {
+    opacity: 0.4;
+    filter: grayscale(0.7);
+    text-decoration: line-through;
+}
+#popup .content .subtask-node-btn.st-status-in-progress {
+    animation: btn-pulse 2s infinite ease-in-out;
+}
+
+@keyframes btn-pulse {
+    0% { box-shadow: 0 0 3px rgba(255, 235, 59, 0.3); }
+    50% { box-shadow: 0 0 12px rgba(255, 235, 59, 0.7); }
+    100% { box-shadow: 0 0 3px rgba(255, 235, 59, 0.3); }
+}
+
 /* ===== CV Popup Content Styles ===== */
 
 .cv-error {
@@ -486,4 +580,136 @@ img.profile-photo.border-layer-0-variant-0 {
     #guide-panel .guide-content {
         padding: 56px 16px 24px;
     }
+}
+
+/* ============================================================ */
+/* SUBTASK NAVIGATION                                           */
+/* ============================================================ */
+
+/* ===== Popup Dropdowns (Acceptance Criteria, Sub-tasks) ===== */
+.popup-dropdown {
+    margin: var(--spacing-sm, 8px) 0;
+    border: 1px solid rgba(128, 128, 128, 0.2);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.popup-dropdown > summary {
+    cursor: pointer;
+    padding: 8px 12px;
+    background: rgba(128, 128, 128, 0.06);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--font-size-base, 14px);
+    user-select: none;
+    transition: background 0.15s;
+}
+
+.popup-dropdown > summary:hover {
+    background: rgba(128, 128, 128, 0.12);
+}
+
+.popup-dropdown > summary::-webkit-details-marker {
+    display: none;
+}
+
+.popup-dropdown > summary::before {
+    content: '▸';
+    display: inline-block;
+    transition: transform 0.15s ease;
+    font-size: 0.75em;
+    color: var(--color-secondary, #4e79a7);
+}
+
+.popup-dropdown[open] > summary::before {
+    transform: rotate(90deg);
+}
+
+.popup-dropdown-count {
+    font-weight: 400;
+    opacity: 0.65;
+    font-size: 0.85em;
+}
+
+.popup-dropdown > ul {
+    margin: 0;
+    padding: 8px 12px 8px 28px;
+    font-size: 0.9em;
+    line-height: 1.55;
+}
+
+.popup-dropdown > ul > li {
+    margin-bottom: 4px;
+}
+
+.popup-dropdown > ul > li em {
+    opacity: 0.7;
+}
+
+.subtask-dive-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: var(--spacing-md, 12px);
+    padding: 8px 16px;
+    background: var(--color-accent, #4a90d9);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: var(--font-size-base, 14px);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.subtask-dive-btn:hover {
+    background: var(--color-accent-hover, #357abd);
+}
+
+.parent-nav-btn {
+    background: #3a3a4a;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #e8e8f0;
+}
+
+.parent-nav-btn:hover {
+    background: #4a4a5e;
+}
+
+.subtask-breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 6px 12px;
+    background: rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    font-size: 13px;
+    z-index: 50;
+}
+
+.breadcrumb-link {
+    background: none;
+    border: none;
+    color: var(--color-accent, #4a90d9);
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 13px;
+}
+
+.breadcrumb-link:hover {
+    text-decoration: underline;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.breadcrumb-sep {
+    color: #999;
+    font-weight: bold;
+}
+
+.breadcrumb-current {
+    font-weight: 600;
+    color: var(--color-text-dark, #333);
 }

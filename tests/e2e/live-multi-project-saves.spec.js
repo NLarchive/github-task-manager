@@ -179,7 +179,7 @@ test.describe('@live Live Site - Multi-Project GitHub Saves', () => {
     // Check tasks file
     const tasksFile = await getTasksFile(page);
     console.log('Tasks file:', tasksFile);
-    expect(tasksFile).toBe('public/tasksDB/github-task-manager/tasks.json');
+    expect(tasksFile).toBe('public/tasksDB/external/github-task-manager/tasks.json');
   });
 
   test('should save to github-task-manager repo', async ({ page }) => {

@@ -140,8 +140,8 @@ github-task-manager/
 ## 📝 Task Database Management
 
 ### How Tasks Are Stored
-- **Primary format**: JSON (`public/tasksDB/<projectId>/tasks.json`)
-- **Export format**: CSV (`public/tasksDB/tasks.csv`)
+- **Primary format**: JSON (`public/tasksDB/<scope>/<projectId>/tasks.json`)
+- **Export format**: CSV (`public/tasksDB/<scope>/<projectId>/tasks.csv`)
 - **Version control**: Both files committed to git for audit trail
 
 ### Adding New Tasks

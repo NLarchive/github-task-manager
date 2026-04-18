@@ -359,9 +359,11 @@ GITHUB: {
 
 You can provide reusable graph templates that the **Interactive Career Graph** (`public/graph-display`) consumes.
 
-- Templates live under: `public/graph-display/templates/`
-- Template registry: `public/graph-display/templates/registry.json` — add entries here so the UI can discover them.
-- JSON schema (validation): `public/graph-display/templates/schema/graph-template.schema.json`
+- Standalone graph demos live under: `public/graph-display/templates/`
+- Published graph experiences are indexed by: `public/tasksDB/registry.json`
+- JSON schema (validation): `public/tasksDB/_schema/graph-template.schema.json`
+- Canonical per-project data lives under: `public/tasksDB/<scope>/<projectId>/tasks.json`
+- Canonical per-project graph tours live under: `public/tasksDB/<scope>/<projectId>/tour/graph-tour.json`
 
 Supported template types (see schema):
 
@@ -380,10 +382,11 @@ Supported template types (see schema):
 
 Best practices and notes:
 
-- Use `templates/registry.json` to expose templates to the UI (see existing `career-lite` and `task-management` entries). The `initTemplates()` loader fetches registry.json and loads each template.
-- Keep graph definitions in JSON — the application no longer contains large hard-coded graph data. This keeps templates editable, versionable, and re-usable across projects. Note: the code no longer ships minimal "fallback" templates; make sure your template is present in `templates/` or exposed via `templates/registry.json`.
-- Place per-project tasks in `public/tasksDB/<projectId>/tasks.json` to make them available via the dynamic TaskDB loader (templates ending with `-tasks`).
-- If your template includes a custom tour, add `tour.json` next to your `data.json` and reference it with `meta.walkthroughStepsPath`.
+- Treat `public/tasksDB/<scope>/<projectId>/tasks.json` as the source of truth for real projects. If a project needs a custom graph, embed it under `graphTemplate` in that file instead of keeping a second copy under `graph-display/templates/`.
+- Use `public/tasksDB/registry.json` as the publishing/index layer. Entries can point either to standalone demo files under `tasksDB/_examples/` or directly to `/tasksDB/<scope>/<projectId>/tasks.json`.
+- Keep standalone demos in `public/graph-display/templates/` only when they are intentionally generic examples and not tied to a project dataset.
+- Put project-specific tours in `public/tasksDB/<scope>/<projectId>/tour/graph-tour.json`. The graph loader normalizes relative tour paths from `tasks.json` into graph-display-safe URLs.
+- Use `tools/task-templates/` only for authoring scaffolds. Those files are not loaded by the runtime.
 - Validate your template against `templates/schema/graph-template.schema.json` before publishing.
 
 Example (career-style minimal `data.json`):
@@ -514,7 +517,7 @@ github-task-manager/
 │   └── workflows/
 │       └── deploy.yml              # GitHub Actions CI/CD
 │
-├── public/tasksDB/<project>/tasks.json  # Task database (source of truth)
+├── public/tasksDB/<scope>/<project>/tasks.json  # Task database (source of truth)
 ├── package.json                     # Node.js dependencies
 ├── README.md                        # This file
 ├── QUICKSTART.md                    # Quick start guide
@@ -553,8 +556,8 @@ secrets:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}  # GitHub API token
   # Access passwords (client-side gate). Add per-project secrets to allow project-specific write access.
   ACCESS_PASSWORD_MASTER: ${{ secrets.ACCESS_PASSWORD_MASTER }}  # Master password (fallback)
-  ACCESS_PASSWORD_GITHUB_TASK_MANAGER: ${{ secrets.ACCESS_PASSWORD_GITHUB_TASK_MANAGER }}  # Password for public/tasksDB/github-task-manager
-  ACCESS_PASSWORD_AI_CAREER_ROADMAP: ${{ secrets.ACCESS_PASSWORD_AI_CAREER_ROADMAP }}  # Password for public/tasksDB/ai-career-roadmap
+   ACCESS_PASSWORD_GITHUB_TASK_MANAGER: ${{ secrets.ACCESS_PASSWORD_GITHUB_TASK_MANAGER }}  # Password for public/tasksDB/external/github-task-manager
+   ACCESS_PASSWORD_AI_CAREER_ROADMAP: ${{ secrets.ACCESS_PASSWORD_AI_CAREER_ROADMAP }}  # Password for public/tasksDB/external/ai-career-roadmap
 ```
 
 How to set secrets for each project folder in GitHub:
@@ -562,8 +565,8 @@ How to set secrets for each project folder in GitHub:
 - Go to your repository on GitHub → Settings → Secrets and variables → Actions.
 - Click "New repository secret" and add the following secrets (example names):
    - `ACCESS_PASSWORD_MASTER` — a master password that unlocks all projects (fallback).
-   - `ACCESS_PASSWORD_GITHUB_TASK_MANAGER` — password specifically for public/tasksDB/github-task-manager.
-   - `ACCESS_PASSWORD_AI_CAREER_ROADMAP` — password specifically for public/tasksDB/ai-career-roadmap.
+   - `ACCESS_PASSWORD_GITHUB_TASK_MANAGER` — password specifically for `public/tasksDB/external/github-task-manager`.
+   - `ACCESS_PASSWORD_AI_CAREER_ROADMAP` — password specifically for `public/tasksDB/external/ai-career-roadmap`.
 - You may add more per-project secrets using the pattern `ACCESS_PASSWORD_<PROJECT_ID>` and update `.github/workflows/deploy.yml` to include the new mapping.
 
 During deployment, the workflow writes the secrets into `public/config/access-secret.js` so the client can identify which password applies for each active project. The master password continues to be supported for backward compatibility.
@@ -614,7 +617,7 @@ Contributions welcome! To contribute:
 
 When working on system code, the repository stores both the canonical `tasks.json` and a few derived/state files (CSV exports and `state/` JSON files). These derived files are often regenerated and can cause merge conflicts when multiple contributors update them. Follow these best practices to avoid conflicts:
 
-- **Don't commit derived files**: Avoid committing `public/tasksDB/*/state/*` and `public/tasksDB/*/tasks.csv` — they're generated from `tasks.json`.
+- **Don't commit derived files**: Avoid committing `public/tasksDB/*/*/state/*` and `public/tasksDB/*/*/tasks.csv` — they're generated from `tasks.json`.
 - **Rebase before starting work**: Run `git fetch && git rebase origin/main` before making changes.
 - **Only commit `tasks.json`**: Treat `tasks.json` as the single source of truth for task data.
 - **Use `git rerere` to speed conflict resolution**: Enable it with `git config --global rerere.enabled true`.

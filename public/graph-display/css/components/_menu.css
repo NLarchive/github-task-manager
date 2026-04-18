@@ -169,6 +169,89 @@
     box-shadow: 0 0 0 3px rgba(176, 122, 161, 0.2);
 }
 
+/* ── Folder-path load row ── */
+.folder-path-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.folder-path-row button {
+    width: 100%;
+}
+
+.folder-path-row input[type="text"] {
+    flex: 1;
+    min-height: 36px;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    font-family: var(--font-family);
+    color: var(--color-text-dark);
+    background: #f7f7fa;
+    border: 1px solid #d0d0e0;
+    border-radius: var(--radius-md);
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+}
+
+.folder-path-row input[type="text"]:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(176, 122, 161, 0.18);
+}
+
+.folder-path-row button {
+    min-height: 36px;
+    padding: 6px 12px;
+    font-size: 1rem;
+    border: 1px solid #d0d0e0;
+    background: #f7f7fa;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.folder-path-row button:hover {
+    background: rgba(78, 121, 167, 0.12);
+    border-color: var(--color-secondary, #4e79a7);
+}
+
+.folder-path-result {
+    margin-top: 6px;
+    padding: 6px 10px;
+    font-size: 0.82rem;
+    background: rgba(0,0,0,0.06);
+    border-radius: var(--radius-sm, 4px);
+    word-break: break-word;
+    line-height: 1.4;
+}
+
+.folder-path-result[data-status="success"] {
+    background: rgba(46, 164, 79, 0.16);
+}
+
+.folder-path-result[data-status="error"] {
+    background: rgba(214, 39, 40, 0.14);
+}
+
+.folder-path-result button {
+    margin-top: 4px;
+    padding: 5px 12px;
+    font-size: 0.82rem;
+    border: 1px solid var(--color-secondary, #4e79a7);
+    background: rgba(78, 121, 167, 0.1);
+    border-radius: 5px;
+    cursor: pointer;
+    color: var(--color-text-dark);
+    transition: background 0.15s;
+}
+
+.folder-path-result button:hover {
+    background: rgba(78, 121, 167, 0.22);
+}
+
 /* Search feedback */
 .search-feedback {
     margin-top: var(--spacing-sm);

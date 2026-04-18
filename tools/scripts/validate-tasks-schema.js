@@ -1,7 +1,7 @@
 /**
  * TaskDB Task Schema Validator
  *
- * Validates TaskDB project files under public/tasksDB/<projectId>/tasks.json.
+ * Validates TaskDB project files under public/tasksDB/<scope>/<projectId>/tasks.json.
  * Focus:
  * - required fields present
  * - date formats + ordering
@@ -40,9 +40,18 @@ function sanitizeProjectId(s) {
 }
 
 function loadTasksJson(projectId) {
-  const tasksPath = path.join(__dirname, '../../public/tasksDB', projectId, 'tasks.json');
-  const content = fs.readFileSync(tasksPath, 'utf8');
-  return { tasksPath, data: JSON.parse(content) };
+  const tasksDbRoot = path.join(__dirname, '../../public/tasksDB');
+  // Auto-discover scope: check external/, local/, then root (backward compat)
+  for (const scope of ['external', 'local', '']) {
+    const tasksPath = scope
+      ? path.join(tasksDbRoot, scope, projectId, 'tasks.json')
+      : path.join(tasksDbRoot, projectId, 'tasks.json');
+    if (fs.existsSync(tasksPath)) {
+      const content = fs.readFileSync(tasksPath, 'utf8');
+      return { tasksPath, data: JSON.parse(content) };
+    }
+  }
+  throw new Error(`tasks.json not found for project "${projectId}" in external/, local/, or root.`);
 }
 
 function isValidDateYYYYMMDD(dateStr) {

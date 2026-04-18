@@ -2,7 +2,7 @@
 // Based on TEMPLATE_VALIDATION_GUIDE.md and starter_project_template.json
 
 const TEMPLATE_CONFIG = {
-  version: "1.3",
+  version: "2.0",
   template_type: "project_task_template",
 
   // Environment flags
@@ -33,6 +33,14 @@ const TEMPLATE_CONFIG = {
     ],
     // Fields that user can optionally fill
     OPTIONAL_INPUT: [
+      "due_date",
+      "sprint_name",
+      "complexity",
+      "blocker_reason",
+      "acceptance_criteria",
+      "reviewer",
+      "subtasks",
+      "links",
       "progress_percentage",
       "actual_hours",
       "is_critical_path",
@@ -49,6 +57,7 @@ const TEMPLATE_CONFIG = {
   ENUMS: {
     PROJECT_STATUS: [
       "Not Started",
+      "Planning",
       "In Progress",
       "On Hold",
       "Completed",
@@ -60,7 +69,9 @@ const TEMPLATE_CONFIG = {
       "In Progress",
       "On Hold",
       "Blocked",
+      "In Review",
       "Completed",
+      "Done",
       "Cancelled",
       "Pending Review"
     ],
@@ -77,6 +88,32 @@ const TEMPLATE_CONFIG = {
       "SS", // Start-to-Start
       "FF", // Finish-to-Finish
       "SF"  // Start-to-Finish
+    ],
+
+    COMPLEXITY: [
+      "Very Low",
+      "Low",
+      "Medium",
+      "High",
+      "Very High"
+    ],
+
+    RISK_PROBABILITY: ["Low", "Medium", "High"],
+    RISK_IMPACT: ["Low", "Medium", "High", "Critical"],
+    RISK_SCORE: ["Low", "Medium", "High", "Critical"],
+    RISK_STATUS: ["Open", "Mitigated", "Closed"],
+    CHANGE_STATUS: ["Pending", "Approved", "Rejected"],
+    MILESTONE_STATUS: ["Not Started", "In Progress", "Achieved", "Missed"],
+    SPRINT_STATUS: ["Not Started", "Active", "Completed"],
+    WORKER_ROLE: [
+      "Project Manager",
+      "Developer",
+      "Designer",
+      "QA Engineer",
+      "DevOps",
+      "Business Analyst",
+      "Stakeholder",
+      "Other"
     ]
   },
 
@@ -113,6 +150,14 @@ const TEMPLATE_CONFIG = {
       "progress_percentage",
       "actual_hours",
       "is_critical_path",
+      "due_date",
+      "sprint_name",
+      "complexity",
+      "blocker_reason",
+      "acceptance_criteria",
+      "reviewer",
+      "subtasks",
+      "links",
       "tags",
       "assigned_workers",
       "parent_task_id",
@@ -139,12 +184,27 @@ const TEMPLATE_CONFIG = {
       attachments: [],
       tags: [],
       parent_task_id: null,
-      completed_date: null
+      completed_date: null,
+      // v3 agentic fields
+      due_date: null,
+      sprint_name: null,
+      blocker_reason: null,
+      reviewer: null,
+      subtasks: [],
+      links: [],
+      acceptance_criteria: [],
+      complexity: null,
+      // Default duration for new tasks when end_date is not provided (in days)
+      default_duration_days: 7
     },
 
     PROJECT: {
       status: "Not Started",
-      budget: 0
+      budget: 0,
+      // v3 agentic fields
+      timezone: 'UTC',
+      currency: 'USD',
+      budget_spent: 0
     }
   },
 
@@ -171,6 +231,9 @@ const TEMPLATE_CONFIG = {
     "cancelled": "Cancelled",
     "canceled": "Cancelled",
     "blocked": "Blocked",
+    "in review": "In Review",
+    "in_review": "In Review",
+    "done": "Done",
     "pending review": "Pending Review",
     "pending_review": "Pending Review"
   },
@@ -216,8 +279,8 @@ const TEMPLATE_CONFIG = {
     WORKER_URL: (typeof GH_WORKER_URL !== 'undefined' ? GH_WORKER_URL : ''),
     // Multi-project TasksDB
     // NOTE: Different projects may live in different repositories and may use different roots.
-    // - github-task-manager repo: public/tasksDB/<projectId>/...
-    // - ai-career-roadmap repo: tasksDB/<projectId>/...
+    // - github-task-manager repo: public/tasksDB/<scope>/<projectId>/...
+    // - legacy layouts without a scope segment are still tolerated in a few fallback paths
     // TASKS_ROOT is the default root when a project does not specify its own.
     TASKS_ROOT: 'public/tasksDB',
     DEFAULT_PROJECT_ID: 'github-task-manager',
@@ -227,6 +290,7 @@ const TEMPLATE_CONFIG = {
       {
         id: 'github-task-manager',
         label: 'GitHub Task Manager',
+        scope: 'external',
         owner: 'nlarchive',
         repo: 'github-task-manager',
         branch: 'main',
@@ -235,6 +299,7 @@ const TEMPLATE_CONFIG = {
       {
         id: 'ai-career-roadmap',
         label: 'AI Career Roadmap (learn.deeplearning.ai)',
+        scope: 'external',
         owner: 'nlarchive',
         repo: 'github-task-manager',
         branch: 'main',
@@ -250,6 +315,7 @@ const TEMPLATE_CONFIG = {
 
       return {
         id: safeId,
+        scope: (match && match.scope) ? String(match.scope) : 'external',
         owner: (match && match.owner) ? String(match.owner) : String(this.OWNER || ''),
         repo: (match && match.repo) ? String(match.repo) : String(this.REPO || ''),
         branch: (match && match.branch) ? String(match.branch) : String(this.BRANCH || 'main'),
@@ -260,10 +326,11 @@ const TEMPLATE_CONFIG = {
     getTasksFile(projectId) {
       const cfg = this.getProjectConfig(projectId);
       const root = String(cfg.tasksRoot || this.TASKS_ROOT || 'public/tasksDB').replace(/\/+$/g, '');
-      return `${root}/${cfg.id}/tasks.json`;
+      const scope = cfg.scope || 'external';
+      return `${root}/${scope}/${cfg.id}/tasks.json`;
     },
     // Default tasks file (app may override at runtime)
-    TASKS_FILE: 'public/tasksDB/github-task-manager/tasks.json',
+    TASKS_FILE: 'public/tasksDB/external/github-task-manager/tasks.json',
     // Use GitHub Pages base path only when actually hosted under it
     BASE_PATH: (typeof window !== 'undefined' && window.location && window.location.pathname.startsWith('/github-task-manager'))
       ? '/github-task-manager'
