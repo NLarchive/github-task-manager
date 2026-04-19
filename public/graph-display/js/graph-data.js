@@ -531,6 +531,7 @@ function normalizeInlineSubtaskTask(subtask, index, parentTask = {}) {
     const links = Array.isArray(subtask.links) ? subtask.links.filter(Boolean) : [];
 
     return {
+        task_id: typeof subtask.task_id === 'number' ? subtask.task_id : null,
         task_name: taskName,
         description: subtask.description || subtask.text || parentTask.description || '',
         priority: subtask.priority || parentTask.priority || 'Medium',
@@ -961,7 +962,8 @@ function buildTaskManagementTemplate(entry, data, options = {}) {
                 const sHours = s.estimated_hours ? `${s.estimated_hours}h` : '';
                 const titleBits = [s.description, s.category_name ? `Category: ${s.category_name}` : '', s.due_date ? `Due: ${s.due_date}` : ''].filter(Boolean);
                 const titleAttr = titleBits.length > 0 ? ` title="${escapeHtml(titleBits.join(' | '))}"` : '';
-                return `<button class="task-node-btn" data-priority="${sPriority}" data-status="${sStatusNorm}"${titleAttr}><span class="tn-name">${sName}</span>${sHours ? `<span class="tn-hours">${sHours}</span>` : ''}</button>`;
+                const nodeIdAttr = typeof s.task_id === 'number' ? ` data-node-id="${idToNodeId(s.task_id)}"` : '';
+                return `<button class="task-node-btn" data-priority="${sPriority}" data-status="${sStatusNorm}"${nodeIdAttr}${titleAttr}><span class="tn-name">${sName}</span>${sHours ? `<span class="tn-hours">${sHours}</span>` : ''}</button>`;
             }).join('')}</div></details>`
             : null;
 
