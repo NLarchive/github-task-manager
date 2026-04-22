@@ -3,14 +3,15 @@ name: Deploy GitHub Task Manager
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
+
+# This workflow deploys the GitHub Pages site from the single source-of-truth branch: main.
+# Validation is handled separately by the Validate TaskDB workflow to avoid duplicate checks.
 
 concurrency:
   group: "pages"
@@ -112,13 +113,6 @@ jobs:
           test -f public/index.html && echo "✓ index.html" || (echo "✗ Missing: index.html" && exit 1)
           test -f public/config/tasks-template-config.js && echo "✓ tasks-template-config.js" || (echo "✗ Missing: tasks-template-config.js" && exit 1)
           echo "✓ All required files found"
-
-      - name: Validate TaskDB schema and commit format
-        run: |
-          echo "=== Validating TaskDB schema ==="
-          node tools/scripts/validate-tasks-schema.js --all
-          echo "=== Validating TaskDB commit format ==="
-          node tools/scripts/validate-commit-format.js --max 300
 
       - name: Regenerate derived state and CSV files
         run: |
