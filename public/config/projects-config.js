@@ -2,14 +2,14 @@
 //
 // Purpose
 // - Defines the canonical list of supported projects and their repository metadata.
-// - Used by `public/config/template-config.js` to populate `TEMPLATE_CONFIG.GITHUB.PROJECTS`.
+// - Used by `public/config/tasks-template-config.js` to populate `TEMPLATE_CONFIG.GITHUB.PROJECTS`.
 //
 // Security
 // - This file is intentionally NON-SECRET and may be committed.
 // - Do NOT place tokens or passwords here.
 //   Keep sensitive values in access-secret.* (client gate) and/or Worker environment variables.
 
-// Global variable expected by `template-config.js`
+// Global variable expected by `tasks-template-config.js`
 // Shape: Array<{ id, label, scope, owner, repo, branch, tasksRoot }>
 //   scope: 'external' = deployed to GitHub Pages / live apps
 //          'local'    = local development / test fixtures

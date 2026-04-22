@@ -102,7 +102,8 @@
         "Task Management",
         "GitHub"
       ],
-      "hourly_rate": 0
+      "hourly_rate": 0,
+      "worker_id": "collab-public"
     },
     {
       "name": "Developer",
@@ -114,17 +115,32 @@
         "Node.js",
         "GitHub API"
       ],
-      "hourly_rate": 75
+      "hourly_rate": 75,
+      "worker_id": "dev-fullstack"
     },
     {
       "name": "QA Tester",
       "email": "qa@example.com",
-      "role": "Quality Assurance",
+      "role": "Quality Assurance Engineer",
       "skills": [
         "Testing",
         "GitHub"
       ],
-      "hourly_rate": 50
+      "hourly_rate": 50,
+      "worker_id": "qa-engineer"
+    },
+    {
+      "name": "AI Copilot",
+      "email": "ai@example.com",
+      "worker_id": "ai-copilot",
+      "role": "AI Copilot",
+      "skills": [
+        "JavaScript",
+        "Node.js",
+        "Code Review",
+        "Automation"
+      ],
+      "hourly_rate": 0
     }
   ],
   "tasks": [
@@ -148,9 +164,10 @@
       "category_name": "Frontend Development",
       "assigned_workers": [
         {
-          "name": "dev@example.com",
+          "name": "Developer",
           "email": "dev@example.com",
-          "role": "Collaborator"
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -198,9 +215,10 @@
       "category_name": "Frontend Development",
       "assigned_workers": [
         {
-          "name": "dev@example.com",
+          "name": "Developer",
           "email": "dev@example.com",
-          "role": "Collaborator"
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -212,25 +230,29 @@
           "task_name": "Add text inputs for task_name and description",
           "status": "Done",
           "estimated_hours": 1,
-          "priority": "Critical"
+          "priority": "Critical",
+          "assigned_workers": []
         },
         {
           "task_name": "Add dropdowns for status, priority, category",
           "status": "Done",
           "estimated_hours": 2,
-          "priority": "High"
+          "priority": "High",
+          "assigned_workers": []
         },
         {
           "task_name": "Add date pickers for start_date and end_date",
           "status": "Done",
           "estimated_hours": 1,
-          "priority": "High"
+          "priority": "High",
+          "assigned_workers": []
         },
         {
           "task_name": "Add tags input with chip UI",
           "status": "Done",
           "estimated_hours": 2,
-          "priority": "Medium"
+          "priority": "Medium",
+          "assigned_workers": []
         },
         {
           "task_name": "Add dependency selector with type dropdown",
@@ -241,19 +263,23 @@
             {
               "task_name": "Build predecessor task picker",
               "status": "Done",
-              "estimated_hours": 1
+              "estimated_hours": 1,
+              "assigned_workers": []
             },
             {
               "task_name": "Add dependency type selector (FS/SS/FF/SF)",
               "status": "Done",
-              "estimated_hours": 0.5
+              "estimated_hours": 0.5,
+              "assigned_workers": []
             },
             {
               "task_name": "Add lag_days input",
               "status": "Done",
-              "estimated_hours": 0.5
+              "estimated_hours": 0.5,
+              "assigned_workers": []
             }
-          ]
+          ],
+          "assigned_workers": []
         }
       ],
       "comments": [],
@@ -288,7 +314,8 @@
         {
           "name": "Developer",
           "email": "dev@example.com",
-          "role": "Full Stack Developer"
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -327,7 +354,8 @@
         {
           "name": "Developer",
           "email": "dev@example.com",
-          "role": "Full Stack Developer"
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -373,7 +401,8 @@
         {
           "name": "Developer",
           "email": "dev@example.com",
-          "role": "Full Stack Developer"
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -385,7 +414,8 @@
           "task_name": "Build dependency type UI (FS/SS/FF/SF)",
           "status": "Done",
           "estimated_hours": 3,
-          "priority": "High"
+          "priority": "High",
+          "assigned_workers": []
         },
         {
           "task_name": "Implement circular dependency validator",
@@ -396,20 +426,24 @@
             {
               "task_name": "Build task dependency graph traversal",
               "status": "Done",
-              "estimated_hours": 1.5
+              "estimated_hours": 1.5,
+              "assigned_workers": []
             },
             {
               "task_name": "Add cycle detection algorithm",
               "status": "Done",
-              "estimated_hours": 1.5
+              "estimated_hours": 1.5,
+              "assigned_workers": []
             }
-          ]
+          ],
+          "assigned_workers": []
         },
         {
           "task_name": "Implement critical path highlighting",
           "status": "Done",
           "estimated_hours": 4,
-          "priority": "High"
+          "priority": "High",
+          "assigned_workers": []
         }
       ],
       "comments": [],
@@ -444,7 +478,8 @@
         {
           "name": "Developer",
           "email": "dev@example.com",
-          "role": "Full Stack Developer"
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -483,7 +518,8 @@
         {
           "name": "QA Tester",
           "email": "qa@example.com",
-          "role": "Quality Assurance"
+          "role": "Quality Assurance Engineer",
+          "worker_id": "qa-engineer"
         }
       ],
       "parent_task_id": null,
@@ -520,9 +556,10 @@
       "category_name": "Documentation",
       "assigned_workers": [
         {
-          "name": "dev@example.com",
+          "name": "Developer",
           "email": "dev@example.com",
-          "role": "Collaborator"
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -578,7 +615,8 @@
         {
           "name": "Developer",
           "email": "dev@example.com",
-          "role": "Full Stack Developer"
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -590,13 +628,15 @@
           "task_name": "Create deploy.yml GitHub Actions workflow",
           "status": "Done",
           "estimated_hours": 2,
-          "priority": "Critical"
+          "priority": "Critical",
+          "assigned_workers": []
         },
         {
           "task_name": "Configure environment secrets injection",
           "status": "Done",
           "estimated_hours": 1,
-          "priority": "High"
+          "priority": "High",
+          "assigned_workers": []
         },
         {
           "task_name": "Smoke test live deployment",
@@ -607,19 +647,23 @@
             {
               "task_name": "Verify task list renders",
               "status": "Done",
-              "estimated_hours": 0.5
+              "estimated_hours": 0.5,
+              "assigned_workers": []
             },
             {
               "task_name": "Verify CRUD operations",
               "status": "Done",
-              "estimated_hours": 1
+              "estimated_hours": 1,
+              "assigned_workers": []
             },
             {
               "task_name": "Verify password protection gate",
               "status": "Done",
-              "estimated_hours": 0.5
+              "estimated_hours": 0.5,
+              "assigned_workers": []
             }
-          ]
+          ],
+          "assigned_workers": []
         }
       ],
       "comments": [],
@@ -652,9 +696,10 @@
       "category_name": "Retrospective",
       "assigned_workers": [
         {
-          "name": "public@example.com",
+          "name": "Public User",
           "email": "public@example.com",
-          "role": "Collaborator"
+          "role": "Collaborator",
+          "worker_id": "collab-public"
         }
       ],
       "parent_task_id": null,
@@ -699,7 +744,8 @@
         {
           "name": "Developer",
           "email": "dev@example.com",
-          "role": "Full Stack Developer"
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -731,7 +777,8 @@
         {
           "name": "Developer",
           "email": "dev@example.com",
-          "role": "Full Stack Developer"
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -763,7 +810,8 @@
         {
           "name": "Developer",
           "email": "dev@example.com",
-          "role": "Full Stack Developer"
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -812,7 +860,8 @@
         {
           "name": "Developer",
           "email": "dev@example.com",
-          "role": "Full Stack Developer"
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -844,7 +893,8 @@
         {
           "name": "Developer",
           "email": "dev@example.com",
-          "role": "Full Stack Developer"
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -883,7 +933,8 @@
         {
           "name": "Developer",
           "email": "dev@example.com",
-          "role": "Full Stack Developer"
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -895,25 +946,29 @@
           "task_name": "Create password prompt modal",
           "status": "Done",
           "estimated_hours": 1,
-          "priority": "High"
+          "priority": "High",
+          "assigned_workers": []
         },
         {
           "task_name": "Wire password check to all mutation actions",
           "status": "Done",
           "estimated_hours": 1,
-          "priority": "High"
+          "priority": "High",
+          "assigned_workers": []
         },
         {
           "task_name": "Add sessionStorage persistence",
           "status": "Done",
           "estimated_hours": 0.5,
-          "priority": "Medium"
+          "priority": "Medium",
+          "assigned_workers": []
         },
         {
           "task_name": "Add config toggle for local dev bypass",
           "status": "Done",
           "estimated_hours": 0.5,
-          "priority": "Medium"
+          "priority": "Medium",
+          "assigned_workers": []
         }
       ],
       "comments": [],
@@ -943,7 +998,8 @@
         {
           "name": "Developer",
           "email": "dev@example.com",
-          "role": "Full Stack Developer"
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -983,7 +1039,8 @@
         {
           "name": "Developer",
           "email": "dev@example.com",
-          "role": "Full Stack Developer"
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -1022,7 +1079,8 @@
         {
           "name": "QA Tester",
           "email": "qa@example.com",
-          "role": "Quality Assurance"
+          "role": "Quality Assurance Engineer",
+          "worker_id": "qa-engineer"
         }
       ],
       "parent_task_id": null,
@@ -1068,7 +1126,8 @@
         {
           "name": "Developer",
           "email": "dev@example.com",
-          "role": "Full Stack Developer"
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -1080,19 +1139,22 @@
           "task_name": "Build commit message parser",
           "status": "Done",
           "estimated_hours": 2,
-          "priority": "High"
+          "priority": "High",
+          "assigned_workers": []
         },
         {
           "task_name": "Create GitHub Actions workflow",
           "status": "Done",
           "estimated_hours": 2,
-          "priority": "High"
+          "priority": "High",
+          "assigned_workers": []
         },
         {
           "task_name": "Add compliance metrics reporter",
           "status": "Done",
           "estimated_hours": 2,
-          "priority": "Medium"
+          "priority": "Medium",
+          "assigned_workers": []
         }
       ],
       "comments": [],
@@ -1105,7 +1167,6 @@
         }
       ]
     },
-
     {
       "task_id": 21,
       "task_name": "Add Task Schema Validation Script",
@@ -1129,7 +1190,8 @@
         {
           "name": "Developer",
           "email": "dev@example.com",
-          "role": "Full Stack Developer"
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -1146,7 +1208,6 @@
         }
       ]
     },
-
     {
       "task_id": 22,
       "task_name": "Standardize Scripts as Tasks-Workers Tools",
@@ -1180,7 +1241,6 @@
         }
       ]
     },
-
     {
       "task_id": 23,
       "task_name": "Remove Legacy Terminology from Roadmap Artifacts",
@@ -1245,7 +1305,8 @@
         {
           "name": "Developer",
           "email": "dev@example.com",
-          "role": "Full Stack Developer"
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -1257,7 +1318,8 @@
           "task_name": "Add CSS classes for Done/In-Progress/Not-Started states",
           "status": "Done",
           "estimated_hours": 2,
-          "priority": "High"
+          "priority": "High",
+          "assigned_workers": []
         },
         {
           "task_name": "Implement pulse animation for In-Progress nodes",
@@ -1268,31 +1330,37 @@
             {
               "task_name": "Create CSS keyframe animation",
               "status": "Done",
-              "estimated_hours": 0.5
+              "estimated_hours": 0.5,
+              "assigned_workers": []
             },
             {
               "task_name": "Add SVG glow filter",
               "status": "Done",
-              "estimated_hours": 0.5
+              "estimated_hours": 0.5,
+              "assigned_workers": []
             },
             {
               "task_name": "Wire animation to status class",
               "status": "Done",
-              "estimated_hours": 0.5
+              "estimated_hours": 0.5,
+              "assigned_workers": []
             }
-          ]
+          ],
+          "assigned_workers": []
         },
         {
           "task_name": "Implement greyed/desaturated style for Done nodes",
           "status": "Done",
           "estimated_hours": 1,
-          "priority": "High"
+          "priority": "High",
+          "assigned_workers": []
         },
         {
           "task_name": "Write E2E tests for visual states",
           "status": "Done",
           "estimated_hours": 1.5,
-          "priority": "Medium"
+          "priority": "Medium",
+          "assigned_workers": []
         }
       ],
       "comments": [],
@@ -1328,7 +1396,8 @@
         {
           "name": "Developer",
           "email": "dev@example.com",
-          "role": "Full Stack Developer"
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -1366,8 +1435,9 @@
       "assigned_workers": [
         {
           "name": "Developer",
-          "email": "",
-          "role": "Full Stack Developer"
+          "email": "dev@example.com",
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
         }
       ],
       "parent_task_id": null,
@@ -1407,7 +1477,8 @@
         {
           "name": "AI Copilot",
           "email": "ai@example.com",
-          "role": "Developer"
+          "role": "AI Copilot",
+          "worker_id": "ai-copilot"
         }
       ],
       "acceptance_criteria": [
@@ -1433,22 +1504,26 @@
         {
           "name": "Add acceptance_criteria dropdown HTML to buildTaskManagementTemplate",
           "status": "Done",
-          "estimated_hours": 1
+          "estimated_hours": 1,
+          "assigned_workers": []
         },
         {
           "name": "Add subtasks dropdown HTML to buildTaskManagementTemplate",
           "status": "Done",
-          "estimated_hours": 1
+          "estimated_hours": 1,
+          "assigned_workers": []
         },
         {
           "name": "Create .popup-dropdown CSS component",
           "status": "Done",
-          "estimated_hours": 0.5
+          "estimated_hours": 0.5,
+          "assigned_workers": []
         },
         {
           "name": "Add unit tests for dropdown rendering",
           "status": "Done",
-          "estimated_hours": 0.5
+          "estimated_hours": 0.5,
+          "assigned_workers": []
         }
       ]
     },
@@ -1476,7 +1551,8 @@
         {
           "name": "AI Copilot",
           "email": "ai@example.com",
-          "role": "Developer"
+          "role": "AI Copilot",
+          "worker_id": "ai-copilot"
         }
       ],
       "acceptance_criteria": [
@@ -1505,37 +1581,44 @@
         {
           "name": "Build buildInlineSubgraphData to convert subtasks into temporary graph data",
           "status": "Done",
-          "estimated_hours": 2
+          "estimated_hours": 2,
+          "assigned_workers": []
         },
         {
           "name": "Build resolveTaskSubtaskTargets with priority: inline > explicit > none",
           "status": "Done",
-          "estimated_hours": 1
+          "estimated_hours": 1,
+          "assigned_workers": []
         },
         {
           "name": "Add parent context to subtaskStack entries (parentTaskNodeId, parentSuccessors)",
           "status": "Done",
-          "estimated_hours": 1
+          "estimated_hours": 1,
+          "assigned_workers": []
         },
         {
           "name": "Implement start-node parent-nav button with openNodeModal after navigateToDepth",
           "status": "Done",
-          "estimated_hours": 1
+          "estimated_hours": 1,
+          "assigned_workers": []
         },
         {
           "name": "Implement end-node successor-nav buttons",
           "status": "Done",
-          "estimated_hours": 1
+          "estimated_hours": 1,
+          "assigned_workers": []
         },
         {
           "name": "Remove broken virtual sidebar modules and Task Sub-graphs folder",
           "status": "Done",
-          "estimated_hours": 0.5
+          "estimated_hours": 0.5,
+          "assigned_workers": []
         },
         {
           "name": "Add Playwright E2E tests for recursive drill-down and parent/sibling nav",
           "status": "Done",
-          "estimated_hours": 1.5
+          "estimated_hours": 1.5,
+          "assigned_workers": []
         }
       ]
     },
@@ -1562,7 +1645,8 @@
         {
           "name": "AI Copilot",
           "email": "ai@example.com",
-          "role": "Developer"
+          "role": "AI Copilot",
+          "worker_id": "ai-copilot"
         }
       ],
       "acceptance_criteria": [
@@ -1590,22 +1674,26 @@
         {
           "name": "Implement recursive tasks.json file discovery",
           "status": "Done",
-          "estimated_hours": 0.5
+          "estimated_hours": 0.5,
+          "assigned_workers": []
         },
         {
           "name": "Implement validateTasksJson with all field checks",
           "status": "Done",
-          "estimated_hours": 1
+          "estimated_hours": 1,
+          "assigned_workers": []
         },
         {
           "name": "Add per-project dynamic test generation",
           "status": "Done",
-          "estimated_hours": 0.5
+          "estimated_hours": 0.5,
+          "assigned_workers": []
         },
         {
           "name": "Add graph-builder integration test (subtask targets link correctly)",
           "status": "Done",
-          "estimated_hours": 1
+          "estimated_hours": 1,
+          "assigned_workers": []
         }
       ]
     },
@@ -1634,7 +1722,8 @@
         {
           "name": "AI Copilot",
           "email": "ai@example.com",
-          "role": "Developer"
+          "role": "AI Copilot",
+          "worker_id": "ai-copilot"
         }
       ],
       "acceptance_criteria": [
@@ -1666,40 +1755,251 @@
         {
           "name": "Replace hardcoded start node graph legend with dynamic project summary",
           "status": "Done",
-          "estimated_hours": 0.5
+          "estimated_hours": 0.5,
+          "assigned_workers": []
         },
         {
           "name": "Add priority/status data attributes to dep-link buttons in graph-data.js",
           "status": "Done",
-          "estimated_hours": 0.5
+          "estimated_hours": 0.5,
+          "assigned_workers": []
         },
         {
           "name": "Render subtasks as node-like pill buttons with color/status/hours",
           "status": "Done",
-          "estimated_hours": 1
+          "estimated_hours": 1,
+          "assigned_workers": []
         },
         {
           "name": "Enrich subtask data from parent task fields",
           "status": "Done",
-          "estimated_hours": 0.5
+          "estimated_hours": 0.5,
+          "assigned_workers": []
         },
         {
           "name": "Apply priority colors and status CSS classes in showNodeDetails",
           "status": "Done",
-          "estimated_hours": 1
+          "estimated_hours": 1,
+          "assigned_workers": []
         },
         {
           "name": "Generate category-based sidebar modules for flat projects",
           "status": "Done",
-          "estimated_hours": 0.5
+          "estimated_hours": 0.5,
+          "assigned_workers": []
         },
         {
           "name": "Add CSS for dep-status-done, dep-status-in-progress, subtask-node-btn, btn-pulse, category-dimmed",
           "status": "Done",
-          "estimated_hours": 1
+          "estimated_hours": 1,
+          "assigned_workers": []
+        }
+      ]
+    },
+    {
+      "task_id": 31,
+      "task_name": "Unify graph relation buttons and stabilize Playwright base URLs",
+      "description": "Removed the remaining subtask-dive button split by rendering graph popup relation buttons through the shared task-node-btn path, unified their click handling for subgraph/parent/sibling navigation, updated the graph regression selectors, and fixed local E2E tests to follow Playwright's configured baseURL instead of hardcoded localhost:3000. Also replaced the stale module-navigation color expectation with a theme-variable-backed assertion, aligned CRUD/update-task/fullscreen Playwright expectations with the current Done status and modal field IDs, and restored a stable data-task-id hook for UI automation.",
+      "start_date": "2026-04-18",
+      "end_date": "2026-04-18",
+      "priority": "High",
+      "status": "Done",
+      "progress_percentage": 100,
+      "estimated_hours": 4,
+      "actual_hours": 4,
+      "is_critical_path": false,
+      "tags": [
+        "graph-display",
+        "playwright",
+        "navigation",
+        "test-stability"
+      ],
+      "category_name": "Maintenance",
+      "assigned_workers": [
+        {
+          "name": "AI Copilot",
+          "email": "ai@example.com",
+          "role": "AI Copilot",
+          "worker_id": "ai-copilot"
+        }
+      ],
+      "parent_task_id": null,
+      "creator_id": "ai@example.com",
+      "created_date": "2026-04-18T20:45:00Z",
+      "completed_date": "2026-04-18T21:30:00Z",
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 28,
+          "type": "FS",
+          "lag_days": 0
+        },
+        {
+          "predecessor_task_id": 29,
+          "type": "FS",
+          "lag_days": 0
+        },
+        {
+          "predecessor_task_id": 30,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "subtasks": [
+        {
+          "name": "Replace leftover subtask-dive modal buttons with task-node-btn variants",
+          "status": "Done",
+          "estimated_hours": 1,
+          "assigned_workers": []
+        },
+        {
+          "name": "Route related graph popup buttons through one shared navigation handler",
+          "status": "Done",
+          "estimated_hours": 1,
+          "assigned_workers": []
+        },
+        {
+          "name": "Update graph and E2E tests to use configured baseURL and current theme expectations",
+          "status": "Done",
+          "estimated_hours": 2,
+          "assigned_workers": []
+        },
+        {
+          "name": "Refresh stale local E2E selectors and assertions for current task card and modal markup",
+          "status": "Done",
+          "estimated_hours": 1,
+          "assigned_workers": []
+        }
+      ]
+    },
+    {
+      "task_id": 32,
+      "task_name": "Document task source audit workflow and output artifact paths",
+      "description": "Capture the recommended Git history and blame workflow for public/tasksDB/external/github-task-manager/tasks.json, and document that temporary outputs such as tmp-test-output.txt, tmp-calendar-run.txt, and live-test-run.log belong under outputs/local-runs/ instead of the repo root.",
+      "start_date": "2026-04-21",
+      "end_date": "2026-04-22",
+      "priority": "Medium",
+      "status": "Done",
+      "progress_percentage": 100,
+      "estimated_hours": 2,
+      "actual_hours": 2,
+      "is_critical_path": false,
+      "tags": [
+        "documentation",
+        "git",
+        "audit",
+        "taskdb"
+      ],
+      "category_name": "Documentation",
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
+        }
+      ],
+      "parent_task_id": null,
+      "creator_id": "system@example.com",
+      "created_date": "2026-04-21T00:00:00Z",
+      "completed_date": "2026-04-22T16:15:00Z",
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 8,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "subtasks": [
+        {
+          "name": "Add git history command examples to README",
+          "status": "Done",
+          "estimated_hours": 0.5,
+          "assigned_workers": []
+        },
+        {
+          "name": "Document which outputs are temporary and should live outside source directories",
+          "status": "Done",
+          "estimated_hours": 0.5,
+          "assigned_workers": []
+        },
+        {
+          "name": "Capture what current task and git status means for the project state",
+          "status": "Done",
+          "estimated_hours": 1,
+          "assigned_workers": []
+        }
+      ]
+    },
+    {
+      "task_id": 33,
+      "task_name": "Add pending/full calendar variants and organize export folders",
+      "description": "Extend the calendar parser with a first-class task-scope option so it can generate both full and pending task calendars, write sorted project calendars under calendars/all and calendars/pending, nest worker variants under workers-calendar/all and workers-calendar/pending, remove the legacy workers-calendar-pending layout, and keep the custom unit runner aligned while validating the change.",
+      "start_date": "2026-04-22",
+      "end_date": "2026-04-22",
+      "priority": "High",
+      "status": "Done",
+      "progress_percentage": 100,
+      "estimated_hours": 4,
+      "actual_hours": 4,
+      "is_critical_path": false,
+      "tags": [
+        "calendar",
+        "output-structure",
+        "workers",
+        "tests"
+      ],
+      "category_name": "Maintenance",
+      "assigned_workers": [
+        {
+          "name": "AI Copilot",
+          "email": "ai@example.com",
+          "role": "AI Copilot",
+          "worker_id": "ai-copilot"
+        }
+      ],
+      "parent_task_id": null,
+      "creator_id": "ai@example.com",
+      "created_date": "2026-04-22T16:00:00Z",
+      "completed_date": "2026-04-22T16:45:00Z",
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 32,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "subtasks": [
+        {
+          "name": "Add a parser option to choose all, pending, or both calendar variants",
+          "status": "Done",
+          "estimated_hours": 1,
+          "assigned_workers": []
+        },
+        {
+          "name": "Write project and worker calendar variants into sorted output folders",
+          "status": "Done",
+          "estimated_hours": 1,
+          "assigned_workers": []
+        },
+        {
+          "name": "Update calendar docs and package scripts for the new export modes",
+          "status": "Done",
+          "estimated_hours": 1,
+          "assigned_workers": []
+        },
+        {
+          "name": "Validate the parser and repair the custom test runner filename fallback",
+          "status": "Done",
+          "estimated_hours": 1,
+          "assigned_workers": []
         }
       ]
     }
-
   ]
 }

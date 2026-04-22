@@ -80,15 +80,24 @@ If updating these files manually:
 ## Schema Validation
 
 All tasks must conform to the template validation schema defined in:
-- `/public/config/template-config.js`
+- `/public/config/tasks-template-config.js`
 - `/public/config/projects-config.js` (multi-project repo metadata; non-secret)
 - `/task-templates/TEMPLATE_VALIDATION_GUIDE.md`
 
 ## Backup & Recovery
 
 The complete task history is maintained in git commits:
-- View history: `git log public/tasksDB/`
+- View history: `git log --follow --pretty=format:'%h %ad %an %s' --date=iso -- public/tasksDB/external/github-task-manager/tasks.json`
 - Restore previous version: `git checkout <commit> public/tasksDB/external/github-task-manager/tasks.json`
+- Line ownership: `git blame --line-porcelain public/tasksDB/external/github-task-manager/tasks.json`
+
+### Temporary output artifacts
+
+Temporary files such as `tmp-test-output.txt`, `tmp-calendar-run.txt`, and `live-test-run.log` are generated during local testing and should be treated as ephemeral developer outputs. Store them under `/outputs/local-runs/` instead of the repo root, and do not treat them as canonical task data.
+
+Generated calendar exports belong under `/tools/calendar/output/`, grouped by project scope and view:
+- project calendars: `/tools/calendar/output/<scope>/<root-project>/calendars/{all,pending}/`
+- worker calendars: `/tools/calendar/output/<scope>/<root-project>/workers-calendar/{all,pending}/`
 
 ## Integration Points
 

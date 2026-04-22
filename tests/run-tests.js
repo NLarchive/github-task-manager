@@ -127,7 +127,8 @@ async function main() {
   const testFiles = [
     'graph-data.test.js',
     'folder-project-service.test.js',
-    'template-config.test.js',
+    'calendar-parser.test.js',
+    ['tasks-template-config.test.js', 'template-config.test.js'],
     'template-validator.test.js',
     'template-automation.test.js',
     'task-database.test.js',
@@ -135,12 +136,14 @@ async function main() {
     'tasks-json-format.test.js'
   ];
 
-  testFiles.forEach(file => {
-    const testPath = path.join(__dirname, 'unit', file);
-    if (fs.existsSync(testPath)) {
-      require(testPath);
+  testFiles.forEach((fileEntry) => {
+    const candidates = Array.isArray(fileEntry) ? fileEntry : [fileEntry];
+    const resolvedFile = candidates.find((candidate) => fs.existsSync(path.join(__dirname, 'unit', candidate)));
+
+    if (resolvedFile) {
+      require(path.join(__dirname, 'unit', resolvedFile));
     } else {
-      console.log(`${colors.yellow}⚠ Test file not found: ${file}${colors.reset}`);
+      console.log(`${colors.yellow}⚠ Test file not found: ${candidates[0]}${colors.reset}`);
     }
   });
 

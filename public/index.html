@@ -401,7 +401,7 @@
     </div>
 
     <!-- Load Components -->
-    <!-- Password config MUST load before template-config so ACCESS_PASSWORD is available -->
+    <!-- Password config MUST load before tasks-template-config so ACCESS_PASSWORD is available -->
     <script src="config/access-secret.local.js"></script>
     <script src="config/access-secret.js"></script>
     <!-- GitHub token config -->
@@ -412,10 +412,10 @@
     <!-- Worker URL config (for secure writes via Cloudflare Worker) -->
     <script src="config/worker-url.local.js"></script>
     <script src="config/worker-url.js"></script>
-    <!-- Centralized projects list (overrides template-config defaults when present) -->
+    <!-- Centralized projects list (overrides tasks-template-config defaults when present) -->
     <script src="config/projects-config.js"></script>
     <!-- Main config (depends on ACCESS_PASSWORD from access-secret) -->
-    <script src="config/template-config.js"></script>
+    <script src="config/tasks-template-config.js"></script>
     <!-- Rest of the scripts -->
     <script src="scripts/template-validator.js"></script>
     <script src="scripts/template-automation.js"></script>

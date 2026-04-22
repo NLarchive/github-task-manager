@@ -28,11 +28,5 @@
     "name": "AI Career Roadmap (Task Graph)",
     "type": "task-management",
     "path": "/tasksDB/external/ai-career-roadmap/tasks.json"
-  },
-  {
-    "id": "extract-project-spec-tasks",
-    "name": "Extract Project Spec (Task Graph)",
-    "type": "task-management",
-    "path": "/tasksDB/external/extract-project-spec/tasks.json"
   }
 ]

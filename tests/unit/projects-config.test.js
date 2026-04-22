@@ -6,7 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const configPath = path.join(__dirname, '../../public/config/template-config.js');
+const configPath = path.join(__dirname, '../../public/config/tasks-template-config.js');
 let configContent = fs.readFileSync(configPath, 'utf8');
 
 // Replace browser-specific GH_TOKEN with an empty token for test environment
