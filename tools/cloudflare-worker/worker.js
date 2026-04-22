@@ -100,7 +100,7 @@ function getProjectConfig(projectId, env) {
     }
   }
 
-  // Defaults (kept in sync with public/config/template-config.js)
+  // Defaults (kept in sync with public/config/tasks-template-config.js)
   const defaults = {
     'github-task-manager': { owner: 'nlarchive', repo: 'github-task-manager', branch: 'main', tasksRoot: 'public/tasksDB', scope: 'external' },
     'ai-career-roadmap': { owner: 'nlarchive', repo: 'github-task-manager', branch: 'main', tasksRoot: 'public/tasksDB', scope: 'external' }

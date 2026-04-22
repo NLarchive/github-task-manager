@@ -88,7 +88,7 @@ github-task-manager/
 ├── public/
 │   ├── config/
 │   │   ├── github-token.js       # Token config (injected at deployment)
-│   │   └── template-config.js    # Template schema configuration
+│   │   └── tasks-template-config.js    # Template schema configuration
 │   ├── scripts/
 │   │   ├── task-manager-app.js   # Main application
 │   │   ├── template-automation.js

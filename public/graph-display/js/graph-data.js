@@ -522,6 +522,7 @@ function normalizeInlineSubtaskTask(subtask, index, parentTask = {}) {
 
     const taskName = String(subtask.task_name || subtask.name || subtask.title || `Subtask ${index + 1}`).trim();
     if (!taskName) return null;
+    const numericTaskId = Number(subtask.task_id);
 
     const assignedWorkers = normalizeAssignedWorkersList(subtask, parentTask);
     const acceptanceCriteria = normalizeStringList(subtask.acceptance_criteria, parentTask.acceptance_criteria);
@@ -531,7 +532,7 @@ function normalizeInlineSubtaskTask(subtask, index, parentTask = {}) {
     const links = Array.isArray(subtask.links) ? subtask.links.filter(Boolean) : [];
 
     return {
-        task_id: typeof subtask.task_id === 'number' ? subtask.task_id : null,
+        task_id: Number.isInteger(numericTaskId) && numericTaskId > 0 ? numericTaskId : null,
         task_name: taskName,
         description: subtask.description || subtask.text || parentTask.description || '',
         priority: subtask.priority || parentTask.priority || 'Medium',
@@ -954,16 +955,24 @@ function buildTaskManagementTemplate(entry, data, options = {}) {
                 ...subtask,
                 estimated_hours: subtask.estimated_hours || (typeof task.estimated_hours === 'number' ? Math.round(task.estimated_hours / Math.max(rawSubtasks.length, 1)) : 0)
             }));
+        const inlineSubgraphUsesExplicitIds = enrichedSubtasks.length > 0
+            && enrichedSubtasks.every((subtask) => Number.isInteger(Number(subtask?.task_id)) && Number(subtask.task_id) > 0);
         const subtasksDetailHtml = enrichedSubtasks.length > 0
-            ? `<details class="popup-dropdown"><summary><strong>Sub-tasks</strong> <span class="popup-dropdown-count">(${enrichedSubtasks.length})</span></summary><div class="task-node-list">${enrichedSubtasks.map(s => {
-                const sName = escapeHtml(String(s.task_name));
+            ? `<details class="popup-dropdown"><summary><strong>Sub-tasks</strong> <span class="popup-dropdown-count">(${enrichedSubtasks.length})</span></summary><div class="task-node-list">${enrichedSubtasks.map((s, index) => {
+                const sLabel = String(s.task_name || `Subtask ${index + 1}`);
+                const sName = escapeHtml(sLabel);
                 const sPriority = normalizePriority(s.priority);
                 const sStatusNorm = (s.status || 'Not Started').toLowerCase().replace(/\s+/g, '-');
                 const sHours = s.estimated_hours ? `${s.estimated_hours}h` : '';
                 const titleBits = [s.description, s.category_name ? `Category: ${s.category_name}` : '', s.due_date ? `Due: ${s.due_date}` : ''].filter(Boolean);
                 const titleAttr = titleBits.length > 0 ? ` title="${escapeHtml(titleBits.join(' | '))}"` : '';
-                const nodeIdAttr = typeof s.task_id === 'number' ? ` data-node-id="${idToNodeId(s.task_id)}"` : '';
-                return `<button class="task-node-btn" data-priority="${sPriority}" data-status="${sStatusNorm}"${nodeIdAttr}${titleAttr}><span class="tn-name">${sName}</span>${sHours ? `<span class="tn-hours">${sHours}</span>` : ''}</button>`;
+                const targetTaskId = inlineSubgraphUsesExplicitIds ? Number(s.task_id) : index + 1;
+                const subtaskPathAttr = effectiveSubtasksPath ? ` data-subtasks-path="${escapeHtml(effectiveSubtasksPath)}"` : '';
+                const targetNodeIdAttr = effectiveSubtasksPath && Number.isInteger(targetTaskId) && targetTaskId > 0
+                    ? ` data-subgraph-node-id="${idToNodeId(targetTaskId)}"`
+                    : '';
+                const targetLabelAttr = effectiveSubtasksPath ? ` data-target-node-label="${escapeHtml(sLabel)}"` : '';
+                return `<button class="task-node-btn" data-priority="${sPriority}" data-status="${sStatusNorm}"${subtaskPathAttr}${targetNodeIdAttr}${targetLabelAttr}${titleAttr}><span class="tn-name">${sName}</span>${sHours ? `<span class="tn-hours">${sHours}</span>` : ''}</button>`;
             }).join('')}</div></details>`
             : null;
 

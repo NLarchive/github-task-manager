@@ -288,9 +288,9 @@ class TaskManagerApp {
     }
 
     loadConfig() {
-        // Use pre-configured GitHub settings from template-config
+        // Use pre-configured GitHub settings from tasks-template-config
         // Note: The project list may be defined in a centralized file `public/config/projects-config.js`
-        // which defines a global `PROJECTS_CONFIG`. `template-config.js` will load and
+        // which defines a global `PROJECTS_CONFIG`. `tasks-template-config.js` will load and
         // prefer that configuration when available, allowing a single canonical projects list.
         const templateConfig = window.TEMPLATE_CONFIG || TEMPLATE_CONFIG;
         if (!templateConfig || !templateConfig.GITHUB) {
@@ -2050,7 +2050,8 @@ class TaskManagerApp {
             const showModuleAction = modulePath && modulePath !== this.activeModulePath;
             // Card click always opens task detail modal; module navigation is only via task-actions button
             const cardAction = `app.openTaskDetail(${index})`;
-            const cardAttributes = cardAction ? ` role="button" tabindex="0" onclick="${cardAction}"` : '';
+            const taskDataAttribute = taskReference ? ` data-task-id="${this.escapeHtml(taskReference)}"` : '';
+            const cardAttributes = cardAction ? `${taskDataAttribute} role="button" tabindex="0" onclick="${cardAction}"` : taskDataAttribute;
             const createdDate = this.formatDisplayDate(task.created_date || task.createdAt || '');
             const dueDate = this.formatDisplayDate(task.end_date || task.due_date || '');
             const dependencyCount = Array.isArray(task.dependencies) ? task.dependencies.length : 0;

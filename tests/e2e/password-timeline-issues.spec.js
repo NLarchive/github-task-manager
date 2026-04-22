@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000/';
+const BASE_URL = '/';
 const LIVE_URL = 'https://nlarchive.github.io/github-task-manager/';
 const TIMEOUT = 5000;
 const LIVE_PASSWORD = '1324';
@@ -22,7 +22,7 @@ async function waitForAppReady(page) {
 test.describe('New Features - Password / Timeline / Issues', () => {
   test('password gate can be forced on localhost for E2E', async ({ page }) => {
     await page.addInitScript(() => {
-      // Injected before template-config.js executes
+      // Injected before tasks-template-config.js executes
       window.ACCESS_PASSWORD = 'playwright-secret';
     });
 

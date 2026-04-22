@@ -1296,7 +1296,7 @@ class CurriculumGraph {
             const subtaskPath = String(node.subtasksPath || '').trim()
                 || String(Array.isArray(node.subtasksTargets) && node.subtasksTargets[0]?.path ? node.subtasksTargets[0].path : '').trim();
             if (subtaskPath) {
-                subtaskBtn = `<button class="subtask-dive-btn" data-subtasks-path="${subtaskPath.replace(/"/g, '&quot;')}" data-node-label="${(details.title || node.label || '').replace(/"/g, '&quot;')}">📂 View Subtasks</button>`;
+                subtaskBtn = `<button class="task-node-btn task-node-nav-btn" data-subtasks-path="${subtaskPath.replace(/"/g, '&quot;')}" data-node-label="${(details.title || node.label || '').replace(/"/g, '&quot;')}"><span class="tn-name">📂 View Subtasks</span></button>`;
             }
 
             // Subgraph context for parent/successor navigation
@@ -1308,9 +1308,9 @@ class CurriculumGraph {
             if (_inSubgraph && node.templateType === 'project-start') {
                 const _pName = _ctx.parentTaskName || 'Parent task';
                 const _pId = (_ctx.parentTaskNodeId || '').replace(/"/g, '&quot;');
-                parentNavBtn = `<button class="subtask-dive-btn parent-nav-btn" data-parent-node-id="${_pId}">↩ ${_pName.replace(/</g, '&lt;')}</button>`;
+                parentNavBtn = `<button class="task-node-btn task-node-nav-btn parent-nav-btn" data-parent-node-id="${_pId}"><span class="tn-name">↩ ${_pName.replace(/</g, '&lt;')}</span></button>`;
             } else if (window.__activeModulePath && node.templateType === 'project-start') {
-                parentNavBtn = `<button class="subtask-dive-btn parent-nav-btn">↩ Navigate to Parent</button>`;
+                parentNavBtn = `<button class="task-node-btn task-node-nav-btn parent-nav-btn" data-nav-depth="-1"><span class="tn-name">↩ Navigate to Parent</span></button>`;
             }
 
             // Successor navigation buttons (visible on end node when inside a subgraph)
@@ -1319,7 +1319,7 @@ class CurriculumGraph {
                 const sibHtml = _ctx.parentSuccessors.map(s => {
                     const sId = (s.nodeId || '').replace(/"/g, '&quot;');
                     const sLabel = (s.label || s.nodeId || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                    return `<button class="subtask-dive-btn sibling-nav-btn" data-sibling-node-id="${sId}">➡ ${sLabel}</button>`;
+                    return `<button class="task-node-btn task-node-nav-btn sibling-nav-btn" data-parent-node-id="${sId}"><span class="tn-name">➡ ${sLabel}</span></button>`;
                 }).join('');
                 successorBtns = `<div style="margin-top:8px"><strong>Next tasks in parent graph:</strong>${sibHtml}</div>`;
             }
@@ -1343,56 +1343,46 @@ class CurriculumGraph {
             else if (s === 'in-progress') btn.classList.add('task-node-status-in-progress');
         });
 
-        // Wire all task-node-btn buttons that have a target node → navigate via openNodeModal
-        contentDiv.querySelectorAll('.task-node-btn[data-node-id]').forEach(btn => {
+        const currentTemplateId = new URLSearchParams(window.location.search).get('template') || '';
+        const currentProjectId = currentTemplateId.endsWith('-tasks') ? currentTemplateId.slice(0, -'-tasks'.length) : currentTemplateId;
+        const handleTaskNodeButtonClick = (btn) => {
+            const targetNodeId = btn.getAttribute('data-node-id');
+            if (targetNodeId) {
+                this.hideNodeDetails();
+                this.openNodeModal(targetNodeId);
+                return;
+            }
+
+            const parentNodeId = btn.getAttribute('data-parent-node-id');
+            if (parentNodeId && typeof window._navigateToParentAndOpenModal === 'function') {
+                this.hideNodeDetails();
+                window._navigateToParentAndOpenModal(parentNodeId);
+                return;
+            }
+
+            const navDepth = Number.parseInt(btn.getAttribute('data-nav-depth') || '', 10);
+            if (Number.isInteger(navDepth) && typeof window._navigateToDepth === 'function') {
+                this.hideNodeDetails();
+                window._navigateToDepth(navDepth);
+                return;
+            }
+
+            const subtaskPath = btn.getAttribute('data-subtasks-path');
+            if (subtaskPath && typeof window._subtaskNavigate === 'function') {
+                const targetSubgraphNodeId = btn.getAttribute('data-subgraph-node-id') || '';
+                const targetNodeLabel = btn.getAttribute('data-target-node-label') || btn.textContent?.trim() || '';
+                const parentLabel = btn.getAttribute('data-node-label') || details?.title || node?.label || targetNodeLabel;
+                this.hideNodeDetails();
+                window._subtaskNavigate(subtaskPath, currentProjectId, parentLabel, targetSubgraphNodeId, targetNodeLabel);
+            }
+        };
+
+        // Wire all navigable task-node-btn buttons through the same navigation path
+        contentDiv.querySelectorAll('.task-node-btn[data-node-id], .task-node-btn[data-parent-node-id], .task-node-btn[data-nav-depth], .task-node-btn[data-subtasks-path]').forEach(btn => {
             btn.addEventListener('click', (e) => {
+                e.preventDefault();
                 e.stopPropagation();
-                const targetNodeId = btn.getAttribute('data-node-id');
-                if (targetNodeId) {
-                    this.hideNodeDetails();
-                    this.openNodeModal(targetNodeId);
-                }
-            });
-        });
-
-        // Wire parent navigation button click
-        const parentBtn = contentDiv.querySelector('.parent-nav-btn');
-        if (parentBtn) {
-            parentBtn.addEventListener('click', () => {
-                const parentNodeId = parentBtn.getAttribute('data-parent-node-id');
-                this.hideNodeDetails();
-                if (parentNodeId && typeof window._navigateToParentAndOpenModal === 'function') {
-                    window._navigateToParentAndOpenModal(parentNodeId);
-                } else if (typeof window._navigateToDepth === 'function') {
-                    window._navigateToDepth(-1);
-                }
-            });
-        }
-
-        // Wire successor/sibling navigation buttons click (end node in subgraph)
-        contentDiv.querySelectorAll('.sibling-nav-btn').forEach(sibBtn => {
-            sibBtn.addEventListener('click', () => {
-                const sibNodeId = sibBtn.getAttribute('data-sibling-node-id');
-                this.hideNodeDetails();
-                if (sibNodeId && typeof window._navigateToParentAndOpenModal === 'function') {
-                    window._navigateToParentAndOpenModal(sibNodeId);
-                }
-            });
-        });
-
-        // Wire subtask button click
-        contentDiv.querySelectorAll('.subtask-dive-btn[data-subtasks-path]').forEach(subBtn => {
-            subBtn.addEventListener('click', () => {
-                const spath = subBtn.getAttribute('data-subtasks-path');
-                const label = subBtn.getAttribute('data-node-label');
-                if (spath && typeof window._subtaskNavigate === 'function') {
-                    // Extract projectId from URL params for context
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const currentTemplateId = urlParams.get('template') || '';
-                    const projectId = currentTemplateId.endsWith('-tasks') ? currentTemplateId.slice(0, -'-tasks'.length) : currentTemplateId;
-                    this.hideNodeDetails();
-                    window._subtaskNavigate(spath, projectId, label);
-                }
+                handleTaskNodeButtonClick(btn);
             });
         });
 
@@ -2763,7 +2753,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         };
 
-        window._subtaskNavigate = async function(modulePath, projectId, nodeLabel) {
+        window._subtaskNavigate = async function(modulePath, projectId, nodeLabel, targetNodeId = '', targetNodeLabel = '') {
             try {
                 const urlParams = new URLSearchParams(window.location.search);
                 const currentTemplateId = urlParams.get('template') || '';
@@ -2861,6 +2851,17 @@ document.addEventListener("DOMContentLoaded", async () => {
                     return;
                 }
 
+                let resolvedTargetNodeId = '';
+                const normalizedTargetLabel = String(targetNodeLabel || '').trim();
+                if (Array.isArray(tpl.nodes)) {
+                    if (targetNodeId && tpl.nodes.some((candidate) => candidate?.id === targetNodeId)) {
+                        resolvedTargetNodeId = targetNodeId;
+                    } else if (normalizedTargetLabel) {
+                        const matchedTargetNode = tpl.nodes.find((candidate) => String(candidate?.label || '').trim() === normalizedTargetLabel);
+                        resolvedTargetNodeId = matchedTargetNode?.id || '';
+                    }
+                }
+
                 // Build parent context so start/end nodes in the subgraph can navigate back
                 let parentTaskNodeId = '';
                 let parentTaskName = '';
@@ -2897,6 +2898,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                     parentSuccessors
                 });
                 restoreGraphState(subtaskStack[subtaskStack.length - 1]);
+                if (resolvedTargetNodeId && window.graphInstance) {
+                    window.graphInstance.onStable(() => {
+                        window.graphInstance.openNodeModal(resolvedTargetNodeId);
+                    });
+                }
                 console.log('Graph re-rendered with subgraph:', modulePath, tpl.nodes.length, 'nodes');
 
             } catch (err) {

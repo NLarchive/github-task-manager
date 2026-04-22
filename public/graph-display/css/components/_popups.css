@@ -119,15 +119,21 @@
 }
 
 #popup .content .task-node-btn[data-node-id]:hover,
-#popup .content .task-node-btn[data-node-id]:focus-visible {
+#popup .content .task-node-btn[data-node-id]:focus-visible,
+#popup .content .task-node-btn[data-subtasks-path]:hover,
+#popup .content .task-node-btn[data-subtasks-path]:focus-visible,
+#popup .content .task-node-btn[data-parent-node-id]:hover,
+#popup .content .task-node-btn[data-parent-node-id]:focus-visible,
+#popup .content .task-node-btn[data-nav-depth]:hover,
+#popup .content .task-node-btn[data-nav-depth]:focus-visible {
     background: rgba(78, 121, 167, 0.26);
     border-color: var(--color-secondary, #4e79a7);
     outline: none;
     filter: brightness(1.15);
 }
 
-/* Buttons without a navigable node (inline subtasks) show default cursor */
-#popup .content .task-node-btn:not([data-node-id]) {
+/* Buttons without a navigable relation show default cursor */
+#popup .content .task-node-btn:not([data-node-id]):not([data-subtasks-path]):not([data-parent-node-id]):not([data-nav-depth]) {
     cursor: default;
 }
 
@@ -159,6 +165,37 @@
 }
 #popup .content .task-node-btn.task-node-status-in-progress {
     animation: btn-pulse 2s infinite ease-in-out;
+}
+
+#popup .content .task-node-btn.task-node-nav-btn {
+    margin-top: var(--spacing-md, 12px);
+    padding: 8px 16px;
+    background: var(--color-accent, #4a90d9);
+    border-color: var(--color-accent, #4a90d9);
+    color: #fff;
+}
+
+#popup .content .task-node-btn.task-node-nav-btn .tn-name {
+    max-width: none;
+    white-space: normal;
+}
+
+#popup .content .task-node-btn.task-node-nav-btn:hover,
+#popup .content .task-node-btn.task-node-nav-btn:focus-visible {
+    background: var(--color-accent-hover, #357abd);
+    border-color: var(--color-accent-hover, #357abd);
+}
+
+#popup .content .task-node-btn.parent-nav-btn {
+    background: #3a3a4a;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #e8e8f0;
+}
+
+#popup .content .task-node-btn.parent-nav-btn:hover,
+#popup .content .task-node-btn.parent-nav-btn:focus-visible {
+    background: #4a4a5e;
+    border-color: rgba(255, 255, 255, 0.24);
 }
 
 @keyframes btn-pulse {
@@ -624,35 +661,6 @@ img.profile-photo.border-layer-0-variant-0 {
 
 .popup-dropdown > ul > li em {
     opacity: 0.7;
-}
-
-.subtask-dive-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: var(--spacing-md, 12px);
-    padding: 8px 16px;
-    background: var(--color-accent, #4a90d9);
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    font-size: var(--font-size-base, 14px);
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.subtask-dive-btn:hover {
-    background: var(--color-accent-hover, #357abd);
-}
-
-.parent-nav-btn {
-    background: #3a3a4a;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #e8e8f0;
-}
-
-.parent-nav-btn:hover {
-    background: #4a4a5e;
 }
 
 .subtask-breadcrumb {

@@ -1,421 +1,319 @@
-# Task Graph API — Agent & Integration Reference
+# Task Graph API — Automation & Agent Contract
 
-This folder documents the REST API and task JSON schema for external tools and AI agents
-to interact with project graphs programmatically — without using the UI.
+This project exposes two HTTP surfaces:
 
----
+- The local development server in `server.js`
+- The Cloudflare write proxy in `tools/cloudflare-worker/worker.js`
 
-## Base URL
-
-When running locally: `http://localhost:3000`
+This document is intentionally aligned to the code that exists today. It is the contract automation, scripts, MCP adapters, and AI agents should follow instead of inferring behavior from the UI.
 
 ---
 
-## Authentication
+## Design Standards
 
-All `/api/` write endpoints require either:
-- The `X-Access-Secret` header matching the value in `config/access-secret.local.js`
-- Or the `Authorization: Bearer <github_token>` header for GitHub-proxied operations
-
-Read endpoints (`GET`) do not require authentication on the local server.
+- Prefer explicit project scoping via `project` or `projectId` on every multi-project call.
+- Use JSON for request and response payloads.
+- Treat `GET` endpoints as read-only.
+- Treat write endpoints as full-document synchronization unless the endpoint explicitly documents patch semantics.
+- Prefer documented server and worker endpoints over scraping DOM state.
+- For agent workflows, discover first, then read, then write.
 
 ---
 
-## Projects API
+## Surface Summary
 
-### List all projects
+### Local server (`server.js`)
 
-```http
-GET /api/projects
+Base URL when running locally:
+
+```text
+http://localhost:3000
 ```
 
-**Response `200`:**
+Purpose:
+
+- serve the app and graph UI
+- list projects
+- load project payloads and module payloads
+- scan local folders for TaskDB projects
+- read/write synchronized local TaskDB files
+
+### Cloudflare worker (`tools/cloudflare-worker/worker.js`)
+
+Base URL:
+
+```text
+<your configured worker URL>
+```
+
+Purpose:
+
+- authenticated GitHub-backed writes
+- public read-only task history lookup
+- remote health check
+
+---
+
+## Local Server Endpoints
+
+### `GET /api/health`
+
+Health probe for the local Node server.
+
+Response:
+
+```json
+{ "ok": true }
+```
+
+---
+
+### `GET /api/projects`
+
+Lists discovered projects by scanning the configured `tasksDB` roots.
+
+Response:
+
 ```json
 {
   "projects": [
-    {
-      "id": "github-task-manager-tasks",
-      "name": "GitHub Task Manager",
-      "path": "external/github-task-manager/tasks.json",
-      "description": "…",
-      "type": "task-management"
-    }
+    { "id": "github-task-manager", "scope": "external" },
+    { "id": "test-tasks", "scope": "local" }
   ]
 }
 ```
 
 ---
 
-### Get a project's full data
+### `GET /api/module?project=<projectId>&path=<relativeModulePath>`
 
-```http
-GET /api/projects/:id
-```
+Returns a single module file from within a project after safe path validation.
 
-`:id` is the `id` from `registry.json` (e.g. `github-task-manager-tasks`).
+Required query params:
 
-**Response `200`:** Full `tasks.json` object (see Task JSON Format below).
+- `project`: project id
+- `path`: relative module path inside that project
 
----
+Common errors:
 
-### Create or replace a project
-
-```http
-PUT /api/projects/:id
-Content-Type: application/json
-
-{ … full tasks.json … }
-```
-
-Writes the body as `tasksDB/<resolved-path>/tasks.json` and regenerates `tasks.csv`.
-
-**Response `200`:** `{ "ok": true, "id": "…" }`
+- `400` invalid or missing params
+- `404` module file not found
 
 ---
 
-## Tasks API
+### `GET /api/scan-path?path=<relativeOrAbsoluteFolder>`
 
-### List tasks
+Scans a local folder for `tasks.json` files and returns a discovered-project summary.
 
-```http
-GET /api/tasks?project=<project-id>
-```
+Use this for folder-based local projects and editor/agent workflows that need discovery without modifying registry files first.
 
-**Response `200`:**
-```json
-{
-  "project": "github-task-manager-tasks",
-  "tasks": [ … ]
-}
-```
-
----
-
-### Get a single task
-
-```http
-GET /api/tasks/:taskId?project=<project-id>
-```
-
-**Response `200`:** The task object.
-**Response `404`:** `{ "error": "Task not found" }`
-
----
-
-### Create a task
-
-```http
-POST /api/tasks?project=<project-id>
-Content-Type: application/json
-
-{
-  "task_name": "Write integration tests",
-  "description": "Cover all API endpoints",
-  "priority": "High",
-  "status": "Not Started",
-  "estimated_hours": 8,
-  "category_name": "Testing",
-  "dependencies": [
-    { "predecessor_task_id": 3, "type": "FS", "lag_days": 0 }
-  ]
-}
-```
-
-`task_id` is auto-assigned (max existing ID + 1).
-
-**Response `201`:** The created task with assigned `task_id`.
-
----
-
-### Update a task
-
-```http
-PUT /api/tasks/:taskId?project=<project-id>
-Content-Type: application/json
-
-{
-  "status": "Done",
-  "actual_hours": 7,
-  "progress_percentage": 100
-}
-```
-
-Only the provided fields are updated (partial update).
-
-**Response `200`:** The updated task.
-
----
-
-### Delete a task
-
-```http
-DELETE /api/tasks/:taskId?project=<project-id>
-```
-
-Also removes this task from the `dependencies` of any other tasks that reference it.
-
-**Response `200`:** `{ "ok": true, "deleted": <taskId> }`
-
----
-
-## Registry API
-
-### Get registry
-
-```http
-GET /api/registry
-```
-
-**Response `200`:** Full `registry.json`.
-
----
-
-### Update registry
-
-```http
-PUT /api/registry
-Content-Type: application/json
-
-{
-  "templates": [ … ]
-}
-```
-
-**Response `200`:** `{ "ok": true }`
-
----
-
-## Task JSON Schema
-
-Every task in a `tasks.json` file follows this schema.
-
-### Minimal task
+Response shape:
 
 ```json
 {
-  "task_id": 1,
-  "task_name": "My task"
-}
-```
-
-### Full task
-
-```json
-{
-  "task_id": 1,
-  "task_name": "Set up CI pipeline",
-  "description": "Configure GitHub Actions for automated testing.",
-  "start_date": "2025-01-05",
-  "end_date": "2025-01-10",
-  "priority": "High",
-  "status": "Done",
-  "progress_percentage": 100,
-  "estimated_hours": 8,
-  "actual_hours": 6,
-  "is_critical_path": true,
-  "category_name": "DevOps",
-  "parent_task_id": null,
-  "creator_id": null,
-  "created_date": "2025-01-01",
-  "completed_date": "2025-01-10",
-  "dependencies": [
+  "ok": true,
+  "scanPath": "public/tasksDB/local",
+  "resolvedPath": "D:/.../public/tasksDB/local",
+  "projectName": "My Project",
+  "rootModule": "tasks.json",
+  "tasksJsonUrl": "/tasksDB/local/my-project/tasks.json",
+  "files": [
     {
-      "predecessor_task_id": 3,
-      "type": "FS",
-      "lag_days": 0
-    }
-  ],
-  "subtasksPath": "external/my-project/backend"
-}
-```
-
-### Field Reference
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `task_id` | integer | ✅ | Unique identifier within the project |
-| `task_name` | string | ✅ | Short display name (shown as graph node label) |
-| `description` | string | | Full description shown in popup |
-| `start_date` | ISO date string | | Planned start date |
-| `end_date` | ISO date string | | Planned end date |
-| `priority` | `"Critical"` `"High"` `"Medium"` `"Low"` | | Controls node size and color. Defaults to `"Medium"` |
-| `status` | `"Not Started"` `"In Progress"` `"Done"` `"On Hold"` `"Cancelled"` | | Controls node animation. Defaults to `"Not Started"`. `"Completed"` remains accepted as a legacy alias. |
-| `progress_percentage` | 0–100 | | Shown in popup |
-| `estimated_hours` | number | | Controls node radius (larger = more hours) |
-| `actual_hours` | number | | Shown in popup |
-| `is_critical_path` | boolean | | Shown in popup |
-| `category_name` | string | | Groups task. Should match an entry in `categories[]` |
-| `parent_task_id` | integer \| null | | Hierarchical parent (informational; does not create a graph edge) |
-| `creator_id` | any | | Optional creator reference |
-| `created_date` | ISO date string | | |
-| `completed_date` | ISO date string | | |
-| `dependencies` | array | | Graph edges to predecessor tasks (see below) |
-| `subtasksPath` | string | | Path to a sub-project's folder — enables 📂 View Subtasks navigation |
-
----
-
-### Dependency Object
-
-```json
-{
-  "predecessor_task_id": 2,
-  "type": "FS",
-  "lag_days": 0
-}
-```
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `predecessor_task_id` | integer | ✅ | `task_id` of the preceding task |
-| `type` | `"FS"` `"SS"` `"FF"` `"SF"` | | Dependency type. Defaults to `"FS"` |
-| `lag_days` | number | | Days of lag/lead between tasks |
-
-**Dependency types:**
-- `FS` (Finish-to-Start): successor cannot start until predecessor finishes *(most common)*
-- `SS` (Start-to-Start): successor can start when predecessor starts
-- `FF` (Finish-to-Finish): successor must finish when predecessor finishes
-- `SF` (Start-to-Finish): successor finishes when predecessor starts *(rare)*
-
----
-
-## Full Project Payload Example
-
-```json
-{
-  "project": {
-    "name": "My Feature Project",
-    "description": "Build and ship feature X",
-    "start_date": "2025-02-01",
-    "end_date": "2025-03-31",
-    "status": "In Progress",
-    "budget": 10000,
-    "graph_end": {
-      "mode": "milestone",
-      "summary": "Feature X ships to production",
-      "next_step": "Monitor metrics and address incidents",
-      "success_signal": "Feature flags enabled for 100% of users",
-      "owner": "Product team"
-    }
-  },
-  "categories": [
-    { "name": "Design", "parent_category_name": null },
-    { "name": "Engineering", "parent_category_name": null },
-    { "name": "QA", "parent_category_name": null }
-  ],
-  "workers": [
-    { "name": "Alice Smith", "email": "alice@example.com", "role": "Lead Developer" }
-  ],
-  "tasks": [
-    {
-      "task_id": 1,
-      "task_name": "Design mockups",
-      "priority": "High",
-      "status": "Done",
-      "estimated_hours": 12,
-      "category_name": "Design",
-      "dependencies": []
-    },
-    {
-      "task_id": 2,
-      "task_name": "Implement backend API",
-      "priority": "Critical",
+      "relativePath": "frontend/tasks.json",
+      "name": "Frontend",
+      "label": "Frontend",
+      "taskCount": 12,
+      "description": "...",
       "status": "In Progress",
-      "estimated_hours": 40,
-      "category_name": "Engineering",
-      "dependencies": [
-        { "predecessor_task_id": 1, "type": "FS", "lag_days": 0 }
-      ]
-    },
-    {
-      "task_id": 3,
-      "task_name": "Write integration tests",
-      "priority": "High",
-      "status": "Not Started",
-      "estimated_hours": 16,
-      "category_name": "QA",
-      "dependencies": [
-        { "predecessor_task_id": 2, "type": "FS", "lag_days": 0 }
-      ]
+      "department": "4-ENGINEERING",
+      "type": "module"
     }
-  ],
-  "navigation": {
-    "modules": []
-  }
-}
-```
-
----
-
-## AI Agent Workflow Guide
-
-### Create a new project from scratch
-
-1. `GET /api/registry` — see existing project IDs to avoid conflicts.
-2. Choose a unique `id` like `my-project-tasks`.
-3. `PUT /api/projects/my-project-tasks` — with the full payload above.
-4. `PUT /api/registry` — add entry: `{ "id": "my-project-tasks", "name": "My Project", "path": "local/my-project/tasks.json", "type": "task-management" }`.
-5. Open `http://localhost:3000/graph-display/?template=my-project-tasks` to view the graph.
-
-### Add a task with dependencies
-
-```http
-POST /api/tasks?project=my-project-tasks
-Content-Type: application/json
-
-{
-  "task_name": "Deploy to production",
-  "priority": "Critical",
-  "status": "Not Started",
-  "estimated_hours": 4,
-  "dependencies": [
-    { "predecessor_task_id": 3, "type": "FS" }
   ]
 }
 ```
 
-### Mark a task as complete
+---
 
-```http
-PUT /api/tasks/2?project=my-project-tasks
-Content-Type: application/json
+### `GET /api/tasks?project=<projectId>`
 
+Reads the synchronized project payload for a project.
+
+This is the primary read endpoint for automation. It returns the canonical full project payload, not just the `tasks[]` array.
+
+Response:
+
+```json
 {
-  "status": "Done",
-  "progress_percentage": 100,
-  "completed_date": "2025-03-15",
-  "actual_hours": 38
+  "project": { "name": "GitHub Task Manager" },
+  "categories": [],
+  "workers": [],
+  "tasks": [],
+  "navigation": { "modules": [] }
 }
 ```
 
-### Build a multi-module project
+Common errors:
 
-1. Create a root project with a `navigation.modules[]` array:
-   ```json
-   "navigation": {
-     "modules": [
-       { "path": "local/my-project/frontend", "label": "Frontend", "type": "module" },
-       { "path": "local/my-project/backend",  "label": "Backend",  "type": "module" }
-     ]
-   }
-   ```
-2. Create each sub-project at `tasksDB/local/my-project/frontend/tasks.json` and `…/backend/tasks.json`.
-3. Add all three to `registry.json`.
-
-Sub-graphs appear in the **📦 Modules** sidebar tab. Tasks within a sub-graph that have `subtasksPath` pointing to another sub-project enable the 📂 View Subtasks navigation button.
+- `404` when `tasks.json` does not exist for the requested project
 
 ---
 
-## Error Responses
+### `PUT /api/tasks?project=<projectId>`
 
-All errors return JSON:
+Replaces the full project payload on local disk and regenerates derived files.
+
+Behavior:
+
+- validates that the request body has a `tasks` array
+- rejects duplicate `task_id` values
+- writes `tasks.json`
+- regenerates `tasks.csv`
+- regenerates `state/*.json`
+
+Request body:
 
 ```json
-{ "error": "Human-readable message", "code": "ERROR_CODE" }
+{
+  "project": { "name": "GitHub Task Manager" },
+  "categories": [],
+  "workers": [],
+  "tasks": []
+}
 ```
 
-| HTTP Status | Meaning |
-|---|---|
-| `400` | Invalid request body or missing required field |
-| `404` | Project or task not found |
-| `409` | Duplicate `task_id` detected |
-| `500` | Server error (file I/O, JSON parse failure) |
+Success response:
+
+```json
+{ "ok": true, "tasks": 42 }
+```
+
+Important note:
+
+- This endpoint does **not** implement item-level `POST /api/tasks/:id`, `PATCH`, or `DELETE` routes.
+- Clients are expected to read the full payload, modify it, and write the updated full payload back.
+
+---
+
+## Worker Endpoints
+
+### `GET /health`
+
+Worker health endpoint.
+
+Response:
+
+```json
+{ "status": "ok" }
+```
+
+---
+
+### `GET /api/task-history?project=<projectId>&taskId=<optional>&limit=<optional>`
+
+Returns append-only task history events from the remote `history/changes.ndjson` file.
+
+Query params:
+
+- `project`: required project id
+- `taskId`: optional task filter
+- `limit`: optional integer, clamped to `1..500`, default `200`
+
+Response:
+
+```json
+{
+  "items": [
+    {
+      "ts": "2026-04-18T19:46:00.000Z",
+      "projectId": "github-task-manager",
+      "action": "update",
+      "taskId": "12",
+      "taskName": "Refine API docs",
+      "changeSummary": "status, progress_percentage"
+    }
+  ]
+}
+```
+
+---
+
+### `PUT /api/tasks`
+
+Authenticated GitHub-backed file update endpoint.
+
+Required JSON body:
+
+```json
+{
+  "projectId": "github-task-manager",
+  "accessPassword": "<project-or-master-password>",
+  "filePath": "public/tasksDB/external/github-task-manager/tasks.json",
+  "content": "{\n  \"tasks\": []\n}",
+  "message": "Update tasks.json",
+  "actor": "automation-bot"
+}
+```
+
+Behavior:
+
+- validates the project id
+- validates password against project or master secret
+- validates the target path against allowed TaskDB paths
+- writes through the GitHub Contents API
+- when writing `tasks.json`, appends task-level history events best-effort
+
+Success response:
+
+```json
+{
+  "success": true,
+  "sha": "<blob-sha>",
+  "commit": "<commit-sha>"
+}
+```
+
+Common errors:
+
+- `400` missing required fields, invalid JSON content, unknown project
+- `401` invalid access password
+- `403` path not allowed or file path outside the selected project scope
+- `500` GitHub token not configured
+
+---
+
+## Agent And MCP-Friendly Usage Patterns
+
+Recommended workflow for deterministic automation:
+
+1. `GET /api/projects` to discover known project ids.
+2. `GET /api/tasks?project=<id>` to read the full canonical payload.
+3. Modify the full payload locally.
+4. `PUT /api/tasks?project=<id>` for local-dev writes or `PUT <worker>/api/tasks` for remote GitHub-backed writes.
+5. `GET <worker>/api/task-history?project=<id>` when an audit trail is needed.
+
+Natural MCP tool mapping:
+
+- `list_projects` → `GET /api/projects`
+- `get_project_payload` → `GET /api/tasks?project=...`
+- `put_project_payload` → `PUT /api/tasks?project=...`
+- `get_module_payload` → `GET /api/module?project=...&path=...`
+- `scan_folder_project` → `GET /api/scan-path?path=...`
+- `get_task_history` → `GET <worker>/api/task-history?project=...`
+
+---
+
+## Current Gaps For Future Development
+
+- `public/api/` is documentation-only today; it does not ship a runtime endpoint provider.
+- No machine-readable OpenAPI or JSON contract is checked into `public/api/` yet.
+- The local server supports full-payload synchronization, not item-level REST CRUD for individual tasks.
+- The production write path is the Cloudflare worker, so the public frontend does not own the write API surface by itself.
+
+---
+
+## Non-Goals And Clarifications
+
+- The local server does not currently expose RESTful per-task CRUD endpoints such as `POST /api/tasks/:taskId` or `DELETE /api/tasks/:taskId`.
+- The local server does not currently expose `/api/projects/:id` or `/api/registry` endpoints.
+- UI code may call documented endpoints, but client `fetch()` usage is not itself an API definition.
+- This document is the source of truth until an OpenAPI spec is added.

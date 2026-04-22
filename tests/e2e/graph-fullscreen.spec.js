@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-// Test configuration
-const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000/';
+// Use the Playwright config baseURL so tests follow the configured server port.
+const BASE_URL = '/';
 const TIMEOUT = 30000;
 
 async function waitForAppReady(page) {
@@ -41,11 +41,26 @@ test.describe('Graph Fullscreen', () => {
 
     // Open the menu inside the graph iframe to access the exit button (we moved it into the menu panel)
     const frame = page.frameLocator('#graphFrame');
-    await frame.locator('#profile-legend-button').click();
-    await frame.locator('#menu-panel.menu-open').waitFor({ timeout: TIMEOUT });
+    const menuToggle = frame.locator('#profile-legend-button');
+    await expect(menuToggle).toHaveAttribute('aria-expanded', 'false', { timeout: TIMEOUT });
+
+    const skipTourBtn = frame.getByRole('button', { name: 'Skip Tour' });
+    if (await skipTourBtn.isVisible().catch(() => false)) {
+      await skipTourBtn.click();
+    }
+
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      if ((await menuToggle.getAttribute('aria-expanded')) === 'true') {
+        break;
+      }
+
+      await menuToggle.click({ force: attempt > 0 });
+    }
+
+    await expect(menuToggle).toHaveAttribute('aria-expanded', 'true', { timeout: TIMEOUT });
 
     const exitBtn = frame.locator('#exitGraphViewBtn');
-    await expect(exitBtn).toBeVisible();
+    await expect(exitBtn).toBeVisible({ timeout: TIMEOUT });
 
     // Click the exit button inside the iframe menu
     await exitBtn.click();

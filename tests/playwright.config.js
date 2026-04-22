@@ -5,19 +5,19 @@ import os from 'os';
  * Playwright Configuration for GitHub Task Manager
  * 
  * Run tests with:
- * npx playwright test
+ * npm run test:playwright
  * 
  * Run in UI mode:
- * npx playwright test --ui
+ * npm run test:playwright:ui
  * 
  * Run with headed browser:
- * npx playwright test --headed
+ * npm run test:playwright:headed
  * 
  * Run specific test file:
- * npx playwright test tests/playwright/crud-operations.spec.js
+ * npx playwright test tests/e2e/crud-operations.spec.js --config=tests/playwright.config.js
  * 
  * Generate HTML report:
- * npx playwright test --reporter=html
+ * npm run test:playwright:report
  */
 
 export default defineConfig({

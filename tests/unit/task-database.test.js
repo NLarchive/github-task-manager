@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Load config
-let configContent = fs.readFileSync(path.join(__dirname, '../../public/config/template-config.js'), 'utf8');
+let configContent = fs.readFileSync(path.join(__dirname, '../../public/config/tasks-template-config.js'), 'utf8');
 configContent = configContent.replace(
   /TOKEN: \(typeof GH_TOKEN !== 'undefined' \? GH_TOKEN : ''\)/,
   "TOKEN: ''"

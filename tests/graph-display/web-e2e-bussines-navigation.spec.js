@@ -43,7 +43,7 @@ test.describe('web-e2e-bussines graph navigation', () => {
 
     const popup = page.locator('#popup');
     await expect(popup).toHaveClass(/visible/);
-    const subtaskButton = popup.locator('.subtask-dive-btn');
+    const subtaskButton = popup.locator('.task-node-btn.task-node-nav-btn[data-subtasks-path]', { hasText: 'View Subtasks' });
     await expect(subtaskButton).toBeVisible();
     await subtaskButton.click();
 

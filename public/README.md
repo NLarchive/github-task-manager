@@ -1,8 +1,14 @@
 # Web GitHub Task Manager — Public Frontend
 
 This `public/` folder is served statically by `server.js` and hosted on GitHub Pages.
-It contains the full frontend: the task-manager list UI, the interactive graph engine,
-all configuration files, and the task database.
+It is the core shipped application surface: the task-manager list UI, the interactive
+graph engine, runtime configuration, and the task database all live here.
+
+Everything outside `public/` is support infrastructure for that core surface:
+
+- `tests/` validates behavior
+- `tools/` handles worker, deployment, and maintenance workflows
+- `.github/` handles CI/CD automation
 
 ---
 
@@ -16,6 +22,27 @@ all configuration files, and the task database.
 
 ---
 
+## Core Runtime Files
+
+These files form the main execution path of the product:
+
+| File | Role |
+|---|---|
+| `index.html` | Bootstraps the list-based task manager UI |
+| `scripts/task-manager-app.js` | Main controller for project selection, auth, rendering, and UI actions |
+| `scripts/task-database.js` | Canonical task payload read/write layer and sync logic |
+| `scripts/template-validator.js` | Validation rules for task and project payloads |
+| `scripts/template-automation.js` | Auto-population and task-template helpers |
+| `graph-display/index.html` | Bootstraps the graph visualization app |
+| `graph-display/js/main-graph.js` | Main graph runtime/controller |
+| `graph-display/js/graph-data.js` | Converts TaskDB payloads into graph-ready nodes/links/details |
+| `config/projects-config.js` | Declares which projects the UI can open |
+| `tasksDB/registry.json` | Registry used for project discovery |
+
+`server.js` sits outside `public/`, but it is the local runtime bridge used by the core app for local reads, writes, and module loading.
+
+---
+
 ## Sub-folders
 
 ```
@@ -25,7 +52,7 @@ public/
   scripts/         ← JS modules for the list UI
   styles/          ← CSS for the list UI
   tasksDB/         ← All project data (tasks.json files + registry)
-  api/             ← Machine-readable API schema for AI agents and integrations
+  api/             ← Documentation and integration guidance for the current API surface
 ```
 
 ---
@@ -81,7 +108,7 @@ Configuration files are plain JS files that export a value or assign a global va
 | `worker-url.js` | URL of the Cloudflare Worker proxy |
 | `worker-url.local.js` | Local override (gitignored) |
 | `projects-config.js` | List of projects available in the UI |
-| `template-config.js` | Graph template display settings |
+| `tasks-template-config.js` | Graph template display settings |
 
 ---
 
@@ -95,10 +122,16 @@ and how to add a new project.
 
 ## API / Agent Integration (`api/`)
 
-The `api/` folder exposes a machine-readable schema and documentation so that AI agents
-and automated tools can create, read, update, and delete task projects without using the UI.
+The `api/` folder is currently documentation-first. It describes how automation, scripts,
+and AI agents should talk to the existing local server and worker surfaces.
 
-See [api/README.md](api/README.md) for the full REST API reference and task JSON schema.
+Current gap summary:
+
+- `public/api/` does not currently contain a runtime endpoint provider
+- there is no machine-readable OpenAPI/JSON contract checked into `public/api/` yet
+- the current write model is full-payload synchronization, not per-task REST CRUD
+
+See [api/README.md](api/README.md) for the code-aligned contract that exists today.
 
 ---
 
@@ -112,24 +145,22 @@ All endpoints are under `/api/` and accept/return `application/json`.
 | Method | Path | Description |
 |---|---|---|
 | `GET` | `/api/projects` | List all known projects (from `tasksDB/registry.json`) |
-| `GET` | `/api/projects/:id` | Get a project's full `tasks.json` |
-| `PUT` | `/api/projects/:id` | Replace a project's entire `tasks.json` |
+| `GET` | `/api/module?project=<id>&path=<relativeModulePath>` | Read one module payload within a project |
+| `GET` | `/api/scan-path?path=<folder>` | Discover a local folder-backed TaskDB project |
 
 ### Tasks
 
 | Method | Path | Description |
 |---|---|---|
-| `GET` | `/api/tasks?project=<id>` | List all tasks for a project |
-| `POST` | `/api/tasks?project=<id>` | Create a new task |
-| `PUT` | `/api/tasks/:taskId?project=<id>` | Update a task by ID |
-| `DELETE` | `/api/tasks/:taskId?project=<id>` | Delete a task by ID |
+| `GET` | `/api/tasks?project=<id>` | Read the full canonical project payload |
+| `PUT` | `/api/tasks?project=<id>` | Replace the full canonical project payload and regenerate derived files |
 
-### Registry
+### Current API Gaps
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/registry` | Full `registry.json` |
-| `PUT` | `/api/registry` | Replace `registry.json` |
+- No item-level `POST`, `PATCH`, or `DELETE` task endpoints exist today
+- No `/api/projects/:id` endpoint is implemented today
+- No `/api/registry` endpoint is implemented today
+- Production GitHub-backed writes are provided by the Cloudflare worker, not by a runtime inside `public/`
 
 ### Static Files
 

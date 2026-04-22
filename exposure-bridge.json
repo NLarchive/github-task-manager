@@ -1,0 +1,245 @@
+{
+  "project": "web-github-task-manager",
+  "root": "d:/web/web-github-task-manager",
+  "formats": {
+    "produce": {
+      "json": [
+        "server.js",
+        "public/graph-display/js/d3.v7.min.js",
+        "public/scripts/folder-project-service.js",
+        "public/scripts/task-database.js",
+        "public/scripts/task-manager-app.js",
+        "tools/cloudflare-worker/worker.js",
+        "tools/scripts/enrich-tasks-workers.js",
+        "tools/scripts/generate-state-files.js",
+        "package.json",
+        "public/graph-display/manifest.json",
+        "public/graph-display/templates/registry.json",
+        "public/tasksDB/registry.json",
+        "public/tasksDB/_examples/career/data.json",
+        "public/tasksDB/_examples/career/tour.json",
+        "public/tasksDB/_examples/task-management/data.json",
+        "public/tasksDB/_examples/task-management/tour.json",
+        "public/tasksDB/_templates/starter_project_template.json",
+        "public/tasksDB/_templates/starter_project_template_v2.json",
+        "public/tasksDB/external/ai-career-roadmap/tasks.json",
+        "public/tasksDB/external/ai-career-roadmap/tour/graph-tour.json",
+        "public/tasksDB/external/extract-project-spec/structure.json",
+        "public/tasksDB/external/extract-project-spec/tasks.json",
+        "public/tasksDB/external/first-graph/tasks.json",
+        "public/tasksDB/external/first-graph/tour/graph-tour.json",
+        "public/tasksDB/external/github-task-manager/tasks.json",
+        "public/tasksDB/external/github-task-manager/history/tasks-root-legacy-20251211-200742.json",
+        "public/tasksDB/external/github-task-manager/tour/graph-tour.json",
+        "tools/cloudflare-worker/package.json"
+      ],
+      "csv": [
+        "server.js",
+        "public/scripts/task-database.js",
+        "tools/scripts/regenerate-tasks-csv.js",
+        "public/tasksDB/_templates/starter_project_template.csv",
+        "public/tasksDB/external/github-task-manager/history/tasks-root-legacy-20251211-200742.csv"
+      ],
+      "ndjson": [
+        "server.js",
+        "public/scripts/task-database.js",
+        "public/scripts/task-manager-app.js",
+        "tools/cloudflare-worker/worker.js",
+        "public/tasksDB/external/ai-career-roadmap/history/changes.ndjson",
+        "public/tasksDB/external/github-task-manager/history/changes.ndjson"
+      ]
+    },
+    "consume": {
+      "json": [
+        "server.js",
+        "public/scripts/folder-project-service.js",
+        "public/scripts/task-database.js",
+        "public/scripts/task-manager-app.js",
+        "tools/cloudflare-worker/worker.js",
+        "tools/scripts/archive-root-tasks.js",
+        "tools/scripts/enrich-tasks-workers.js",
+        "tools/scripts/generate-state-files.js",
+        "tools/scripts/regenerate-tasks-csv.js",
+        "tools/scripts/validate-commit-format.js",
+        "tools/scripts/validate-tasks-schema.js",
+        "tools/scripts/validate-tasks-workers.js"
+      ],
+      "csv": [
+        "server.js",
+        "public/scripts/task-database.js",
+        "tools/scripts/regenerate-tasks-csv.js"
+      ]
+    }
+  },
+  "schemas": [
+    {
+      "file": "public/graph-display/templates/registry.json",
+      "kind": "data-template"
+    },
+    {
+      "file": "public/tasksDB/_schema/graph-template.schema.json",
+      "kind": "schema"
+    },
+    {
+      "file": "public/tasksDB/_templates/starter_project_template.csv",
+      "kind": "data-template"
+    },
+    {
+      "file": "public/tasksDB/_templates/starter_project_template.json",
+      "kind": "data-template"
+    },
+    {
+      "file": "public/tasksDB/_templates/starter_project_template_v2.json",
+      "kind": "data-template"
+    }
+  ],
+  "connectors": [
+    {
+      "file": "public/graph-display/js/graph-data.js",
+      "kind": "mapping",
+      "name": "convertCypherToGraph"
+    }
+  ],
+  "http_apis": [
+    {
+      "file": "server.js",
+      "method": "GET",
+      "path": "/api/health"
+    },
+    {
+      "file": "server.js",
+      "method": "GET",
+      "path": "/api/projects"
+    },
+    {
+      "file": "server.js",
+      "method": "GET",
+      "path": "/api/module"
+    },
+    {
+      "file": "server.js",
+      "method": "GET",
+      "path": "/api/scan-path"
+    },
+    {
+      "file": "server.js",
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "file": "server.js",
+      "method": "PUT",
+      "path": "/api/tasks"
+    },
+    {
+      "file": "tools/cloudflare-worker/worker.js",
+      "method": "GET",
+      "path": "/health"
+    },
+    {
+      "file": "tools/cloudflare-worker/worker.js",
+      "method": "GET",
+      "path": "/api/task-history"
+    },
+    {
+      "file": "tools/cloudflare-worker/worker.js",
+      "method": "PUT",
+      "path": "/api/tasks"
+    }
+  ],
+  "bridge": {
+    "projects": [
+      "web-github-task-manager",
+      "web-appoinment"
+    ],
+    "shared_formats": {
+      "csv": {
+        "web-github-task-manager_produce": true,
+        "web-github-task-manager_consume": true,
+        "web-appoinment_produce": true,
+        "web-appoinment_consume": true
+      },
+      "ics": {
+        "web-github-task-manager_produce": false,
+        "web-github-task-manager_consume": false,
+        "web-appoinment_produce": true,
+        "web-appoinment_consume": true
+      },
+      "json": {
+        "web-github-task-manager_produce": true,
+        "web-github-task-manager_consume": true,
+        "web-appoinment_produce": true,
+        "web-appoinment_consume": true
+      },
+      "ndjson": {
+        "web-github-task-manager_produce": true,
+        "web-github-task-manager_consume": false,
+        "web-appoinment_produce": false,
+        "web-appoinment_consume": false
+      }
+    },
+    "bridge_ready": [
+      {
+        "format": "csv",
+        "direction": "bidirectional",
+        "note": "web-github-task-manager ↔ web-appoinment via csv"
+      },
+      {
+        "format": "json",
+        "direction": "bidirectional",
+        "note": "web-github-task-manager ↔ web-appoinment via json"
+      }
+    ],
+    "bridge_missing": [
+      {
+        "format": "ics",
+        "status": "web-appoinment produces; web-appoinment consumes",
+        "note": "need adapter so the other project can consume ics"
+      },
+      {
+        "format": "ndjson",
+        "status": "web-github-task-manager produces",
+        "note": "need adapter so the other project can consume ndjson"
+      }
+    ],
+    "existing_mappings": [
+      {
+        "file": "public/graph-display/js/graph-data.js",
+        "kind": "mapping",
+        "name": "convertCypherToGraph"
+      },
+      {
+        "file": "src/connectors/githubTaskManagerConnector.js",
+        "kind": "mapping",
+        "name": "mapAppointmentToTask"
+      },
+      {
+        "file": "src/modules/calculator/calculatorTemplates.js",
+        "kind": "mapping",
+        "name": "mapTemplateToRuntime"
+      },
+      {
+        "file": "src/modules/sync/calendarSyncFormats.js",
+        "kind": "mapping",
+        "name": "parseStateFromJson"
+      },
+      {
+        "file": "src/modules/sync/calendarSyncFormats.js",
+        "kind": "mapping",
+        "name": "parseStateFromICS"
+      },
+      {
+        "file": "src/modules/sync/calendarSyncFormats.js",
+        "kind": "mapping",
+        "name": "parseStateFromCSV"
+      }
+    ],
+    "needed_mappings": [
+      {
+        "from": "web-github-task-manager",
+        "to": "web-appoinment",
+        "note": "web-github-task-manager has no connector targeting web-appoinment"
+      }
+    ]
+  }
+}

@@ -5,11 +5,11 @@ import { test, expect } from '@playwright/test';
  * Use this to programmatically update task data via the web interface.
  *
  * Usage example:
- *   npx playwright test tests/e2e/update-task-via-ui.spec.js --headed
+ *   npx playwright test tests/e2e/update-task-via-ui.spec.js --config=tests/playwright.config.js --headed
  */
 
-// Test configuration
-const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000/';
+// Use the Playwright config baseURL so tests follow the configured server port.
+const BASE_URL = '/';
 const TIMEOUT = 30000;
 
 /**
@@ -56,7 +56,7 @@ async function updateTaskViaUI(page, taskId, taskData) {
 
   // Update progress percentage if provided
   if (taskData.progress_percentage !== undefined) {
-    await page.fill('[id="taskProgressPercentage"]', String(taskData.progress_percentage));
+    await page.fill('[id="taskProgress"]', String(taskData.progress_percentage));
   }
 
   // Update priority if provided
@@ -141,7 +141,7 @@ async function createTaskViaUI(page, taskData) {
   }
 
   if (taskData.progress_percentage !== undefined) {
-    await page.fill('[id="taskProgressPercentage"]', String(taskData.progress_percentage));
+    await page.fill('[id="taskProgress"]', String(taskData.progress_percentage));
   }
 
   if (taskData.actual_hours !== undefined) {
@@ -178,16 +178,18 @@ test.describe('Update Tasks Via UI Automation', () => {
       progress_percentage: 60
     });
 
-    // Verify the update by checking the task card
+    // Verify the persisted values by reopening the edit form.
     const taskCard = page.locator('[data-task-id="8"]').first();
-    const progressText = await taskCard.locator('[class*="progress"]').textContent();
-    expect(progressText).toContain('60');
+    await taskCard.locator('button:has-text("Edit")').click();
+    await page.waitForSelector('[id="taskModal"]', { timeout: TIMEOUT });
+    await expect(page.locator('[id="taskStatus"]')).toHaveValue('In Progress');
+    await expect(page.locator('[id="taskProgress"]')).toHaveValue('60');
   });
 
   test('should mark task as completed', async ({ page }) => {
-    // Mark task 13 (Token Strategy) as Completed
+    // Mark task 13 (Token Strategy) as Done
     await updateTaskViaUI(page, 13, {
-      status: 'Completed',
+      status: 'Done',
       progress_percentage: 100,
       actual_hours: 2
     });
@@ -195,7 +197,7 @@ test.describe('Update Tasks Via UI Automation', () => {
     // Verify the update
     const taskCard = page.locator('[data-task-id="13"]').first();
     const statusText = await taskCard.locator('[class*="status"]').textContent();
-    expect(statusText).toContain('Completed');
+    expect(statusText).toContain('Done');
   });
 
   test('should update multiple task fields at once', async ({ page }) => {
@@ -237,7 +239,7 @@ test.describe('Update Tasks Via UI Automation', () => {
     const updates = [
       { id: 8, data: { progress_percentage: 60 } },
       { id: 10, data: { progress_percentage: 25 } },
-      { id: 13, data: { status: 'Completed', progress_percentage: 100 } }
+      { id: 13, data: { status: 'Done', progress_percentage: 100 } }
     ];
 
     for (const update of updates) {

@@ -1,5 +1,5 @@
 # Project Specification: web-github-task-manager
-Generated: 2026-04-18 19:46
+Generated: 2026-04-18 21:45
 
 ## Folder structure
 
@@ -51,7 +51,7 @@ LICENSE
 package.json
 public\api\README.md
 public\config\projects-config.js
-public\config\template-config.js
+public\config\tasks-template-config.js
 public\config\worker-url.js
 public\graph-display\.gitignore
 public\graph-display\css\components\_accessibility.css
@@ -150,9 +150,10 @@ tests\unit\server-api.test.js
 tests\unit\task-database.test.js
 tests\unit\tasks-json-format.test.js
 tests\unit\template-automation.test.js
-tests\unit\template-config.test.js
+tests\unit\tasks-template-config.test.js
 tests\unit\template-validator.test.js
 tests\unit\validate-schema.js
+tmp-test-output.txt
 tools\cloudflare-worker\deploy.ps1
 tools\cloudflare-worker\deploy.sh
 tools\cloudflare-worker\package.json
@@ -177,6 +178,28 @@ tools\scripts\setup.js
 tools\scripts\validate-commit-format.js
 tools\scripts\validate-tasks-schema.js
 tools\scripts\validate-tasks-workers.js
+
+---
+
+## Project focus
+
+focus from repo structure:
+    [core-root] public/ — primary shipped web application
+    [core-runtime-bridge] server.js — local dev server and API bridge for the public application
+    [supporting-root] tests/ — validation and regression coverage
+    [supporting-root] tools/ — deployment, worker, and maintenance support
+    [supporting-root] .github/ — CI/CD automation
+    [ignored-scope] .gitignore influences which generated, local, or secret files are intentionally excluded
+    [suggested-core-file] public/index.html — GitHub Task Manager
+    [suggested-core-file] public/scripts/task-manager-app.js — main task manager controller
+    [suggested-core-file] public/scripts/task-database.js — task data and persistence layer
+    [suggested-core-file] public/scripts/template-validator.js — task validation layer
+    [suggested-core-file] public/scripts/template-automation.js — task automation helpers
+    [suggested-core-file] public/graph-display/index.html — Template: interactive graph-based CV/portfolio. Replace the sample graph data with your own career, skills, and outcomes.
+    [suggested-core-file] public/graph-display/js/main-graph.js — Main script for initializing and managing the Curriculum Graph. Imports data, CV generator, walkthrough, utilities. Uses CSS classes for color and manages accessibility. UPDATED: Touch interaction mir
+    [suggested-core-file] public/graph-display/js/graph-data.js — graph data normalization layer
+    [suggested-core-file] public/config/projects-config.js — runtime project selection config
+    [suggested-core-file] public/tasksDB/registry.json — project registry and template discovery
 
 ---
 
@@ -359,6 +382,8 @@ structure from server.js:
     function writeStateFiles(tasksDbDir, fullData)  «docstring: none»
     function createServer({ publicDir, tasksDbDir, graphDir })  «docstring: none»
 
+structure from tmp-test-output.txt:  (no extractable definitions)
+
 structure from .github/workflows/deploy.yml:
     [file-summary] Deploy GitHub Task Manager
     [yaml-key] name: "Deploy GitHub Task Manager"
@@ -380,6 +405,7 @@ structure from public/README.md:
     [file-summary] Web GitHub Task Manager — Public Frontend
     [heading-1] # Web GitHub Task Manager — Public Frontend
     [heading-2] ## Top-level Files
+    [heading-2] ## Core Runtime Files
     [heading-2] ## Sub-folders
     [heading-2] ## Application Modes
     [heading-3] ### 1. Task Manager List UI (`index.html`)
@@ -390,7 +416,7 @@ structure from public/README.md:
     [heading-2] ## Server API (provided by `server.js`)
     [heading-3] ### Projects
     [heading-3] ### Tasks
-    [heading-3] ### Registry
+    [heading-3] ### Current API Gaps
     [heading-3] ### Static Files
     [heading-2] ## Deployment
 
@@ -507,41 +533,32 @@ structure from public/styles.css:
     [section] /* Responsive */
 
 structure from public/api/README.md:
-    [file-summary] Task Graph API — Agent & Integration Reference
-    [heading-1] # Task Graph API — Agent & Integration Reference
-    [heading-2] ## Base URL
-    [heading-2] ## Authentication
-    [heading-2] ## Projects API
-    [heading-3] ### List all projects
-    [heading-3] ### Get a project's full data
-    [heading-3] ### Create or replace a project
-    [heading-2] ## Tasks API
-    [heading-3] ### List tasks
-    [heading-3] ### Get a single task
-    [heading-3] ### Create a task
-    [heading-3] ### Update a task
-    [heading-3] ### Delete a task
-    [heading-2] ## Registry API
-    [heading-3] ### Get registry
-    [heading-3] ### Update registry
-    [heading-2] ## Task JSON Schema
-    [heading-3] ### Minimal task
-    [heading-3] ### Full task
-    [heading-3] ### Field Reference
-    [heading-3] ### Dependency Object
-    [heading-2] ## Full Project Payload Example
-    [heading-2] ## AI Agent Workflow Guide
-    [heading-3] ### Create a new project from scratch
-    [heading-3] ### Add a task with dependencies
-    [heading-3] ### Mark a task as complete
-    [heading-3] ### Build a multi-module project
-    [heading-2] ## Error Responses
+    [file-summary] Task Graph API — Automation & Agent Contract
+    [heading-1] # Task Graph API — Automation & Agent Contract
+    [heading-2] ## Design Standards
+    [heading-2] ## Surface Summary
+    [heading-3] ### Local server (`server.js`)
+    [heading-3] ### Cloudflare worker (`tools/cloudflare-worker/worker.js`)
+    [heading-2] ## Local Server Endpoints
+    [heading-3] ### `GET /api/health`
+    [heading-3] ### `GET /api/projects`
+    [heading-3] ### `GET /api/module?project=<projectId>&path=<relativeModulePath>`
+    [heading-3] ### `GET /api/scan-path?path=<relativeOrAbsoluteFolder>`
+    [heading-3] ### `GET /api/tasks?project=<projectId>`
+    [heading-3] ### `PUT /api/tasks?project=<projectId>`
+    [heading-2] ## Worker Endpoints
+    [heading-3] ### `GET /health`
+    [heading-3] ### `GET /api/task-history?project=<projectId>&taskId=<optional>&limit=<optional>`
+    [heading-3] ### `PUT /api/tasks`
+    [heading-2] ## Agent And MCP-Friendly Usage Patterns
+    [heading-2] ## Current Gaps For Future Development
+    [heading-2] ## Non-Goals And Clarifications
 
 structure from public/config/projects-config.js:
     [file-summary] No top-level file docstring detected
     const PROJECTS_CONFIG  «docstring: none»
 
-structure from public/config/template-config.js:
+structure from public/config/tasks-template-config.js:
     [file-summary] No top-level file docstring detected
     const TEMPLATE_CONFIG  «docstring: none»
 
@@ -1838,21 +1855,21 @@ structure from public/graph-display/css/components/_popups.css:
     [selector] #legend-popup.visible .content
     [section] /* Popup titles */
     [selector] #legend-popup .content h2
-    [section] /* ===== Dependency link buttons inside node detail popup ===== */
-    [selector] #popup .content .dep-link
-    [selector] #popup .content .dep-link:focus-visible
-    [section] /* Status-aware dep buttons */
-    [selector] #popup .content .dep-link.dep-status-done
-    [selector] #popup .content .dep-link.dep-status-in-progress
-    [section] /* Hours badge inside dep-link buttons */
-    [selector] #popup .content .dep-link .dep-hours
-    [section] /* ===== Subtask node-like buttons ===== */
-    [selector] .subtask-node-list
-    [selector] #popup .content .subtask-node-btn
-    [selector] #popup .content .subtask-node-btn .st-name
-    [selector] #popup .content .subtask-node-btn .st-hours
-    [selector] #popup .content .subtask-node-btn.st-status-done
-    [selector] #popup .content .subtask-node-btn.st-status-in-progress
+    [selector] .task-node-list
+    [selector] #popup .content .task-node-btn
+    [selector] #popup .content .task-node-btn[data-nav-depth]:focus-visible
+    [section] /* Buttons without a navigable relation show default cursor */
+    [selector] #popup .content .task-node-btn .tn-name
+    [section] /* Hours badge */
+    [selector] #popup .content .task-node-btn .tn-hours
+    [section] /* Status-aware modifiers */
+    [selector] #popup .content .task-node-btn.task-node-status-done
+    [selector] #popup .content .task-node-btn.task-node-status-in-progress
+    [selector] #popup .content .task-node-btn.task-node-nav-btn
+    [selector] #popup .content .task-node-btn.task-node-nav-btn .tn-name
+    [selector] #popup .content .task-node-btn.task-node-nav-btn.task-node-btn-active
+    [selector] #popup .content .task-node-btn.parent-nav-btn
+    [selector] #popup .content .task-node-btn.parent-nav-btn:focus-visible
     [section] /* ===== CV Popup Content Styles ===== */
     [selector] .cv-error
     [selector] .cv-profile-header
@@ -1915,10 +1932,6 @@ structure from public/graph-display/css/components/_popups.css:
     [selector] .popup-dropdown > ul
     [selector] .popup-dropdown > ul > li
     [selector] .popup-dropdown > ul > li em
-    [selector] .subtask-dive-btn
-    [selector] .subtask-dive-btn:hover
-    [selector] .parent-nav-btn
-    [selector] .parent-nav-btn:hover
     [selector] .subtask-breadcrumb
     [selector] .breadcrumb-link
     [selector] .breadcrumb-link:hover
@@ -2237,7 +2250,7 @@ structure from public/graph-display/js/graph-data.js:
     function getTaskNarrativeText(task)  «docstring: none»
     function resolveProjectEndConfig(project)  «docstring: none»
     function resolveProjectEndMode(project, terminalTasks)  «docstring: none»
-    function buildProjectEndDetails(project, terminalTasks)  «docstring: none»
+    function buildProjectEndDetails(project, terminalTasks, totalProjectHours = 0)  «docstring: none»
     function buildProjectTaskTemplate(entry, data, options = {})  «docstring: none»
     function buildTaskManagementTemplate(entry, data, options = {})  «docstring: none»
     function isDevMode()  «docstring: none»
@@ -2288,7 +2301,7 @@ structure from public/graph-display/js/main-graph.js:
         populateGuidePanel()  «Populate the guide panel with graph structure information»
         focusOnNode(nodeId)  «Zoom and pan the graph to focus on a specific node»
         _openNodeDetails(d)  «Apply persistent node-selected state (same logic as handleShowDetails) without a triggering DOM event. Used by dep-link »
-        openNodeModal(nodeId)  «Pan & zoom to a node by ID, then open its detail modal and keep it selected with a permanent blink. Used by dep-link but»
+        openNodeModal(nodeId, { animate = true } = {})  «Pan & zoom to a node by ID, then open its detail modal and keep it selected with a permanent blink. Used by dep-link but»
         ticked()  «Simulation tick function: Update node and link positions»
         dragHandler()  «Drag handler definition for nodes»
         bindGlobalEvents()  «Bind global event listeners (resize, escape key)»
@@ -3015,7 +3028,7 @@ structure from public/tasksDB/external/extract-project-spec/tasks.json:
     [json-key] project: {name, description, start_date, end_date, status, +2 more}
     [json-key] categories: [8 items]
     [json-key] workers: [1 items]
-    [json-key] tasks: [20 items]
+    [json-key] tasks: [23 items]
     [json-key] meta: {legendMode, walkthroughEnabled}
     [json-key] configOverrides: {colorMode, sizeMode, taskSizing}
 
@@ -3051,7 +3064,7 @@ structure from public/tasksDB/external/github-task-manager/tasks.json:
     [json-key] project: {name, description, start_date, end_date, status, +2 more}
     [json-key] categories: [19 items]
     [json-key] workers: [3 items]
-    [json-key] tasks: [30 items]
+    [json-key] tasks: [31 items]
 
 structure from public/tasksDB/external/github-task-manager/history/changes.ndjson:  (no extractable definitions)
 
@@ -3260,7 +3273,7 @@ structure from tests/unit/template-automation.test.js:
     [describe] v3 Project Auto-Population  «docstring: none»
     [describe] validateAndFix v3 Support  «docstring: none»
 
-structure from tests/unit/template-config.test.js:
+structure from tests/unit/tasks-template-config.test.js:
     [file-summary] Template Config Tests Tests for TEMPLATE_CONFIG structure and values
     const TEMPLATE_CONFIG  «docstring: none»
     [describe] TEMPLATE_CONFIG Structure  «docstring: none»
@@ -3645,7 +3658,7 @@ relations from public/index.html:
     [asset] config/worker-url.local.js
     [asset] config/worker-url.js
     [asset] config/projects-config.js
-    [asset] config/template-config.js
+    [asset] config/tasks-template-config.js
     [asset] scripts/template-validator.js
     [asset] scripts/template-automation.js
     [asset] scripts/folder-project-service.js
@@ -3777,7 +3790,7 @@ relations from tests/unit/template-automation.test.js:
     [require] fs
     [require] path
 
-relations from tests/unit/template-config.test.js:
+relations from tests/unit/tasks-template-config.test.js:
     [require] fs
     [require] path
 
@@ -4011,18 +4024,100 @@ flow from tools/scripts/validate-tasks-workers.js:
 
 ## API endpoints
 
+api posture:
+    [gap] public/api/ is documentation-only; no runtime endpoint provider was detected under public/
+    [runtime-provider] runtime endpoints currently live in server.js, tools/cloudflare-worker/worker.js
+    [gap] /api/tasks uses a full-payload GET/PUT model; no item-level POST/PATCH/DELETE task endpoints were detected
+    [gap] no registry endpoint provider was detected; registry management appears file-based
+    [gap] no machine-readable API contract (OpenAPI/JSON) was detected under public/api/
+
+cli entry points:
+    [cli] tools/scripts/enrich-tasks-workers.js — process.argv CLI
+    [cli] tools/scripts/generate-state-files.js — process.argv CLI
+    [cli] tools/scripts/regenerate-tasks-csv.js — process.argv CLI
+    [cli] tools/scripts/validate-commit-format.js — process.argv CLI
+    [cli] tools/scripts/validate-tasks-schema.js — process.argv CLI
+    [cli] tools/scripts/validate-tasks-workers.js — process.argv CLI
+
+core surface candidates for API/MCP exposure:
+    [candidate] public/scripts/task-database.js: inferProjectIdFromTasksFile, resolveTemplateConfig, hasValidGitHubToken, resolveActiveProjectId, getProjectScopedStorageKey (+3 more)
+    [candidate] public/scripts/task-manager-app.js: TaskManagerApp, constructor, getGraphTemplateIdForActiveProject, getStoredFolderProjects, registerFolderProjectOption (+3 more)
+    [candidate] public/graph-display/js/main-graph.js: isEmbeddedMode, getInitialTemplateId, setSelectedTemplateId, CurriculumGraph, constructor (+3 more)
+    [candidate] tools/scripts/enrich-tasks-workers.js: isNonEmptyString, uniq, loadJson, saveJson, buildTasksById (+3 more)
+    [candidate] public/graph-display/js/graph-data.js: convertCypherToGraph, normalizePriority, getTaskPredecessorIds, getDependencyLinkType, buildDependencyLayering (+3 more)
+    [candidate] public/graph-display/js/walkthrough.js: debounce, Walkthrough, constructor, setSteps, init (+3 more)
+
+automation suggestions:
+    [suggest-mcp] wrap core functions with MCP SDK tool decorators for agent integration
+    [suggest-contract] add an OpenAPI/JSON schema to document the API surface
+
 api from server.js:
-    [route] * /api/health
-    [route] * /api/projects
-    [route] * /api/module
-    [route] * /api/scan-path
-    [route] * /api/tasks
+    [route] GET /api/health
+    [route] GET /api/projects
+    [route] GET /api/module
+    [route] GET /api/scan-path
+    [route] GET /api/tasks
+    [route] PUT /api/tasks
 
-api from public/scripts/task-database.js:
-    [fetch] * /api/tasks?project=${encodeURIComponent(safeProject)}
-
-api from public/scripts/task-manager-app.js:
-    [fetch] * /api/projects
+api from tools/cloudflare-worker/worker.js:
+    [route] GET /health
+    [route] GET /api/task-history
+    [route] PUT /api/tasks
 
 ---
-*135 files indexed · generated by extract_project_spec.py*
+
+## Feature exposure
+
+data formats (web-github-task-manager):
+    [format-produce] csv: server.js (+4 more)
+    [format-produce] json: server.js (+27 more)
+    [format-produce] ndjson: server.js (+5 more)
+    [format-consume] csv: server.js (+2 more)
+    [format-consume] json: server.js (+11 more)
+
+schemas and templates:
+    [data-template] public/graph-display/templates/registry.json
+    [schema] public/tasksDB/_schema/graph-template.schema.json
+    [data-template] public/tasksDB/_templates/starter_project_template.csv
+    [data-template] public/tasksDB/_templates/starter_project_template.json
+    [data-template] public/tasksDB/_templates/starter_project_template_v2.json
+
+connectors and mappings:
+    [mapping] public/graph-display/js/graph-data.js: convertCypherToGraph
+
+http endpoints:
+    [route] GET /api/health (server.js)
+    [route] GET /api/projects (server.js)
+    [route] GET /api/module (server.js)
+    [route] GET /api/scan-path (server.js)
+    [route] GET /api/tasks (server.js)
+    [route] PUT /api/tasks (server.js)
+    [route] GET /health (tools/cloudflare-worker/worker.js)
+    [route] GET /api/task-history (tools/cloudflare-worker/worker.js)
+    [route] PUT /api/tasks (tools/cloudflare-worker/worker.js)
+
+---
+
+## Bridge analysis: web-github-task-manager ↔ web-appoinment
+
+compatible format bridges:
+    [bridge-ready] csv: web-github-task-manager ↔ web-appoinment via csv
+    [bridge-ready] json: web-github-task-manager ↔ web-appoinment via json
+
+format gaps:
+    [bridge-missing] ics: web-appoinment produces; web-appoinment consumes
+    [bridge-missing] ndjson: web-github-task-manager produces
+
+existing mapping functions:
+    [mapping-exists] public/graph-display/js/graph-data.js: convertCypherToGraph
+    [mapping-exists] src/connectors/githubTaskManagerConnector.js: mapAppointmentToTask
+    [mapping-exists] src/modules/calculator/calculatorTemplates.js: mapTemplateToRuntime
+    [mapping-exists] src/modules/sync/calendarSyncFormats.js: parseStateFromJson
+    [mapping-exists] src/modules/sync/calendarSyncFormats.js: parseStateFromICS
+    [mapping-exists] src/modules/sync/calendarSyncFormats.js: parseStateFromCSV
+
+needed mappings:
+    [mapping-needed] web-github-task-manager → web-appoinment: web-github-task-manager has no connector targeting web-appoinment
+
+---
+*136 files indexed · generated by extract_project_spec.py*

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-// Test configuration
-const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000/';
+// Use the Playwright config baseURL so tests follow the configured server port.
+const BASE_URL = '/';
 const TIMEOUT = 30000;
 
 async function waitForAppReady(page) {
@@ -271,8 +271,8 @@ test.describe('GitHub Task Manager - Filter & Search', () => {
   });
 
   test('should filter tasks by status', async ({ page }) => {
-    // Select "Completed" status filter
-    await page.selectOption('[id="filterStatus"]', 'Completed');
+    // Select the current completed-state label used by the UI.
+    await page.selectOption('[id="filterStatus"]', 'Done');
     
     // Wait for filter to apply
     await page.waitForTimeout(500);
@@ -296,7 +296,7 @@ test.describe('GitHub Task Manager - Filter & Search', () => {
 
   test('should combine multiple filters', async ({ page }) => {
     // Apply status filter
-    await page.selectOption('[id="filterStatus"]', 'Completed');
+    await page.selectOption('[id="filterStatus"]', 'Done');
     
     // Apply priority filter
     await page.selectOption('[id="filterPriority"]', 'High');
@@ -409,7 +409,7 @@ test.describe('GitHub Task Manager - Statistics', () => {
     await expect(page.locator('.stat-card h3:has-text("Total Tasks")')).toBeVisible();
     await expect(page.locator('.stat-card h3:has-text("Not Started")')).toBeVisible();
     await expect(page.locator('.stat-card h3:has-text("In Progress")')).toBeVisible();
-    await expect(page.locator('.stat-card h3:has-text("Completed")')).toBeVisible();
+    await expect(page.locator('.stat-card h3:has-text("Done")')).toBeVisible();
   });
 
   test('should update statistics after creating task', async ({ page }) => {

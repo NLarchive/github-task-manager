@@ -7,6 +7,40 @@ async function waitForNodeCount(page, minimum) {
 }
 
 test.describe('inline subtask navigation', () => {
+  test('subtask task-node button opens the matching node inside the subtask graph', async ({ page }) => {
+    await page.goto('/graph-display/index.html?template=github-task-manager-tasks&skipTour=true', {
+      waitUntil: 'domcontentloaded'
+    });
+
+    await waitForNodeCount(page, 10);
+
+    const rootTask = page.locator('#graph-container g.node').filter({ hasText: 'Implement Task Dependencies & Critical Path' }).first();
+    await expect(rootTask).toBeVisible();
+    await rootTask.click();
+
+    const popup = page.locator('#popup');
+    await expect(popup).toHaveClass(/visible/);
+
+    const subtaskDropdown = popup.locator('.popup-dropdown').filter({ hasText: 'Sub-tasks' }).first();
+    await expect(subtaskDropdown).toBeVisible();
+    await subtaskDropdown.locator('summary').click();
+
+    const subtaskBtn = subtaskDropdown.locator('.task-node-btn').filter({ hasText: 'Implement circular dependency validator' }).first();
+    await expect(subtaskBtn).toBeVisible();
+    await subtaskBtn.click();
+
+    const breadcrumb = page.locator('#subtask-breadcrumb');
+    await expect(breadcrumb).toBeVisible({ timeout: 15000 });
+    await expect(breadcrumb).toContainText('Implement Task Dependencies & Critical Path');
+
+    await expect(popup).toHaveClass(/visible/, { timeout: 15000 });
+    await expect(popup.locator('h2')).toContainText('Implement circular dependency validator');
+    await expect(popup).toContainText('Build task dependency graph traversal');
+
+    const selectedNode = page.locator('#graph-container g.node.details-shown-for').filter({ hasText: 'Implement circular dependency validator' }).first();
+    await expect(selectedNode).toBeVisible();
+  });
+
   test('drills recursively through nested inline subtasks', async ({ page }) => {
     await page.goto('/graph-display/index.html?template=github-task-manager-tasks&skipTour=true', {
       waitUntil: 'domcontentloaded'
@@ -22,7 +56,7 @@ test.describe('inline subtask navigation', () => {
     await expect(popup).toHaveClass(/visible/);
     await expect(popup).toContainText('Build dependency type UI (FS/SS/FF/SF)');
 
-    const firstDiveButton = popup.locator('.subtask-dive-btn', { hasText: 'View Subtasks' });
+    const firstDiveButton = popup.locator('.task-node-btn[data-subtasks-path]', { hasText: 'View Subtasks' });
     await expect(firstDiveButton).toBeVisible();
     await firstDiveButton.click();
 
@@ -37,7 +71,7 @@ test.describe('inline subtask navigation', () => {
     await expect(popup).toHaveClass(/visible/);
     await expect(popup).toContainText('Build task dependency graph traversal');
 
-    const secondDiveButton = popup.locator('.subtask-dive-btn', { hasText: 'View Subtasks' });
+    const secondDiveButton = popup.locator('.task-node-btn[data-subtasks-path]', { hasText: 'View Subtasks' });
     await expect(secondDiveButton).toBeVisible();
     await secondDiveButton.click();
 
@@ -60,7 +94,7 @@ test.describe('inline subtask navigation', () => {
 
     const popup = page.locator('#popup');
     await expect(popup).toHaveClass(/visible/);
-    const diveBtn = popup.locator('.subtask-dive-btn', { hasText: 'View Subtasks' });
+    const diveBtn = popup.locator('.task-node-btn[data-subtasks-path]', { hasText: 'View Subtasks' });
     await diveBtn.click();
 
     // Wait for subgraph to load
@@ -73,7 +107,7 @@ test.describe('inline subtask navigation', () => {
 
     await expect(popup).toHaveClass(/visible/);
     // Start node should show a parent-nav-btn with the parent task name
-    const parentBtn = popup.locator('.parent-nav-btn');
+    const parentBtn = popup.locator('.task-node-btn.parent-nav-btn');
     await expect(parentBtn).toBeVisible();
     await expect(parentBtn).toContainText('Implement Task Dependencies');
 

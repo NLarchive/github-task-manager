@@ -300,7 +300,7 @@ Pre-defined categories for organization:
 6. **Documentation** - User guides and docs
 7. **Retrospective** - Team reviews
 
-Add more categories by editing `TEMPLATE_CONFIG` in `public/config/template-config.js`.
+Add more categories by editing `TEMPLATE_CONFIG` in `public/config/tasks-template-config.js`.
 
 ## GitHub Integration 🔗
 
@@ -345,7 +345,7 @@ Live Site Updated
 The app uses GitHub REST API v3 to manage tasks:
 
 ```javascript
-// Configuration in public/config/template-config.js
+// Configuration in public/config/tasks-template-config.js
 GITHUB: {
   OWNER: 'nlarchive',           // Repository owner
   REPO: 'github-task-manager',  // Repository name
@@ -487,7 +487,7 @@ github-task-manager/
 │   ├── index.html                  # Main application
 │   ├── config/
 │   │   ├── projects-config.js      # Canonical multi-project list (non-secret)
-│   │   ├── template-config.js      # Configuration and validation rules
+│   │   ├── tasks-template-config.js      # Configuration and validation rules
 │   │   └── github-token.js         # GitHub API token (injected)
 │   ├── scripts/
 │   │   ├── task-manager-app.js     # Main application controller
@@ -504,7 +504,7 @@ github-task-manager/
 │
 ├── tests/                           # Test files
 │   ├── playwright/                  # Playwright E2E tests
-│   ├── template-config.test.js     # Config tests
+│   ├── template-config.test.js      # Config tests
 │   ├── template-validator.test.js  # Validator tests
 │   ├── template-automation.test.js # Automation tests
 │   └── task-database.test.js       # Database tests
@@ -528,7 +528,7 @@ github-task-manager/
 
 ### Template Configuration
 
-Edit `public/config/template-config.js` to customize:
+Edit `public/config/tasks-template-config.js` to customize:
 
 ```javascript
 FIELD_CATEGORIES: {

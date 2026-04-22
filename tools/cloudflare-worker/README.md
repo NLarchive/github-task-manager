@@ -39,7 +39,7 @@ https://task-manager-api.YOUR-SUBDOMAIN.workers.dev
 ```
 
 ### 5. Configure the App
-Update `public/config/template-config.js` to add the worker URL:
+Update `public/config/tasks-template-config.js` to add the worker URL:
 
 ```javascript
 GITHUB: {

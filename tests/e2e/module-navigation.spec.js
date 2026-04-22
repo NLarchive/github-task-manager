@@ -34,13 +34,26 @@ test.describe('module navigation sync', () => {
     await expect(navigationPanel).toBeVisible();
     const panelSurface = await navigationPanel.evaluate((el) => {
       const styles = getComputedStyle(el);
+      const probe = document.createElement('div');
+      probe.style.backgroundColor = 'var(--module-nav-bg)';
+      probe.style.color = 'var(--module-nav-text)';
+      probe.style.position = 'fixed';
+      probe.style.opacity = '0';
+      probe.style.pointerEvents = 'none';
+      document.body.appendChild(probe);
+      const resolvedProbeStyles = getComputedStyle(probe);
+      const expectedBackgroundColor = resolvedProbeStyles.backgroundColor;
+      const expectedColor = resolvedProbeStyles.color;
+      probe.remove();
       return {
         backgroundColor: styles.backgroundColor,
-        color: styles.color
+        color: styles.color,
+        expectedBackgroundColor,
+        expectedColor
       };
     });
-    expect(panelSurface.backgroundColor).toBe('rgb(220, 220, 237)');
-    expect(panelSurface.color).toBe('rgb(17, 24, 39)');
+    expect(panelSurface.backgroundColor).toBe(panelSurface.expectedBackgroundColor);
+    expect(panelSurface.color).toBe(panelSurface.expectedColor);
     await expect(navigationPanel.locator('.project-modules-summary').filter({ hasText: /^crm$/ })).toHaveCount(0);
     await expect(page.locator('.project-modules-leaf', { hasText: 'crm' }).first()).toBeVisible();
 

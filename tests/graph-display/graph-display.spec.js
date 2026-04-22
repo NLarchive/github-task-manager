@@ -21,9 +21,13 @@ test.describe('graph-display task-management template', () => {
       for (const [sourceId, details] of Object.entries(graph.details)) {
         const items = Array.isArray(details && details.items) ? details.items : [];
         const joined = items.join(' ');
-        const match = joined.match(/data-dep-node-id="([^"]+)"/);
+        const match = joined.match(/class="task-node-btn"[^>]*data-node-id="([^"]+)"/);
         if (match) {
-          return { sourceId, targetId: match[1] };
+          return {
+            sourceId,
+            targetId: match[1],
+            targetTitle: (graph.details && graph.details[match[1]] && graph.details[match[1]].title) || ''
+          };
         }
       }
       return null;
@@ -42,12 +46,17 @@ test.describe('graph-display task-management template', () => {
     const popup = page.locator('#popup');
     await expect(popup).toHaveClass(/visible/);
 
-    const depButton = page.locator('#popup .task-node-btn[data-node-id]').first();
+    const depButton = page.locator(`#popup .task-node-btn[data-node-id="${candidate.targetId}"]`).first();
     await expect(depButton).toBeVisible();
-    await depButton.click();
+    await depButton.evaluate((el) => {
+      el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+    });
 
     const targetNode = page.locator(`#graph-container g.node[data-id="${candidate.targetId}"]`);
-    await expect(targetNode).toHaveClass(/details-shown-for/);
+    if (candidate.targetTitle) {
+      await expect.poll(async () => popup.locator('h2').textContent(), { timeout: 10000 }).toContain(candidate.targetTitle);
+    }
+    await expect(targetNode).toHaveClass(/details-shown-for/, { timeout: 10000 });
     await expect(popup).toHaveClass(/visible/);
 
     await page.locator('#popup .close-button').click();

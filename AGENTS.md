@@ -15,7 +15,7 @@ D:\web\web-github-task-manager\public\config\github-oauth.js
 D:\web\web-github-task-manager\public\config\github-token.js
 D:\web\web-github-task-manager\public\config\github-token.local.js
 D:\web\web-github-task-manager\public\config\projects-config.js
-D:\web\web-github-task-manager\public\config\template-config.js
+D:\web\web-github-task-manager\public\config\tasks-template-config.js
 D:\web\web-github-task-manager\public\config\worker-url.js
 D:\web\web-github-task-manager\public\config\worker-url.local.js
 D:\web\web-github-task-manager\public\graph-display
