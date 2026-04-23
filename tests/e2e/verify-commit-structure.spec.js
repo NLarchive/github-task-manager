@@ -5,11 +5,16 @@
 import { test, expect } from '@playwright/test';
 
 // Live E2E: Verify compact commit subject structure and TASKDB_CHANGE_V1 payload
+/** Live GitHub Pages URL used for commit-verification regressions. */
 const LIVE_URL = process.env.PLAYWRIGHT_BASE_URL || 'https://nlarchive.github.io/github-task-manager/';
+/** Timeout budget for worker saves and GitHub commit propagation checks. */
 const TIMEOUT = 90000; // allow longer for commits to appear
+/** Feature flag that enables the live-site commit verification suite. */
 const RUN_LIVE = process.env.PLAYWRIGHT_RUN_LIVE === '1' || process.env.RUN_LIVE_E2E === '1';
+/** Password for unlocking the ai-career-roadmap live project during this suite. */
 const LIVE_PASSWORD_AI_CAREER_ROADMAP = process.env.LIVE_PASSWORD_AI_CAREER_ROADMAP || 'ai-career-roadmap-1234';
 
+/** Wait for the save toast to appear, assert its text, and wait for dismissal. */
 async function waitForSaveToast(page, expectedText, timeout = 15000) {
   const toast = page.locator('#toast');
   await toast.waitFor({ state: 'visible', timeout });
@@ -18,6 +23,7 @@ async function waitForSaveToast(page, expectedText, timeout = 15000) {
   await toast.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
 }
 
+/** Poll the GitHub commits API until a commit message contains the requested marker. */
 async function pollForCommitWithMessageContaining(page, repoOwner, repoName, needle, timeout = TIMEOUT) {
   const start = Date.now();
   while (Date.now() - start < timeout) {
@@ -36,6 +42,7 @@ async function pollForCommitWithMessageContaining(page, repoOwner, repoName, nee
   return null;
 }
 
+/** Extract the legacy TaskDB payload block from a commit message when present. */
 function extractTaskDbCommitPayload(message) {
   const start = '---TASKDB_CHANGE_V1---';
   const end = '---/TASKDB_CHANGE_V1---';
@@ -47,6 +54,7 @@ function extractTaskDbCommitPayload(message) {
   try { return JSON.parse(jsonText); } catch { return null; }
 }
 
+/** Validate live TaskDB commit subjects and payload structure after worker saves. */
 test.describe('@live Verify commit subject + payload structure', () => {
   test.skip(!RUN_LIVE, 'Set PLAYWRIGHT_RUN_LIVE=1 to enable live-site tests');
 

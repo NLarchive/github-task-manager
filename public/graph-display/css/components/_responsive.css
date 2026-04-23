@@ -1,10 +1,9 @@
-/* ============================================================ */
-/* RESPONSIVE & MOBILE OPTIMIZATIONS */
-/* ============================================================ */
-/*
- * Mobile-first responsive styles and touch optimizations.
- * Includes iPhone-specific fixes and enhancements.
- */
+/* ══════════════════════════════════════════════════════════════════════════════
+ * public/graph-display/css/components/_responsive.css — web-github-task-manager
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Mobile-first responsive breakpoints and touch optimisations.
+ * Includes device-specific fixes for small viewports and high-DPI screens.
+ * ══════════════════════════════════════════════════════════════════════════════ */
 
 /* ===== Touch Optimizations ===== */
 

@@ -1402,7 +1402,7 @@ export async function ensureDynamicTaskTemplate(requestedTemplateId, options = {
                 id: requested,
                 name: `${localFolderProject.label || projectId} (Local Folder)`,
                 type: 'task-management',
-                path: `/local-folder/${projectId}/${localFolderProject.rootModuleRelative || 'tasks.json'}`
+                path: `/local-folder/${projectId}/${localFolderProject.rootModuleRelative || 'node.tasks.json'}`
             };
             const localTasks = Array.isArray(localData.tasks) ? localData.tasks : [];
             const usesStringIds = localTasks.length > 0 && typeof localTasks[0].task_id !== 'number';
@@ -1421,9 +1421,9 @@ export async function ensureDynamicTaskTemplate(requestedTemplateId, options = {
         const candidates = customTasksUrl
             ? [customTasksUrl]
             : [
-                `${siteRoot}tasksDB/external/${projectId}/tasks.json`,
-                `${siteRoot}tasksDB/local/${projectId}/tasks.json`,
-                `${basePath}../tasksDB/${projectId}/tasks.json`
+                `${siteRoot}tasksDB/external/${projectId}/node.tasks.json`,
+                `${siteRoot}tasksDB/local/${projectId}/node.tasks.json`,
+                `${basePath}../tasksDB/${projectId}/node.tasks.json`
             ];
 
         let data = null;

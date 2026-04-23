@@ -1,7 +1,7 @@
 /**
- * tasks.json format validation tests.
+ * node.tasks.json format validation tests.
  *
- * Walks public/tasksDB/ (external + local) and validates every tasks.json
+ * Walks public/tasksDB/ (external + local) and validates every node.tasks.json
  * found so that:
  *   1. JSON is parseable
  *   2. project metadata exists and has required fields
@@ -22,15 +22,27 @@ const fs = require('fs');
 const path = require('path');
 
 // ── Constants ─────────────────────────────────────────────────────────────────
+/** Absolute path to the root tasksDB directory scanned for node.tasks.json files. */
 const TASKS_DB_ROOT = path.join(__dirname, '../../public/tasksDB');
 
+/** Allowed values for the project-level `status` field. */
 const VALID_PROJECT_STATUS = ['Not Started', 'In Progress', 'On Hold', 'Completed', 'Cancelled', 'Planning'];
+/** Allowed values for a task-level `status` field. */
 const VALID_TASK_STATUS = ['Not Started', 'In Progress', 'On Hold', 'Blocked', 'Completed', 'Cancelled', 'Pending Review', 'Done'];
+/** Allowed values for a task-level `priority` field. */
 const VALID_PRIORITY = ['Low', 'Medium', 'High', 'Critical'];
+/** Allowed dependency link type codes (Finish-to-Start, Start-to-Start, Finish-to-Finish, Start-to-Finish). */
 const VALID_DEP_TYPES = ['FS', 'SS', 'FF', 'SF'];
+/** Regular expression that matches the YYYY-MM-DD date format. */
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+/**
+ * Recursively walk a directory tree and collect all `node.tasks.json` file paths.
+ * @param {string} dir - Directory to scan.
+ * @param {string[]} [results=[]] - Accumulator array for discovered file paths.
+ * @returns {string[]} Absolute paths to every `node.tasks.json` found under `dir`.
+ */
 function findTasksJsonFiles(dir, results = []) {
   if (!fs.existsSync(dir)) return results;
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -38,13 +50,18 @@ function findTasksJsonFiles(dir, results = []) {
     if (entry.name === '_schema' || entry.name === '_templates' || entry.name === '_examples' || entry.name === 'node_modules') continue;
     if (entry.isDirectory()) {
       findTasksJsonFiles(full, results);
-    } else if (entry.name === 'tasks.json') {
+    } else if (entry.name === 'node.tasks.json') {
       results.push(full);
     }
   }
   return results;
 }
 
+/**
+ * Validate a single `node.tasks.json` file against the expected schema and return all collected errors and warnings.
+ * @param {string} filePath - Absolute path to the node.tasks.json file to validate.
+ * @returns {{ relativePath: string, errors: string[], warnings: string[] }} Validation result object.
+ */
 function validateTasksJson(filePath) {
   const errors = [];
   const warnings = [];
@@ -227,9 +244,10 @@ function validateTasksJson(filePath) {
 const allTasksJsonFiles = findTasksJsonFiles(TASKS_DB_ROOT);
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
-describe('tasks.json format validation', () => {
+/** Validate every node.tasks.json discovered under the tasksDB directory against the project schema. */
+describe('node.tasks.json format validation', () => {
 
-  it('discovers at least 2 tasks.json files in tasksDB/', () => {
+  it('discovers at least 2 node.tasks.json files in tasksDB/', () => {
     expect(allTasksJsonFiles.length).toBeGreaterThan(1);
   });
 
@@ -250,9 +268,9 @@ describe('tasks.json format validation', () => {
     });
   }
 
-  it('github-task-manager tasks.json has all tasks with task_id and task_name', () => {
-    const fp = path.join(TASKS_DB_ROOT, 'external/github-task-manager/tasks.json');
-    if (!fs.existsSync(fp)) throw new Error('github-task-manager/tasks.json not found');
+  it('github-task-manager node.tasks.json has all tasks with task_id and task_name', () => {
+    const fp = path.join(TASKS_DB_ROOT, 'external/github-task-manager/node.tasks.json');
+    if (!fs.existsSync(fp)) throw new Error('github-task-manager/node.tasks.json not found');
     const data = JSON.parse(fs.readFileSync(fp, 'utf8'));
     expect(Array.isArray(data.tasks)).toBe(true);
     expect(data.tasks.length).toBeGreaterThan(0);
@@ -263,8 +281,8 @@ describe('tasks.json format validation', () => {
     });
   });
 
-  it('github-task-manager tasks.json has no orphan dependency references', () => {
-    const fp = path.join(TASKS_DB_ROOT, 'external/github-task-manager/tasks.json');
+  it('github-task-manager node.tasks.json has no orphan dependency references', () => {
+    const fp = path.join(TASKS_DB_ROOT, 'external/github-task-manager/node.tasks.json');
     const data = JSON.parse(fs.readFileSync(fp, 'utf8'));
     const ids = new Set(data.tasks.map(t => t.task_id));
     for (const task of data.tasks) {
@@ -289,9 +307,9 @@ describe('tasks.json format validation', () => {
       location: { pathname: '/public/graph-display/index.html', hostname: '127.0.0.1', search: '' }
     }, async () => ({ ok: false, status: 404, json: async () => ({}) }), console);
 
-    const fp = path.join(TASKS_DB_ROOT, 'external/github-task-manager/tasks.json');
+    const fp = path.join(TASKS_DB_ROOT, 'external/github-task-manager/node.tasks.json');
     const data = JSON.parse(fs.readFileSync(fp, 'utf8'));
-    const entry = { id: 'gtm-link-test', name: 'GTM Link Test', path: '/tasksDB/external/github-task-manager/tasks.json' };
+    const entry = { id: 'gtm-link-test', name: 'GTM Link Test', path: '/tasksDB/external/github-task-manager/node.tasks.json' };
     const tpl = mod.buildProjectTaskTemplatePublic(entry, data);
 
     expect(tpl).toBeTruthy();
@@ -312,3 +330,5 @@ describe('tasks.json format validation', () => {
     }
   });
 });
+
+

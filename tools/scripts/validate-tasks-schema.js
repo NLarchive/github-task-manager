@@ -1,7 +1,7 @@
 /**
  * TaskDB Task Schema Validator
  *
- * Validates TaskDB project files under public/tasksDB/<scope>/<projectId>/tasks.json.
+ * Validates TaskDB project files under public/tasksDB/<scope>/<projectId>/node.tasks.json.
  * Focus:
  * - required fields present
  * - date formats + ordering
@@ -41,20 +41,20 @@ function sanitizeProjectId(s) {
   return String(s || '').replace(/[^a-zA-Z0-9_-]/g, '');
 }
 
-/** Load the tasks.json payload for a project. */
+/** Load the node.tasks.json payload for a project. */
 function loadTasksJson(projectId) {
   const tasksDbRoot = path.join(__dirname, '../../public/tasksDB');
   // Auto-discover scope: check external/, local/, then root (backward compat)
   for (const scope of ['external', 'local', '']) {
     const tasksPath = scope
-      ? path.join(tasksDbRoot, scope, projectId, 'tasks.json')
-      : path.join(tasksDbRoot, projectId, 'tasks.json');
+      ? path.join(tasksDbRoot, scope, projectId, 'node.tasks.json')
+      : path.join(tasksDbRoot, projectId, 'node.tasks.json');
     if (fs.existsSync(tasksPath)) {
       const content = fs.readFileSync(tasksPath, 'utf8');
       return { tasksPath, data: JSON.parse(content) };
     }
   }
-  throw new Error(`tasks.json not found for project "${projectId}" in external/, local/, or root.`);
+  throw new Error(`node.tasks.json not found for project "${projectId}" in external/, local/, or root.`);
 }
 
 /** Check whether a string matches the YYYY-MM-DD date format. */
@@ -69,7 +69,7 @@ function hasTimestampPollution(taskName) {
   return /\b\d{10,}\b/.test(taskName);
 }
 
-/** Validate one project tasks.json payload against the expected schema rules. */
+/** Validate one project node.tasks.json payload against the expected schema rules. */
 function validateProjectFile(projectId, tasksJson) {
   const errors = [];
   const warnings = [];
@@ -113,7 +113,7 @@ function validateProjectFile(projectId, tasksJson) {
 
   // Top-level
   if (!tasksJson || typeof tasksJson !== 'object') {
-    errors.push('tasks.json root is not an object');
+    errors.push('node.tasks.json root is not an object');
     return { errors, warnings };
   }
 
@@ -280,3 +280,4 @@ function main() {
 }
 
 main();
+

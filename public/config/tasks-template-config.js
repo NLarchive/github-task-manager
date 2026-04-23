@@ -331,10 +331,10 @@ const TEMPLATE_CONFIG = {
       const cfg = this.getProjectConfig(projectId);
       const root = String(cfg.tasksRoot || this.TASKS_ROOT || 'public/tasksDB').replace(/\/+$/g, '');
       const scope = cfg.scope || 'external';
-      return `${root}/${scope}/${cfg.id}/tasks.json`;
+      return `${root}/${scope}/${cfg.id}/node.tasks.json`;
     },
     // Default tasks file (app may override at runtime)
-    TASKS_FILE: 'public/tasksDB/external/github-task-manager/tasks.json',
+    TASKS_FILE: 'public/tasksDB/external/github-task-manager/node.tasks.json',
     // Use GitHub Pages base path only when actually hosted under it
     BASE_PATH: (typeof window !== 'undefined' && window.location && window.location.pathname.startsWith('/github-task-manager'))
       ? '/github-task-manager'

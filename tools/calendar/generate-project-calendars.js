@@ -567,7 +567,7 @@ function resolveProjectDescriptor(projectId, repoRoot) {
     const projectDir = scope
       ? path.join(tasksDbRoot, scope, safeProjectId)
       : path.join(tasksDbRoot, safeProjectId);
-    const tasksJsonPath = path.join(projectDir, 'tasks.json');
+    const tasksJsonPath = path.join(projectDir, 'node.tasks.json');
     if (fs.existsSync(tasksJsonPath)) {
       return {
         projectId: safeProjectId,
@@ -593,7 +593,7 @@ function normalizeTaskPathId(value) {
     .toLowerCase();
 }
 
-/** Find nested tasks.json files under a project directory. */
+/** Find nested node.tasks.json files under a project directory. */
 /** Find nested task json paths. */
 function findNestedTaskJsonPaths(rootDir, excludePath) {
   const results = [];
@@ -608,7 +608,7 @@ function findNestedTaskJsonPaths(rootDir, excludePath) {
         traverse(path.join(dir, entry.name));
         continue;
       }
-      if (entry.isFile() && entry.name === 'tasks.json') {
+      if (entry.isFile() && entry.name === 'node.tasks.json') {
         const candidate = path.join(dir, entry.name);
         if (path.resolve(candidate) !== path.resolve(excludePath)) {
           results.push(candidate);

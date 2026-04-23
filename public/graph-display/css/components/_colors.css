@@ -1,10 +1,9 @@
-/* ============================================================ */
-/* COLOR UTILITIES & CLASSES */
-/* ============================================================ */
-/*
- * Dynamic color classes for text, borders, and backgrounds.
+/* ══════════════════════════════════════════════════════════════════════════════
+ * public/graph-display/css/components/_colors.css — web-github-task-manager
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Dynamic color utility classes for text, borders, and backgrounds.
  * Applied by JavaScript based on node layer and variant.
- */
+ * ══════════════════════════════════════════════════════════════════════════════ */
 
 /* Text color classes (for contrast) */
 .text-light { color: var(--color-text-light) !important; }

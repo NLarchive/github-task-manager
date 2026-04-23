@@ -1,6 +1,9 @@
-/* ============================================================ */
-/* MODULES SIDEBAR — submodule tree navigation for project graphs */
-/* ============================================================ */
+/* ══════════════════════════════════════════════════════════════════════════════
+ * public/graph-display/css/components/_modules-sidebar.css — web-github-task-manager
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Submodule tree navigation sidebar: toggle button, tree list, and expand
+ * animations for hierarchical project graph navigation.
+ * ══════════════════════════════════════════════════════════════════════════════ */
 
 /* Toggle button (floats bottom-left when modules are available) */
 .modules-sidebar-toggle {

@@ -4,6 +4,7 @@
 
 import { test, expect } from '@playwright/test';
 
+/** Validate list and graph styling hooks for task status-driven visual states. */
 test.describe('Task Visual States', () => {
   test.beforeEach(async ({ page }) => {
     // Go to the main app

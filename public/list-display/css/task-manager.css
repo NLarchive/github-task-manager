@@ -1,6 +1,9 @@
-/* ============================================================ */
-/* GitHub Task Manager - Responsive & Touch-Optimized CSS */
-/* ============================================================ */
+/* ══════════════════════════════════════════════════════════════════════════════
+ * public/list-display/css/task-manager.css — web-github-task-manager
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Responsive and touch-optimised styles for the list-display task manager.
+ * Covers task cards, modals, project selector, mobile breakpoints, and theming.
+ * ══════════════════════════════════════════════════════════════════════════════ */
 
 :root {
     /* GitHub Theme Colors */
@@ -1076,6 +1079,13 @@ header h1 {
 
 .calendar-dropdown > summary {
     list-style: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
     cursor: pointer;
     -webkit-user-select: none;
     user-select: none;

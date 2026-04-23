@@ -12,6 +12,7 @@ const {
   DEFAULT_SORT_MODE
 } = require('../../tools/calendar/calendar-constants.js');
 
+/** Validate calendar state generation and descriptor discovery from TaskDB data. */
 describe('Calendar Parser', () => {
   it('builds normalized appointments from standard task fields', () => {
     const state = buildCalendarState({
@@ -158,7 +159,7 @@ describe('Calendar Parser', () => {
     expect(filtered.map((task) => task.task_id)).toEqual([1, 4]);
   });
 
-  it('discovers nested tasks.json files in folder-based graph projects', () => {
+  it('discovers nested node.tasks.json files in folder-based graph projects', () => {
     const path = require('path');
     const repoRoot = path.join(__dirname, '..', '..');
     const descriptors = listProjectDescriptors(repoRoot);
@@ -167,7 +168,7 @@ describe('Calendar Parser', () => {
     expect(descriptors.some((d) => {
       if (d.scope !== 'local' || !d.projectId.startsWith('web-e2e-bussines-')) return false;
       const normalizedPath = d.tasksJsonPath.replace(/\\/g, '/');
-      return normalizedPath.endsWith('src/apps/PRIVATE/1-STRATEGY/crm/tasks.json');
+      return normalizedPath.endsWith('src/apps/PRIVATE/1-STRATEGY/crm/node.tasks.json');
     })).toBeTruthy();
   });
 

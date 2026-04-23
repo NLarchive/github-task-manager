@@ -1,3 +1,10 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+ * public/health/css/health.css — web-github-task-manager
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Styles for the runtime health-check page. Provides themed layout, status
+ * indicator colours, and responsive card grid for health probe results.
+ * ══════════════════════════════════════════════════════════════════════════════ */
+
 :root {
     --health-bg: linear-gradient(135deg, #0f2f2d 0%, #18485e 48%, #f0a24b 100%);
     --health-surface: rgba(252, 249, 242, 0.96);

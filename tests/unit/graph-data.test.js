@@ -5,6 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 
+/** Load the browser graph-data module into a Node test harness with mocked globals. */
 function loadGraphDataModule(windowMock = {
   location: {
     pathname: '/public/graph-display/index.html',
@@ -28,6 +29,7 @@ function loadGraphDataModule(windowMock = {
   return fn(windowMock, fetchMock, console);
 }
 
+/** Validate that the graph-data module parses and builds task graph templates correctly. */
 describe('Graph Data Module', () => {
   it('parses and exposes key functions (no syntax errors)', () => {
     const filePath = path.join(__dirname, '../../public/graph-display/js/graph-data.js');
@@ -65,15 +67,15 @@ describe('Graph Data Module', () => {
         return {
           ok: true,
           json: async () => ([
-            { id: 'first-graph', name: 'First Graph', type: 'task-management', path: '/tasksDB/external/first-graph/tasks.json' },
+            { id: 'first-graph', name: 'First Graph', type: 'task-management', path: '/tasksDB/external/first-graph/node.tasks.json' },
             { id: 'task-management', name: 'Task Management', type: 'task-management', path: '/tasksDB/_examples/task-management/data.json' },
-            { id: 'github-task-manager-tasks', name: 'GTM (TaskDB)', type: 'task-management', path: '/tasksDB/external/github-task-manager/tasks.json' },
-            { id: 'ai-career-roadmap-tasks', name: 'AI Roadmap (TaskDB)', type: 'task-management', path: '/tasksDB/external/ai-career-roadmap/tasks.json' }
+            { id: 'github-task-manager-tasks', name: 'GTM (TaskDB)', type: 'task-management', path: '/tasksDB/external/github-task-manager/node.tasks.json' },
+            { id: 'ai-career-roadmap-tasks', name: 'AI Roadmap (TaskDB)', type: 'task-management', path: '/tasksDB/external/ai-career-roadmap/node.tasks.json' }
           ])
         };
       }
 
-      if (String(url).endsWith('/public/tasksDB/external/first-graph/tasks.json')) {
+      if (String(url).endsWith('/public/tasksDB/external/first-graph/node.tasks.json')) {
         return {
           ok: true,
           json: async () => ({
@@ -97,10 +99,10 @@ describe('Graph Data Module', () => {
       }
 
       // TaskDB templates (absolute-like)
-      if (String(url).endsWith('/public/tasksDB/external/github-task-manager/tasks.json')) {
+      if (String(url).endsWith('/public/tasksDB/external/github-task-manager/node.tasks.json')) {
         return { ok: true, json: async () => ({ project: { name: 'GTM' }, tasks: [] }) };
       }
-      if (String(url).endsWith('/public/tasksDB/external/ai-career-roadmap/tasks.json')) {
+      if (String(url).endsWith('/public/tasksDB/external/ai-career-roadmap/node.tasks.json')) {
         return { ok: true, json: async () => ({ project: { name: 'AI' }, tasks: [] }) };
       }
 
@@ -121,8 +123,8 @@ describe('Graph Data Module', () => {
 
     // Ensure we never build '/publictasksDB' (missing slash) and we do fetch the correct URLs.
     expect(requested.some(u => u.includes('/publictasksDB/'))).toBe(false);
-    expect(requested.some(u => u.endsWith('/public/tasksDB/external/github-task-manager/tasks.json'))).toBe(true);
-    expect(requested.some(u => u.endsWith('/public/tasksDB/external/ai-career-roadmap/tasks.json'))).toBe(true);
+    expect(requested.some(u => u.endsWith('/public/tasksDB/external/github-task-manager/node.tasks.json'))).toBe(true);
+    expect(requested.some(u => u.endsWith('/public/tasksDB/external/ai-career-roadmap/node.tasks.json'))).toBe(true);
 
     const loaded = res.loadTemplate('first-graph');
     expect(loaded.nodes.length).toBeGreaterThan(0);
@@ -148,8 +150,8 @@ describe('Graph Data Module', () => {
         return { ok: true, json: async () => ([]) };
       }
 
-      // When asked for the TaskDB tasks.json for first-graph, return a payload with graphTemplate
-      if (normalizedUrl.endsWith('/public/tasksDB/external/first-graph/tasks.json')) {
+      // When asked for the TaskDB node.tasks.json for first-graph, return a payload with graphTemplate
+      if (normalizedUrl.endsWith('/public/tasksDB/external/first-graph/node.tasks.json')) {
         return {
           ok: true,
           json: async () => ({
@@ -194,7 +196,7 @@ describe('Graph Data Module', () => {
     const mod = loadGraphDataModule();
 
     const tpl = mod.buildProjectTaskTemplatePublic(
-      { id: 'demo-project', name: 'Demo Project', path: '/tasksDB/external/demo-project/tasks.json' },
+      { id: 'demo-project', name: 'Demo Project', path: '/tasksDB/external/demo-project/node.tasks.json' },
       {
         project: {
           name: 'Demo Project',
@@ -223,7 +225,7 @@ describe('Graph Data Module', () => {
     const mod = loadGraphDataModule();
 
     const tpl = mod.buildProjectTaskTemplatePublic(
-      { id: 'fallback-project', name: 'Fallback Project', path: '/tasksDB/external/fallback-project/tasks.json' },
+      { id: 'fallback-project', name: 'Fallback Project', path: '/tasksDB/external/fallback-project/node.tasks.json' },
       {
         project: { name: 'Fallback Project' },
         tasks: [
@@ -243,13 +245,13 @@ describe('Graph Data Module', () => {
     const mod = loadGraphDataModule();
 
     const tpl = mod.buildProjectTaskTemplatePublic(
-      { id: 'multi-subgraph-project', name: 'Multi Subgraph Project', path: '/tasksDB/local/multi-subgraph-project/tasks.json' },
+      { id: 'multi-subgraph-project', name: 'Multi Subgraph Project', path: '/tasksDB/local/multi-subgraph-project/node.tasks.json' },
       {
         project: { name: 'Multi Subgraph Project' },
         navigation: {
           modules: [
-            { path: 'src/apps/PRIVATE/app-a/tasks.json', label: 'app-a', name: 'app-a', taskIds: ['PIPE-001'] },
-            { path: 'src/apps/PRIVATE/app-b/tasks.json', label: 'app-b', name: 'app-b', taskIds: ['PIPE-001'] }
+            { path: 'src/apps/PRIVATE/app-a/node.tasks.json', label: 'app-a', name: 'app-a', taskIds: ['PIPE-001'] },
+            { path: 'src/apps/PRIVATE/app-b/node.tasks.json', label: 'app-b', name: 'app-b', taskIds: ['PIPE-001'] }
           ]
         },
         tasks: [
@@ -265,16 +267,16 @@ describe('Graph Data Module', () => {
     expect(pipeNode.subtasksPath).toBe(null);
     expect(Array.isArray(tpl.meta.modules)).toBe(true);
     expect(tpl.meta.modules.map((target) => target.path)).toEqual([
-      'src/apps/PRIVATE/app-a/tasks.json',
-      'src/apps/PRIVATE/app-b/tasks.json'
+      'src/apps/PRIVATE/app-a/node.tasks.json',
+      'src/apps/PRIVATE/app-b/node.tasks.json'
     ]);
   });
 
-  it('keeps explicit subtask module paths when task data points to another tasks.json file', () => {
+  it('keeps explicit subtask module paths when task data points to another node.tasks.json file', () => {
     const mod = loadGraphDataModule();
 
     const tpl = mod.buildProjectTaskTemplatePublic(
-      { id: 'explicit-subtask-path', name: 'Explicit Subtask Path', path: '/tasksDB/local/explicit-subtask-path/tasks.json' },
+      { id: 'explicit-subtask-path', name: 'Explicit Subtask Path', path: '/tasksDB/local/explicit-subtask-path/node.tasks.json' },
       {
         project: { name: 'Explicit Subtask Path' },
         tasks: [
@@ -283,7 +285,7 @@ describe('Graph Data Module', () => {
             estimated_hours: 5,
             status: 'Done',
             priority: 'High',
-            subtasksPath: 'src/apps/PRIVATE/crm/tasks.json'
+            subtasksPath: 'src/apps/PRIVATE/crm/node.tasks.json'
           }
         ]
       }
@@ -291,8 +293,8 @@ describe('Graph Data Module', () => {
 
     const node = tpl.nodes.find((candidate) => candidate.id === 'task-1');
     expect(node).toBeTruthy();
-    expect(node.subtasksPath).toBe('src/apps/PRIVATE/crm/tasks.json');
-    expect(node.subtasksTargets).toEqual([{ path: 'src/apps/PRIVATE/crm/tasks.json', label: 'Subtasks' }]);
+    expect(node.subtasksPath).toBe('src/apps/PRIVATE/crm/node.tasks.json');
+    expect(node.subtasksTargets).toEqual([{ path: 'src/apps/PRIVATE/crm/node.tasks.json', label: 'Subtasks' }]);
   });
 
   it('builds recursive inline subgraphs from subtasks stored in the same JSON file', () => {
@@ -333,7 +335,7 @@ describe('Graph Data Module', () => {
     };
 
     const rootTpl = mod.buildProjectTaskTemplatePublic(
-      { id: 'inline-subgraph-demo', name: 'Inline Subgraph Demo', path: '/tasksDB/local/inline-subgraph-demo/tasks.json' },
+      { id: 'inline-subgraph-demo', name: 'Inline Subgraph Demo', path: '/tasksDB/local/inline-subgraph-demo/node.tasks.json' },
       sourceData
     );
 
@@ -370,7 +372,7 @@ describe('Graph Data Module', () => {
     const mod = loadGraphDataModule();
 
     const tpl = mod.buildProjectTaskTemplatePublic(
-      { id: 'ac-test', name: 'AC Test', path: '/tasksDB/external/ac-test/tasks.json' },
+      { id: 'ac-test', name: 'AC Test', path: '/tasksDB/external/ac-test/node.tasks.json' },
       {
         project: { name: 'AC Test' },
         tasks: [
@@ -471,7 +473,7 @@ describe('Graph Data Module', () => {
     const mod = loadGraphDataModule();
 
     const tpl = mod.buildProjectTaskTemplatePublic(
-      { id: 'no-virtual-mod-test', name: 'No Virtual Modules Test', path: '/tasksDB/external/no-virtual-mod-test/tasks.json' },
+      { id: 'no-virtual-mod-test', name: 'No Virtual Modules Test', path: '/tasksDB/external/no-virtual-mod-test/node.tasks.json' },
       {
         project: { name: 'No Virtual Modules Test' },
         tasks: [
@@ -504,3 +506,4 @@ describe('Graph Data Module', () => {
     expect(inlineMod).toBeFalsy();
   });
 });
+

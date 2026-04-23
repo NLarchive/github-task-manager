@@ -38,14 +38,14 @@ function loadProjectTasks(projectId) {
   // Auto-discover scope
   for (const scope of ['external', 'local', '']) {
     const tasksPath = scope
-      ? path.join(tasksDbRoot, scope, projectId, 'tasks.json')
-      : path.join(tasksDbRoot, projectId, 'tasks.json');
+      ? path.join(tasksDbRoot, scope, projectId, 'node.tasks.json')
+      : path.join(tasksDbRoot, projectId, 'node.tasks.json');
     if (fs.existsSync(tasksPath)) {
       const content = fs.readFileSync(tasksPath, 'utf8');
       return { tasksPath, data: JSON.parse(content) };
     }
   }
-  throw new Error(`tasks.json not found for project "${projectId}" in external/, local/, or root.`);
+  throw new Error(`node.tasks.json not found for project "${projectId}" in external/, local/, or root.`);
 }
 
 /** Check whether a value is a non-empty string. */
@@ -191,3 +191,4 @@ if (require.main === module) {
 }
 
 module.exports = { main, validate };
+

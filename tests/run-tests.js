@@ -122,6 +122,9 @@ global.expect = (actual) => ({
 console.log(`${colors.blue}🧪 GitHub Task Manager - Test Suite${colors.reset}`);
 console.log('='.repeat(50));
 
+/**
+ * Load the unit test files, execute the queued suites, and print a summary.
+ */
 async function main() {
   // Load test files (they register tests into the queue)
   const testFiles = [

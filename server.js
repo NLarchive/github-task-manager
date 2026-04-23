@@ -2,7 +2,7 @@
  * Local development server and runtime API bridge for the public TaskDB apps.
  *
  * This module serves the static frontend under `public/`, exposes project and
- * module discovery endpoints for local workflows, and persists `tasks.json`,
+ * module discovery endpoints for local workflows, and persists `node.tasks.json`,
  * derived CSV, and state files when the app runs outside GitHub Pages.
  */
 const http = require('http');
@@ -212,7 +212,7 @@ function inferModuleType(relativePath, moduleData) {
 }
 
 /** Preferred task filenames searched within a TaskDB project tree. */
-const TASK_FILE_CANDIDATES = ['tasks.json', 'TODO_project_task.json'];
+const TASK_FILE_CANDIDATES = ['node.tasks.json', 'TODO_project_task.json'];
 
 /** Directories skipped while scanning project modules and derived artifacts. */
 const DISCOVERY_IGNORED_DIRS = new Set(['history', 'state', 'tour', 'node_modules', '.git']);
@@ -403,9 +403,9 @@ function scoreRootModuleCandidate(relativePath, rawData) {
   if (!normalized) return -1;
 
   let score = 0;
-  if (normalized === 'src/tasks.json') score += 120;
+  if (normalized === 'src/node.tasks.json') score += 120;
   if (normalized === 'src/TODO_project_task.json') score += 115;
-  if (normalized === 'tasks.json') score += 105;
+  if (normalized === 'node.tasks.json') score += 105;
   if (normalized === 'TODO_project_task.json') score += 100;
   if (normalized.startsWith('src/')) score += 30;
 
@@ -432,7 +432,7 @@ function resolveRootModuleRelative(projectDir, tasksIndexData) {
   const explicitPath = explicitRoot ? safeJoin(projectDir, explicitRoot) : null;
   if (explicitRoot && explicitPath && fs.existsSync(explicitPath)) return explicitRoot;
 
-  for (const candidate of ['src/tasks.json', 'src/TODO_project_task.json', 'tasks.json', 'TODO_project_task.json']) {
+  for (const candidate of ['src/node.tasks.json', 'src/TODO_project_task.json', 'node.tasks.json', 'TODO_project_task.json']) {
     const absolutePath = safeJoin(projectDir, candidate);
     if (absolutePath && fs.existsSync(absolutePath)) return candidate;
   }
@@ -452,7 +452,7 @@ function resolveRootModuleRelative(projectDir, tasksIndexData) {
     .sort((a, b) => scoreRootModuleCandidate(b.relativePath, b.rawData) - scoreRootModuleCandidate(a.relativePath, a.rawData));
 
   if (candidates.length > 0) return candidates[0].relativePath;
-  if (tasksIndexData) return 'tasks.json';
+  if (tasksIndexData) return 'node.tasks.json';
   return '';
 }
 
@@ -469,7 +469,7 @@ function collectProjectModules(projectDir, rootModuleRelative) {
 
   for (const relativePath of discoverProjectTaskFiles(projectDir)) {
     if (!relativePath) continue;
-    if (relativePath === 'tasks.json') continue;
+    if (relativePath === 'node.tasks.json') continue;
     if (normalizedRootModule && relativePath === normalizedRootModule) continue;
 
     const fullPath = safeJoin(projectDir, relativePath);
@@ -514,7 +514,7 @@ function collectProjectModules(projectDir, rootModuleRelative) {
  * @returns {object[]}
  */
 function buildRootRelativeModules(modules, rootModuleRelative) {
-  const rootDir = normalizeRelativePath(rootModuleRelative || 'src/tasks.json').replace(/\/[^\/]*$/, '');
+  const rootDir = normalizeRelativePath(rootModuleRelative || 'src/node.tasks.json').replace(/\/[^\/]*$/, '');
   const prefix = rootDir ? `${rootDir}/` : '';
 
   return (modules || []).map((moduleEntry) => {
@@ -538,7 +538,7 @@ function buildRootRelativeModules(modules, rootModuleRelative) {
  * @returns {{payload: object, tasksJsonPath: string, rootModulePath: string|null, rootModuleRelative: string, modules: object[]}|null}
  */
 function buildProjectPayload(projectDir) {
-  const tasksJsonPath = path.join(projectDir, 'tasks.json');
+  const tasksJsonPath = path.join(projectDir, 'node.tasks.json');
   const tasksIndexData = readJsonFile(tasksJsonPath);
   const rootModuleRelative = normalizeRelativePath(resolveRootModuleRelative(projectDir, tasksIndexData));
   const rootModulePath = rootModuleRelative ? safeJoin(projectDir, rootModuleRelative) : null;
@@ -580,9 +580,9 @@ function writeProjectPayload(projectDir, fullData) {
       ? fullData.navigation.rootModule
       : (current && current.rootModuleRelative)
         ? current.rootModuleRelative
-        : resolveRootModuleRelative(projectDir, fullData) || 'tasks.json'
+        : resolveRootModuleRelative(projectDir, fullData) || 'node.tasks.json'
   );
-  const tasksJsonPath = path.join(projectDir, 'tasks.json');
+  const tasksJsonPath = path.join(projectDir, 'node.tasks.json');
   const rootModulePath = safeJoin(projectDir, rootModuleRelative);
 
   ensureDir(projectDir);
@@ -658,9 +658,9 @@ function maybeBootstrapTasksDb(tasksDbDir, fallbackDir) {
 
     const bootstrapPair = (srcDir, dstDir) => {
       ensureDir(dstDir);
-      const jsonSrc = path.join(srcDir, 'tasks.json');
+      const jsonSrc = path.join(srcDir, 'node.tasks.json');
       const csvSrc = path.join(srcDir, 'tasks.csv');
-      const jsonDst = path.join(dstDir, 'tasks.json');
+      const jsonDst = path.join(dstDir, 'node.tasks.json');
       const csvDst = path.join(dstDir, 'tasks.csv');
       if (!fs.existsSync(jsonDst) && fs.existsSync(jsonSrc)) fs.copyFileSync(jsonSrc, jsonDst);
       if (!fs.existsSync(csvDst) && fs.existsSync(csvSrc)) fs.copyFileSync(csvSrc, csvDst);
@@ -672,10 +672,10 @@ function maybeBootstrapTasksDb(tasksDbDir, fallbackDir) {
     }
 
     // Legacy fallback (single-project layout)
-    const jsonPath = path.join(tasksDbDir, 'tasks.json');
+    const jsonPath = path.join(tasksDbDir, 'node.tasks.json');
     const csvPath = path.join(tasksDbDir, 'tasks.csv');
-    if (!fs.existsSync(jsonPath) && fs.existsSync(path.join(fallbackDir, 'tasks.json'))) {
-      fs.copyFileSync(path.join(fallbackDir, 'tasks.json'), jsonPath);
+    if (!fs.existsSync(jsonPath) && fs.existsSync(path.join(fallbackDir, 'node.tasks.json'))) {
+      fs.copyFileSync(path.join(fallbackDir, 'node.tasks.json'), jsonPath);
     }
     if (!fs.existsSync(csvPath) && fs.existsSync(path.join(fallbackDir, 'tasks.csv'))) {
       fs.copyFileSync(path.join(fallbackDir, 'tasks.csv'), csvPath);
@@ -864,7 +864,7 @@ function createServer({ publicDir, tasksDbDir, graphDir }) {
         return;
       }
 
-      // GET /api/scan-path?path=relative/or/absolute — scan a folder for tasks.json files
+      // GET /api/scan-path?path=relative/or/absolute — scan a folder for node.tasks.json files
       // Allows the UI to dynamically discover and load projects from a given path.
       if (pathname === '/api/scan-path' && req.method === 'GET') {
         const rawRequestedPath = url.searchParams.get('path') || '';
@@ -890,7 +890,7 @@ function createServer({ publicDir, tasksDbDir, graphDir }) {
           return sendJson(res, 404, { ok: false, error: 'Directory not found: ' + rawRequestedPath });
         }
 
-        // Discover all tasks.json files under the path
+        // Discover all node.tasks.json files under the path
         const discovered = discoverProjectTaskFiles(resolvedNorm);
         // Build a module list from discovered files
         const taskFiles = discovered.map(rel => {
@@ -913,8 +913,8 @@ function createServer({ publicDir, tasksDbDir, graphDir }) {
         });
 
         // Determine if there is a root module
-        const rootModuleRelative = resolveRootModuleRelative(resolvedNorm, readJsonFile(path.join(resolvedNorm, 'tasks.json')));
-        const rootData = readJsonFile(path.join(resolvedNorm, 'tasks.json'));
+        const rootModuleRelative = resolveRootModuleRelative(resolvedNorm, readJsonFile(path.join(resolvedNorm, 'node.tasks.json')));
+        const rootData = readJsonFile(path.join(resolvedNorm, 'node.tasks.json'));
         const projectName = (() => {
           if (rootData && rootData.project && rootData.project.name) return rootData.project.name;
           return path.basename(resolvedNorm);
@@ -923,7 +923,7 @@ function createServer({ publicDir, tasksDbDir, graphDir }) {
         // Compute URL path accessible from the browser (relative to publicDir)
         const relativeToPublic = path.relative(publicDir, resolvedNorm);
         const serverRelDir = relativeToPublic.split(path.sep).join('/');
-        const rootModuleName = rootModuleRelative || 'tasks.json';
+        const rootModuleName = rootModuleRelative || 'node.tasks.json';
         const tasksJsonUrl = `/${serverRelDir}/${rootModuleName}`;
 
         return sendJson(res, 200, {
@@ -940,13 +940,13 @@ function createServer({ publicDir, tasksDbDir, graphDir }) {
       if (pathname === '/api/tasks') {
         const projectId = sanitizeProjectId(url.searchParams.get('project'));
         const effectiveTasksDbDir = resolveProjectDir(projectId);
-        const tasksJsonPath = path.join(effectiveTasksDbDir, 'tasks.json');
+        const tasksJsonPath = path.join(effectiveTasksDbDir, 'node.tasks.json');
         const tasksCsvPath = path.join(effectiveTasksDbDir, 'tasks.csv');
 
         if (req.method === 'GET') {
           const synchronized = buildProjectPayload(effectiveTasksDbDir);
           if (!synchronized || !synchronized.payload) {
-            return sendJson(res, 404, { ok: false, error: 'tasks.json not found' });
+            return sendJson(res, 404, { ok: false, error: 'node.tasks.json not found' });
           }
           res.writeHead(200, {
             'Content-Type': 'application/json; charset=utf-8',
@@ -1009,12 +1009,12 @@ function createServer({ publicDir, tasksDbDir, graphDir }) {
           if (relativeProjectDir) ensureRelativeProjectDir(relativeProjectDir);
         }
 
-        // Serve synchronized project payloads for tasks.json so the graph always sees
+        // Serve synchronized project payloads for node.tasks.json so the graph always sees
         // the canonical root project file plus the generated navigation index.
-        if (pathname.endsWith('/tasks.json')) {
+        if (pathname.endsWith('/node.tasks.json')) {
           const relativeProjectDir = pathname
             .replace(/^\/tasksDB\//, '')
-            .replace(/\/tasks\.json$/i, '');
+            .replace(/\/node\.tasks\.json$/i, '');
           const projectDir = ensureRelativeProjectDir(relativeProjectDir);
           const synchronized = projectDir ? buildProjectPayload(projectDir) : null;
           if (synchronized && synchronized.payload) {

@@ -1,6 +1,10 @@
-/* ============================================================ */
-/* ========== Interactive Career Graph - MOBILE-FIRST STYLESHEET (Template) ======== */
-/* ============================================================ */
+/* ══════════════════════════════════════════════════════════════════════════════
+ * public/graph-display/css/styles-mobile-optimized.css — web-github-task-manager
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Mobile-first stylesheet for the graph-display view.
+ * Provides touch-optimised interactions, responsive breakpoints, and
+ * performance improvements for smaller screens and low-powered devices.
+ * ══════════════════════════════════════════════════════════════════════════════ */
 /* 
  * TABLE OF CONTENTS - Quick Navigation Index
  * Use Ctrl+F / Cmd+F with these codes to jump to sections

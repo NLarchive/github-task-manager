@@ -1,7 +1,7 @@
 /**
  * regenerate-tasks-csv.js
  * ------------------------
- * Generates a flattened CSV export from public/tasksDB/<scope>/<project>/tasks.json
+ * Generates a flattened CSV export from public/tasksDB/<scope>/<project>/node.tasks.json
  * Output: public/tasksDB/<scope>/<project>/tasks.csv
  * Usage: node tools/scripts/regenerate-tasks-csv.js <projectId>
  */
@@ -26,10 +26,10 @@ function main() {
   let projectDir = null;
   for (const scope of ['external', 'local', '']) {
     const candidate = scope ? path.join(tasksDbRoot, scope, projectId) : path.join(tasksDbRoot, projectId);
-    if (fs.existsSync(path.join(candidate, 'tasks.json'))) { projectDir = candidate; break; }
+    if (fs.existsSync(path.join(candidate, 'node.tasks.json'))) { projectDir = candidate; break; }
   }
-  if (!projectDir) { console.error(`tasks.json not found for project: ${projectId}`); process.exit(1); }
-  const tasksJsonPath = path.join(projectDir, 'tasks.json');
+  if (!projectDir) { console.error(`node.tasks.json not found for project: ${projectId}`); process.exit(1); }
+  const tasksJsonPath = path.join(projectDir, 'node.tasks.json');
   const tasksCsvPath = path.join(projectDir, 'tasks.csv');
 
   const raw = fs.readFileSync(tasksJsonPath, 'utf8');

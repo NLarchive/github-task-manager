@@ -1,10 +1,9 @@
-/* ============================================================ */
-/* BASE RESET & TYPOGRAPHY */
-/* ============================================================ */
-/*
- * Modern CSS reset and base styles.
- * Applies to all elements and sets foundational typography.
- */
+/* ══════════════════════════════════════════════════════════════════════════════
+ * public/graph-display/css/components/_base.css — web-github-task-manager
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Modern CSS reset and base styles. Applies to all elements and sets
+ * foundational typography for the graph-display view.
+ * ══════════════════════════════════════════════════════════════════════════════ */
 
 /* Modern CSS Reset */
 *, *::before, *::after {

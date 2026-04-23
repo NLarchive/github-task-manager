@@ -1,9 +1,8 @@
-/* ============================================================ */
-/* ACCESSIBILITY COMPONENTS */
-/* ============================================================ */
-/*
- * Skip links and other accessibility features.
- */
+/* ══════════════════════════════════════════════════════════════════════════════
+ * public/graph-display/css/components/_accessibility.css — web-github-task-manager
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Accessibility component styles: skip-navigation links and focus indicators.
+ * ══════════════════════════════════════════════════════════════════════════════ */
 
 /* Skip Navigation Link */
 .skip-link {

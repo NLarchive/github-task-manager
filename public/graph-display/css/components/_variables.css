@@ -1,6 +1,9 @@
-/* ============================================================ */
-/* CSS VARIABLES & THEME CONFIGURATION */
-/* ============================================================ */
+/* ══════════════════════════════════════════════════════════════════════════════
+ * public/graph-display/css/components/_variables.css — web-github-task-manager
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Central CSS custom properties: colours, spacing, typography, transitions,
+ * and theme configuration for the graph-display component system.
+ * ══════════════════════════════════════════════════════════════════════════════ */
 /* 
  * Central location for all CSS custom properties.
  * Includes colors, spacing, typography, transitions, and more.

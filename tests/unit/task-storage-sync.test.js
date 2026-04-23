@@ -13,16 +13,19 @@ configContent = configContent.replace(
   "TOKEN: ''"
 );
 const getConfig = new Function(configContent + '\nreturn TEMPLATE_CONFIG;');
+/** Evaluated TEMPLATE_CONFIG loaded directly from the production config file. */
 const TEMPLATE_CONFIG = getConfig();
 
 // Load validator
 const validatorContent = fs.readFileSync(path.join(__dirname, '../../public/task-engine/js/task-schema-validator.js'), 'utf8');
 const getValidator = new Function('TEMPLATE_CONFIG', validatorContent + '\nreturn TemplateValidator;');
+/** TemplateValidator class evaluated from the browser module in a Node test harness. */
 const TemplateValidator = getValidator(TEMPLATE_CONFIG);
 
 // Load automation
 const automationContent = fs.readFileSync(path.join(__dirname, '../../public/task-engine/js/task-field-automation.js'), 'utf8');
 const getAutomation = new Function('TEMPLATE_CONFIG', 'TemplateValidator', automationContent + '\nreturn TemplateAutomation;');
+/** TemplateAutomation class evaluated from the browser module in a Node test harness. */
 const TemplateAutomation = getAutomation(TEMPLATE_CONFIG, TemplateValidator);
 
 // Load database
@@ -31,11 +34,18 @@ const getDatabase = new Function('TemplateValidator', 'TemplateAutomation', 'con
 const { TaskDatabase, resolveActiveProjectId } = getDatabase(TemplateValidator, TemplateAutomation, console);
 
 // Mock GitHub API
+/** In-memory stub that replaces the real GitHub API client for isolated task storage tests. */
 class MockGitHubAPI {
+  /** Initialize with an empty in-memory file store. */
   constructor() {
     this.files = {};
   }
   
+  /**
+   * Return the stored content and a deterministic SHA for the given path.
+   * @param {string} path - Repository-relative file path.
+   * @returns {Promise<{ content: string, sha: string }>}
+   */
   async getFileContent(path) {
     return { 
       content: this.files[path] || '[]',
@@ -43,12 +53,21 @@ class MockGitHubAPI {
     };
   }
   
+  /**
+   * Persist the content in the in-memory store and return a new mock SHA.
+   * @param {string} path - Repository-relative file path.
+   * @param {string} content - Serialized file content to store.
+   * @param {string} message - Commit message (unused in mock).
+   * @param {string} sha - Current file SHA (unused in mock).
+   * @returns {Promise<{ sha: string }>}
+   */
   async updateFile(path, content, message, sha) {
     this.files[path] = content;
     return { sha: 'new-mock-sha' };
   }
 }
 
+/** Verify that TaskDatabase can be created and exposes an empty tasks array initially. */
 describe('TaskDatabase Initialization', () => {
   it('should create database instance with mock API', () => {
     const mockApi = new MockGitHubAPI();
@@ -68,7 +87,7 @@ describe('TaskDatabase Initialization', () => {
       GITHUB: {
         ACTIVE_PROJECT_ID: '',
         DEFAULT_PROJECT_ID: '',
-        TASKS_FILE: 'public/tasksDB/external/github-task-manager/tasks.json'
+        TASKS_FILE: 'public/tasksDB/external/github-task-manager/node.tasks.json'
       }
     };
 
@@ -84,6 +103,7 @@ describe('TaskDatabase Initialization', () => {
   });
 });
 
+/** Validate create, read, update, and delete operations on tasks within TaskDatabase. */
 describe('Task CRUD Operations', () => {
   it('should create a task with auto-generated fields', () => {
     const mockApi = new MockGitHubAPI();
@@ -222,6 +242,7 @@ describe('Task CRUD Operations', () => {
   });
 });
 
+/** Validate filtering tasks by status, priority, and category. */
 describe('Task Filtering', () => {
   it('should filter tasks by status', () => {
     const mockApi = new MockGitHubAPI();
@@ -286,6 +307,7 @@ describe('Task Filtering', () => {
   });
 });
 
+/** Validate task statistics aggregation including counts by status and priority. */
 describe('Statistics Generation', () => {
   it('should generate project summary statistics', () => {
     const mockApi = new MockGitHubAPI();
@@ -321,8 +343,9 @@ describe('Statistics Generation', () => {
   });
 });
 
+/** Validate that TaskDatabase correctly loads from and saves to the mock GitHub storage backend. */
 describe('TaskDatabase Persistence', () => {
-  it('should save both tasks.json and tasks.csv', async () => {
+  it('should save both node.tasks.json and tasks.csv', async () => {
     const mockApi = new MockGitHubAPI();
     const db = new TaskDatabase(mockApi);
 
@@ -342,7 +365,7 @@ describe('TaskDatabase Persistence', () => {
     const result = await db.saveTasks('Test save');
     expect(result.success).toBeTruthy();
 
-    expect(mockApi.files['tasksDB/tasks.json']).toBeTruthy();
+    expect(mockApi.files['tasksDB/node.tasks.json']).toBeTruthy();
     expect(mockApi.files['tasksDB/tasks.csv']).toBeTruthy();
   });
 
@@ -404,3 +427,4 @@ describe('TaskDatabase Persistence', () => {
     expect(result.error).toContain('Duplicate task_id');
   });
 });
+

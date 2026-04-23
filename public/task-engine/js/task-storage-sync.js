@@ -39,7 +39,7 @@ function resolveActiveProjectId() {
   const fromActive = active.trim();
   if (fromActive) return fromActive;
 
-  // Best-effort: infer from TASKS_FILE (supports public/tasksDB/<scope>/<projectId>/tasks.json and legacy layouts)
+  // Best-effort: infer from TASKS_FILE (supports public/tasksDB/<scope>/<projectId>/node.tasks.json and legacy layouts)
   const tasksFile = (gh && gh.TASKS_FILE) ? String(gh.TASKS_FILE) : '';
   const inferredProjectId = inferProjectIdFromTasksFile(tasksFile);
   if (inferredProjectId) return inferredProjectId;
@@ -451,7 +451,7 @@ class TaskDatabase {
       const projectId = resolveActiveProjectId();
       const tasksFile = (gh && typeof gh.getTasksFile === 'function')
         ? gh.getTasksFile(projectId)
-        : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/external/github-task-manager/tasks.json');
+        : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/external/github-task-manager/node.tasks.json');
 
       // We want GitHub Pages to reflect canonical repo state.
       // LocalStorage is useful as a fallback, but should not override remote reads on production.
@@ -470,7 +470,7 @@ class TaskDatabase {
             this.localSourceMeta = {
               id: localFolderProject.id,
               label: localFolderProject.label,
-              rootModuleRelative: localFolderProject.rootModuleRelative || 'tasks.json',
+              rootModuleRelative: localFolderProject.rootModuleRelative || 'node.tasks.json',
               fileCount: localFolderProject.fileCount || 0
             };
             console.log('Loaded', loadedTasks.length, 'tasks from browser-selected local folder project:', projectId);
@@ -652,7 +652,7 @@ class TaskDatabase {
     return str;
   }
 
-  // Persisted reporting CSV (kept in repo alongside tasks.json)
+  // Persisted reporting CSV (kept in repo alongside node.tasks.json)
   /** Generate the repo-side persisted CSV companion for the active task list. */
   generatePersistedCSV(tasks = this.tasks) {
     const fields = [
@@ -746,7 +746,7 @@ class TaskDatabase {
         return { success: false, error: 'Local folder projects are read-only in the browser loader. Re-open the source files in the workspace if you need to edit them.' };
       }
 
-      // Block saving if duplicates exist (prevents corrupting tasks.csv and tasks.json)
+      // Block saving if duplicates exist (prevents corrupting tasks.csv and node.tasks.json)
       // Do this BEFORE choosing GitHub vs local persistence so behavior is consistent.
       const duplicateIds = this.getDuplicateTaskIds(this.tasks);
       if (duplicateIds.length > 0) {
@@ -815,7 +815,7 @@ class TaskDatabase {
     const gh = (templateConfig && templateConfig.GITHUB) ? templateConfig.GITHUB : null;
     const tasksFile = (gh && typeof gh.getTasksFile === 'function')
       ? gh.getTasksFile(projectId)
-      : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/external/github-task-manager/tasks.json');
+      : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/external/github-task-manager/node.tasks.json');
 
     const beforeTasksSnapshot = this.cloneTasksSnapshot(this._lastSyncedTasksSnapshot || []);
 
@@ -839,7 +839,7 @@ class TaskDatabase {
 
     const actor = this.resolveActor();
 
-    // Save tasks.json
+    // Save node.tasks.json
     const jsonResponse = await fetch(`${workerUrl}/api/tasks`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -951,7 +951,7 @@ class TaskDatabase {
       const gh = (templateConfig && templateConfig.GITHUB) ? templateConfig.GITHUB : null;
       const tasksFile = (gh && typeof gh.getTasksFile === 'function')
         ? gh.getTasksFile(resolveActiveProjectId())
-        : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/external/github-task-manager/tasks.json');
+        : ((gh && gh.TASKS_FILE) ? gh.TASKS_FILE : 'public/tasksDB/external/github-task-manager/node.tasks.json');
 
       // Persist JSON
       const { sha: tasksSha } = await this.githubApi.getFileContent(tasksFile);
@@ -982,10 +982,10 @@ class TaskDatabase {
       } catch (altErr) {
         // Non-fatal: best-effort only
       }
-      // Also write to legacy short path 'tasksDB/tasks.json' and 'tasksDB/tasks.csv' to
+      // Also write to legacy short path 'tasksDB/node.tasks.json' and 'tasksDB/tasks.csv' to
       // support older test expectations and environments that expect files at the repo root.
       try {
-        const legacyJsonPath = 'tasksDB/tasks.json';
+        const legacyJsonPath = 'tasksDB/node.tasks.json';
         await this.githubApi.updateFile(legacyJsonPath, content, `${message} (legacy)`).catch(() => null);
         const legacyCsvPath = 'tasksDB/tasks.csv';
         await this.githubApi.updateFile(legacyCsvPath, csvContent, `${message} (csv, legacy)`).catch(() => null);

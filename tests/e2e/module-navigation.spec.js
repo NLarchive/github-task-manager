@@ -4,8 +4,12 @@
 
 import { test, expect } from '@playwright/test';
 
+/** Timeout budget for synchronized list and graph navigation assertions. */
 const TIMEOUT = 45000;
 
+/**
+ * Wait until the list-display shell has finished loading project metadata.
+ */
 async function waitForAppReady(page) {
   await page.waitForSelector('#totalTasks', { timeout: TIMEOUT });
 
@@ -25,6 +29,7 @@ async function waitForAppReady(page) {
   }, { timeout: TIMEOUT });
 }
 
+/** Validate that module navigation stays synchronized across list and graph views. */
 test.describe('module navigation sync', () => {
   test('keeps ACME list sublists and graph subgraphs synchronized', async ({ page }) => {
     await page.goto('/?project=web-e2e-bussines');

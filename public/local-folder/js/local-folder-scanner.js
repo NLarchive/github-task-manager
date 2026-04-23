@@ -1,13 +1,13 @@
 /**
  * Browser-side local-folder scanner and TaskDB project registry.
  *
- * It discovers `tasks.json` files from user-selected directories, builds a
+ * It discovers `node.tasks.json` files from user-selected directories, builds a
  * normalized project payload, and stores the result for reuse across sessions.
  */
 
 (function (globalScope) {
     const STORAGE_KEY = 'taskManagerLocalFolderProjects';
-    const TASK_FILE_CANDIDATES = ['tasks.json', 'TODO_project_task.json'];
+    const TASK_FILE_CANDIDATES = ['node.tasks.json', 'TODO_project_task.json'];
     const DISCOVERY_IGNORED_DIRS = new Set(['history', 'state', 'tour', 'node_modules', '.git']);
 
     function deepClone(value) {
@@ -215,9 +215,9 @@
         if (!normalized) return -1;
 
         let score = 0;
-        if (normalized === 'src/tasks.json') score += 120;
+        if (normalized === 'src/node.tasks.json') score += 120;
         if (normalized === 'src/TODO_project_task.json') score += 115;
-        if (normalized === 'tasks.json') score += 105;
+        if (normalized === 'node.tasks.json') score += 105;
         if (normalized === 'TODO_project_task.json') score += 100;
         if (normalized.startsWith('src/')) score += 30;
         if (rawData && rawData.template_type === 'project_task_template') score += 40;
@@ -235,7 +235,7 @@
         );
         if (explicitRoot && fileMap[explicitRoot]) return explicitRoot;
 
-        for (const candidate of ['src/tasks.json', 'src/TODO_project_task.json', 'tasks.json', 'TODO_project_task.json']) {
+        for (const candidate of ['src/node.tasks.json', 'src/TODO_project_task.json', 'node.tasks.json', 'TODO_project_task.json']) {
             if (fileMap[candidate]) return candidate;
         }
 
@@ -251,7 +251,7 @@
             .sort((a, b) => scoreRootModuleCandidate(b.relativePath, b.rawData) - scoreRootModuleCandidate(a.relativePath, a.rawData));
 
         if (candidates.length > 0) return candidates[0].relativePath;
-        if (tasksIndexData) return 'tasks.json';
+        if (tasksIndexData) return 'node.tasks.json';
         return '';
     }
 
@@ -261,7 +261,7 @@
 
         for (const relativePath of discoverProjectTaskFilesFromMap(fileMap)) {
             if (!relativePath) continue;
-            if (relativePath === 'tasks.json') continue;
+            if (relativePath === 'node.tasks.json') continue;
             if (normalizedRootModule && relativePath === normalizedRootModule) continue;
 
             const raw = fileMap[relativePath] || {};
@@ -410,10 +410,10 @@
         const safeFileMap = fileMap && typeof fileMap === 'object' ? fileMap : {};
         const discoveredFiles = discoverProjectTaskFilesFromMap(safeFileMap);
         if (discoveredFiles.length === 0) {
-            throw new Error('No tasks.json files were found in the selected folder.');
+            throw new Error('No node.tasks.json files were found in the selected folder.');
         }
 
-        const tasksIndexData = safeFileMap['tasks.json'] || null;
+        const tasksIndexData = safeFileMap['node.tasks.json'] || null;
         const rootModuleRelative = resolveRootModuleRelativeFromMap(safeFileMap, tasksIndexData);
         const rootData = rootModuleRelative ? safeFileMap[rootModuleRelative] || null : null;
         const baseData = rootData || tasksIndexData || null;
@@ -446,7 +446,7 @@
             label: projectName,
             sourceKind: 'folder',
             folderName: String(folderName || '').trim() || projectId,
-            rootModuleRelative: rootModuleRelative || 'tasks.json',
+            rootModuleRelative: rootModuleRelative || 'node.tasks.json',
             payload,
             discoveredFiles,
             fileCount: discoveredFiles.length,

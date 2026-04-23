@@ -1,10 +1,9 @@
-/* ============================================================ */
-/* POPUPS & MODALS */
-/* ============================================================ */
-/*
- * Node details popup, legend popup, and modal styling.
- * Optimized for mobile with proper centering and scrolling.
- */
+/* ══════════════════════════════════════════════════════════════════════════════
+ * public/graph-display/css/components/_popups.css — web-github-task-manager
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Node-details popup, legend popup, and modal overlay styles.
+ * Optimised for mobile with proper centering and scrollable content areas.
+ * ══════════════════════════════════════════════════════════════════════════════ */
 
 /* Popup containers (overlay) */
 #popup,

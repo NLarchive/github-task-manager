@@ -5,7 +5,9 @@
 import { test, expect } from '@playwright/test';
 
 // Use the Playwright config baseURL so tests follow the configured server port.
+/** Base route for the list-display app under the local Playwright server. */
 const BASE_URL = '/list-display/';
+/** Timeout budget for task edit and save assertions in this suite. */
 const TIMEOUT = 30000;
 
 /**
@@ -155,6 +157,7 @@ async function createTaskViaUI(page, taskData) {
 // TEST EXAMPLES - Update task progress programmatically through the UI
 // ============================================================================
 
+/** Validate reusable UI helpers for updating and creating tasks through the app. */
 test.describe('Update Tasks Via UI Automation', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the application

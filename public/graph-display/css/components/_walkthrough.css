@@ -1,9 +1,8 @@
-/* ============================================================ */
-/* WALKTHROUGH OVERLAY */
-/* ============================================================ */
-/*
- * Interactive tour/walkthrough overlay and tooltip.
- */
+/* ══════════════════════════════════════════════════════════════════════════════
+ * public/graph-display/css/components/_walkthrough.css — web-github-task-manager
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Interactive guided-tour overlay and step-tooltip styles.
+ * ══════════════════════════════════════════════════════════════════════════════ */
 
 .walkthrough-overlay {
     position: fixed;

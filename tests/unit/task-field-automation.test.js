@@ -14,18 +14,22 @@ configContent = configContent.replace(
   "TOKEN: ''"
 );
 const getConfig = new Function(configContent + '\nreturn TEMPLATE_CONFIG;');
+/** Evaluated TEMPLATE_CONFIG loaded directly from the production config file. */
 const TEMPLATE_CONFIG = getConfig();
 
 // Load validator
 const validatorContent = fs.readFileSync(path.join(__dirname, '../../public/task-engine/js/task-schema-validator.js'), 'utf8');
 const getValidator = new Function('TEMPLATE_CONFIG', validatorContent + '\nreturn TemplateValidator;');
+/** TemplateValidator class evaluated from the browser module in a Node test harness. */
 const TemplateValidator = getValidator(TEMPLATE_CONFIG);
 
 // Load automation
 const automationContent = fs.readFileSync(path.join(__dirname, '../../public/task-engine/js/task-field-automation.js'), 'utf8');
 const getAutomation = new Function('TEMPLATE_CONFIG', 'TemplateValidator', automationContent + '\nreturn TemplateAutomation;');
+/** TemplateAutomation class evaluated from the browser module in a Node test harness. */
 const TemplateAutomation = getAutomation(TEMPLATE_CONFIG, TemplateValidator);
 
+/** Verify that TemplateAutomation can be instantiated with a TEMPLATE_CONFIG. */
 describe('TemplateAutomation Initialization', () => {
   it('should create automation instance', () => {
     const automation = new TemplateAutomation(TEMPLATE_CONFIG);
@@ -38,6 +42,7 @@ describe('TemplateAutomation Initialization', () => {
   });
 });
 
+/** Validate sequential task ID generation and gap-filling logic. */
 describe('Task ID Generation', () => {
   const automation = new TemplateAutomation(TEMPLATE_CONFIG);
 
@@ -67,6 +72,7 @@ describe('Task ID Generation', () => {
   });
 });
 
+/** Validate auto-population of individual task fields from TEMPLATE_CONFIG defaults and rules. */
 describe('Auto-populate Task', () => {
   const automation = new TemplateAutomation(TEMPLATE_CONFIG);
 
@@ -154,6 +160,7 @@ describe('Auto-populate Task', () => {
   });
 });
 
+/** Validate auto-population of project-level fields. */
 describe('Auto-populate Project', () => {
   const automation = new TemplateAutomation(TEMPLATE_CONFIG);
 
@@ -174,6 +181,7 @@ describe('Auto-populate Project', () => {
   });
 });
 
+/** Validate worker skill matching score calculation against task requirements. */
 describe('Skill Match Calculation', () => {
   const automation = new TemplateAutomation(TEMPLATE_CONFIG);
 
@@ -192,6 +200,7 @@ describe('Skill Match Calculation', () => {
   });
 });
 
+/** Validate v3 agentic field auto-population including effort, complexity, and risk fields. */
 describe('v3 Agentic Field Auto-Population', () => {
   const automation = new TemplateAutomation(TEMPLATE_CONFIG);
 
@@ -284,6 +293,7 @@ describe('v3 Agentic Field Auto-Population', () => {
   });
 });
 
+/** Validate v3 project-level field auto-population including budget and health scores. */
 describe('v3 Project Auto-Population', () => {
   const automation = new TemplateAutomation(TEMPLATE_CONFIG);
 
@@ -312,6 +322,7 @@ describe('v3 Project Auto-Population', () => {
   });
 });
 
+/** Validate that validateAndFix correctly handles v3 schema fields. */
 describe('validateAndFix v3 Support', () => {
   const automation = new TemplateAutomation(TEMPLATE_CONFIG);
 

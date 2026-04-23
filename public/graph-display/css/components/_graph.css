@@ -1,6 +1,9 @@
-/* ============================================================ */
-/* D3 GRAPH VISUALIZATION */
-/* ============================================================ */
+/* ══════════════════════════════════════════════════════════════════════════════
+ * public/graph-display/css/components/_graph.css — web-github-task-manager
+ * ─────────────────────────────────────────────────────────────────────────────
+ * D3 graph visualisation styles: canvas container, nodes, links, labels,
+ * and simulation-related layout helpers.
+ * ══════════════════════════════════════════════════════════════════════════════ */
 
 /* ===== Graph Container ===== */
 #main-content {

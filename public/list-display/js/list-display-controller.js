@@ -1797,7 +1797,7 @@ class TaskManagerApp {
         const tasksInfo = document.getElementById('tasksInfo');
         if (tasksInfo) {
             const tasksFile = localFolderProject
-                ? String(localFolderProject.rootModuleRelative || 'tasks.json')
+                ? String(localFolderProject.rootModuleRelative || 'node.tasks.json')
                 : (this.config && this.config.tasksFile ? String(this.config.tasksFile) : (window.TEMPLATE_CONFIG && window.TEMPLATE_CONFIG.GITHUB && window.TEMPLATE_CONFIG.GITHUB.TASKS_FILE ? String(window.TEMPLATE_CONFIG.GITHUB.TASKS_FILE) : '-'));
             tasksInfo.textContent = `TasksFile: ${tasksFile}`;
         }
@@ -1947,7 +1947,7 @@ class TaskManagerApp {
 
         if (!tasksFile) {
             const safeProject = String(projectId || '').replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
-            tasksFile = `public/tasksDB/external/${safeProject}/tasks.json`;
+            tasksFile = `public/tasksDB/external/${safeProject}/node.tasks.json`;
         }
 
         const historyPath = String(tasksFile)

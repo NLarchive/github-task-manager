@@ -5,9 +5,14 @@
 import { test, expect } from '@playwright/test';
 
 // Use the Playwright config baseURL so tests follow the configured server port.
+/** Base route for the list-display app under the local Playwright server. */
 const BASE_URL = '/list-display/';
+/** Default timeout budget for waits in this CRUD regression suite. */
 const TIMEOUT = 30000;
 
+/**
+ * Wait until the list-display app has rendered either tasks or the empty state.
+ */
 async function waitForAppReady(page) {
   await page.waitForSelector('[id="totalTasks"]', { timeout: TIMEOUT });
   await page.waitForFunction(() => {
@@ -20,6 +25,7 @@ async function waitForAppReady(page) {
   }, { timeout: 30000 });
 }
 
+/** Validate task creation flows, defaults, and required-field handling. */
 test.describe('GitHub Task Manager - Create Task', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the application
@@ -110,6 +116,7 @@ test.describe('GitHub Task Manager - Create Task', () => {
   });
 });
 
+/** Validate editing flows for existing tasks and edit-modal regressions. */
 test.describe('GitHub Task Manager - Edit Task', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(BASE_URL);
@@ -225,6 +232,7 @@ test.describe('GitHub Task Manager - Edit Task', () => {
   });
 });
 
+/** Validate destructive task removal flows and confirmation handling. */
 test.describe('GitHub Task Manager - Delete Task', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(BASE_URL);
@@ -255,6 +263,7 @@ test.describe('GitHub Task Manager - Delete Task', () => {
   });
 });
 
+/** Validate task filtering and search-related list narrowing behavior. */
 test.describe('GitHub Task Manager - Filter & Search', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(BASE_URL);
@@ -318,6 +327,7 @@ test.describe('GitHub Task Manager - Filter & Search', () => {
   });
 });
 
+/** Validate refresh behavior and state persistence across reload-style actions. */
 test.describe('GitHub Task Manager - Refresh & Persistence', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(BASE_URL);
@@ -366,6 +376,7 @@ test.describe('GitHub Task Manager - Refresh & Persistence', () => {
   });
 });
 
+/** Validate CSV export availability and basic download payload generation. */
 test.describe('GitHub Task Manager - CSV Export', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(BASE_URL);
@@ -402,6 +413,7 @@ test.describe('GitHub Task Manager - CSV Export', () => {
   });
 });
 
+/** Validate the list-display statistics cards and count updates. */
 test.describe('GitHub Task Manager - Statistics', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(BASE_URL);
@@ -451,6 +463,7 @@ test.describe('GitHub Task Manager - Statistics', () => {
   });
 });
 
+/** Validate core UI affordances, visibility, and responsive behavior. */
 test.describe('GitHub Task Manager - UI/UX', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(BASE_URL);

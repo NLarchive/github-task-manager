@@ -1,3 +1,6 @@
+<!-- public/list-display/index.html — web-github-task-manager
+     List-based task management view. Provides CRUD operations, project
+     switching, and inline task editing backed by the GitHub API or local server. -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -45,7 +48,7 @@
                     <button onclick="loadTasks()" class="btn-secondary">🔄 Refresh</button>
                     <button onclick="exportToCSV()" class="btn-secondary">📥 Export CSV</button>
                     <details class="calendar-dropdown" id="calendarDropdown">
-                        <summary class="btn-secondary" data-testid="calendar-btn" title="Download tasks and calendars">📅 Export ▾</summary>
+                        <summary class="btn-secondary" data-testid="calendar-btn" title="Download tasks and calendars">📅 Calendar ▾</summary>
                         <div class="calendar-dropdown-menu">
                             <div class="calendar-dropdown-section">
                                 <label for="downloadFormat">Format</label>

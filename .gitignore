@@ -1,3 +1,11 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# .gitignore — web-github-task-manager
+# ──────────────────────────────────────────────────────────────────────────────
+# Defines which files and directories Git should never track.
+# Organised by category: private data, secrets, dependencies, generated output,
+# IDE/OS noise, test artefacts and local-only documentation.
+# ══════════════════════════════════════════════════════════════════════════════
+
 # ─── Local / private task databases ──────────────────────────────────────────
 # These folders contain personal or proprietary tasks and must never be committed.
 public/tasksDB/local/
@@ -78,3 +86,5 @@ tools/**/.wrangler/
 # ─── Docs (local-only, not part of repo) ──────────────────────────────────────
 .docs/
 
+PROJECT_DOCS.md
+memories/

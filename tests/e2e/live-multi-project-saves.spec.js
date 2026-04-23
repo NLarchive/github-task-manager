@@ -4,12 +4,20 @@
 
 import { test, expect } from '@playwright/test';
 
+/** Live-site URL used for GitHub Pages regression coverage. */
 const LIVE_URL = process.env.PLAYWRIGHT_BASE_URL || 'https://nlarchive.github.io/github-task-manager/';
+/** Timeout budget for live-site navigation, unlock, and save flows. */
 const TIMEOUT = 60000;
+/** Password for unlocking the github-task-manager live project during tests. */
 const LIVE_PASSWORD_GITHUB_TASK_MANAGER = process.env.LIVE_PASSWORD_GITHUB_TASK_MANAGER || 'github-task-manager-1234';
+/** Password for unlocking the ai-career-roadmap live project during tests. */
 const LIVE_PASSWORD_AI_CAREER_ROADMAP = process.env.LIVE_PASSWORD_AI_CAREER_ROADMAP || 'ai-career-roadmap-1234';
+/** Feature flag that enables live-site Playwright coverage in opted-in environments. */
 const RUN_LIVE = process.env.PLAYWRIGHT_RUN_LIVE === '1' || process.env.RUN_LIVE_E2E === '1';
 
+/**
+ * Switch to a project and wait until its task list characteristics are visible.
+ */
 async function selectProjectAndWait(page, projectId, { expectTaskText, minTotalTasks, maxTotalTasks } = {}) {
   const projectSelect = page.locator('#projectSelect');
   await projectSelect.selectOption(projectId);
@@ -36,6 +44,9 @@ async function selectProjectAndWait(page, projectId, { expectTaskText, minTotalT
   }
 }
 
+/**
+ * Wait until the app has rendered either tasks or the empty-state placeholder.
+ */
 async function waitForAppReady(page) {
   await page.waitForSelector('[id="totalTasks"]', { timeout: TIMEOUT });
   await page.waitForFunction(() => {
@@ -48,6 +59,7 @@ async function waitForAppReady(page) {
   }, { timeout: 30000 });
 }
 
+/** Read the rendered Worker URL from the live-site diagnostics panel. */
 async function getWorkerUrl(page) {
   return await page.evaluate(() => {
     const workerInfo = document.getElementById('workerInfo');
@@ -55,6 +67,7 @@ async function getWorkerUrl(page) {
   });
 }
 
+/** Read the active node.tasks.json path from the live-site diagnostics panel. */
 async function getTasksFile(page) {
   return await page.evaluate(() => {
     const tasksInfo = document.getElementById('tasksInfo');
@@ -62,6 +75,7 @@ async function getTasksFile(page) {
   });
 }
 
+/** Read the active repository identifier from the live-site diagnostics panel. */
 async function getRepoInfo(page) {
   return await page.evaluate(() => {
     const repoInfo = document.getElementById('repoInfo');
@@ -69,6 +83,7 @@ async function getRepoInfo(page) {
   });
 }
 
+/** Unlock the current password-protected project before save actions. */
 async function unlockProject(page, password) {
   // Click the lock indicator to open password modal (make robust against transient layout)
   const lockIndicator = page.locator('.auth-indicator.locked');
@@ -92,6 +107,7 @@ async function unlockProject(page, password) {
   await page.waitForSelector('.auth-indicator.unlocked', { timeout: TIMEOUT });
 }
 
+/** Create a minimal test task through the live UI and return its generated name. */
 async function createTestTask(page, taskName = 'Test Task ' + Math.random().toString(36).slice(2,8)) {
   // Click Add New Task
   await page.locator('button:has-text("Add New Task")').click();
@@ -117,6 +133,7 @@ async function createTestTask(page, taskName = 'Test Task ' + Math.random().toSt
   return taskName;
 }
 
+/** Edit the first visible task through the live UI and return the updated name. */
 async function editFirstTask(page, newName = 'Edited Task ' + Math.random().toString(36).slice(2,8)) {
   // Find and click the first Edit button
   const editButtons = page.locator('button:has-text("Edit")');
@@ -139,6 +156,7 @@ async function editFirstTask(page, newName = 'Edited Task ' + Math.random().toSt
   return newName;
 }
 
+/** Wait for the save toast to appear, assert its text, and wait for dismissal. */
 async function waitForSaveToast(page, expectedText, timeout = 10000) {
   const toast = page.locator('#toast');
   await toast.waitFor({ state: 'visible', timeout });
@@ -152,6 +170,7 @@ async function waitForSaveToast(page, expectedText, timeout = 10000) {
   await toast.waitFor({ state: 'hidden', timeout: 5000 });
 }
 
+/** Validate live-site save behavior across multiple password-protected projects. */
 test.describe('@live Live Site - Multi-Project GitHub Saves', () => {
   test.skip(!RUN_LIVE, 'Set PLAYWRIGHT_RUN_LIVE=1 to enable live-site tests');
 
@@ -177,7 +196,7 @@ test.describe('@live Live Site - Multi-Project GitHub Saves', () => {
     // Check tasks file
     const tasksFile = await getTasksFile(page);
     console.log('Tasks file:', tasksFile);
-    expect(tasksFile).toBe('public/tasksDB/external/github-task-manager/tasks.json');
+    expect(tasksFile).toBe('public/tasksDB/external/github-task-manager/node.tasks.json');
   });
 
   test('should save to github-task-manager repo', async ({ page }) => {

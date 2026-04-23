@@ -4,12 +4,14 @@
 
 import { test, expect } from '@playwright/test';
 
+/** Wait until the graph contains more than the requested number of nodes. */
 async function waitForNodeCount(page, minimum) {
   const nodes = page.locator('#graph-container g.node');
   await expect.poll(async () => nodes.count(), { timeout: 20000 }).toBeGreaterThan(minimum);
   return nodes;
 }
 
+/** Validate graph navigation and sidebar drilling for the web-e2e-bussines template. */
 test.describe('web-e2e-bussines graph navigation', () => {
   test('loads root project, shows global tree navigation, and drills into inline subtasks from a task node', async ({ page }) => {
     await page.goto('/graph-display/index.html?template=web-e2e-bussines-tasks&skipTour=true', {
@@ -37,7 +39,7 @@ test.describe('web-e2e-bussines graph navigation', () => {
     await expect(sidebar.locator('.modules-tree-summary', { hasText: 'apps' })).toBeVisible();
     await expect(sidebar.locator('.modules-tree-summary', { hasText: 'PRIVATE' })).toBeVisible();
     await expect(sidebar.locator('.modules-tree-summary').filter({ hasText: /^crm$/ })).toHaveCount(0);
-    await expect(sidebar.locator('.modules-item[title="src/apps/PRIVATE/1-STRATEGY/crm/tasks.json"]')).toBeVisible();
+    await expect(sidebar.locator('.modules-item[title="src/apps/PRIVATE/1-STRATEGY/crm/node.tasks.json"]')).toBeVisible();
     await sidebar.locator('.modules-sidebar-close').click();
 
     // Drill down from the graph itself using the root task node popup.
@@ -69,3 +71,4 @@ test.describe('web-e2e-bussines graph navigation', () => {
     await expect(page.locator('#subtask-breadcrumb')).toBeHidden();
   });
 });
+

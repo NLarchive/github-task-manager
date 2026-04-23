@@ -1,9 +1,8 @@
-/* ============================================================ */
-/* HEADER & PROFILE BUTTON */
-/* ============================================================ */
-/*
- * Header section and profile menu trigger button.
- */
+/* ══════════════════════════════════════════════════════════════════════════════
+ * public/graph-display/css/components/_header.css — web-github-task-manager
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Header bar styles: project title, profile button, and top-level navigation.
+ * ══════════════════════════════════════════════════════════════════════════════ */
 
 header {
     position: fixed;

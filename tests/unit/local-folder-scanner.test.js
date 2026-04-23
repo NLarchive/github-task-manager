@@ -5,6 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 
+/** Load the browser folder-project service into a Node test harness with mocked storage. */
 function loadFolderProjectService(initialStorage = {}) {
   const filePath = path.join(__dirname, '../../public/local-folder/js/local-folder-scanner.js');
   const src = fs.readFileSync(filePath, 'utf8');
@@ -44,6 +45,7 @@ function loadFolderProjectService(initialStorage = {}) {
   return { service, storageState };
 }
 
+/** Validate local folder TaskDB discovery, registration, and lookup behavior. */
 describe('Folder Project Service', () => {
   it('builds a root payload and module list from browser-selected task files', () => {
     const { service } = loadFolderProjectService();
@@ -51,18 +53,18 @@ describe('Folder Project Service', () => {
     const record = service.__test__.buildProjectRecordFromFileMap({
       folderName: 'web-e2e-bussines',
       fileMap: {
-        'tasks.json': {
+        'node.tasks.json': {
           project: { name: 'Web E2E Business' },
-          navigation: { rootModule: 'src/tasks.json' }
+          navigation: { rootModule: 'src/node.tasks.json' }
         },
-        'src/tasks.json': {
+        'src/node.tasks.json': {
           template_type: 'project_task_template',
           project: { name: 'Web E2E Business' },
           tasks: [
             { task_name: 'INFRA-001: Super-repo setup', status: 'Done', priority: 'High' }
           ]
         },
-        'src/SHARED/shared-ui/tasks.json': {
+        'src/SHARED/shared-ui/node.tasks.json': {
           module: { name: 'shared-ui', label: 'Shared UI' },
           tasks: [
             {
@@ -78,10 +80,10 @@ describe('Folder Project Service', () => {
 
     expect(record.id).toBe('folder-web-e2e-bussines');
     expect(record.templateId).toBe('folder-web-e2e-bussines-tasks');
-    expect(record.rootModuleRelative).toBe('src/tasks.json');
-    expect(record.payload.navigation.rootModule).toBe('src/tasks.json');
+    expect(record.rootModuleRelative).toBe('src/node.tasks.json');
+    expect(record.payload.navigation.rootModule).toBe('src/node.tasks.json');
     expect(record.payload.navigation.modules).toHaveLength(1);
-    expect(record.payload.navigation.modules[0].path).toBe('src/SHARED/shared-ui/tasks.json');
+    expect(record.payload.navigation.modules[0].path).toBe('src/SHARED/shared-ui/node.tasks.json');
   });
 
   it('stores and retrieves folder projects by project id or template id', () => {
@@ -91,11 +93,11 @@ describe('Folder Project Service', () => {
       id: 'folder-acme-os',
       templateId: 'folder-acme-os-tasks',
       label: 'Acme OS',
-      rootModuleRelative: 'src/tasks.json',
+      rootModuleRelative: 'src/node.tasks.json',
       payload: {
         project: { name: 'Acme OS' },
         tasks: [{ task_name: 'Task 1', priority: 'High', status: 'Done' }],
-        navigation: { rootModule: 'src/tasks.json', modules: [] }
+        navigation: { rootModule: 'src/node.tasks.json', modules: [] }
       },
       moduleDataByPath: {}
     });

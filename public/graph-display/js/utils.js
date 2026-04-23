@@ -1,5 +1,6 @@
- 
 /**
+ * public/graph-display/js/utils.js — web-github-task-manager
+ *
  * Utility functions for color manipulation, contrast checking, and debouncing.
  */
 

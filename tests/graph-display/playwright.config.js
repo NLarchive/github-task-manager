@@ -1,3 +1,9 @@
+/**
+ * tests/graph-display/playwright.config.js — web-github-task-manager
+ *
+ * Playwright configuration scoped to the graph-display e2e test suite.
+ * Spins up the local graph server and runs browser tests against it.
+ */
 import { defineConfig, devices } from '@playwright/test';
 const repoRoot = process.cwd();
 

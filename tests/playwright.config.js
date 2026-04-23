@@ -1,3 +1,9 @@
+/**
+ * tests/playwright.config.js — web-github-task-manager
+ *
+ * Root Playwright configuration for all e2e and integration test suites.
+ * Declares shared browser projects, timeouts, reporters, and base URL.
+ */
 import { defineConfig, devices } from '@playwright/test';
 import os from 'os';
 

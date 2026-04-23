@@ -1,6 +1,9 @@
-/* ============================================================ */
-/* Interactive Career Graph - MAIN STYLESHEET (Template) */
-/* ============================================================ */
+/* ══════════════════════════════════════════════════════════════════════════════
+ * public/graph-display/css/styles-new.css — web-github-task-manager
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Modular refactored stylesheet for the graph-display view (template variant).
+ * Imports component partials and applies the updated design-system layer.
+ * ══════════════════════════════════════════════════════════════════════════════ */
 /*
  * Modular CSS architecture for easy maintenance and editing.
  * Import order matters - variables first, utilities last.

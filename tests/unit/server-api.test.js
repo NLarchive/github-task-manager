@@ -9,6 +9,11 @@ const path = require('path');
 
 const { createServer } = require('../../server');
 
+/**
+ * Send a raw HTTP request to a locally running server and resolve with status code and body.
+ * @param {{ port: number, method: string, path: string, body?: string, headers?: Object }} options - Request parameters.
+ * @returns {Promise<{ status: number, body: string }>} Resolved response envelope.
+ */
 function httpRequest({ port, method, path: reqPath, body, headers = {} }) {
   return new Promise((resolve, reject) => {
     const req = http.request(
@@ -39,8 +44,9 @@ function httpRequest({ port, method, path: reqPath, body, headers = {} }) {
   });
 }
 
+/** Validate the /api/tasks REST endpoints for task persistence and derived state file generation. */
 describe('Server API - /api/tasks', () => {
-  it('should persist tasks.json + tasks.csv and generate state files', async () => {
+  it('should persist node.tasks.json + tasks.csv and generate state files', async () => {
     const repoRoot = path.join(__dirname, '..', '..');
     const publicDir = path.join(repoRoot, 'public');
     const tasksDbDir = path.join(repoRoot, 'test-results', 'unit', 'tasksDB-server-api');
@@ -117,7 +123,7 @@ describe('Server API - /api/tasks', () => {
 
       expect(putRes.status).toBe(200);
 
-      const jsonPath = path.join(tasksDbDir, 'tasks.json');
+      const jsonPath = path.join(tasksDbDir, 'node.tasks.json');
       const csvPath = path.join(tasksDbDir, 'tasks.csv');
       expect(fs.existsSync(jsonPath)).toBeTruthy();
       expect(fs.existsSync(csvPath)).toBeTruthy();
@@ -143,7 +149,7 @@ describe('Server API - /api/tasks', () => {
     }
   });
 
-  it('should read and write synchronized root project payloads backed by src/tasks.json', async () => {
+  it('should read and write synchronized root project payloads backed by src/node.tasks.json', async () => {
     const repoRoot = path.join(__dirname, '..', '..');
     const publicDir = path.join(repoRoot, 'public');
     const tasksDbDir = path.join(repoRoot, 'test-results', 'unit', 'tasksDB-server-api-sync');
@@ -154,17 +160,17 @@ describe('Server API - /api/tasks', () => {
     fs.rmSync(tasksDbDir, { recursive: true, force: true });
     fs.mkdirSync(moduleDir, { recursive: true });
 
-    fs.writeFileSync(path.join(projectDir, 'tasks.json'), JSON.stringify({
+    fs.writeFileSync(path.join(projectDir, 'node.tasks.json'), JSON.stringify({
       template_type: 'project_task_template',
       version: '3.0',
       navigation: {
-        rootModule: 'src/tasks.json',
+        rootModule: 'src/node.tasks.json',
         modules: []
       },
       tasks: []
     }, null, 2), 'utf8');
 
-    fs.writeFileSync(path.join(srcDir, 'tasks.json'), JSON.stringify({
+    fs.writeFileSync(path.join(srcDir, 'node.tasks.json'), JSON.stringify({
       template_type: 'project_task_template',
       version: '3.0',
       project: { name: 'Synced Root Project', status: 'Planning' },
@@ -181,7 +187,7 @@ describe('Server API - /api/tasks', () => {
       ]
     }, null, 2), 'utf8');
 
-    fs.writeFileSync(path.join(moduleDir, 'tasks.json'), JSON.stringify({
+    fs.writeFileSync(path.join(moduleDir, 'node.tasks.json'), JSON.stringify({
       template_type: 'submodule_task_template',
       version: '1.0',
       module: {
@@ -212,9 +218,9 @@ describe('Server API - /api/tasks', () => {
       expect(getRes.status).toBe(200);
       const readBack = JSON.parse(getRes.body);
       expect(readBack.project.name).toBe('Synced Root Project');
-      expect(readBack.navigation.rootModule).toBe('src/tasks.json');
+      expect(readBack.navigation.rootModule).toBe('src/node.tasks.json');
       expect(Array.isArray(readBack.navigation.modules)).toBeTruthy();
-      expect(readBack.navigation.modules[0].path).toBe('src/apps/PRIVATE/1-STRATEGY/crm/tasks.json');
+      expect(readBack.navigation.modules[0].path).toBe('src/apps/PRIVATE/1-STRATEGY/crm/node.tasks.json');
       expect(readBack.navigation.modules[0].taskIds).toEqual(['STRAT-003']);
 
       const updatedPayload = {
@@ -242,18 +248,18 @@ describe('Server API - /api/tasks', () => {
       });
       expect(putRes.status).toBe(200);
 
-      const syncedTasksJson = JSON.parse(fs.readFileSync(path.join(projectDir, 'tasks.json'), 'utf8'));
-      const syncedRootTasks = JSON.parse(fs.readFileSync(path.join(srcDir, 'tasks.json'), 'utf8'));
+      const syncedTasksJson = JSON.parse(fs.readFileSync(path.join(projectDir, 'node.tasks.json'), 'utf8'));
+      const syncedRootTasks = JSON.parse(fs.readFileSync(path.join(srcDir, 'node.tasks.json'), 'utf8'));
       expect(syncedTasksJson.tasks.length).toBe(2);
       expect(syncedRootTasks.tasks.length).toBe(2);
-      expect(syncedTasksJson.navigation.rootModule).toBe('src/tasks.json');
-      expect(syncedRootTasks.navigation.modules[0].path).toBe('apps/PRIVATE/1-STRATEGY/crm/tasks.json');
+      expect(syncedTasksJson.navigation.rootModule).toBe('src/node.tasks.json');
+      expect(syncedRootTasks.navigation.modules[0].path).toBe('apps/PRIVATE/1-STRATEGY/crm/node.tasks.json');
     } finally {
       await new Promise((resolve) => server.close(resolve));
     }
   });
 
-  it('should discover and synchronize projects backed by recursive tasks.json files', async () => {
+  it('should discover and synchronize projects backed by recursive node.tasks.json files', async () => {
     const repoRoot = path.join(__dirname, '..', '..');
     const publicDir = path.join(repoRoot, 'public');
     const tasksDbDir = path.join(repoRoot, 'test-results', 'unit', 'tasksDB-server-api-mixed');
@@ -264,14 +270,14 @@ describe('Server API - /api/tasks', () => {
     fs.rmSync(tasksDbDir, { recursive: true, force: true });
     fs.mkdirSync(moduleDir, { recursive: true });
 
-    fs.writeFileSync(path.join(srcDir, 'tasks.json'), JSON.stringify({
+    fs.writeFileSync(path.join(srcDir, 'node.tasks.json'), JSON.stringify({
       template_type: 'project_task_template',
       version: '3.0',
       project: { name: 'Mixed Filename Root', status: 'Planning' },
       tasks: [
         {
           task_name: 'STRAT-001: crm foundation',
-          description: 'Root task loaded from src/tasks.json',
+          description: 'Root task loaded from src/node.tasks.json',
           priority: 'High',
           status: 'Not Started',
           estimated_hours: 5,
@@ -281,7 +287,7 @@ describe('Server API - /api/tasks', () => {
       ]
     }, null, 2), 'utf8');
 
-    fs.writeFileSync(path.join(moduleDir, 'tasks.json'), JSON.stringify({
+    fs.writeFileSync(path.join(moduleDir, 'node.tasks.json'), JSON.stringify({
       template_type: 'submodule_task_template',
       version: '1.0',
       module: {
@@ -293,7 +299,7 @@ describe('Server API - /api/tasks', () => {
       tasks: [
         {
           task_name: 'STRAT-001: crm foundation',
-          description: 'Module task loaded from tasks.json',
+          description: 'Module task loaded from node.tasks.json',
           priority: 'High',
           status: 'Not Started',
           estimated_hours: 5,
@@ -313,9 +319,9 @@ describe('Server API - /api/tasks', () => {
 
       const readBack = JSON.parse(getRes.body);
       expect(readBack.project.name).toBe('Mixed Filename Root');
-      expect(readBack.navigation.rootModule).toBe('src/tasks.json');
+      expect(readBack.navigation.rootModule).toBe('src/node.tasks.json');
       expect(Array.isArray(readBack.navigation.modules)).toBeTruthy();
-      expect(readBack.navigation.modules[0].path).toBe('src/apps/PRIVATE/1-STRATEGY/crm/tasks.json');
+      expect(readBack.navigation.modules[0].path).toBe('src/apps/PRIVATE/1-STRATEGY/crm/node.tasks.json');
       expect(readBack.navigation.modules[0].taskIds).toEqual(['STRAT-001']);
       expect(readBack.navigation.modules[0].startTasks).toContain('STRAT-001: crm foundation');
       expect(readBack.navigation.modules[0].endTasks).toContain('STRAT-001: crm foundation');
@@ -351,14 +357,15 @@ describe('Server API - /api/tasks', () => {
       });
       expect(putRes.status).toBe(200);
 
-      const syncedTasksIndex = JSON.parse(fs.readFileSync(path.join(projectDir, 'tasks.json'), 'utf8'));
-      const syncedRootTasks = JSON.parse(fs.readFileSync(path.join(srcDir, 'tasks.json'), 'utf8'));
-      expect(syncedTasksIndex.navigation.rootModule).toBe('src/tasks.json');
+      const syncedTasksIndex = JSON.parse(fs.readFileSync(path.join(projectDir, 'node.tasks.json'), 'utf8'));
+      const syncedRootTasks = JSON.parse(fs.readFileSync(path.join(srcDir, 'node.tasks.json'), 'utf8'));
+      expect(syncedTasksIndex.navigation.rootModule).toBe('src/node.tasks.json');
       expect(syncedTasksIndex.tasks.length).toBe(2);
       expect(syncedRootTasks.tasks.length).toBe(2);
-      expect(syncedRootTasks.navigation.modules[0].path).toBe('apps/PRIVATE/1-STRATEGY/crm/tasks.json');
+      expect(syncedRootTasks.navigation.modules[0].path).toBe('apps/PRIVATE/1-STRATEGY/crm/node.tasks.json');
     } finally {
       await new Promise((resolve) => server.close(resolve));
     }
   });
 });
+

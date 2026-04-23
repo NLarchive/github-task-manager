@@ -461,8 +461,8 @@ async function handleTasksUpdate(request, env, origin) {
         const data = await getResponse.json();
         sha = data.sha;
 
-        // If we are updating tasks.json, fetch previous content for diff
-        if (filePath.endsWith('/tasks.json') && data && data.content) {
+        // If we are updating node.tasks.json, fetch previous content for diff
+        if (filePath.endsWith('/node.tasks.json') && data && data.content) {
           previousTasksJson = atob(data.content);
         }
       }
@@ -501,8 +501,8 @@ async function handleTasksUpdate(request, env, origin) {
 
     const result = await updateResponse.json();
 
-    // Record detailed per-task history ONLY when tasks.json changes
-    if (filePath.endsWith('/tasks.json')) {
+    // Record detailed per-task history ONLY when node.tasks.json changes
+    if (filePath.endsWith('/node.tasks.json')) {
       try {
         const prev = safeJsonParse(previousTasksJson || '', null);
         const next = safeJsonParse(content || '', null);

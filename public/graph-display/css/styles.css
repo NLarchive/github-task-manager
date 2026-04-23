@@ -1,6 +1,9 @@
-/* ============================================================ */
-/* ==================== FULL CSS START ======================== */
-/* ============================================================ */
+/* ══════════════════════════════════════════════════════════════════════════════
+ * public/graph-display/css/styles.css — web-github-task-manager
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Full consolidated stylesheet for the D3 graph-display view.
+ * Includes variables, layout, graph canvas, panels, and component overrides.
+ * ══════════════════════════════════════════════════════════════════════════════ */
 
 :root {
     /* Base colors - MUST match main-graph.js config.baseLayerColorsHex */

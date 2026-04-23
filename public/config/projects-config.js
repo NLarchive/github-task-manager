@@ -41,15 +41,6 @@ var PROJECTS_CONFIG = [
   },
   // --- Local (dev / test) ---
   {
-    id: 'test-tasks',
-    label: 'Test Tasks (Fixture)',
-    scope: 'local',
-    owner: 'nlarchive',
-    repo: 'github-task-manager',
-    branch: 'main',
-    tasksRoot: 'public/tasksDB'
-  },
-  {
     id: 'web-e2e-bussines',
     label: 'ACME-OS — E2E Business OS',
     scope: 'local',

@@ -4,13 +4,22 @@
 
 import { test, expect } from '@playwright/test';
 
+/** Base route for local list-display password, timeline, and issues coverage. */
 const BASE_URL = '/list-display/';
+/** Live GitHub Pages URL used by the opted-in regression suite. */
 const LIVE_URL = 'https://nlarchive.github.io/github-task-manager/';
+/** Timeout budget for local and live feature regressions in this suite. */
 const TIMEOUT = 5000;
+/** Default live-site password for the primary project under test. */
 const LIVE_PASSWORD = '1324';
+/** Live-site password for the ai-career-roadmap project switch regression. */
 const LIVE_PASSWORD_AI_CAREER_ROADMAP = 'ai-career-roadmap-1234';
+/** Feature flag that enables the live-site portion of this regression suite. */
 const RUN_LIVE = process.env.PLAYWRIGHT_RUN_LIVE === '1' || process.env.RUN_LIVE_E2E === '1';
 
+/**
+ * Wait until the list-display app has rendered either tasks or the empty state.
+ */
 async function waitForAppReady(page) {
   await page.waitForSelector('[id="totalTasks"]', { timeout: TIMEOUT });
   await page.waitForFunction(() => {
@@ -23,6 +32,7 @@ async function waitForAppReady(page) {
   }, { timeout: 30000 });
 }
 
+/** Validate local password-gate, timeline, and issue-sync behavior. */
 test.describe('New Features - Password / Timeline / Issues', () => {
   test('password gate can be forced on localhost for E2E', async ({ page }) => {
     await page.addInitScript(() => {
@@ -119,6 +129,7 @@ test.describe('New Features - Password / Timeline / Issues', () => {
 });
 
 // Live GitHub Pages Tests
+/** Validate live-site password, timeline, and issue workflow behavior. */
 test.describe('Live Site - Password Protection & New Features', () => {
   test.skip(!RUN_LIVE, 'Set PLAYWRIGHT_RUN_LIVE=1 (or RUN_LIVE_E2E=1) to enable live-site tests');
 

@@ -9,7 +9,7 @@
     "id": "first-graph",
     "name": "First Graph (Learn Graphs)",
     "type": "task-management",
-    "path": "/tasksDB/external/first-graph/tasks.json"
+    "path": "/tasksDB/external/first-graph/node.tasks.json"
   },
   {
     "id": "task-management",
@@ -21,12 +21,12 @@
     "id": "github-task-manager-tasks",
     "name": "GitHub Task Manager (Task Graph)",
     "type": "task-management",
-    "path": "/tasksDB/external/github-task-manager/tasks.json"
+    "path": "/tasksDB/external/github-task-manager/node.tasks.json"
   },
   {
     "id": "ai-career-roadmap-tasks",
     "name": "AI Career Roadmap (Task Graph)",
     "type": "task-management",
-    "path": "/tasksDB/external/ai-career-roadmap/tasks.json"
+    "path": "/tasksDB/external/ai-career-roadmap/node.tasks.json"
   }
 ]

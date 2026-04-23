@@ -5,9 +5,14 @@
 import { test, expect } from '@playwright/test';
 
 // Use the Playwright config baseURL so tests follow the configured server port.
+/** Base route for the list-display app under the local Playwright server. */
 const BASE_URL = '/list-display/';
+/** Default timeout budget for fullscreen flow assertions in this suite. */
 const TIMEOUT = 30000;
 
+/**
+ * Wait until the list-display app has rendered either tasks or the empty state.
+ */
 async function waitForAppReady(page) {
   await page.waitForSelector('[id="totalTasks"]', { timeout: TIMEOUT });
   await page.waitForFunction(() => {
@@ -20,6 +25,7 @@ async function waitForAppReady(page) {
   }, { timeout: 30000 });
 }
 
+/** Validate entering and exiting fullscreen graph mode from list-display. */
 test.describe('Graph Fullscreen', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(BASE_URL);

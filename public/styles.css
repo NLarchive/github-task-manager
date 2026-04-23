@@ -1,3 +1,10 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+ * public/styles.css — web-github-task-manager
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Root stylesheet for the task-manager landing page (public/index.html).
+ * Provides global reset, layout, and theming for the project-selector shell.
+ * ══════════════════════════════════════════════════════════════════════════════ */
+
 * {
     margin: 0;
     padding: 0;

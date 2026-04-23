@@ -1,6 +1,6 @@
 /**
  * Schema Validation Script
- * Validates tasks.json against the template schema
+ * Validates node.tasks.json against the template schema
  */
 
 const fs = require('fs');
@@ -21,15 +21,15 @@ console.log('='.repeat(50));
 // Load tasks database JSON (deployed under /public)
 const projectId = (process.argv[2] || process.env.PROJECT_ID || 'github-task-manager')
   .replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
-const tasksPath = path.join(__dirname, '../../public/tasksDB', projectId, 'tasks.json');
+const tasksPath = path.join(__dirname, '../../public/tasksDB', projectId, 'node.tasks.json');
 let tasks;
 
 try {
   const content = fs.readFileSync(tasksPath, 'utf8');
   tasks = JSON.parse(content);
-  console.log(`${colors.green}✓${colors.reset} tasks.json parsed successfully`);
+  console.log(`${colors.green}✓${colors.reset} node.tasks.json parsed successfully`);
 } catch (error) {
-  console.error(`${colors.red}✗ Failed to parse tasks.json: ${error.message}${colors.reset}`);
+  console.error(`${colors.red}✗ Failed to parse node.tasks.json: ${error.message}${colors.reset}`);
   process.exit(1);
 }
 
@@ -37,6 +37,12 @@ try {
 const errors = [];
 const warnings = [];
 
+/**
+ * Assert that all listed fields exist and are non-empty on the given object.
+ * @param {Object} obj - Object to validate.
+ * @param {string[]} fields - Field names that must be present and non-empty.
+ * @param {string} [prefix=''] - Prefix prepended to field names in error messages.
+ */
 function validateRequired(obj, fields, prefix = '') {
   fields.forEach(field => {
     if (obj[field] === undefined || obj[field] === null || obj[field] === '') {
@@ -45,12 +51,23 @@ function validateRequired(obj, fields, prefix = '') {
   });
 }
 
+/**
+ * Record an error when a value is defined but not included in the allowed values list.
+ * @param {*} value - The field value to check.
+ * @param {string[]} validValues - Array of acceptable values.
+ * @param {string} fieldName - Field name included in the error message.
+ */
 function validateEnum(value, validValues, fieldName) {
   if (value && !validValues.includes(value)) {
     errors.push(`Invalid ${fieldName}: "${value}". Valid values: ${validValues.join(', ')}`);
   }
 }
 
+/**
+ * Record an error when a date string is defined but does not match the YYYY-MM-DD format.
+ * @param {string|undefined} dateStr - Date string to check.
+ * @param {string} fieldName - Field name included in the error message.
+ */
 function validateDateFormat(dateStr, fieldName) {
   if (dateStr && !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
     errors.push(`Invalid date format for ${fieldName}: "${dateStr}". Expected YYYY-MM-DD`);
@@ -58,9 +75,13 @@ function validateDateFormat(dateStr, fieldName) {
 }
 
 // Valid enum values
+/** Allowed values for the project-level `status` field. */
 const PROJECT_STATUS = ['Not Started', 'In Progress', 'On Hold', 'Completed', 'Cancelled'];
+/** Allowed values for a task-level `status` field. */
 const TASK_STATUS = ['Not Started', 'In Progress', 'On Hold', 'Blocked', 'Completed', 'Cancelled', 'Pending Review'];
+/** Allowed values for a task-level `priority` field. */
 const TASK_PRIORITY = ['Low', 'Medium', 'High', 'Critical'];
+/** Allowed dependency link type codes. */
 const DEPENDENCY_TYPES = ['FS', 'SS', 'FF', 'SF'];
 
 // Validate project
@@ -197,3 +218,4 @@ if (errors.length > 0) {
 } else {
   process.exit(0);
 }
+

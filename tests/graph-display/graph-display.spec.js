@@ -4,6 +4,7 @@
 
 import { test, expect } from '@playwright/test';
 
+/** Parse an SVG translate transform string into numeric x/y coordinates. */
 function parseTranslate(transform) {
   // transform is typically: translate(x,y) or translate(x y)
   if (!transform) return null;
@@ -12,6 +13,7 @@ function parseTranslate(transform) {
   return { x: Number(m[1]), y: Number(m[2]) };
 }
 
+/** Validate graph-display rendering, navigation, and task-graph layout behavior. */
 test.describe('graph-display task-management template', () => {
   test('renders task nodes with the configured priority fill colors', async ({ page }) => {
     await page.goto('/graph-display/index.html?template=task-management&skipTour=true', { waitUntil: 'domcontentloaded' });

@@ -19,8 +19,10 @@ configContent = configContent.replace(
 
 // Execute in a function to get TEMPLATE_CONFIG
 const getConfig = new Function(configContent + '\nreturn TEMPLATE_CONFIG;');
+/** Evaluated TEMPLATE_CONFIG loaded directly from the production config file. */
 const TEMPLATE_CONFIG = getConfig();
 
+/** Verify that TEMPLATE_CONFIG exposes all mandatory top-level keys and metadata. */
 describe('TEMPLATE_CONFIG Structure', () => {
   it('should have version property', () => {
     expect(TEMPLATE_CONFIG.version).toBeTruthy();
@@ -47,6 +49,7 @@ describe('TEMPLATE_CONFIG Structure', () => {
   });
 });
 
+/** Validate FIELD_CATEGORIES arrays for automatic, required, and optional input fields. */
 describe('FIELD_CATEGORIES', () => {
   const { FIELD_CATEGORIES } = TEMPLATE_CONFIG;
 
@@ -83,6 +86,7 @@ describe('FIELD_CATEGORIES', () => {
   });
 });
 
+/** Validate that ENUMS covers all required status, priority, and v3 extension values. */
 describe('ENUMS Validation', () => {
   const { ENUMS } = TEMPLATE_CONFIG;
 
@@ -159,6 +163,7 @@ describe('ENUMS Validation', () => {
   });
 });
 
+/** Validate v3 task and project default values are correct types and initial states. */
 describe('v3 Defaults', () => {
   it('should have due_date default as null in TASK defaults', () => {
     expect(TEMPLATE_CONFIG.DEFAULTS.TASK.due_date).toBe(null);
@@ -190,6 +195,7 @@ describe('v3 Defaults', () => {
   });
 });
 
+/** Validate that v3 optional task fields are registered in OPTIONAL_FIELDS and FIELD_CATEGORIES. */
 describe('v3 Optional Fields', () => {
   it('should include due_date in OPTIONAL_FIELDS.TASK', () => {
     expect(TEMPLATE_CONFIG.OPTIONAL_FIELDS.TASK).toContain('due_date');
@@ -212,6 +218,7 @@ describe('v3 Optional Fields', () => {
   });
 });
 
+/** Validate that STATUS_NORMALIZATION maps lowercase and underscore variants to canonical v3 values. */
 describe('STATUS_NORMALIZATION v3', () => {
   it('should have "in review" normalization', () => {
     expect(TEMPLATE_CONFIG.STATUS_NORMALIZATION['in review']).toBe('In Review');
@@ -226,6 +233,7 @@ describe('STATUS_NORMALIZATION v3', () => {
   });
 });
 
+/** Validate the GITHUB configuration block for owner, repo, branch, and project resolver methods. */
 describe('GITHUB Configuration', () => {
   const { GITHUB } = TEMPLATE_CONFIG;
 
@@ -241,8 +249,8 @@ describe('GITHUB Configuration', () => {
     expect(GITHUB.BRANCH).toBe('main');
   });
 
-  it('should have TASKS_FILE set to public/tasksDB/external/github-task-manager/tasks.json', () => {
-    expect(GITHUB.TASKS_FILE).toBe('public/tasksDB/external/github-task-manager/tasks.json');
+  it('should have TASKS_FILE set to public/tasksDB/external/github-task-manager/node.tasks.json', () => {
+    expect(GITHUB.TASKS_FILE).toBe('public/tasksDB/external/github-task-manager/node.tasks.json');
   });
 
   it('should resolve project config for github-task-manager', () => {
@@ -269,11 +277,12 @@ describe('GITHUB Configuration', () => {
 
   it('should compute tasks file per project root', () => {
     expect(typeof GITHUB.getTasksFile).toBe('function');
-    expect(GITHUB.getTasksFile('github-task-manager')).toBe('public/tasksDB/external/github-task-manager/tasks.json');
-    expect(GITHUB.getTasksFile('ai-career-roadmap')).toBe('public/tasksDB/external/ai-career-roadmap/tasks.json');
+    expect(GITHUB.getTasksFile('github-task-manager')).toBe('public/tasksDB/external/github-task-manager/node.tasks.json');
+    expect(GITHUB.getTasksFile('ai-career-roadmap')).toBe('public/tasksDB/external/ai-career-roadmap/node.tasks.json');
   });
 });
 
+/** Validate that the CATEGORIES list is populated with the expected category names. */
 describe('CATEGORIES List', () => {
   it('should have CATEGORIES array', () => {
     expect(Array.isArray(TEMPLATE_CONFIG.CATEGORIES)).toBeTruthy();
@@ -289,3 +298,4 @@ describe('CATEGORIES List', () => {
     expect(TEMPLATE_CONFIG.CATEGORIES).toContain('Testing');
   });
 });
+

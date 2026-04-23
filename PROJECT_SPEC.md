@@ -1,11 +1,13 @@
 # Project Specification: web-github-task-manager
-Generated: 2026-04-22 20:57
+Generated: 2026-04-23 11:29
 <!-- To update this file, run: python D:\tool\extract_project_spec\app.py --root D:\web\web-github-task-manager -->
 
 ## Folder structure
 
 .github
 .github\workflows
+memories
+memories\repo
 public
 public\api
 public\calendar
@@ -58,6 +60,7 @@ AGENTS.md
 CONTRIBUTING.md
 exposure-bridge.json
 LICENSE
+memories\repo\testing.md
 package.json
 public\api\README.md
 public\calendar\js\task-ics-export.js
@@ -421,6 +424,8 @@ structure from .github/workflows/validate-taskdb.yml:
     [yaml-key] jobs: {validate}
     [yaml-job] job: validate (4 steps)
 
+structure from memories/repo/testing.md:  (no extractable definitions)
+
 structure from public/README.md:
     [file-summary] Web GitHub Task Manager — Public Frontend
     [heading-1] # Web GitHub Task Manager — Public Frontend
@@ -447,6 +452,7 @@ structure from public/index.html:
     [section] <nav id="nav-grid">
 
 structure from public/styles.css:
+    [file-summary] ══════════════════════════════════════════════════════════════════════════════ * public/styles.css — web github task manager * ─────────────────────────────────────────────────────────────────────────
     [css-variable] --primary-color
     [css-variable] --primary-hover
     [css-variable] --secondary-color
@@ -683,8 +689,7 @@ structure from public/graph-display/css/README.md:
     [heading-3] ### Version 1.0 (Legacy)
 
 structure from public/graph-display/css/styles-mobile-optimized.css:
-    [file-summary] Interactive Career Graph - MOBILE-FIRST STYLESHEET (Template)
-    [section] /* ========== Interactive Career Graph - MOBILE-FIRST STYLESHEET (Template) ======== */
+    [file-summary] ══════════════════════════════════════════════════════════════════════════════ * public/graph display/css/styles mobile optimized.css — web github task manager * ──────────────────────────────────────
     [section] /* Base layer colors */
     [section] /* Profile Purple */
     [css-variable] --layer0-base
@@ -1079,13 +1084,11 @@ structure from public/graph-display/css/styles-mobile-optimized.css:
     [section] /* END OF MOBILE-OPTIMIZED STYLESHEET */
 
 structure from public/graph-display/css/styles-new.css:
-    [file-summary] Interactive Career Graph - MAIN STYLESHEET (Template)
-    [section] /* Interactive Career Graph - MAIN STYLESHEET (Template) */
+    [file-summary] ══════════════════════════════════════════════════════════════════════════════ * public/graph display/css/styles new.css — web github task manager * ───────────────────────────────────────────────────
     [section] /* END OF MAIN STYLESHEET */
 
 structure from public/graph-display/css/styles.css:
-    [file-summary] FULL CSS START
-    [section] /* ==================== FULL CSS START ======================== */
+    [file-summary] ══════════════════════════════════════════════════════════════════════════════ * public/graph display/css/styles.css — web github task manager * ───────────────────────────────────────────────────────
     [section] /* Profile */
     [css-variable] --layer0-base
     [section] /* Foundations */
@@ -1473,14 +1476,13 @@ structure from public/graph-display/css/styles.css:
     [section] /* Text size already small, ensure visibility rules work */
 
 structure from public/graph-display/css/components/_accessibility.css:
-    [section] /* ACCESSIBILITY COMPONENTS */
+    [file-summary] ══════════════════════════════════════════════════════════════════════════════ * public/graph display/css/components/_accessibility.css — web github task manager * ────────────────────────────────────
     [section] /* Skip Navigation Link */
     [selector] .skip-link
     [selector] .skip-link:focus
 
 structure from public/graph-display/css/components/_base.css:
-    [file-summary] BASE RESET & TYPOGRAPHY
-    [section] /* BASE RESET & TYPOGRAPHY */
+    [file-summary] ══════════════════════════════════════════════════════════════════════════════ * public/graph display/css/components/_base.css — web github task manager * ─────────────────────────────────────────────
     [section] /* Modern CSS Reset */
     [section] /* Prevent text size adjustment on orientation change */
     [section] /* Improved font rendering */
@@ -1511,7 +1513,7 @@ structure from public/graph-display/css/components/_base.css:
     [selector] .seo-content a
 
 structure from public/graph-display/css/components/_buttons.css:
-    [section] /* BUTTON COMPONENTS */
+    [file-summary] ══════════════════════════════════════════════════════════════════════════════ * public/graph display/css/components/_buttons.css — web github task manager * ──────────────────────────────────────────
     [section] /* Base button styles */
     [selector] .walkthrough-tooltip button
     [section] /* Accessibility requirement */
@@ -1546,8 +1548,7 @@ structure from public/graph-display/css/components/_buttons.css:
     [selector] .walkthrough-tooltip .tooltip-buttons
 
 structure from public/graph-display/css/components/_colors.css:
-    [file-summary] COLOR UTILITIES & CLASSES
-    [section] /* COLOR UTILITIES & CLASSES */
+    [file-summary] ══════════════════════════════════════════════════════════════════════════════ * public/graph display/css/components/_colors.css — web github task manager * ───────────────────────────────────────────
     [section] /* Text color classes (for contrast) */
     [selector] .text-light
     [selector] .text-dark
@@ -1585,8 +1586,7 @@ structure from public/graph-display/css/components/_colors.css:
     [section] /* Add more as needed for specific use cases */
 
 structure from public/graph-display/css/components/_graph.css:
-    [file-summary] D3 GRAPH VISUALIZATION
-    [section] /* D3 GRAPH VISUALIZATION */
+    [file-summary] ══════════════════════════════════════════════════════════════════════════════ * public/graph display/css/components/_graph.css — web github task manager * ────────────────────────────────────────────
     [section] /* ===== Graph Container ===== */
     [selector] #main-content
     [selector] #graph-section
@@ -1606,35 +1606,35 @@ structure from public/graph-display/css/components/_graph.css:
     [selector] #graph-container .node-type-child text
     [section] /* ===== Layer Color Variants ===== */
     [section] /* Layer 0 (Profile Purple) */
-    [selector] .node.layer-0.color-variant-0 circle
-    [selector] .node.layer-0.color-variant-1 circle
-    [selector] .node.layer-0.color-variant-2 circle
-    [selector] .node.layer-0.color-variant-3 circle
-    [selector] .node.layer-0.color-variant-4 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-0.color-variant-0 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-0.color-variant-1 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-0.color-variant-2 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-0.color-variant-3 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-0.color-variant-4 circle
     [section] /* Layer 1 (Foundations Blue) */
-    [selector] .node.layer-1.color-variant-0 circle
-    [selector] .node.layer-1.color-variant-1 circle
-    [selector] .node.layer-1.color-variant-2 circle
-    [selector] .node.layer-1.color-variant-3 circle
-    [selector] .node.layer-1.color-variant-4 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-1.color-variant-0 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-1.color-variant-1 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-1.color-variant-2 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-1.color-variant-3 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-1.color-variant-4 circle
     [section] /* Layer 2 (Skills Orange) */
-    [selector] .node.layer-2.color-variant-0 circle
-    [selector] .node.layer-2.color-variant-1 circle
-    [selector] .node.layer-2.color-variant-2 circle
-    [selector] .node.layer-2.color-variant-3 circle
-    [selector] .node.layer-2.color-variant-4 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-2.color-variant-0 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-2.color-variant-1 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-2.color-variant-2 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-2.color-variant-3 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-2.color-variant-4 circle
     [section] /* Layer 3 (Impact Green) */
-    [selector] .node.layer-3.color-variant-0 circle
-    [selector] .node.layer-3.color-variant-1 circle
-    [selector] .node.layer-3.color-variant-2 circle
-    [selector] .node.layer-3.color-variant-3 circle
-    [selector] .node.layer-3.color-variant-4 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-3.color-variant-0 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-3.color-variant-1 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-3.color-variant-2 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-3.color-variant-3 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-3.color-variant-4 circle
     [section] /* Layer 4 (Outcome Purple) */
-    [selector] .node.layer-4.color-variant-0 circle
-    [selector] .node.layer-4.color-variant-1 circle
-    [selector] .node.layer-4.color-variant-2 circle
-    [selector] .node.layer-4.color-variant-3 circle
-    [selector] .node.layer-4.color-variant-4 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-4.color-variant-0 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-4.color-variant-1 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-4.color-variant-2 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-4.color-variant-3 circle
+    [selector] #graph-container[data-color-mode="layer"] .node.layer-4.color-variant-4 circle
     [section] /* ===== SVG Text Color Classes (High Specificity for Consistency) ===== */
     [section] /* Ensures all node text has consistent, high-contrast styling */
     [selector] #graph-container .node text.text-light
@@ -1681,8 +1681,7 @@ structure from public/graph-display/css/components/_graph.css:
     [selector] .legend-color.legend-sample-in-progress
 
 structure from public/graph-display/css/components/_header.css:
-    [file-summary] HEADER & PROFILE BUTTON
-    [section] /* HEADER & PROFILE BUTTON */
+    [file-summary] ══════════════════════════════════════════════════════════════════════════════ * public/graph display/css/components/_header.css — web github task manager * ───────────────────────────────────────────
     [selector] header
     [section] /* Allow clicks through header */
     [selector] header button
@@ -1707,8 +1706,7 @@ structure from public/graph-display/css/components/_header.css:
     [section] /* Mobile optimizations */
 
 structure from public/graph-display/css/components/_menu.css:
-    [file-summary] MENU PANEL & SEARCH
-    [section] /* MENU PANEL & SEARCH */
+    [file-summary] ══════════════════════════════════════════════════════════════════════════════ * public/graph display/css/components/_menu.css — web github task manager * ─────────────────────────────────────────────
     [selector] #menu-aside
     [section] /* Flexbox for alignment */
     [section] /* Prevent scrolling background */
@@ -1765,7 +1763,7 @@ structure from public/graph-display/css/components/_menu.css:
     [section] /* Mobile optimizations - following modal template */
 
 structure from public/graph-display/css/components/_modules-sidebar.css:
-    [file-summary] Toggle button (floats bottom-left when modules are available)
+    [file-summary] ══════════════════════════════════════════════════════════════════════════════ * public/graph display/css/components/_modules sidebar.css — web github task manager * ──────────────────────────────────
     [section] /* Toggle button (floats bottom-left when modules are available) */
     [selector] .modules-sidebar-toggle
     [selector] .modules-sidebar-toggle:focus-visible
@@ -1851,8 +1849,7 @@ structure from public/graph-display/css/components/_modules-sidebar.css:
     [selector] .modules-item-count
 
 structure from public/graph-display/css/components/_popups.css:
-    [file-summary] POPUPS & MODALS
-    [section] /* POPUPS & MODALS */
+    [file-summary] ══════════════════════════════════════════════════════════════════════════════ * public/graph display/css/components/_popups.css — web github task manager * ───────────────────────────────────────────
     [section] /* Popup containers (overlay) */
     [selector] #legend-popup
     [section] /* Flexbox for perfect centering */
@@ -1956,8 +1953,7 @@ structure from public/graph-display/css/components/_popups.css:
     [selector] .breadcrumb-current
 
 structure from public/graph-display/css/components/_responsive.css:
-    [file-summary] RESPONSIVE & MOBILE OPTIMIZATIONS
-    [section] /* RESPONSIVE & MOBILE OPTIMIZATIONS */
+    [file-summary] ══════════════════════════════════════════════════════════════════════════════ * public/graph display/css/components/_responsive.css — web github task manager * ───────────────────────────────────────
     [section] /* ===== Touch Optimizations ===== */
     [section] /* Ensure all interactive elements meet minimum touch target */
     [selector] textarea
@@ -2001,7 +1997,7 @@ structure from public/graph-display/css/components/_responsive.css:
     [section] /* Show all content */
 
 structure from public/graph-display/css/components/_tooltip.css:
-    [section] /* TOOLTIP */
+    [file-summary] ══════════════════════════════════════════════════════════════════════════════ * public/graph display/css/components/_tooltip.css — web github task manager * ──────────────────────────────────────────
     [selector] #tooltip
     [selector] #tooltip.visible
     [section] /* Tooltip color indicators */
@@ -2025,8 +2021,7 @@ structure from public/graph-display/css/components/_tooltip.css:
     [selector] .tooltip-layer-indicator.layer-4.color-variant-0
 
 structure from public/graph-display/css/components/_variables.css:
-    [file-summary] CSS VARIABLES & THEME CONFIGURATION
-    [section] /* CSS VARIABLES & THEME CONFIGURATION */
+    [file-summary] ══════════════════════════════════════════════════════════════════════════════ * public/graph display/css/components/_variables.css — web github task manager * ────────────────────────────────────────
     [section] /* ===== Base Layer Colors ===== */
     [css-variable] --layer0-base
     [css-variable] --layer1-base
@@ -2149,7 +2144,7 @@ structure from public/graph-display/css/components/_variables.css:
     [css-variable] --node-text-stroke-width
 
 structure from public/graph-display/css/components/_walkthrough.css:
-    [section] /* WALKTHROUGH OVERLAY */
+    [file-summary] ══════════════════════════════════════════════════════════════════════════════ * public/graph display/css/components/_walkthrough.css — web github task manager * ──────────────────────────────────────
     [selector] .walkthrough-overlay
     [selector] .walkthrough-overlay.active
     [section] /* Walkthrough tooltip */
@@ -2342,7 +2337,7 @@ structure from public/graph-display/js/template-loader.js:
     function syncBuiltInTemplates(registry, convertFn, helpers = {})  «Register any locally available built-in templates into the provided registry.»
 
 structure from public/graph-display/js/utils.js:
-    [file-summary] Utility functions for color manipulation, contrast checking, and debouncing.
+    [file-summary] public/graph-display/js/utils.js — web-github-task-manager
     function debounce(func, wait)  «Debounce function delays execution until after wait milliseconds have elapsed since the last time the debounced function»
     function getLuminance(hexColor)  «Calculates the relative luminance of a color.»
     function getContrast(hexColor1, hexColor2)  «Calculates the contrast ratio between two colors.»
@@ -2416,6 +2411,7 @@ structure from public/health/index.html:
     [section] <footer id="health-footer">
 
 structure from public/health/css/health.css:
+    [file-summary] ══════════════════════════════════════════════════════════════════════════════ * public/health/css/health.css — web github task manager * ──────────────────────────────────────────────────────────────
     [css-variable] --health-bg
     [css-variable] --health-surface
     [css-variable] --health-border
@@ -2487,8 +2483,7 @@ structure from public/list-display/css/README.md:
     [heading-2] ## Current wiring
 
 structure from public/list-display/css/task-manager.css:
-    [file-summary] GitHub Task Manager - Responsive & Touch-Optimized CSS
-    [section] /* GitHub Task Manager - Responsive & Touch-Optimized CSS */
+    [file-summary] ══════════════════════════════════════════════════════════════════════════════ * public/list display/css/task manager.css — web github task manager * ──────────────────────────────────────────────────
     [section] /* GitHub Theme Colors */
     [css-variable] --primary-color
     [css-variable] --primary-hover
@@ -3190,221 +3185,223 @@ structure from public/tasksDB/external/github-task-manager/tasks.json:
 structure from public/tasksDB/external/github-task-manager/tour/graph-tour.json:
     [json-array] [8 items]
 
-structure from tests/playwright.config.js:  (no extractable definitions)
+structure from tests/playwright.config.js:
+    [file-summary] tests/playwright.config.js — web-github-task-manager
 
 structure from tests/run-tests.js:
     [file-summary] Test Runner for GitHub Task Manager Runs all component tests and reports results
-    function main()  «docstring: none»
+    function main()  «Load the unit test files, execute the queued suites, and print a summary.»
 
 structure from tests/e2e/crud-operations.spec.js:
     [file-summary] End-to-end coverage for CRUD, filtering, export, and statistics in list-display.
-    const BASE_URL  «docstring: none»
-    const TIMEOUT  «docstring: none»
-    function waitForAppReady(page)  «docstring: none»
-    [describe] GitHub Task Manager - Create Task  «docstring: none»
-    [describe] GitHub Task Manager - Edit Task  «docstring: none»
-    [describe] GitHub Task Manager - Delete Task  «docstring: none»
-    [describe] GitHub Task Manager - Filter & Search  «docstring: none»
-    [describe] GitHub Task Manager - Refresh & Persistence  «docstring: none»
-    [describe] GitHub Task Manager - CSV Export  «docstring: none»
-    [describe] GitHub Task Manager - Statistics  «docstring: none»
-    [describe] GitHub Task Manager - UI/UX  «docstring: none»
+    const BASE_URL  «Base route for the list-display app under the local Playwright server.»
+    const TIMEOUT  «Default timeout budget for waits in this CRUD regression suite.»
+    function waitForAppReady(page)  «Wait until the list-display app has rendered either tasks or the empty state.»
+    [describe] GitHub Task Manager - Create Task  «Validate task creation flows, defaults, and required-field handling.»
+    [describe] GitHub Task Manager - Edit Task  «Validate editing flows for existing tasks and edit-modal regressions.»
+    [describe] GitHub Task Manager - Delete Task  «Validate destructive task removal flows and confirmation handling.»
+    [describe] GitHub Task Manager - Filter & Search  «Validate task filtering and search-related list narrowing behavior.»
+    [describe] GitHub Task Manager - Refresh & Persistence  «Validate refresh behavior and state persistence across reload-style actions.»
+    [describe] GitHub Task Manager - CSV Export  «Validate CSV export availability and basic download payload generation.»
+    [describe] GitHub Task Manager - Statistics  «Validate the list-display statistics cards and count updates.»
+    [describe] GitHub Task Manager - UI/UX  «Validate core UI affordances, visibility, and responsive behavior.»
 
 structure from tests/e2e/graph-fullscreen.spec.js:
     [file-summary] End-to-end checks for graph fullscreen behavior launched from list-display.
-    const BASE_URL  «docstring: none»
-    const TIMEOUT  «docstring: none»
-    function waitForAppReady(page)  «docstring: none»
-    [describe] Graph Fullscreen  «docstring: none»
+    const BASE_URL  «Base route for the list-display app under the local Playwright server.»
+    const TIMEOUT  «Default timeout budget for fullscreen flow assertions in this suite.»
+    function waitForAppReady(page)  «Wait until the list-display app has rendered either tasks or the empty state.»
+    [describe] Graph Fullscreen  «Validate entering and exiting fullscreen graph mode from list-display.»
 
 structure from tests/e2e/live-multi-project-saves.spec.js:
     [file-summary] Live-site regression coverage for saving the correct project after project switches.
-    const LIVE_URL  «docstring: none»
-    const TIMEOUT  «docstring: none»
-    const LIVE_PASSWORD_GITHUB_TASK_MANAGER  «docstring: none»
-    const LIVE_PASSWORD_AI_CAREER_ROADMAP  «docstring: none»
-    const RUN_LIVE  «docstring: none»
-    function selectProjectAndWait(page, projectId, { expectTaskText, minTotalTasks, maxTotalTasks } = {})  «docstring: none»
-    function waitForAppReady(page)  «docstring: none»
-    function getWorkerUrl(page)  «docstring: none»
-    function getTasksFile(page)  «docstring: none»
-    function getRepoInfo(page)  «docstring: none»
-    function unlockProject(page, password)  «docstring: none»
-    function createTestTask(page, taskName = 'Test Task ' + Math.random().toString(36).slice(2,8))  «docstring: none»
-    function editFirstTask(page, newName = 'Edited Task ' + Math.random().toString(36).slice(2,8))  «docstring: none»
-    function waitForSaveToast(page, expectedText, timeout = 10000)  «docstring: none»
-    [describe] @live Live Site - Multi-Project GitHub Saves  «docstring: none»
+    const LIVE_URL  «Live-site URL used for GitHub Pages regression coverage.»
+    const TIMEOUT  «Timeout budget for live-site navigation, unlock, and save flows.»
+    const LIVE_PASSWORD_GITHUB_TASK_MANAGER  «Password for unlocking the github-task-manager live project during tests.»
+    const LIVE_PASSWORD_AI_CAREER_ROADMAP  «Password for unlocking the ai-career-roadmap live project during tests.»
+    const RUN_LIVE  «Feature flag that enables live-site Playwright coverage in opted-in environments.»
+    function selectProjectAndWait(page, projectId, { expectTaskText, minTotalTasks, maxTotalTasks } = {})  «Switch to a project and wait until its task list characteristics are visible.»
+    function waitForAppReady(page)  «Wait until the app has rendered either tasks or the empty-state placeholder.»
+    function getWorkerUrl(page)  «Read the rendered Worker URL from the live-site diagnostics panel.»
+    function getTasksFile(page)  «Read the active tasks.json path from the live-site diagnostics panel.»
+    function getRepoInfo(page)  «Read the active repository identifier from the live-site diagnostics panel.»
+    function unlockProject(page, password)  «Unlock the current password-protected project before save actions.»
+    function createTestTask(page, taskName = 'Test Task ' + Math.random().toString(36).slice(2,8))  «Create a minimal test task through the live UI and return its generated name.»
+    function editFirstTask(page, newName = 'Edited Task ' + Math.random().toString(36).slice(2,8))  «Edit the first visible task through the live UI and return the updated name.»
+    function waitForSaveToast(page, expectedText, timeout = 10000)  «Wait for the save toast to appear, assert its text, and wait for dismissal.»
+    [describe] @live Live Site - Multi-Project GitHub Saves  «Validate live-site save behavior across multiple password-protected projects.»
 
 structure from tests/e2e/module-navigation.spec.js:
     [file-summary] End-to-end validation for synchronized module navigation between list and graph views.
-    const TIMEOUT  «docstring: none»
-    function waitForAppReady(page)  «docstring: none»
-    [describe] module navigation sync  «docstring: none»
+    const TIMEOUT  «Timeout budget for synchronized list and graph navigation assertions.»
+    function waitForAppReady(page)  «Wait until the list-display shell has finished loading project metadata.»
+    [describe] module navigation sync  «Validate that module navigation stays synchronized across list and graph views.»
 
 structure from tests/e2e/password-timeline-issues.spec.js:
     [file-summary] End-to-end regression coverage for password, timeline, and GitHub issue workflows.
-    const BASE_URL  «docstring: none»
-    const LIVE_URL  «docstring: none»
-    const TIMEOUT  «docstring: none»
-    const LIVE_PASSWORD  «docstring: none»
-    const LIVE_PASSWORD_AI_CAREER_ROADMAP  «docstring: none»
-    const RUN_LIVE  «docstring: none»
-    function waitForAppReady(page)  «docstring: none»
-    [describe] New Features - Password / Timeline / Issues  «docstring: none»
-    [describe] Live Site - Password Protection & New Features  «docstring: none»
+    const BASE_URL  «Base route for local list-display password, timeline, and issues coverage.»
+    const LIVE_URL  «Live GitHub Pages URL used by the opted-in regression suite.»
+    const TIMEOUT  «Timeout budget for local and live feature regressions in this suite.»
+    const LIVE_PASSWORD  «Default live-site password for the primary project under test.»
+    const LIVE_PASSWORD_AI_CAREER_ROADMAP  «Live-site password for the ai-career-roadmap project switch regression.»
+    const RUN_LIVE  «Feature flag that enables the live-site portion of this regression suite.»
+    function waitForAppReady(page)  «Wait until the list-display app has rendered either tasks or the empty state.»
+    [describe] New Features - Password / Timeline / Issues  «Validate local password-gate, timeline, and issue-sync behavior.»
+    [describe] Live Site - Password Protection & New Features  «await route.fulfill({ status: 200, contentType: 'application/json; charset=utf-8', body: JSON.stringify(mockIssues) }); »
 
 structure from tests/e2e/smoke.spec.js:
     [file-summary] Smoke tests: app boot and basic create task flow.
-    const TIMEOUT  «docstring: none»
-    function waitForAppReady(page)  «docstring: none»
-    function unlockIfNeeded(page)  «docstring: none»
-    [describe] @smoke app boot + create task  «docstring: none»
+    const TIMEOUT  «Timeout budget for the fast smoke coverage path.»
+    function waitForAppReady(page)  «Wait until the app shell, debug metadata, and loading overlay settle.»
+    function unlockIfNeeded(page)  «Unlock the active project when password protection is enabled.»
+    [describe] @smoke app boot + create task  «Validate that the app boots and can create a task in the local test environment.»
 
 structure from tests/e2e/update-task-via-ui.spec.js:
     [file-summary] Playwright utility coverage for updating tasks through the UI instead of raw JSON edits.
-    const BASE_URL  «docstring: none»
-    const TIMEOUT  «docstring: none»
+    const BASE_URL  «Base route for the list-display app under the local Playwright server.»
+    const TIMEOUT  «Timeout budget for task edit and save assertions in this suite.»
     function waitForAppReady(page)  «Wait for the app to be ready and all tasks loaded»
     function updateTaskViaUI(page, taskId, taskData)  «Update a task by task ID through the UI»
     function createTaskViaUI(page, taskData)  «Create a new task with specified data»
-    [describe] Update Tasks Via UI Automation  «docstring: none»
+    [describe] Update Tasks Via UI Automation  «Validate reusable UI helpers for updating and creating tasks through the app.»
 
 structure from tests/e2e/verify-commit-structure.spec.js:
     [file-summary] Live-site verification for TaskDB commit subjects and machine-readable payload structure.
-    const LIVE_URL  «docstring: none»
-    const TIMEOUT  «docstring: none»
-    const RUN_LIVE  «docstring: none»
-    const LIVE_PASSWORD_AI_CAREER_ROADMAP  «docstring: none»
-    function waitForSaveToast(page, expectedText, timeout = 15000)  «docstring: none»
-    function pollForCommitWithMessageContaining(page, repoOwner, repoName, needle, timeout = TIMEOUT)  «docstring: none»
-    function extractTaskDbCommitPayload(message)  «docstring: none»
-    [describe] @live Verify commit subject + payload structure  «docstring: none»
+    const LIVE_URL  «Live GitHub Pages URL used for commit-verification regressions.»
+    const TIMEOUT  «Timeout budget for worker saves and GitHub commit propagation checks.»
+    const RUN_LIVE  «Feature flag that enables the live-site commit verification suite.»
+    const LIVE_PASSWORD_AI_CAREER_ROADMAP  «Password for unlocking the ai-career-roadmap live project during this suite.»
+    function waitForSaveToast(page, expectedText, timeout = 15000)  «Wait for the save toast to appear, assert its text, and wait for dismissal.»
+    function pollForCommitWithMessageContaining(page, repoOwner, repoName, needle, timeout = TIMEOUT)  «Poll the GitHub commits API until a commit message contains the requested marker.»
+    function extractTaskDbCommitPayload(message)  «Extract the legacy TaskDB payload block from a commit message when present.»
+    [describe] @live Verify commit subject + payload structure  «Validate live TaskDB commit subjects and payload structure after worker saves.»
 
 structure from tests/e2e/visual-states.spec.js:
     [file-summary] Visual-state checks for list-display task status classes and styling hooks.
-    [describe] Task Visual States  «docstring: none»
+    [describe] Task Visual States  «Validate list and graph styling hooks for task status-driven visual states.»
 
 structure from tests/graph-display/graph-display.spec.js:
     [file-summary] Graph-display interaction tests for modal navigation and persistent node selection.
-    function parseTranslate(transform)  «docstring: none»
-    [describe] graph-display task-management template  «docstring: none»
+    function parseTranslate(transform)  «Parse an SVG translate transform string into numeric x/y coordinates.»
+    [describe] graph-display task-management template  «Validate graph-display rendering, navigation, and task-graph layout behavior.»
 
 structure from tests/graph-display/inline-subtask-navigation.spec.js:
     [file-summary] Graph-display regression coverage for inline subtask drill-down behavior.
-    function waitForNodeCount(page, minimum)  «docstring: none»
-    [describe] inline subtask navigation  «docstring: none»
+    function waitForNodeCount(page, minimum)  «Wait until the graph contains more than the requested number of nodes.»
+    [describe] inline subtask navigation  «Validate inline task-subgraph drill-down and parent navigation behavior.»
 
-structure from tests/graph-display/playwright.config.js:  (no extractable definitions)
+structure from tests/graph-display/playwright.config.js:
+    [file-summary] tests/graph-display/playwright.config.js — web-github-task-manager
 
 structure from tests/graph-display/server.js:
     [file-summary] Minimal static server used by graph-display Playwright tests.
-    function contentTypeFor(filePath)  «docstring: none»
-    function safeJoin(root, requestPath)  «docstring: none»
+    function contentTypeFor(filePath)  «Resolve the response content type for a requested static asset path.»
+    function safeJoin(root, requestPath)  «Safely resolve a request path under the configured root without traversal.»
 
 structure from tests/graph-display/web-e2e-bussines-navigation.spec.js:
     [file-summary] Graph-display navigation coverage for the web-e2e-bussines project template.
-    function waitForNodeCount(page, minimum)  «docstring: none»
-    [describe] web-e2e-bussines graph navigation  «docstring: none»
+    function waitForNodeCount(page, minimum)  «Wait until the graph contains more than the requested number of nodes.»
+    [describe] web-e2e-bussines graph navigation  «Validate graph navigation and sidebar drilling for the web-e2e-bussines template.»
 
 structure from tests/unit/generate-project-calendars.test.js:
     [file-summary] Unit coverage for TaskDB-to-calendar generation and project descriptor discovery.
-    [describe] Calendar Parser  «docstring: none»
+    [describe] Calendar Parser  «Validate calendar state generation and descriptor discovery from TaskDB data.»
 
 structure from tests/unit/graph-data.test.js:
     [file-summary] Basic sanity test for `public/graph-display/js/graph-data.js` to ensure it parses without syntax errors in the Node test environment.
-    function loadGraphDataModule(windowMock = { location: { pathname: '/public/graph-display/index.html', hostname: '127.0.0.1', search: '' } }, fetchMock = async () => ({ ok: false, status: 404, json: async () => ({}) })  «docstring: none»
-    [describe] Graph Data Module  «docstring: none»
+    function loadGraphDataModule(windowMock = { location: { pathname: '/public/graph-display/index.html', hostname: '127.0.0.1', search: '' } }, fetchMock = async () => ({ ok: false, status: 404, json: async () => ({}) })  «Load the browser graph-data module into a Node test harness with mocked globals.»
+    [describe] Graph Data Module  «Validate that the graph-data module parses and builds task graph templates correctly.»
 
 structure from tests/unit/local-folder-scanner.test.js:
     [file-summary] Unit coverage for browser-side local-folder TaskDB discovery and registration.
-    function loadFolderProjectService(initialStorage = {})  «docstring: none»
-    [describe] Folder Project Service  «docstring: none»
+    function loadFolderProjectService(initialStorage = {})  «Load the browser folder-project service into a Node test harness with mocked storage.»
+    [describe] Folder Project Service  «Validate local folder TaskDB discovery, registration, and lookup behavior.»
 
 structure from tests/unit/projects-config.test.js:
     [file-summary] Projects Config Tests Verify that a centralized PROJECTS_CONFIG is loaded and applied to TEMPLATE_CONFIG
-    const TEMPLATE_CONFIG  «docstring: none»
-    [describe] PROJECTS_CONFIG override  «docstring: none»
+    const TEMPLATE_CONFIG  «Evaluated template configuration with an injected PROJECTS_CONFIG test fixture.»
+    [describe] PROJECTS_CONFIG override  «Validate that PROJECTS_CONFIG overrides are wired into TEMPLATE_CONFIG.»
 
 structure from tests/unit/server-api.test.js:
     [file-summary] Server API Tests Validates local disk persistence API and derived state files generation.
-    function httpRequest({ port, method, path: reqPath, body, headers = {} })  «docstring: none»
-    [describe] Server API - /api/tasks  «docstring: none»
+    function httpRequest({ port, method, path: reqPath, body, headers = {} })  «Send a raw HTTP request to a locally running server and resolve with status code and body.»
+    [describe] Server API - /api/tasks  «Validate the /api/tasks REST endpoints for task persistence and derived state file generation.»
 
 structure from tests/unit/task-field-automation.test.js:
     [file-summary] Template Automation Tests Tests for automated field population
-    const TEMPLATE_CONFIG  «docstring: none»
-    const TemplateValidator  «docstring: none»
-    const TemplateAutomation  «docstring: none»
-    [describe] TemplateAutomation Initialization  «docstring: none»
-    [describe] Task ID Generation  «docstring: none»
-    [describe] Auto-populate Task  «docstring: none»
-    [describe] Auto-populate Project  «docstring: none»
-    [describe] Skill Match Calculation  «docstring: none»
-    [describe] v3 Agentic Field Auto-Population  «docstring: none»
-    [describe] v3 Project Auto-Population  «docstring: none»
-    [describe] validateAndFix v3 Support  «docstring: none»
+    const TEMPLATE_CONFIG  «Evaluated TEMPLATE_CONFIG loaded directly from the production config file.»
+    const TemplateValidator  «TemplateValidator class evaluated from the browser module in a Node test harness.»
+    const TemplateAutomation  «TemplateAutomation class evaluated from the browser module in a Node test harness.»
+    [describe] TemplateAutomation Initialization  «Verify that TemplateAutomation can be instantiated with a TEMPLATE_CONFIG.»
+    [describe] Task ID Generation  «Validate sequential task ID generation and gap-filling logic.»
+    [describe] Auto-populate Task  «Validate auto-population of individual task fields from TEMPLATE_CONFIG defaults and rules.»
+    [describe] Auto-populate Project  «Validate auto-population of project-level fields.»
+    [describe] Skill Match Calculation  «Validate worker skill matching score calculation against task requirements.»
+    [describe] v3 Agentic Field Auto-Population  «Validate v3 agentic field auto-population including effort, complexity, and risk fields.»
+    [describe] v3 Project Auto-Population  «Validate v3 project-level field auto-population including budget and health scores.»
+    [describe] validateAndFix v3 Support  «Validate that validateAndFix correctly handles v3 schema fields.»
 
 structure from tests/unit/task-schema-validator.test.js:
     [file-summary] Template Validator Tests Tests for validation logic
-    const TEMPLATE_CONFIG  «docstring: none»
-    const TemplateValidator  «docstring: none»
-    [describe] TemplateValidator Initialization  «docstring: none»
-    [describe] Date Validation  «docstring: none»
-    [describe] Email Validation  «docstring: none»
-    [describe] Status Normalization  «docstring: none»
-    [describe] Task Validation  «docstring: none»
-    [describe] Project Validation  «docstring: none»
-    [describe] v3 Task Field Validation  «docstring: none»
+    const TEMPLATE_CONFIG  «Evaluated TEMPLATE_CONFIG loaded directly from the production config file.»
+    const TemplateValidator  «TemplateValidator class evaluated from the browser module in a Node test harness.»
+    [describe] TemplateValidator Initialization  «Verify that TemplateValidator can be instantiated with a TEMPLATE_CONFIG.»
+    [describe] Date Validation  «Validate YYYY-MM-DD date format detection and rejection of non-conformant values.»
+    [describe] Email Validation  «Validate RFC-5322-style email format detection.»
+    [describe] Status Normalization  «Validate case-insensitive status string normalization to canonical enum values.»
+    [describe] Task Validation  «Validate task-level field validation rules including required fields and enum constraints.»
+    [describe] Project Validation  «Validate project-level field validation rules including dates and status values.»
+    [describe] v3 Task Field Validation  «Validate v3 schema task fields including agentic, risk, and milestone properties.»
 
 structure from tests/unit/task-storage-sync.test.js:
     [file-summary] Task Database Tests Tests for task storage and operations
-    const TEMPLATE_CONFIG  «docstring: none»
-    const TemplateValidator  «docstring: none»
-    const TemplateAutomation  «docstring: none»
-    class MockGitHubAPI  «docstring: none»:
-        constructor()  «docstring: none»
-        async getFileContent(path)  «docstring: none»
-        async updateFile(path, content, message, sha)  «docstring: none»
+    const TEMPLATE_CONFIG  «Evaluated TEMPLATE_CONFIG loaded directly from the production config file.»
+    const TemplateValidator  «TemplateValidator class evaluated from the browser module in a Node test harness.»
+    const TemplateAutomation  «TemplateAutomation class evaluated from the browser module in a Node test harness.»
+    class MockGitHubAPI  «In-memory stub that replaces the real GitHub API client for isolated task storage tests.»:
+        constructor()  «Initialize with an empty in-memory file store.»
+        async getFileContent(path)  «Return the stored content and a deterministic SHA for the given path.»
+        async updateFile(path, content, message, sha)  «Persist the content in the in-memory store and return a new mock SHA.»
 
-    [describe] TaskDatabase Initialization  «docstring: none»
-    [describe] Task CRUD Operations  «docstring: none»
-    [describe] Task Filtering  «docstring: none»
-    [describe] Statistics Generation  «docstring: none»
-    [describe] TaskDatabase Persistence  «docstring: none»
+    [describe] TaskDatabase Initialization  «Verify that TaskDatabase can be created and exposes an empty tasks array initially.»
+    [describe] Task CRUD Operations  «Validate create, read, update, and delete operations on tasks within TaskDatabase.»
+    [describe] Task Filtering  «Validate filtering tasks by status, priority, and category.»
+    [describe] Statistics Generation  «Validate task statistics aggregation including counts by status and priority.»
+    [describe] TaskDatabase Persistence  «Validate that TaskDatabase correctly loads from and saves to the mock GitHub storage backend.»
 
 structure from tests/unit/tasks-json-format.test.js:
     [file-summary] tasks.json format validation tests.
-    const TASKS_DB_ROOT  «docstring: none»
-    const VALID_PROJECT_STATUS  «docstring: none»
-    const VALID_TASK_STATUS  «docstring: none»
-    const VALID_PRIORITY  «docstring: none»
-    const VALID_DEP_TYPES  «docstring: none»
-    const DATE_RE  «docstring: none»
-    function findTasksJsonFiles(dir, results = [])  «docstring: none»
-    function validateTasksJson(filePath)  «docstring: none»
-    [describe] tasks.json format validation  «docstring: none»
+    const TASKS_DB_ROOT  «Absolute path to the root tasksDB directory scanned for tasks.json files.»
+    const VALID_PROJECT_STATUS  «Allowed values for the project-level `status` field.»
+    const VALID_TASK_STATUS  «Allowed values for a task-level `status` field.»
+    const VALID_PRIORITY  «Allowed values for a task-level `priority` field.»
+    const VALID_DEP_TYPES  «Allowed dependency link type codes (Finish-to-Start, Start-to-Start, Finish-to-Finish, Start-to-Finish).»
+    const DATE_RE  «Regular expression that matches the YYYY-MM-DD date format.»
+    function findTasksJsonFiles(dir, results = [])  «Recursively walk a directory tree and collect all `tasks.json` file paths.»
+    function validateTasksJson(filePath)  «Validate a single `tasks.json` file against the expected schema and return all collected errors and warnings.»
+    [describe] tasks.json format validation  «Validate every tasks.json discovered under the tasksDB directory against the project schema.»
 
 structure from tests/unit/template-config.test.js:
     [file-summary] Template Config Tests Tests for TEMPLATE_CONFIG structure and values
-    const TEMPLATE_CONFIG  «docstring: none»
-    [describe] TEMPLATE_CONFIG Structure  «docstring: none»
-    [describe] FIELD_CATEGORIES  «docstring: none»
-    [describe] ENUMS Validation  «docstring: none»
-    [describe] v3 Defaults  «docstring: none»
-    [describe] v3 Optional Fields  «docstring: none»
-    [describe] STATUS_NORMALIZATION v3  «docstring: none»
-    [describe] GITHUB Configuration  «docstring: none»
-    [describe] CATEGORIES List  «docstring: none»
+    const TEMPLATE_CONFIG  «Evaluated TEMPLATE_CONFIG loaded directly from the production config file.»
+    [describe] TEMPLATE_CONFIG Structure  «Verify that TEMPLATE_CONFIG exposes all mandatory top-level keys and metadata.»
+    [describe] FIELD_CATEGORIES  «Validate FIELD_CATEGORIES arrays for automatic, required, and optional input fields.»
+    [describe] ENUMS Validation  «Validate that ENUMS covers all required status, priority, and v3 extension values.»
+    [describe] v3 Defaults  «Validate v3 task and project default values are correct types and initial states.»
+    [describe] v3 Optional Fields  «Validate that v3 optional task fields are registered in OPTIONAL_FIELDS and FIELD_CATEGORIES.»
+    [describe] STATUS_NORMALIZATION v3  «Validate that STATUS_NORMALIZATION maps lowercase and underscore variants to canonical v3 values.»
+    [describe] GITHUB Configuration  «Validate the GITHUB configuration block for owner, repo, branch, and project resolver methods.»
+    [describe] CATEGORIES List  «Validate that the CATEGORIES list is populated with the expected category names.»
 
 structure from tests/unit/validate-schema.js:
     [file-summary] Schema Validation Script Validates tasks.json against the template schema
-    const PROJECT_STATUS  «docstring: none»
-    const TASK_STATUS  «docstring: none»
-    const TASK_PRIORITY  «docstring: none»
-    const DEPENDENCY_TYPES  «docstring: none»
-    function validateRequired(obj, fields, prefix = '')  «docstring: none»
-    function validateEnum(value, validValues, fieldName)  «docstring: none»
-    function validateDateFormat(dateStr, fieldName)  «docstring: none»
+    const PROJECT_STATUS  «Allowed values for the project-level `status` field.»
+    const TASK_STATUS  «Allowed values for a task-level `status` field.»
+    const TASK_PRIORITY  «Allowed values for a task-level `priority` field.»
+    const DEPENDENCY_TYPES  «Allowed dependency link type codes.»
+    function validateRequired(obj, fields, prefix = '')  «Assert that all listed fields exist and are non-empty on the given object.»
+    function validateEnum(value, validValues, fieldName)  «Record an error when a value is defined but not included in the allowed values list.»
+    function validateDateFormat(dateStr, fieldName)  «Record an error when a date string is defined but does not match the YYYY-MM-DD format.»
 
 structure from tools/calendar/README.md:
     [file-summary] Calendar Export Tooling
@@ -4289,4 +4286,4 @@ api from tools/cloudflare-worker/worker.js:
     [route] PUT /api/tasks
 
 ---
-*144 files indexed · generated by extract_project_spec.py*
+*145 files indexed · generated by extract_project_spec.py*

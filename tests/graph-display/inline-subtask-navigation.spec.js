@@ -4,12 +4,14 @@
 
 import { test, expect } from '@playwright/test';
 
+/** Wait until the graph contains more than the requested number of nodes. */
 async function waitForNodeCount(page, minimum) {
   const nodes = page.locator('#graph-container g.node');
   await expect.poll(async () => nodes.count(), { timeout: 20000 }).toBeGreaterThan(minimum);
   return nodes;
 }
 
+/** Validate inline task-subgraph drill-down and parent navigation behavior. */
 test.describe('inline subtask navigation', () => {
   test('subtask task-node button opens the matching node inside the subtask graph', async ({ page }) => {
     await page.goto('/graph-display/index.html?template=github-task-manager-tasks&skipTour=true', {

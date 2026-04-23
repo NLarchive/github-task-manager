@@ -14,13 +14,16 @@ configContent = configContent.replace(
   "TOKEN: ''"
 );
 const getConfig = new Function(configContent + '\nreturn TEMPLATE_CONFIG;');
+/** Evaluated TEMPLATE_CONFIG loaded directly from the production config file. */
 const TEMPLATE_CONFIG = getConfig();
 
 // Load validator
 const validatorContent = fs.readFileSync(path.join(__dirname, '../../public/task-engine/js/task-schema-validator.js'), 'utf8');
 const getValidator = new Function('TEMPLATE_CONFIG', validatorContent + '\nreturn TemplateValidator;');
+/** TemplateValidator class evaluated from the browser module in a Node test harness. */
 const TemplateValidator = getValidator(TEMPLATE_CONFIG);
 
+/** Verify that TemplateValidator can be instantiated with a TEMPLATE_CONFIG. */
 describe('TemplateValidator Initialization', () => {
   it('should create validator instance with default config', () => {
     const validator = new TemplateValidator(TEMPLATE_CONFIG);
@@ -33,6 +36,7 @@ describe('TemplateValidator Initialization', () => {
   });
 });
 
+/** Validate YYYY-MM-DD date format detection and rejection of non-conformant values. */
 describe('Date Validation', () => {
   const validator = new TemplateValidator(TEMPLATE_CONFIG);
 
@@ -49,6 +53,7 @@ describe('Date Validation', () => {
   });
 });
 
+/** Validate RFC-5322-style email format detection. */
 describe('Email Validation', () => {
   const validator = new TemplateValidator(TEMPLATE_CONFIG);
 
@@ -65,6 +70,7 @@ describe('Email Validation', () => {
   });
 });
 
+/** Validate case-insensitive status string normalization to canonical enum values. */
 describe('Status Normalization', () => {
   const validator = new TemplateValidator(TEMPLATE_CONFIG);
 
@@ -85,6 +91,7 @@ describe('Status Normalization', () => {
   });
 });
 
+/** Validate task-level field validation rules including required fields and enum constraints. */
 describe('Task Validation', () => {
   const validator = new TemplateValidator(TEMPLATE_CONFIG);
 
@@ -153,6 +160,7 @@ describe('Task Validation', () => {
   });
 });
 
+/** Validate project-level field validation rules including dates and status values. */
 describe('Project Validation', () => {
   const validator = new TemplateValidator(TEMPLATE_CONFIG);
 
@@ -262,6 +270,7 @@ describe('Project Validation', () => {
   });
 });
 
+/** Validate v3 schema task fields including agentic, risk, and milestone properties. */
 describe('v3 Task Field Validation', () => {
   const validator = new TemplateValidator(TEMPLATE_CONFIG);
 

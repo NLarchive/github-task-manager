@@ -9,7 +9,7 @@
  * - If `tracking` is missing, adds a minimal structure for review/verification.
  *
  * Usage:
- *   node tools/scripts/enrich-tasks-workers.js public/tasksDB/external/ai-career-roadmap/tasks.json
+ *   node tools/scripts/enrich-tasks-workers.js public/tasksDB/external/ai-career-roadmap/node.tasks.json
  *   node tools/scripts/enrich-tasks-workers.js public/tasksDB/external/ai-career-roadmap/integration-tasks-v2.json
  */
 

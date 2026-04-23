@@ -12,8 +12,12 @@
  */
 import { test, expect } from '@playwright/test';
 
+/** Timeout budget for the fast smoke coverage path. */
 const TIMEOUT = 30000;
 
+/**
+ * Wait until the app shell, debug metadata, and loading overlay settle.
+ */
 async function waitForAppReady(page) {
   await page.waitForSelector('#totalTasks', { timeout: TIMEOUT });
 
@@ -35,6 +39,7 @@ async function waitForAppReady(page) {
   }, { timeout: TIMEOUT });
 }
 
+/** Unlock the active project when password protection is enabled. */
 async function unlockIfNeeded(page) {
   const lockedIndicator = page.locator('.auth-indicator.locked');
   const isLocked = await lockedIndicator.isVisible().catch(() => false);
@@ -48,6 +53,7 @@ async function unlockIfNeeded(page) {
   await page.locator('.auth-indicator.unlocked').waitFor({ timeout: TIMEOUT });
 }
 
+/** Validate that the app boots and can create a task in the local test environment. */
 test.describe('@smoke app boot + create task', () => {
   test('loads and can create a task locally', async ({ page }) => {
     if (process.env.E2E_DEBUG === '1') {

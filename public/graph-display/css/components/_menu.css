@@ -1,10 +1,9 @@
-/* ============================================================ */
-/* MENU PANEL & SEARCH */
-/* ============================================================ */
-/*
- * Side menu panel with search box and control buttons.
- * Follows modal template pattern for consistency.
- */
+/* ══════════════════════════════════════════════════════════════════════════════
+ * public/graph-display/css/components/_menu.css — web-github-task-manager
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Side menu panel styles: search box, control buttons, and slide-in animation.
+ * Follows the modal template pattern for visual consistency.
+ * ══════════════════════════════════════════════════════════════════════════════ */
 
 #menu-aside {
     position: fixed;

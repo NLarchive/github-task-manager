@@ -1,10 +1,9 @@
-/* ============================================================ */
-/* BUTTON COMPONENTS */
-/* ============================================================ */
-/*
- * All button styles including control buttons, close buttons,
- * and touch-optimized interactions.
- */
+/* ══════════════════════════════════════════════════════════════════════════════
+ * public/graph-display/css/components/_buttons.css — web-github-task-manager
+ * ─────────────────────────────────────────────────────────────────────────────
+ * All button styles: control buttons, close buttons, and touch-optimised
+ * interactions. Meets 44 px minimum touch-target accessibility requirement.
+ * ══════════════════════════════════════════════════════════════════════════════ */
 
 /* Base button styles */
 button,

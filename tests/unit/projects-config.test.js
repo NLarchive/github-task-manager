@@ -27,8 +27,10 @@ const injectedProjects = [
 const prefix = `var PROJECTS_CONFIG = ${JSON.stringify(injectedProjects)};\n`;
 
 const getConfig = new Function(prefix + configContent + '\nreturn TEMPLATE_CONFIG;');
+/** Evaluated template configuration with an injected PROJECTS_CONFIG test fixture. */
 const TEMPLATE_CONFIG = getConfig();
 
+/** Validate that PROJECTS_CONFIG overrides are wired into TEMPLATE_CONFIG. */
 describe('PROJECTS_CONFIG override', () => {
   it('should use PROJECTS_CONFIG to populate GITHUB.PROJECTS', () => {
     expect(Array.isArray(TEMPLATE_CONFIG.GITHUB.PROJECTS)).toBeTruthy();

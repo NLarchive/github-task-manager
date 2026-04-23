@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const { URL } = require('url');
 
+/** Resolve the response content type for a requested static asset path. */
 function contentTypeFor(filePath) {
   const ext = path.extname(filePath).toLowerCase();
   if (ext === '.html' || ext === '.php') return 'text/html; charset=utf-8';
@@ -19,6 +20,7 @@ function contentTypeFor(filePath) {
   return 'application/octet-stream';
 }
 
+/** Safely resolve a request path under the configured root without traversal. */
 function safeJoin(root, requestPath) {
   const decoded = decodeURIComponent(requestPath);
   const cleaned = decoded.replace(/^\/+/, '');
