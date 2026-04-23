@@ -1,6 +1,10 @@
+/**
+ * End-to-end regression coverage for password, timeline, and GitHub issue workflows.
+ */
+
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = '/';
+const BASE_URL = '/list-display/';
 const LIVE_URL = 'https://nlarchive.github.io/github-task-manager/';
 const TIMEOUT = 5000;
 const LIVE_PASSWORD = '1324';

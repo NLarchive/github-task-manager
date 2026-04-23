@@ -1,3 +1,7 @@
+/**
+ * End-to-end validation for synchronized module navigation between list and graph views.
+ */
+
 import { test, expect } from '@playwright/test';
 
 const TIMEOUT = 45000;

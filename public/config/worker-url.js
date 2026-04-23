@@ -1,12 +1,9 @@
-// Placeholder - Worker URL will be injected at deploy time by GitHub Actions
-// This file prevents 404 errors during local development
-// The actual GH_WORKER_URL is set in worker-url.local.js (local) or injected at deploy
-
-// GitHub Pages runtime convenience:
-// Allow setting Worker URL without rebuilding by using either:
-//   - Query string: ?workerUrl=https://YOUR.workers.dev
-//   - Local storage: localStorage['GH_WORKER_URL']
-// NOTE: Worker URL is not a secret (tokens stay inside the Worker).
+/**
+ * Runtime resolver for the Cloudflare worker URL used by secure write flows.
+ *
+ * Deployments can inject `GH_WORKER_URL`, while local and hosted debugging can
+ * override the value with a query string or localStorage without rebuilding.
+ */
 
 function __resolveWorkerUrlRuntime() {
   try {

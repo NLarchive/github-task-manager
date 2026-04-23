@@ -1,3 +1,7 @@
+/**
+ * Graph-display interaction tests for modal navigation and persistent node selection.
+ */
+
 import { test, expect } from '@playwright/test';
 
 function parseTranslate(transform) {
@@ -9,6 +13,56 @@ function parseTranslate(transform) {
 }
 
 test.describe('graph-display task-management template', () => {
+  test('renders task nodes with the configured priority fill colors', async ({ page }) => {
+    await page.goto('/graph-display/index.html?template=task-management&skipTour=true', { waitUntil: 'domcontentloaded' });
+
+    const nodes = page.locator('#graph-container g.node');
+    await expect.poll(async () => nodes.count(), { timeout: 15000 }).toBeGreaterThan(10);
+
+    const colorAudit = await page.evaluate(() => {
+      const graph = window.graphInstance;
+      if (!graph) return { error: 'graph instance unavailable' };
+      if (graph.config?.colorMode !== 'priority') {
+        return { error: `unexpected color mode: ${graph.config?.colorMode}` };
+      }
+
+      const toComputedColor = (colorValue) => {
+        const probe = document.createElement('div');
+        probe.style.color = colorValue;
+        document.body.appendChild(probe);
+        const resolved = getComputedStyle(probe).color;
+        probe.remove();
+        return resolved;
+      };
+
+      const taskNodes = (graph.data?.nodes || []).filter((node) => node?.templateType === 'task' && node?.priority);
+      const mismatches = [];
+      const checked = [];
+
+      taskNodes.forEach((node) => {
+        const expectedHex = graph.config?.priorityColorsHex?.[node.priority];
+        const nodeElement = document.querySelector(`#graph-container g.node[data-id="${node.id}"] circle`);
+        if (!expectedHex || !nodeElement) return;
+
+        const actualFill = getComputedStyle(nodeElement).fill;
+        const expectedFill = toComputedColor(expectedHex);
+        checked.push({ id: node.id, priority: node.priority, actualFill, expectedFill });
+        if (actualFill !== expectedFill) {
+          mismatches.push({ id: node.id, priority: node.priority, actualFill, expectedFill });
+        }
+      });
+
+      return {
+        checkedCount: checked.length,
+        mismatches
+      };
+    });
+
+    expect(colorAudit.error).toBeUndefined();
+    expect(colorAudit.checkedCount).toBeGreaterThan(5);
+    expect(colorAudit.mismatches).toEqual([]);
+  });
+
   test('dependency link opens target modal, keeps selection after close, and clears on background click', async ({ page }) => {
     await page.goto('/graph-display/index.html?template=task-management&skipTour=true', { waitUntil: 'domcontentloaded' });
 

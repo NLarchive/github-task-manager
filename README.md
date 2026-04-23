@@ -484,23 +484,30 @@ Tested and working on:
 ```
 github-task-manager/
 ├── public/                          # GitHub Pages content
-│   ├── index.html                  # Main application
+│   ├── index.html                  # Public hub / redirect to list-display
+│   ├── list-display/
+│   │   ├── index.html              # List task manager app shell
+│   │   ├── js/
+│   │   │   └── list-display-controller.js # List app controller
+│   │   └── css/
+│   │       └── task-manager.css    # List app stylesheet entrypoint
+│   ├── health/
+│   │   └── index.html              # Diagnostics page
 │   ├── config/
 │   │   ├── projects-config.js      # Canonical multi-project list (non-secret)
 │   │   ├── tasks-template-config.js      # Configuration and validation rules
 │   │   └── github-token.js         # GitHub API token (injected)
-│   ├── scripts/
-│   │   ├── task-manager-app.js     # Main application controller
-│   │   ├── template-validator.js   # Validation logic
-│   │   ├── template-automation.js  # Auto-population logic
-│   │   └── (GitHub API wrapper lives in task-manager-app.js)
+│   ├── task-engine/
+│   │   └── js/                      # Shared task validation, automation, and storage modules
+│   ├── local-folder/
+│   │   └── js/                      # Shared browser folder discovery and picker bindings
+│   ├── calendar/
+│   │   └── js/                      # Shared browser ICS export helper
 │   ├── tasksDB/
-│   │   ├── task-database.js        # Database CRUD operations
-│   │   ├── tasks.json              # Task storage file
-│   │   └── tasks.csv               # Exported tasks
-│   ├── styles/
-│   │   └── task-manager.css        # Application styling
-│   └── docs/                        # Documentation files
+│   │   ├── external/               # Git-tracked shared/public projects
+│   │   ├── local/                  # Local or gitignored projects
+│   │   └── registry.json           # Project discovery registry
+│   └── graph-display/              # Graph mini-app
 │
 ├── tests/                           # Test files
 │   ├── playwright/                  # Playwright E2E tests

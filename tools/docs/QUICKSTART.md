@@ -72,7 +72,7 @@ Site will be live at: https://nlarchive.github.io/github-task-manager/
 > Multi-project note: each project lives in `public/tasksDB/<scope>/<projectId>/tasks.json`.
 | `public/tasksDB/external/github-task-manager/tasks.csv` | Created CSV export | ✅ Pushed |
 | `public/tasksDB/README.md` | Database docs | ✅ Pushed |
-| `public/health-check.html` | Diagnostics page | ✅ Pushed |
+| `public/health/index.html` | Diagnostics page | ✅ Pushed |
 | `GITHUB_PAGES_SETUP.md` | Setup instructions | ✅ Pushed |
 | `DEPLOYMENT_SUMMARY.md` | Full summary | ✅ Pushed |
 
@@ -103,8 +103,8 @@ Site will be live at: https://nlarchive.github.io/github-task-manager/
 |-----------|--------|-----|
 | GitHub Repo | ✅ Live | https://github.com/NLarchive/github-task-manager |
 | GitHub Pages | ⏳ Waiting | https://nlarchive.github.io/github-task-manager/ |
-| Health Check | ⏳ Waiting | https://nlarchive.github.io/github-task-manager/health-check.html |
-| Task Manager UI | ⏳ Waiting | https://nlarchive.github.io/github-task-manager/index.html |
+| Health Check | ⏳ Waiting | https://nlarchive.github.io/github-task-manager/health/ |
+| Task Manager UI | ⏳ Waiting | https://nlarchive.github.io/github-task-manager/list-display/ |
 
 ---
 

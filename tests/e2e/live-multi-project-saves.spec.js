@@ -1,10 +1,8 @@
-import { test, expect } from '@playwright/test';
-
 /**
- * Live Site Multi-Project Save Tests
- * Tests that saves persist to the correct GitHub repo when switching projects
- * on the deployed GitHub Pages site.
+ * Live-site regression coverage for saving the correct project after project switches.
  */
+
+import { test, expect } from '@playwright/test';
 
 const LIVE_URL = process.env.PLAYWRIGHT_BASE_URL || 'https://nlarchive.github.io/github-task-manager/';
 const TIMEOUT = 60000;

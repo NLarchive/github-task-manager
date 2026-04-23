@@ -1,18 +1,15 @@
-// Projects Configuration (Centralized)
-//
-// Purpose
-// - Defines the canonical list of supported projects and their repository metadata.
-// - Used by `public/config/tasks-template-config.js` to populate `TEMPLATE_CONFIG.GITHUB.PROJECTS`.
-//
-// Security
-// - This file is intentionally NON-SECRET and may be committed.
-// - Do NOT place tokens or passwords here.
-//   Keep sensitive values in access-secret.* (client gate) and/or Worker environment variables.
+/**
+ * Canonical runtime registry for TaskDB projects and their repository metadata.
+ *
+ * This non-secret config feeds project selection in the frontend and keeps the
+ * list of supported repos centralized for local and deployed environments.
+ */
 
 // Global variable expected by `tasks-template-config.js`
 // Shape: Array<{ id, label, scope, owner, repo, branch, tasksRoot }>
 //   scope: 'external' = deployed to GitHub Pages / live apps
 //          'local'    = local development / test fixtures
+/** Canonical project descriptors exposed to the browser runtime and tests. */
 var PROJECTS_CONFIG = [
   // --- External (deployed) ---
   {

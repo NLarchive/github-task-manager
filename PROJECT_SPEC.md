@@ -1,5 +1,6 @@
 # Project Specification: web-github-task-manager
-Generated: 2026-04-18 21:45
+Generated: 2026-04-22 20:57
+<!-- To update this file, run: python D:\tool\extract_project_spec\app.py --root D:\web\web-github-task-manager -->
 
 ## Folder structure
 
@@ -7,6 +8,9 @@ Generated: 2026-04-18 21:45
 .github\workflows
 public
 public\api
+public\calendar
+public\calendar\js
+public\calendar\snippets
 public\config
 public\graph-display
 public\graph-display\css
@@ -15,9 +19,16 @@ public\graph-display\images
 public\graph-display\images\team
 public\graph-display\js
 public\graph-display\js\shared
-public\graph-display\templates
-public\scripts
-public\styles
+public\health
+public\health\css
+public\health\js
+public\list-display
+public\list-display\css
+public\list-display\js
+public\local-folder
+public\local-folder\js
+public\task-engine
+public\task-engine\js
 public\tasksDB
 public\tasksDB\_examples
 public\tasksDB\_examples\career
@@ -26,19 +37,17 @@ public\tasksDB\_schema
 public\tasksDB\_templates
 public\tasksDB\external
 public\tasksDB\external\ai-career-roadmap
-public\tasksDB\external\ai-career-roadmap\history
 public\tasksDB\external\ai-career-roadmap\tour
-public\tasksDB\external\extract-project-spec
 public\tasksDB\external\first-graph
 public\tasksDB\external\first-graph\tour
 public\tasksDB\external\github-task-manager
-public\tasksDB\external\github-task-manager\history
 public\tasksDB\external\github-task-manager\tour
 tests
 tests\e2e
 tests\graph-display
 tests\unit
 tools
+tools\calendar
 tools\cloudflare-worker
 tools\docs
 tools\scripts
@@ -47,9 +56,13 @@ tools\scripts
 .gitignore
 AGENTS.md
 CONTRIBUTING.md
+exposure-bridge.json
 LICENSE
 package.json
 public\api\README.md
+public\calendar\js\task-ics-export.js
+public\calendar\README.md
+public\calendar\snippets\calendar-dropdown-snippets.html
 public\config\projects-config.js
 public\config\tasks-template-config.js
 public\config\worker-url.js
@@ -88,18 +101,25 @@ public\graph-display\js\walkthrough.js
 public\graph-display\manifest.json
 public\graph-display\README.md
 public\graph-display\sw.js
-public\graph-display\templates\registry.json
-public\health-check.html
+public\health\css\health.css
+public\health\index.html
+public\health\js\runtime-health-checker.js
+public\health\README.md
 public\index.html
+public\list-display\css\README.md
+public\list-display\css\task-manager.css
+public\list-display\index.html
+public\list-display\js\list-display-controller.js
+public\list-display\js\README.md
+public\list-display\README.md
+public\local-folder\js\folder-picker-trigger.js
+public\local-folder\js\local-folder-scanner.js
+public\local-folder\README.md
 public\README.md
-public\scripts\folder-project-service.js
-public\scripts\folder-project-ui.js
-public\scripts\task-database.js
-public\scripts\task-manager-app.js
-public\scripts\template-automation.js
-public\scripts\template-validator.js
 public\styles.css
-public\styles\task-manager.css
+public\task-engine\js\task-field-automation.js
+public\task-engine\js\task-schema-validator.js
+public\task-engine\js\task-storage-sync.js
 public\tasksDB\_examples\career\data.json
 public\tasksDB\_examples\career\tour.json
 public\tasksDB\_examples\task-management\data.json
@@ -108,18 +128,11 @@ public\tasksDB\_schema\graph-template.schema.json
 public\tasksDB\_templates\starter_project_template.csv
 public\tasksDB\_templates\starter_project_template.json
 public\tasksDB\_templates\starter_project_template_v2.json
-public\tasksDB\external\ai-career-roadmap\history\.gitkeep
-public\tasksDB\external\ai-career-roadmap\history\changes.ndjson
 public\tasksDB\external\ai-career-roadmap\README.md
 public\tasksDB\external\ai-career-roadmap\tasks.json
 public\tasksDB\external\ai-career-roadmap\tour\graph-tour.json
-public\tasksDB\external\extract-project-spec\structure.json
-public\tasksDB\external\extract-project-spec\tasks.json
 public\tasksDB\external\first-graph\tasks.json
 public\tasksDB\external\first-graph\tour\graph-tour.json
-public\tasksDB\external\github-task-manager\history\changes.ndjson
-public\tasksDB\external\github-task-manager\history\tasks-root-legacy-20251211-200742.csv
-public\tasksDB\external\github-task-manager\history\tasks-root-legacy-20251211-200742.json
 public\tasksDB\external\github-task-manager\README.md
 public\tasksDB\external\github-task-manager\tasks.json
 public\tasksDB\external\github-task-manager\tour\graph-tour.json
@@ -143,17 +156,21 @@ tests\graph-display\server.js
 tests\graph-display\web-e2e-bussines-navigation.spec.js
 tests\playwright.config.js
 tests\run-tests.js
-tests\unit\folder-project-service.test.js
+tests\unit\generate-project-calendars.test.js
 tests\unit\graph-data.test.js
+tests\unit\local-folder-scanner.test.js
 tests\unit\projects-config.test.js
 tests\unit\server-api.test.js
-tests\unit\task-database.test.js
+tests\unit\task-field-automation.test.js
+tests\unit\task-schema-validator.test.js
+tests\unit\task-storage-sync.test.js
 tests\unit\tasks-json-format.test.js
-tests\unit\template-automation.test.js
-tests\unit\tasks-template-config.test.js
-tests\unit\template-validator.test.js
+tests\unit\template-config.test.js
 tests\unit\validate-schema.js
-tmp-test-output.txt
+tools\calendar\calendar-appointment-schema.js
+tools\calendar\calendar-constants.js
+tools\calendar\generate-project-calendars.js
+tools\calendar\README.md
 tools\cloudflare-worker\deploy.ps1
 tools\cloudflare-worker\deploy.sh
 tools\cloudflare-worker\package.json
@@ -191,14 +208,10 @@ focus from repo structure:
     [supporting-root] .github/ — CI/CD automation
     [ignored-scope] .gitignore influences which generated, local, or secret files are intentionally excluded
     [suggested-core-file] public/index.html — GitHub Task Manager
-    [suggested-core-file] public/scripts/task-manager-app.js — main task manager controller
-    [suggested-core-file] public/scripts/task-database.js — task data and persistence layer
-    [suggested-core-file] public/scripts/template-validator.js — task validation layer
-    [suggested-core-file] public/scripts/template-automation.js — task automation helpers
     [suggested-core-file] public/graph-display/index.html — Template: interactive graph-based CV/portfolio. Replace the sample graph data with your own career, skills, and outcomes.
     [suggested-core-file] public/graph-display/js/main-graph.js — Main script for initializing and managing the Curriculum Graph. Imports data, CV generator, walkthrough, utilities. Uses CSS classes for color and manages accessibility. UPDATED: Touch interaction mir
-    [suggested-core-file] public/graph-display/js/graph-data.js — graph data normalization layer
-    [suggested-core-file] public/config/projects-config.js — runtime project selection config
+    [suggested-core-file] public/graph-display/js/graph-data.js — IMPORTANT: Graph definitions (nodes, relationships, details) must come from external JSON templates following the schemas in `tasksDB/_schema/`.
+    [suggested-core-file] public/config/projects-config.js — Canonical runtime registry for TaskDB projects and their repository metadata.
     [suggested-core-file] public/tasksDB/registry.json — project registry and template discovery
 
 ---
@@ -330,13 +343,22 @@ structure from README.md:
     [heading-2] ## Changelog 📝
     [heading-3] ### Version 1.0.0 (2025-12-10)
 
+structure from exposure-bridge.json:
+    [json-key] project: "web-github-task-manager"
+    [json-key] root: "d:/web/web-github-task-manager"
+    [json-key] formats: {produce, consume}
+    [json-key] schemas: [5 items]
+    [json-key] connectors: [1 items]
+    [json-key] http_apis: [9 items]
+    [json-key] bridge: {projects, shared_formats, bridge_ready, bridge_missing, existing_mappings, +1 more}
+
 structure from package.json:
     [file-summary] github-task-manager — Collaborative task management system integrated with GitHub for public collaboration
     [json-key] name: "github-task-manager"
     [json-key] version: "1.0.0"
     [json-key] description: "Collaborative task management system integrated with GitHub ..."
-    [json-key] main: "public/scripts/task-manager-app.js"
-    [json-key] scripts: {start, start:static, test, test:validate, validate:tasks, +22 more}
+    [json-key] main: "public/list-display/js/list-display-controller.js"
+    [json-key] scripts: {start, start:static, test, test:validate, validate:tasks, +26 more}
     [json-key] repository: {type, url}
     [json-key] keywords: [4 items]
     [json-key] author: "nlarchive"
@@ -347,51 +369,49 @@ structure from package.json:
     [json-key] dependencies: {github-task-manager}
 
 structure from server.js:
-    [file-summary] No top-level file docstring detected
-    const TASK_FILE_CANDIDATES  «docstring: none»
-    const DISCOVERY_IGNORED_DIRS  «docstring: none»
-    function escapeCsvValue(value)  «docstring: none»
-    function generatePersistedCSV(tasks = [])  «docstring: none»
-    function getDuplicateTaskIds(tasks = [])  «docstring: none»
-    function safeJoin(root, requestPath)  «docstring: none»
-    function contentTypeFor(filePath)  «docstring: none»
-    function sendJson(res, status, payload)  «docstring: none»
-    function readBody(req)  «docstring: none»
-    function readJsonFile(filePath)  «docstring: none»
-    function normalizeRelativePath(value)  «docstring: none»
-    function inferModuleDepartment(relativePath)  «docstring: none»
-    function inferModuleType(relativePath, moduleData)  «docstring: none»
-    function isTaskFileCandidate(fileName)  «docstring: none»
-    function readDirectoryEntries(dirPath)  «docstring: none»
-    function pickPreferredTaskFileName(entries)  «docstring: none»
-    function discoverProjectTaskFiles(projectDir)  «docstring: none»
-    function getTaskKey(task)  «docstring: none»
-    function getTaskCode(task)  «docstring: none»
-    function getTaskPredecessorKeys(task)  «docstring: none»
-    function computeTaskFlowSummary(tasks)  «docstring: none»
-    function scoreRootModuleCandidate(relativePath, rawData)  «docstring: none»
-    function resolveRootModuleRelative(projectDir, tasksIndexData)  «docstring: none»
-    function collectProjectModules(projectDir, rootModuleRelative)  «docstring: none»
-    function buildRootRelativeModules(modules, rootModuleRelative)  «docstring: none»
-    function buildProjectPayload(projectDir)  «docstring: none»
-    function writeProjectPayload(projectDir, fullData)  «docstring: none»
-    function ensureDir(dirPath)  «docstring: none»
-    function sanitizeProjectId(value)  «docstring: none»
-    function maybeBootstrapTasksDb(tasksDbDir, fallbackDir)  «docstring: none»
-    function copyDirRecursive(sourceDir, targetDir)  «docstring: none»
-    function writeStateFiles(tasksDbDir, fullData)  «docstring: none»
-    function createServer({ publicDir, tasksDbDir, graphDir })  «docstring: none»
-
-structure from tmp-test-output.txt:  (no extractable definitions)
+    [file-summary] Local development server and runtime API bridge for the public TaskDB apps.
+    const TASK_FILE_CANDIDATES  «Preferred task filenames searched within a TaskDB project tree.»
+    const DISCOVERY_IGNORED_DIRS  «Directories skipped while scanning project modules and derived artifacts.»
+    function escapeCsvValue(value)  «Escape a scalar value for inclusion in the persisted CSV export.»
+    function generatePersistedCSV(tasks = [])  «Build the repo-side flattened CSV companion for a TaskDB task list.»
+    function getDuplicateTaskIds(tasks = [])  «Collect duplicate numeric task identifiers before persisting project data.»
+    function safeJoin(root, requestPath)  «Resolve a request-relative path within a trusted root, rejecting traversal.»
+    function contentTypeFor(filePath)  «Map a file path extension to the HTTP content type used by static serving.»
+    function sendJson(res, status, payload)  «Send a JSON response with no-store caching for API endpoints.»
+    function readBody(req)  «Read the full request body into memory with a conservative size guard.»
+    function readJsonFile(filePath)  «Read and parse a JSON file, returning null when it does not exist or fails.»
+    function normalizeRelativePath(value)  «Normalize a project-relative path to forward slashes without leading markers.»
+    function inferModuleDepartment(relativePath)  «Infer the department/group label for a discovered module path.»
+    function inferModuleType(relativePath, moduleData)  «Infer a coarse module type when the module file does not declare one.»
+    function isTaskFileCandidate(fileName)  «Determine whether a filename is a supported TaskDB source file.»
+    function readDirectoryEntries(dirPath)  «Read directory entries safely, returning an empty list on filesystem errors.»
+    function pickPreferredTaskFileName(entries)  «Pick the preferred task source file from a directory listing.»
+    function discoverProjectTaskFiles(projectDir)  «Recursively discover TaskDB task files under a project directory.»
+    function getTaskKey(task)  «Resolve the canonical task key used for dependency and flow matching.»
+    function getTaskCode(task)  «Extract the short task code prefix from a task key when present.»
+    function getTaskPredecessorKeys(task)  «Collect predecessor identifiers from a task dependency list.»
+    function computeTaskFlowSummary(tasks)  «Compute start/end tasks for a task list based on dependency relationships.»
+    function scoreRootModuleCandidate(relativePath, rawData)  «Score a candidate tasks file when selecting the root module for a project.»
+    function resolveRootModuleRelative(projectDir, tasksIndexData)  «Resolve the project root module path from navigation metadata or discovered files.»
+    function collectProjectModules(projectDir, rootModuleRelative)  «Build module metadata entries for all non-root task files in a project.»
+    function buildRootRelativeModules(modules, rootModuleRelative)  «Rebase module paths so the root module can reference them relative to itself.»
+    function buildProjectPayload(projectDir)  «Build the synchronized project payload served to the browser and graph runtime.»
+    function writeProjectPayload(projectDir, fullData)  «Persist the project index and root module payloads with regenerated navigation.»
+    function ensureDir(dirPath)  «Ensure a directory exists before writing project artifacts.»
+    function sanitizeProjectId(value)  «Sanitize a project identifier used to address project folders.»
+    function maybeBootstrapTasksDb(tasksDbDir, fallbackDir)  «Seed the writable tasks directory from bundled public TaskDB data when needed.»
+    function copyDirRecursive(sourceDir, targetDir)  «Recursively copy a directory tree into the writable tasks workspace.»
+    function writeStateFiles(tasksDbDir, fullData)  «Regenerate the lightweight status-oriented state files for a project.»
+    function createServer({ publicDir, tasksDbDir, graphDir })  «Create the local HTTP server used by development, tests, and file-backed saves.»
 
 structure from .github/workflows/deploy.yml:
     [file-summary] Deploy GitHub Task Manager
     [yaml-key] name: "Deploy GitHub Task Manager"
-    [yaml-key] True: {push, pull_request, workflow_dispatch}
+    [yaml-key] True: {push, workflow_dispatch}
     [yaml-key] permissions: {contents, pages, id-token}
     [yaml-key] concurrency: {group, cancel-in-progress}
     [yaml-key] jobs: {build}
-    [yaml-job] job: build (11 steps) — Build and Deploy
+    [yaml-job] job: build (10 steps) — Build and Deploy
 
 structure from .github/workflows/validate-taskdb.yml:
     [file-summary] Validate TaskDB (Schema + Commit Format)
@@ -408,7 +428,7 @@ structure from public/README.md:
     [heading-2] ## Core Runtime Files
     [heading-2] ## Sub-folders
     [heading-2] ## Application Modes
-    [heading-3] ### 1. Task Manager List UI (`index.html`)
+    [heading-3] ### 1. Task Manager List UI (`list-display/index.html`)
     [heading-3] ### 2. Graph Display (`graph-display/index.html`)
     [heading-2] ## Configuration Files (`config/`)
     [heading-2] ## Task Database (`tasksDB/`)
@@ -420,35 +440,11 @@ structure from public/README.md:
     [heading-3] ### Static Files
     [heading-2] ## Deployment
 
-structure from public/health-check.html:
-    [file-summary] GitHub Task Manager - Health Check
-    [title] <title>GitHub Task Manager - Health Check</title>
-    [heading-1] <h1>✓ GitHub Task Manager</h1>
-    [heading-3] <h3>🎯 Project Status</h3>
-    [heading-3] <h3>📊 Task Database</h3>
-    [heading-3] <h3>🔧 Recent Changes</h3>
-    [heading-3] <h3>⚠ Next Steps</h3>
-    [heading-3] <h3>📋 Current Project Tasks</h3>
-
 structure from public/index.html:
     [file-summary] GitHub Task Manager
     [title] <title>GitHub Task Manager</title>
     [heading-1] <h1>📋 GitHub Task Manager</h1>
-    [section] <section id="user-section">
-    [section] <section id="controls">
-    [section] <section id="stats">
-    [heading-3] <h3>Total Tasks</h3>
-    [heading-3] <h3>Not Started</h3>
-    [heading-3] <h3>In Progress</h3>
-    [heading-3] <h3>Done</h3>
-    [section] <section id="tasks-section">
-    [heading-2] <h2>Root Project</h2>
-    [heading-2] <h2>Add New Task</h2>
-    [heading-3] <h3>Automatic Fields</h3>
-    [heading-2] <h2>🔐 Access Required</h2>
-    [heading-2] <h2>🐙 Connect to GitHub</h2>
-    [heading-2] <h2>🐙 GitHub Issues Sync</h2>
-    [heading-2] <h2>🕘 Change History</h2>
+    [section] <nav id="nav-grid">
 
 structure from public/styles.css:
     [css-variable] --primary-color
@@ -554,17 +550,28 @@ structure from public/api/README.md:
     [heading-2] ## Current Gaps For Future Development
     [heading-2] ## Non-Goals And Clarifications
 
+structure from public/calendar/README.md:
+    [file-summary] Calendar Export Module
+    [heading-1] # Calendar Export Module
+    [heading-2] ## Files
+    [heading-2] ## Architecture
+
+structure from public/calendar/js/task-ics-export.js:
+    [file-summary] task-ics-export.js Client-side ICS (iCalendar) generator for GitHub Task Manager. Works as a browser global (window.calendarExport) or CommonJS module.
+
+structure from public/calendar/snippets/calendar-dropdown-snippets.html:  (no extractable definitions)
+
 structure from public/config/projects-config.js:
-    [file-summary] No top-level file docstring detected
-    const PROJECTS_CONFIG  «docstring: none»
+    [file-summary] Canonical runtime registry for TaskDB projects and their repository metadata.
+    const PROJECTS_CONFIG  «Canonical project descriptors exposed to the browser runtime and tests.»
 
 structure from public/config/tasks-template-config.js:
-    [file-summary] No top-level file docstring detected
-    const TEMPLATE_CONFIG  «docstring: none»
+    [file-summary] Shared TaskDB schema, defaults, enums, and runtime GitHub configuration.
+    const TEMPLATE_CONFIG  «Shared TaskDB schema, defaults, enums, and runtime GitHub configuration.»
 
 structure from public/config/worker-url.js:
-    [file-summary] No top-level file docstring detected
-    function __resolveWorkerUrlRuntime()  «docstring: none»
+    [file-summary] Runtime resolver for the Cloudflare worker URL used by secure write flows.
+    function __resolveWorkerUrlRuntime()  «Runtime resolver for the Cloudflare worker URL used by secure write flows.»
 
 structure from public/graph-display/.gitignore:  (no extractable definitions)
 
@@ -622,10 +629,10 @@ structure from public/graph-display/manifest.json:
     [json-key] screenshots: [0 items]
 
 structure from public/graph-display/sw.js:
-    [file-summary] No top-level file docstring detected
-    const CACHE_NAME  «docstring: none»
-    const ASSET_PATHS  «docstring: none»
-    precacheAssets = (cache) =>  «docstring: none»
+    [file-summary] Service worker for the graph-display app.
+    const CACHE_NAME  «Service worker for the graph-display app.»
+    const ASSET_PATHS  «Static graph assets that should be warmed into the service worker cache.»
+    precacheAssets = (cache) =>  «Fetch and cache the graph shell assets during service-worker install.»
 
 structure from public/graph-display/css/README.md:
     [file-summary] Interactive Career Graph - Modular CSS Architecture (Template)
@@ -1669,6 +1676,9 @@ structure from public/graph-display/css/components/_graph.css:
     [section] /* Category filter dimming */
     [selector] #graph-container .node.category-dimmed
     [selector] #graph-container .link.category-dimmed
+    [section] /* ===== Legend Status Sample Indicators ===== */
+    [selector] .legend-color.legend-sample-done
+    [selector] .legend-color.legend-sample-in-progress
 
 structure from public/graph-display/css/components/_header.css:
     [file-summary] HEADER & PROFILE BUTTON
@@ -1716,6 +1726,13 @@ structure from public/graph-display/css/components/_menu.css:
     [section] /* Animation */
     [selector] #menu-panel .cv-section-title
     [selector] #menu-aside.menu-open #menu-panel
+    [section] /* ===== Calendar Download Dropdown ===== */
+    [selector] .calendar-ctrl-details
+    [selector] .calendar-ctrl-details > summary
+    [selector] .calendar-ctrl-details > summary::-webkit-details-marker
+    [selector] .calendar-ctrl-menu
+    [selector] .calendar-ctrl-item
+    [selector] .calendar-ctrl-item:hover
     [section] /* Search Box */
     [selector] .search-box
     [selector] .search-icon
@@ -1867,7 +1884,7 @@ structure from public/graph-display/css/components/_popups.css:
     [selector] #popup .content .task-node-btn.task-node-status-in-progress
     [selector] #popup .content .task-node-btn.task-node-nav-btn
     [selector] #popup .content .task-node-btn.task-node-nav-btn .tn-name
-    [selector] #popup .content .task-node-btn.task-node-nav-btn.task-node-btn-active
+    [selector] #popup .content .task-node-btn.task-node-nav-btn:focus-visible
     [selector] #popup .content .task-node-btn.parent-nav-btn
     [selector] #popup .content .task-node-btn.parent-nav-btn:focus-visible
     [section] /* ===== CV Popup Content Styles ===== */
@@ -2177,14 +2194,14 @@ structure from public/graph-display/js/README.md:
 
 structure from public/graph-display/js/cv-generator.js:
     [file-summary] Generates HTML for a classic CV view based on graph data. Uses CSS classes for color styling based on node properties.
-    function findChildNodes(parentNodeId, relationshipType, allLinks, nodeMap)  «docstring: none»
-    function sortNodes(nodesToSort, method, details)  «docstring: none»
+    function findChildNodes(parentNodeId, relationshipType, allLinks, nodeMap)  «Collect direct child nodes linked from a parent through a specific relationship type.»
+    function sortNodes(nodesToSort, method, details)  «Sort CV section nodes using an alpha, chronology, or explicit-order strategy.»
     function generateGenericSectionItems(sectionConfig, allLinks, nodeMap, details)  «Generates HTML list items for a generic section. Applies CSS classes for styling based on node properties.»
     function generateSkillsSectionInternal(sectionConfig, allLinks, nodeMap, details)  «Generates HTML for the skills section. Applies CSS classes for styling based on node properties.»
     function generateClassicCV(nodes, links, details, userConfig)  «Main function to generate and display the Classic CV in the popup. Relies on nodes having layer, colorVariantIndex, and »
 
 structure from public/graph-display/js/d3.v7.min.js:
-    [file-summary] No top-level file docstring detected
+    [file-summary] Vendored D3 v7 runtime bundle used by the graph-display app.
     class T  «docstring: none»:
         constructor()  «docstring: none»
 
@@ -2210,64 +2227,64 @@ structure from public/graph-display/js/d3.v7.min.js:
 
 
 structure from public/graph-display/js/graph-data.js:
-    [file-summary] No top-level file docstring detected
-    const TEMPLATE_REGISTRY  «docstring: none»
-    const INLINE_TASK_ID_PREFIX  «docstring: none»
-    const GRAPH_NODES  «docstring: none»
-    const GRAPH_LINKS  «docstring: none»
-    const GRAPH_DETAILS  «docstring: none»
+    [file-summary] IMPORTANT: Graph definitions (nodes, relationships, details) must come from external JSON templates following the schemas in `tasksDB/_schema/`.
+    const TEMPLATE_REGISTRY  «Global template registry keyed by template id for the graph runtime.»
+    const INLINE_TASK_ID_PREFIX  «Prefix used to encode inline subtask task ids into synthetic navigation paths.»
+    const GRAPH_NODES  «Backwards-compatible node export for consumers expecting the Career template payload.»
+    const GRAPH_LINKS  «Backwards-compatible link export for consumers expecting the Career template payload.»
+    const GRAPH_DETAILS  «Backwards-compatible detail export for consumers expecting the Career template payload.»
     function convertCypherToGraph(cypherData)  «Converts raw Cypher-like export data into D3 compatible nodes and links.»
-    function normalizePriority(priority)  «docstring: none»
-    function getTaskPredecessorIds(task, validTaskIds)  «docstring: none»
-    function getDependencyLinkType(dep)  «docstring: none»
-    function buildDependencyLayering(tasks)  «docstring: none»
-    function scaleHoursToRadius(hours, minHours, maxHours, minRadius, maxRadius)  «docstring: none»
-    function validateAgainstSchema(obj, schema)  «docstring: none»
-    function resolveProjectIdFromTasksPath(path)  «docstring: none»
+    function normalizePriority(priority)  «Normalize a priority string to the canonical task-management priority enum.»
+    function getTaskPredecessorIds(task, validTaskIds)  «Extract valid predecessor task ids from a task's requisites and dependencies.»
+    function getDependencyLinkType(dep)  «Resolve the graph link type string for a structured task dependency.»
+    function buildDependencyLayering(tasks)  «Compute dependency layers for tasks and flag nodes that participate in cycles.»
+    function scaleHoursToRadius(hours, minHours, maxHours, minRadius, maxRadius)  «Scale estimated hours into a rendered node radius using eased clamping.»
+    function validateAgainstSchema(obj, schema)  «Perform lightweight shape validation for supported graph template payloads.»
+    function resolveProjectIdFromTasksPath(path)  «Extract a project id from a TaskDB tasks.json path.»
     function resolveProjectScopedBase(path)  «Return the scoped base path segment for a TaskDB URL. Examples: '/tasksDB/external/first-graph/tasks.json' → 'external/f»
-    function normalizeTaskDbWalkthroughPath(pathValue, scopedBase)  «docstring: none»
-    function buildEmbeddedTaskDbTemplate(entry, data, scopedBase, embeddedGraphName)  «docstring: none»
-    function normalizeProjectRelativeModulePath(modulePath, entryPath)  «docstring: none»
-    function normalizeNavigationModules(modules, entryPath)  «docstring: none»
-    function buildInlineTaskIdPath(taskId)  «docstring: none»
-    function parseInlineTaskPath(path)  «docstring: none»
-    function hasOwnInlineSubtasks(task)  «docstring: none»
-    function buildChildrenByParentTaskId(tasks)  «docstring: none»
-    function collectDescendantTasks(childrenByParentId, parentTaskId, visited = new Set())  «docstring: none»
-    function toFiniteNumber(...values)  «docstring: none»
-    function normalizeInlineAssignedWorkers(subtask)  «docstring: none»
-    function escapeHtml(value)  «docstring: none»
-    function normalizeStringList(value, fallback = [])  «docstring: none»
-    function normalizeAssignedWorkersList(task, fallbackTask = {})  «docstring: none»
-    function buildPopupListDropdown(title, items, renderItem)  «docstring: none»
-    function formatWorkerLabel(worker)  «docstring: none»
-    function buildTaskSupplementalDetailItems(task)  «docstring: none»
-    function normalizeInlineSubtaskTask(subtask, index, parentTask = {})  «docstring: none»
-    function buildInlineSubgraphData(sourceData, task)  «docstring: none»
-    function buildInlineSubtaskTargets(task, childrenByParentId)  «docstring: none»
-    function normalizeExplicitSubtaskTargets(task)  «docstring: none»
-    function resolveTaskSubtaskTargets(task, childrenByParentId)  «docstring: none»
-    function getTaskNarrativeText(task)  «docstring: none»
-    function resolveProjectEndConfig(project)  «docstring: none»
-    function resolveProjectEndMode(project, terminalTasks)  «docstring: none»
-    function buildProjectEndDetails(project, terminalTasks, totalProjectHours = 0)  «docstring: none»
-    function buildProjectTaskTemplate(entry, data, options = {})  «docstring: none»
-    function buildTaskManagementTemplate(entry, data, options = {})  «docstring: none»
-    function isDevMode()  «docstring: none»
-    function ensureDynamicTaskTemplate(requestedTemplateId, options = {})  «docstring: none»
-    function initTemplates()  «docstring: none»
-    function getAvailableTemplates()  «docstring: none»
-    function loadTemplate(templateId)  «docstring: none»
-    function getDefaultTemplateId()  «docstring: none»
-    function buildProjectTaskTemplatePublic(entry, data, options)  «docstring: none»
-    function buildInlineTaskSubgraphTemplatePublic(entry, data, inlinePath, options)  «docstring: none»
+    function normalizeTaskDbWalkthroughPath(pathValue, scopedBase)  «Normalize a walkthrough asset path for a scoped TaskDB project base.»
+    function buildEmbeddedTaskDbTemplate(entry, data, scopedBase, embeddedGraphName)  «Build a graph template from an embedded TaskDB graphTemplate payload.»
+    function normalizeProjectRelativeModulePath(modulePath, entryPath)  «Resolve a module path relative to the project entry file inside TaskDB.»
+    function normalizeNavigationModules(modules, entryPath)  «Normalize navigation module records and their task id aliases for sidebar use.»
+    function buildInlineTaskIdPath(taskId)  «Build a synthetic inline-task navigation path from a numeric task id.»
+    function parseInlineTaskPath(path)  «Parse an inline-task navigation path back into its task id.»
+    function hasOwnInlineSubtasks(task)  «Determine whether a task owns inline subtask records.»
+    function buildChildrenByParentTaskId(tasks)  «Build a parent-task lookup map for hierarchical task relationships.»
+    function collectDescendantTasks(childrenByParentId, parentTaskId, visited = new Set())  «Recursively collect descendant tasks for a parent task id.»
+    function toFiniteNumber(...values)  «Return the first finite number parsed from a list of candidate values.»
+    function normalizeInlineAssignedWorkers(subtask)  «Normalize inline subtask assignee data into the assigned_workers shape.»
+    function escapeHtml(value)  «Escape HTML special characters before rendering task details into popups.»
+    function normalizeStringList(value, fallback = [])  «Normalize a value into a filtered string list, falling back when needed.»
+    function normalizeAssignedWorkersList(task, fallbackTask = {})  «Resolve the assigned-worker list for a task, falling back to its parent task.»
+    function buildPopupListDropdown(title, items, renderItem)  «Build a reusable dropdown list section for task-detail popup content.»
+    function formatWorkerLabel(worker)  «Format an assigned worker record into a compact display label.»
+    function buildTaskSupplementalDetailItems(task)  «Build supplemental task-detail markup for planning, staffing, links, and notes.»
+    function normalizeInlineSubtaskTask(subtask, index, parentTask = {})  «Normalize an inline subtask into a task-like record for graph rendering.»
+    function buildInlineSubgraphData(sourceData, task)  «Build a task-management payload for a task's inline or child-task subgraph.»
+    function buildInlineSubtaskTargets(task, childrenByParentId)  «Build synthetic subtask navigation targets when a task has inline descendants.»
+    function normalizeExplicitSubtaskTargets(task)  «Normalize explicit subtask navigation targets declared on a task record.»
+    function resolveTaskSubtaskTargets(task, childrenByParentId)  «Resolve the preferred subtask navigation targets for a task.»
+    function getTaskNarrativeText(task)  «Build a lowercase narrative string used to classify a task's end-state semantics.»
+    function resolveProjectEndConfig(project)  «Resolve the configured graph-end metadata from a project payload.»
+    function resolveProjectEndMode(project, terminalTasks)  «Infer the semantic end-node mode for a project graph from config and task narratives.»
+    function buildProjectEndDetails(project, terminalTasks, totalProjectHours = 0)  «Build the end-node popup details for a project graph.»
+    function buildProjectTaskTemplate(entry, data, options = {})  «Convert a string-id project_task_template payload into the numeric task template shape.»
+    function buildTaskManagementTemplate(entry, data, options = {})  «Build a task-management graph template from TaskDB project data.»
+    function isDevMode()  «Detect whether the graph app is running on a local development host.»
+    function ensureDynamicTaskTemplate(requestedTemplateId, options = {})  «Fetch and register a dynamic TaskDB template when the requested id is not preloaded.»
+    function initTemplates()  «Load all registered graph templates into the runtime registry.»
+    function getAvailableTemplates()  «Return lightweight metadata for every registered graph template.»
+    function loadTemplate(templateId)  «Load a registered template with safe fallbacks for empty runtime state.»
+    function getDefaultTemplateId()  «Return the default template id used when the caller does not specify one.»
+    function buildProjectTaskTemplatePublic(entry, data, options)  «Public wrapper around project task template construction.»
+    function buildInlineTaskSubgraphTemplatePublic(entry, data, inlinePath, options)  «Build a graph template for an inline subtask subgraph selected by synthetic path.»
 
 structure from public/graph-display/js/main-graph.js:
     [file-summary] Main script for initializing and managing the Curriculum Graph. Imports data, CV generator, walkthrough, utilities. Uses CSS classes for color and manages accessibility. UPDATED: Touch interaction mir
-    const TEMPLATE_STORAGE_KEY  «docstring: none»
-    class CurriculumGraph  «docstring: none»:
-        constructor(elId, graphData, detailsData, cfg, templateContext = {})  «docstring: none»
-        deepMerge(target, source)  «docstring: none»
+    const TEMPLATE_STORAGE_KEY  «Persist the last selected graph template across page reloads.»
+    class CurriculumGraph  «Render and manage the interactive curriculum/task graph experience.»:
+        constructor(elId, graphData, detailsData, cfg, templateContext = {})  «Create a graph instance bound to a container, template data, and config.»
+        deepMerge(target, source)  «Deep-merge nested configuration objects while preserving existing defaults.»
         preprocessData()  «Pre-processes nodes and links: 1. Builds connection index (`linkedByIndex`). 2. Validates nodes, calculates max layer, n»
         init()  «Initialize the graph visualization»
         renderError(message)  «Renders an error message in the container»
@@ -2292,16 +2309,18 @@ structure from public/graph-display/js/main-graph.js:
         updateLegendPopup()  «Update legend popup content dynamically using CSS classes»
         showNodeDetails(d)  «Show node details popup using CSS classes for styling»
         displayPopup(popupElement)  «Helper function to display a popup and manage focus»
-        clearSelectedNodeState()  «docstring: none»
+        clearSelectedNodeState()  «Clear persistent node selection and restore the default graph emphasis state.»
         hideNodeDetails({ clearSelection = false } = {})  «Hide node details popup. Selection persists unless clearSelection is explicitly requested.»
         setupZoom()  «Setup zoom behavior»
         setupControlButtons(panelEl)  «Setup control button actions in the menu panel»
+        downloadCalendar(scope)  «Download the current graph's task data as an ICS calendar file.»
+        _extractCalendarTasks()  «Extract task-like objects from graph nodes for use with calendar export.»
         resetViewAndSearch()  «Reset graph view, zoom, clear search, and close popups»
         toggleGraphGuide()  «Toggle the graph types guide panel»
         populateGuidePanel()  «Populate the guide panel with graph structure information»
         focusOnNode(nodeId)  «Zoom and pan the graph to focus on a specific node»
         _openNodeDetails(d)  «Apply persistent node-selected state (same logic as handleShowDetails) without a triggering DOM event. Used by dep-link »
-        openNodeModal(nodeId, { animate = true } = {})  «Pan & zoom to a node by ID, then open its detail modal and keep it selected with a permanent blink. Used by dep-link but»
+        openNodeModal(nodeId)  «Pan & zoom to a node by ID, then open its detail modal and keep it selected with a permanent blink. Used by dep-link but»
         ticked()  «Simulation tick function: Update node and link positions»
         dragHandler()  «Drag handler definition for nodes»
         bindGlobalEvents()  «Bind global event listeners (resize, escape key)»
@@ -2309,18 +2328,18 @@ structure from public/graph-display/js/main-graph.js:
         createFeedbackElement(inputContainerElement)  «Create search feedback element if it doesn't exist»
         setupSearch(inputId)  «Setup search input functionality»
 
-    function isEmbeddedMode()  «docstring: none»
-    function getInitialTemplateId()  «docstring: none»
-    function setSelectedTemplateId(templateId)  «docstring: none»
+    function isEmbeddedMode()  «Detect whether the graph is running in embedded iframe mode.»
+    function getInitialTemplateId()  «Resolve the initial template id from the URL, storage, or default registry entry.»
+    function setSelectedTemplateId(templateId)  «Persist the currently selected template id for future visits.»
 
 structure from public/graph-display/js/template-loader.js:
-    [file-summary] No top-level file docstring detected
-    const CAREER_TEMPLATE_ID  «docstring: none»
-    const TASK_MGMT_TEMPLATE_ID  «docstring: none»
-    function tryRequireLocalTemplate(path)  «docstring: none»
-    function buildCareerTemplateFromData(id, name, data, convertFn)  «docstring: none»
-    function buildTaskMgmtFromData(id, name, data, helpers)  «docstring: none»
-    function syncBuiltInTemplates(registry, convertFn, helpers = {})  «docstring: none»
+    [file-summary] Optional template-loader helpers for graph-display template registration.
+    const CAREER_TEMPLATE_ID  «Optional template-loader helpers for graph-display template registration.»
+    const TASK_MGMT_TEMPLATE_ID  «Built-in template id for the task-management/project graph template.»
+    function tryRequireLocalTemplate(path)  «Try to synchronously require a local JSON payload in Node-based test environments.»
+    function buildCareerTemplateFromData(id, name, data, convertFn)  «Build the graph-display career template shape from raw example JSON.»
+    function buildTaskMgmtFromData(id, name, data, helpers)  «Build the task-management template shape from TaskDB example data.»
+    function syncBuiltInTemplates(registry, convertFn, helpers = {})  «Register any locally available built-in templates into the provided registry.»
 
 structure from public/graph-display/js/utils.js:
     [file-summary] Utility functions for color manipulation, contrast checking, and debouncing.
@@ -2332,288 +2351,142 @@ structure from public/graph-display/js/utils.js:
 
 structure from public/graph-display/js/walkthrough.js:
     [file-summary] Manages the interactive walkthrough/tour of the graph interface. Relies on CurriculumGraph instance for interactions.
-    class Walkthrough  «docstring: none»:
-        constructor()  «docstring: none»
+    class Walkthrough  «Drive the guided walkthrough overlay and scripted graph interactions.»:
+        constructor()  «Create a walkthrough controller bound to the overlay DOM elements.»
         setSteps(steps)  «Replace current walkthrough steps. Steps should be an array of step objects. Example step: { title, content, nodeId, tar»
-        init()  «docstring: none»
-        setGraph(graphInstance)  «docstring: none»
-        bindEvents()  «docstring: none»
-        handleNext()  «docstring: none»
-        start()  «docstring: none»
-        startTour()  «docstring: none»
-        nextStep()  «docstring: none»
-        executeStepActions()  «docstring: none»
-        updateTooltipContent()  «docstring: none»
-        positionTooltip()  «docstring: none»
-        simulateNodeHover(nodeElement)  «docstring: none»
-        _createCursor(targetElement)  «docstring: none»
-        _removeCursor()  «docstring: none»
-        simulateNodeClick(nodeElement)  «docstring: none»
-        simulateSearch(searchTerm)  «docstring: none»
-        ensureNodeTextVisibility(nodeElement)  «docstring: none»
-        end()  «docstring: none»
+        init()  «Initialize the overlay content and bind its event handlers.»
+        setGraph(graphInstance)  «Attach the active graph instance used for focus and popup simulation.»
+        bindEvents()  «Bind overlay, keyboard, and resize events for the active walkthrough.»
+        handleNext()  «Advance from the current step, clearing any pending step simulations.»
+        start()  «Start the walkthrough unless it has been skipped or previously completed.»
+        startTour()  «Move from the welcome step into the first guided graph step.»
+        nextStep()  «Advance to the next configured walkthrough step or finish the tour.»
+        executeStepActions()  «Execute the current step's focus, highlight, hover, click, and search actions.»
+        updateTooltipContent()  «Render the tooltip content for the current walkthrough step.»
+        positionTooltip()  «Position the walkthrough tooltip relative to the current target element.»
+        simulateNodeHover(nodeElement)  «Simulate a hover interaction on a graph node for the current step.»
+        _createCursor(targetElement)  «Create the temporary walkthrough cursor anchored to a target element.»
+        _removeCursor()  «Remove the temporary walkthrough cursor, if present.»
+        simulateNodeClick(nodeElement)  «Simulate clicking a node so its detail popup opens during a tour step.»
+        simulateSearch(searchTerm)  «Simulate typing into the graph search input for demonstration steps.»
+        ensureNodeTextVisibility(nodeElement)  «Ensure a node's label remains visible while the walkthrough focuses it.»
+        end()  «End the walkthrough, clear UI state, and persist the completion flag.»
 
-    function debounce(func, wait)  «docstring: none»
 
 structure from public/graph-display/js/shared/link-types.js:
     [file-summary] Shared link-type definitions and helpers.
     const COMMON_LINK_TYPES  «Shared link-type definitions and helpers.»
-    const TASK_LINK_TYPES  «docstring: none»
+    const TASK_LINK_TYPES  «Task-management specific link types layered on top of the shared graph set.»
     const TEMPLATE_LINK_TYPES  «Useful for UIs (legend/debug): shared + template-specific types.»
-    function isDependsLinkType(type)  «docstring: none»
-    function isSubcategoryLinkType(type)  «docstring: none»
-    function isStrongCohesionLinkType(type)  «docstring: none»
-    function isLayerSpacingLinkType(type)  «docstring: none»
+    function isDependsLinkType(type)  «Check whether a link type encodes a dependency edge in the task template.»
+    function isSubcategoryLinkType(type)  «Check whether a link type represents an in-layer subcategory relationship.»
+    function isStrongCohesionLinkType(type)  «Identify link types that should render with the stronger cohesion force.»
+    function isLayerSpacingLinkType(type)  «Identify link types that should use the wider layer-spacing distance.»
     function getForceLinkDistance(linkType, forcesCfg)  «Returns the link distance to use for a link type. Mirrors existing behavior in main-graph.js, but centralized.»
     function getForceLinkStrength(linkType)  «Returns the link force strength to use for a link type. Mirrors existing behavior in main-graph.js, but centralized.»
 
 structure from public/graph-display/js/shared/tours.js:
     [file-summary] Generates/returns walkthrough steps for different templates. - If a template provides `meta.walkthroughSteps` (array), use that. - Otherwise generate sensible steps from nodes/details for known templa
     function getStepsForTemplate(templateId, nodes = [], details = {}, meta = {})  «Generates/returns walkthrough steps for different templates. - If a template provides `meta.walkthroughSteps` (array), u»
-    function resolveTourUrl(path, basePath)  «docstring: none»
+    function resolveTourUrl(path, basePath)  «Resolve a walkthrough JSON path relative to the graph app base path.»
     function resolveStepsForTemplate(templateId, nodes = [], details = {}, meta = {}, basePath = './')  «Resolve steps for a template. Priority: 1) meta.walkthroughSteps (inline) 2) meta.walkthroughStepsPath (JSON file) 3) Ge»
 
-structure from public/graph-display/templates/registry.json:
-    [json-array] [5 items]
+structure from public/health/README.md:
+    [file-summary] Health Diagnostics App
+    [heading-1] # Health Diagnostics App
+    [heading-2] ## Structure
 
-structure from public/scripts/folder-project-service.js:  (no extractable definitions)
+structure from public/health/index.html:
+    [file-summary] GitHub Task Manager - Health Check
+    [title] <title>GitHub Task Manager - Health Check</title>
+    [section] <main id="health-shell">
+    [section] <section id="health-card">
+    [section] <header id="health-header">
+    [heading-1] <h1>GitHub Task Manager</h1>
+    [section] <section id="health-panel">
+    [heading-2] <h2>Project</h2>
+    [section] <section id="health-panel">
+    [heading-2] <h2>Route Map</h2>
+    [section] <section id="health-panel">
+    [heading-2] <h2>TaskDB</h2>
+    [section] <section id="health-panel">
+    [heading-2] <h2>Module Layout</h2>
+    [section] <section id="health-runtime">
+    [section] <nav id="health-actions">
+    [section] <footer id="health-footer">
 
-structure from public/scripts/folder-project-ui.js:  (no extractable definitions)
+structure from public/health/css/health.css:
+    [css-variable] --health-bg
+    [css-variable] --health-surface
+    [css-variable] --health-border
+    [css-variable] --health-shadow
+    [css-variable] --health-text
+    [css-variable] --health-muted
+    [css-variable] --health-accent
+    [css-variable] --health-accent-strong
+    [css-variable] --health-success
+    [css-variable] --health-link
+    [selector] .health-shell
+    [selector] .health-card
+    [selector] .health-header
+    [selector] .health-title-group h1
+    [selector] .health-title-group p
+    [selector] .health-pill
+    [selector] .health-pill::before
+    [selector] .health-grid
+    [selector] .health-panel
+    [selector] .health-panel h2
+    [selector] .health-panel li
+    [selector] .health-panel ul
+    [selector] .health-panel code
+    [selector] .health-runtime
+    [selector] .health-runtime strong
+    [selector] .health-runtime p
+    [selector] .health-actions
+    [selector] .health-actions a
+    [selector] .health-actions a:hover
+    [selector] .health-actions .primary-link
+    [selector] .health-actions .secondary-link
+    [selector] .health-footer
+    [selector] .health-footer p
+    [selector] .health-link
 
-structure from public/scripts/task-database.js:
-    [file-summary] No top-level file docstring detected
-    class TaskDatabase  «docstring: none»:
-        constructor(githubApi, validator = new TemplateValidator(), automation = new TemplateAutomation())  «docstring: none»
-        resetLoadedMetadata()  «docstring: none»
-        applyLoadedPayload(data)  «docstring: none»
-        cloneTasksSnapshot(tasks)  «docstring: none»
-        getHistoryTaskKey(task)  «docstring: none»
-        summarizeHistoryChanges(changes)  «docstring: none»
-        diffTasksForHistory(beforeTasks, afterTasks)  «docstring: none»
-        async appendHistoryNdjsonViaWorkerFallback({ projectId, workerUrl, accessPassword, tasksFile, message, actor, commitSha, beforeTasks, afterTasks })  «docstring: none»
-        resolveActor()  «docstring: none»
-        isLocalDevHost()  «docstring: none»
-        buildFullData(tasks = this.tasks)  «docstring: none»
-        generateStateFiles(tasks = this.tasks)  «docstring: none»
-        async saveTasksLocalDisk(message = 'Update tasks')  «docstring: none»
-        async initialize()  «docstring: none»
-        async loadTasks()  «docstring: none»
-        getDuplicateTaskIds(tasks = this.tasks)  «docstring: none»
-        escapeCsvValue(value)  «docstring: none»
-        generatePersistedCSV(tasks = this.tasks)  «docstring: none»
-        saveTasksLocal(message = 'Update tasks')  «docstring: none»
-        async saveTasks(message = 'Update tasks')  «docstring: none»
-        async saveTasksViaWorker(message, workerUrl)  «docstring: none»
-        getSessionAccessPassword()  «docstring: none»
-        async saveTasksDirectGitHub(message)  «docstring: none»
-        async loadTemplates()  «docstring: none»
-        async importFromTemplate(template, options = {})  «docstring: none»
-        exportToCSV(tasks = null)  «docstring: none»
-        importFromCSV(csvContent, options = {})  «docstring: none»
-        parseCSVLine(line)  «docstring: none»
-        createTask(taskData, creatorId = null)  «docstring: none»
-        updateTask(taskId, updates)  «docstring: none»
-        deleteTask(taskId)  «docstring: none»
-        getTask(taskId)  «docstring: none»
-        getTasks(filters = {})  «docstring: none»
-        getStatistics()  «docstring: none»
+structure from public/health/js/runtime-health-checker.js:
+    [file-summary] Lightweight runtime diagnostics for the standalone health page.
 
-    function inferProjectIdFromTasksFile(tasksFile)  «docstring: none»
-    function resolveTemplateConfig()  «docstring: none»
-    function hasValidGitHubToken()  «docstring: none»
-    function resolveActiveProjectId()  «docstring: none»
-    function getProjectScopedStorageKey()  «docstring: none»
+structure from public/list-display/README.md:
+    [file-summary] List Display App
+    [heading-1] # List Display App
+    [heading-2] ## Structure
+    [heading-2] ## Notes
 
-structure from public/scripts/task-manager-app.js:
-    [file-summary] No top-level file docstring detected
-    class TaskManagerApp  «docstring: none»:
-        constructor()  «docstring: none»
-        getGraphTemplateIdForActiveProject()  «docstring: none»
-        getStoredFolderProjects()  «docstring: none»
-        registerFolderProjectOption(projectRecord)  «docstring: none»
-        initializeFolderProjectPicker()  «docstring: none»
-        buildGraphIframeSrc()  «docstring: none»
-        async ensureGraphIframeLoaded()  «docstring: none»
-        async initialize()  «docstring: none»
-        loadConfig()  «docstring: none»
-        setupProjectSelector()  «docstring: none»
-        async setActiveProject(projectId)  «docstring: none»
-        normalizeModulePath(value)  «docstring: none»
-        normalizeModuleEntry(moduleEntry)  «docstring: none»
-        getTaskKey(task)  «docstring: none»
-        getTaskCode(task)  «docstring: none»
-        getTaskPredecessorKeys(task)  «docstring: none»
-        buildTaskFlowSummary(tasks = [])  «docstring: none»
-        applyProjectTheme()  «docstring: none»
-        updateTaskAuthoringAvailability()  «docstring: none»
-        syncProjectContextFromDatabase()  «docstring: none»
-        getModuleByPath(modulePath)  «docstring: none»
-        getModuleByName(moduleName)  «docstring: none»
-        getContextBaseTasks()  «docstring: none»
-        filterTaskCollection(tasks, { status = null, priority = null } = {})  «docstring: none»
-        resolveTaskModulePath(task)  «docstring: none»
-        supportsTaskEditing(task)  «docstring: none»
-        formatDisplayDate(value)  «docstring: none»
-        encodeModulePath(modulePath)  «docstring: none»
-        getModuleFetchCandidates(projectId, modulePath)  «docstring: none»
-        async fetchModuleData(modulePath)  «docstring: none»
-        buildModuleContextTasks(moduleEntry, moduleData, modulePath = '')  «docstring: none»
-        getActiveModuleLabel()  «docstring: none»
-        syncGraphModuleState()  «docstring: none»
-        async setActiveModule(modulePath, options = {})  «docstring: none»
-        async restoreCurrentContext(options = {})  «docstring: none»
-        openModuleView(encodedModulePath)  «docstring: none»
-        openModuleRelation(encodedModuleName)  «docstring: none»
-        clearModuleView()  «docstring: none»
-        toggleProjectNavigationPanel()  «docstring: none»
-        renderProjectNavigation()  «docstring: none»
-        getAvailableCategoryNames()  «docstring: none»
-        refreshCategoryOptions({ preserveValue = true } = {})  «docstring: none»
-        getProjectAuthKey(projectId)  «docstring: none»
-        getProjectPasswordKey(projectId)  «docstring: none»
-        loadUserName()  «docstring: none»
-        saveUserName(name)  «docstring: none»
-        getAccessConfig()  «docstring: none»
-        isGitHubPagesHost()  «docstring: none»
-        getQueryParam(name)  «docstring: none»
-        isLocalHost()  «docstring: none»
-        isPasswordProtectionEnabled()  «docstring: none»
-        isPasswordProtected()  «docstring: none»
-        checkAuth()  «docstring: none»
-        requireAuth(action, ...args)  «docstring: none»
-        showPasswordModal()  «docstring: none»
-        closePasswordModal()  «docstring: none»
-        async verifyPassword(event)  «docstring: none»
-        logout()  «docstring: none»
-        getGitHubOAuthToken()  «docstring: none»
-        setGitHubOAuthToken(token, user = '')  «docstring: none»
-        clearGitHubOAuthToken()  «docstring: none»
-        isGitHubConnected()  «docstring: none»
-        showGitHubLoginModal()  «docstring: none»
-        closeGitHubLoginModal()  «docstring: none»
-        async startGitHubDeviceFlow()  «docstring: none»
-        showManualOAuthInstructions()  «docstring: none»
-        showGitHubLoginError(message)  «docstring: none»
-        copyDeviceCode()  «docstring: none»
-        updateAccessIndicator()  «docstring: none»
-        toggleAuthIndicator()  «docstring: none»
-        isConfigured()  «docstring: none»
-        showConfigError()  «docstring: none»
-        async showTaskManager()  «docstring: none»
-        async loadTasks()  «docstring: none»
-        async saveTasks()  «docstring: none»
-        openHistoryModal()  «docstring: none»
-        closeHistoryModal()  «docstring: none»
-        setHistoryStatus(message, type = 'info')  «docstring: none»
-        getWorkerUrl()  «docstring: none»
-        getRawHistoryUrl(projectId)  «docstring: none»
-        applyHistoryFilter()  «docstring: none»
-        async refreshHistory()  «docstring: none»
-        async loadHistoryItems({ projectId, taskId = '', limit = 200 })  «docstring: none»
-        renderHistory(items)  «docstring: none»
-        renderTasks()  «docstring: none»
-        setViewMode(mode)  «docstring: none»
-        updateViewToggle()  «docstring: none»
-        setTimelineScale(scale)  «docstring: none»
-        parseDate(dateStr)  «docstring: none»
-        daysBetween(a, b)  «docstring: none»
-        formatShortDate(d)  «docstring: none»
-        renderTimeline()  «docstring: none»
-        openIssuesSyncModal()  «docstring: none»
-        _openIssuesSyncModal()  «docstring: none»
-        closeIssuesSyncModal()  «docstring: none»
-        setIssuesSyncStatus(message, type = 'info')  «docstring: none»
-        async loadIssuesForSync()  «docstring: none»
-        renderIssuesList()  «docstring: none»
-        isIssueAlreadyImported(issueNumber)  «docstring: none»
-        async importSelectedIssues()  «docstring: none»
-        _importSelectedIssues()  «docstring: none»
-        async _importSelectedIssuesAsync()  «docstring: none»
-        getLinkedIssue(task)  «docstring: none»
-        createIssueForTask(taskId)  «docstring: none»
-        async _createIssueForTask(taskId)  «docstring: none»
-        updateStats(taskSource = null)  «docstring: none»
-        setActiveStatCard(statusValue)  «docstring: none»
-        setupStatCardFilters()  «docstring: none»
-        filterTasks()  «docstring: none»
-        showAddTaskModal()  «docstring: none»
-        _showAddTaskModal()  «docstring: none»
-        editTask(taskId)  «docstring: none»
-        openTaskDetail(taskIndex)  «Open task detail by filteredTasks index (works for all task types, numeric and string IDs).»
-        _openReadOnlyTask(task)  «docstring: none»
-        _injectReadOnlyDepLinks(task)  «In read-only task detail: hide the deps textarea and show clickable dep-link buttons. Each button navigates to the prede»
-        navigateToDependency(predecessorId)  «Close the current modal and open the task detail for the specified predecessor task ID. Works across root tasks and the »
-        _editTask(taskId)  «docstring: none»
-        setTaskModalReadOnly(readOnly = false)  «docstring: none»
-        populateFormWithDefaults()  «docstring: none»
-        populateFormWithTask(task)  «docstring: none»
-        closeModal()  «docstring: none»
-        async saveTask(event)  «docstring: none»
-        getFormData()  «docstring: none»
-        parseAssignedWorkers(input)  «docstring: none»
-        parseDependencies(input)  «docstring: none»
-        parseParentTaskId(value)  «docstring: none»
-        async deleteTask(taskId)  «docstring: none»
-        async _deleteTask(taskId)  «docstring: none»
-        updateTemplateUI()  «docstring: none»
-        async importTemplate(templateType)  «docstring: none»
-        exportToCSV()  «docstring: none»
-        showValidationMessages(errors, warnings)  «docstring: none»
-        clearValidationMessages()  «docstring: none»
-        escapeHtml(text)  «docstring: none»
-        showLoading()  «docstring: none»
-        hideLoading()  «docstring: none»
-        showToast(message, type = 'success')  «docstring: none»
-        setupEventListeners()  «docstring: none»
+structure from public/list-display/index.html:
+    [file-summary] GitHub Task Manager
+    [title] <title>GitHub Task Manager</title>
+    [heading-1] <h1>📋 GitHub Task Manager</h1>
+    [section] <section id="user-section">
+    [section] <section id="controls">
+    [section] <section id="stats">
+    [heading-3] <h3>Total Tasks</h3>
+    [heading-3] <h3>Not Started</h3>
+    [heading-3] <h3>In Progress</h3>
+    [heading-3] <h3>Done</h3>
+    [section] <section id="tasks-section">
+    [heading-2] <h2>Root Project</h2>
+    [heading-2] <h2>Add New Task</h2>
+    [heading-3] <h3>Automatic Fields</h3>
+    [heading-2] <h2>🔐 Access Required</h2>
+    [heading-2] <h2>🐙 Connect to GitHub</h2>
+    [heading-2] <h2>🐙 GitHub Issues Sync</h2>
+    [heading-2] <h2>🕘 Change History</h2>
 
-    class GitHubAPI  «docstring: none»:
-        constructor(config)  «docstring: none»
-        async request(endpoint, method = 'GET', body = null)  «docstring: none»
-        async getFileContent(path)  «docstring: none»
-        async updateFile(path, content, message, sha = null)  «docstring: none»
-        async listIssues(state = 'open')  «docstring: none»
-        async createIssue(title, body, labels = [])  «docstring: none»
+structure from public/list-display/css/README.md:
+    [file-summary] List Display Engine - CSS
+    [heading-1] # List Display Engine - CSS
+    [heading-2] ## Files
+    [heading-2] ## Current wiring
 
-    function showAddTaskModal()  «docstring: none»
-    function closeModal()  «docstring: none»
-    function exportToCSV()  «docstring: none»
-    function loadTasks()  «docstring: none»
-    function closePasswordModal()  «docstring: none»
-    function verifyPassword(event)  «docstring: none»
-
-structure from public/scripts/template-automation.js:
-    [file-summary] No top-level file docstring detected
-    class TemplateAutomation  «docstring: none»:
-        constructor(config = TEMPLATE_CONFIG, validator = new TemplateValidator())  «docstring: none»
-        generateTaskId(existingTasks = [])  «docstring: none»
-        autoPopulateTask(task, template = null, creatorId = null)  «docstring: none»
-        autoPopulateProject(project)  «docstring: none»
-        createTaskFromTemplate(templateTask, template, customizations = {})  «docstring: none»
-        autoGenerateDependencies(tasks)  «docstring: none»
-        suggestAssignments(task, workers)  «docstring: none»
-        calculateSkillMatch(taskTags, workerSkills)  «docstring: none»
-        autoCategorize(task, categories)  «docstring: none»
-        validateAndFix(task, template = null)  «docstring: none»
-        generateProjectSummary(template)  «docstring: none»
-
-
-structure from public/scripts/template-validator.js:
-    [file-summary] No top-level file docstring detected
-    class TemplateValidator  «docstring: none»:
-        constructor(config = TEMPLATE_CONFIG)  «docstring: none»
-        validate(data, type = 'task')  «docstring: none»
-        validateTemplate(template)  «docstring: none»
-        validateProject(project)  «docstring: none»
-        validateTask(task, template = null)  «docstring: none»
-        validateCategories(categories)  «docstring: none»
-        validateWorkers(workers)  «docstring: none»
-        validateDependencies(tasks)  «docstring: none»
-        isValidDate(dateString)  «docstring: none»
-        isValidEmail(email)  «docstring: none»
-        normalizeStatus(status)  «docstring: none»
-
-
-structure from public/styles/task-manager.css:
+structure from public/list-display/css/task-manager.css:
     [file-summary] GitHub Task Manager - Responsive & Touch-Optimized CSS
     [section] /* GitHub Task Manager - Responsive & Touch-Optimized CSS */
     [section] /* GitHub Theme Colors */
@@ -2832,6 +2705,17 @@ structure from public/styles/task-manager.css:
     [selector] .toast.success
     [selector] .toast.error
     [selector] .toast.warning
+    [section] /* Calendar Download Dropdown                                   */
+    [selector] .calendar-dropdown
+    [selector] .calendar-dropdown > summary
+    [selector] .calendar-dropdown > summary::-webkit-details-marker
+    [selector] .calendar-dropdown-menu
+    [selector] .calendar-dropdown-menu button
+    [selector] .calendar-dropdown-section
+    [selector] .calendar-dropdown-section label
+    [selector] .calendar-format-select
+    [selector] .calendar-dropdown-menu button:hover
+    [selector] .calendar-dropdown-divider
     [section] /* Animations */
     [section] /* Password Modal */
     [selector] #passwordModal .modal-content
@@ -2901,6 +2785,261 @@ structure from public/styles/task-manager.css:
     [section] /* Shrink name col */
     [section] /* Hide subtitle to save space */
 
+structure from public/list-display/js/README.md:
+    [file-summary] List Display Engine - JS Module Reference
+    [heading-1] # List Display Engine - JS Module Reference
+    [heading-2] ## Notes
+
+structure from public/list-display/js/list-display-controller.js:
+    [file-summary] List-display runtime controller for the GitHub Task Manager app.
+    class TaskManagerApp  «Coordinate the list-display UI, project context, and persistence services.»:
+        constructor()  «Create the runtime controller state for this component.»
+        getGraphTemplateIdForActiveProject()  «Get graph template id for active project.»
+        getStoredFolderProjects()  «Get stored folder projects.»
+        registerFolderProjectOption(projectRecord)  «Register folder project option.»
+        initializeFolderProjectPicker()  «Initialize folder project picker.»
+        buildGraphIframeSrc()  «Build graph iframe src.»
+        async ensureGraphIframeLoaded()  «Ensure graph iframe loaded.»
+        async initialize()  «Initialize initialize.»
+        loadConfig()  «Load config.»
+        setupProjectSelector()  «Set up project selector.»
+        async setActiveProject(projectId)  «Set active project.»
+        normalizeModulePath(value)  «Normalize module path.»
+        normalizeModuleEntry(moduleEntry)  «Normalize module entry.»
+        getTaskKey(task)  «Get task key.»
+        getTaskCode(task)  «Get task code.»
+        getTaskPredecessorKeys(task)  «Get task predecessor keys.»
+        buildTaskFlowSummary(tasks = [])  «Build task flow summary.»
+        applyProjectTheme()  «Apply project theme.»
+        updateTaskAuthoringAvailability()  «Update task authoring availability.»
+        syncProjectContextFromDatabase()  «Sync project context from database.»
+        getModuleByPath(modulePath)  «Get module by path.»
+        getModuleByName(moduleName)  «Get module by name.»
+        getContextBaseTasks()  «Get context base tasks.»
+        filterTaskCollection(tasks, { status = null, priority = null } = {})  «Filter task collection.»
+        resolveTaskModulePath(task)  «Resolve task module path.»
+        supportsTaskEditing(task)  «Check whether task editing.»
+        formatDisplayDate(value)  «Format display date.»
+        encodeModulePath(modulePath)  «Encode module path.»
+        getModuleFetchCandidates(projectId, modulePath)  «Get module fetch candidates.»
+        async fetchModuleData(modulePath)  «Fetch module data.»
+        buildModuleContextTasks(moduleEntry, moduleData, modulePath = '')  «Build module context tasks.»
+        getActiveModuleLabel()  «Get active module label.»
+        syncGraphModuleState()  «Sync graph module state.»
+        async setActiveModule(modulePath, options = {})  «Set active module.»
+        async restoreCurrentContext(options = {})  «Restore current context.»
+        openModuleView(encodedModulePath)  «Open module view.»
+        openModuleRelation(encodedModuleName)  «Open module relation.»
+        clearModuleView()  «Clear module view.»
+        toggleProjectNavigationPanel()  «Toggle project navigation panel.»
+        renderProjectNavigation()  «Render project navigation.»
+        getAvailableCategoryNames()  «Get available category names.»
+        refreshCategoryOptions({ preserveValue = true } = {})  «Refresh category options.»
+        getProjectAuthKey(projectId)  «Get project auth key.»
+        getProjectPasswordKey(projectId)  «Get project password key.»
+        loadUserName()  «Load user name.»
+        saveUserName(name)  «Save user name.»
+        getAccessConfig()  «Get access config.»
+        isGitHubPagesHost()  «Check whether git hub pages host.»
+        getQueryParam(name)  «Get query param.»
+        isLocalHost()  «Check whether local host.»
+        isPasswordProtectionEnabled()  «Check whether password protection enabled.»
+        isPasswordProtected()  «Check whether password protected.»
+        checkAuth()  «Check auth.»
+        requireAuth(action, ...args)  «Require auth.»
+        showPasswordModal()  «Show password modal.»
+        closePasswordModal()  «Close password modal.»
+        async verifyPassword(event)  «Verify password.»
+        logout()  «Logout.»
+        getGitHubOAuthToken()  «Get git hub oauth token.»
+        setGitHubOAuthToken(token, user = '')  «Set git hub oauth token.»
+        clearGitHubOAuthToken()  «Clear git hub oauth token.»
+        isGitHubConnected()  «Check whether git hub connected.»
+        showGitHubLoginModal()  «Show git hub login modal.»
+        closeGitHubLoginModal()  «Close git hub login modal.»
+        async startGitHubDeviceFlow()  «Start git hub device flow.»
+        showManualOAuthInstructions()  «Show manual oauth instructions.»
+        showGitHubLoginError(message)  «Show git hub login error.»
+        copyDeviceCode()  «Copy device code.»
+        updateAccessIndicator()  «Update access indicator.»
+        toggleAuthIndicator()  «Toggle auth indicator.»
+        isConfigured()  «Check whether configured.»
+        showConfigError()  «Show config error.»
+        async showTaskManager()  «Show task manager.»
+        async loadTasks()  «Load tasks.»
+        async saveTasks()  «Save tasks.»
+        openHistoryModal()  «Open history modal.»
+        closeHistoryModal()  «Close history modal.»
+        setHistoryStatus(message, type = 'info')  «Set history status.»
+        getWorkerUrl()  «Get worker url.»
+        getRawHistoryUrl(projectId)  «Get raw history url.»
+        applyHistoryFilter()  «Apply history filter.»
+        async refreshHistory()  «Refresh history.»
+        async loadHistoryItems({ projectId, taskId = '', limit = 200 })  «Load history items.»
+        renderHistory(items)  «Render history.»
+        renderTasks()  «Render tasks.»
+        setViewMode(mode)  «Set view mode.»
+        updateViewToggle()  «Update view toggle.»
+        setTimelineScale(scale)  «Set timeline scale.»
+        parseDate(dateStr)  «Parse date.»
+        daysBetween(a, b)  «Calculate the number of days between two dates.»
+        formatShortDate(d)  «Format short date.»
+        renderTimeline()  «Render timeline.»
+        openIssuesSyncModal()  «Open issues sync modal.»
+        _openIssuesSyncModal()  «Open issues sync modal.»
+        closeIssuesSyncModal()  «Close issues sync modal.»
+        setIssuesSyncStatus(message, type = 'info')  «Set issues sync status.»
+        async loadIssuesForSync()  «Load issues for sync.»
+        renderIssuesList()  «Render issues list.»
+        isIssueAlreadyImported(issueNumber)  «Check whether issue already imported.»
+        async importSelectedIssues()  «Import selected issues.»
+        _importSelectedIssues()  «Import selected issues.»
+        async _importSelectedIssuesAsync()  «Import selected issues async.»
+        getLinkedIssue(task)  «Get linked issue.»
+        createIssueForTask(taskId)  «Create issue for task.»
+        async _createIssueForTask(taskId)  «Create issue for task.»
+        updateStats(taskSource = null)  «Update stats.»
+        setActiveStatCard(statusValue)  «Set active stat card.»
+        setupStatCardFilters()  «Set up stat card filters.»
+        filterTasks()  «Filter tasks.»
+        showAddTaskModal()  «Show add task modal.»
+        _showAddTaskModal()  «Show add task modal.»
+        editTask(taskId)  «Edit task.»
+        openTaskDetail(taskIndex)  «Open the detail view for a task by its rendered index.»
+        _openReadOnlyTask(task)  «Open read only task.»
+        _injectReadOnlyDepLinks(task)  «In read-only task detail: hide the deps textarea and show clickable dep-link buttons. Each button navigates to the prede»
+        navigateToDependency(predecessorId)  «Close the current modal and open the task detail for the specified predecessor task ID. Works across root tasks and the »
+        _editTask(taskId)  «Edit task.»
+        setTaskModalReadOnly(readOnly = false)  «Set task modal read only.»
+        populateFormWithDefaults()  «Populate form with defaults.»
+        populateFormWithTask(task)  «Populate form with task.»
+        closeModal()  «Close modal.»
+        async saveTask(event)  «Save task.»
+        getFormData()  «Collect the current task form values into a task payload.»
+        parseAssignedWorkers(input)  «Parse assigned worker input into structured worker records.»
+        parseDependencies(input)  «Parse dependency input into structured dependency records.»
+        parseParentTaskId(value)  «Parse the parent task id from form input.»
+        async deleteTask(taskId)  «Delete task.»
+        async _deleteTask(taskId)  «Delete task.»
+        updateTemplateUI()  «Update template ui.»
+        async importTemplate(templateType)  «Import template.»
+        exportToCSV()  «Export to csv.»
+        getDownloadFormat()  «Get download format.»
+        getDownloadTasksByScope(scope, workerName = '')  «Get download tasks by scope.»
+        downloadBlob(content, mimeType, filename)  «Download blob.»
+        downloadTasksFile(tasks, format, fileBase)  «Download tasks file.»
+        downloadCalendar(scope)  «Download the current project's tasks in the selected format.»
+        downloadCalendarWorkers()  «Download one file per worker found in the current project's tasks.»
+        showValidationMessages(errors, warnings)  «Show validation messages.»
+        clearValidationMessages()  «Clear validation messages.»
+        escapeHtml(text)  «Escape HTML text for safe rendering.»
+        showLoading()  «Show loading.»
+        hideLoading()  «Hide loading.»
+        showToast(message, type = 'success')  «Show toast.»
+        setupEventListeners()  «Set up the main UI event listeners.»
+
+    class GitHubAPI  «Minimal GitHub REST wrapper for file and issue operations used by the UI.»:
+        constructor(config)  «Create the runtime controller state for this component.»
+        async request(endpoint, method = 'GET', body = null)  «Send a GitHub API request with the configured authentication.»
+        async getFileContent(path)  «Get file content from the configured GitHub repository.»
+        async updateFile(path, content, message, sha = null)  «Update a file in the configured GitHub repository.»
+        async listIssues(state = 'open')  «List GitHub issues for the configured repository.»
+        async createIssue(title, body, labels = [])  «Create a GitHub issue for the configured repository.»
+
+    function showAddTaskModal()  «Show add task modal.»
+    function closeModal()  «Close modal.»
+    function exportToCSV()  «Export to csv.»
+    function loadTasks()  «Load tasks.»
+    function closePasswordModal()  «Close password modal.»
+    function verifyPassword(event)  «Verify password.»
+
+structure from public/local-folder/README.md:
+    [file-summary] Local Folder Integration Module
+    [heading-1] # Local Folder Integration Module
+    [heading-2] ## Files
+
+structure from public/local-folder/js/folder-picker-trigger.js:
+    [file-summary] UI binding layer for launching the local-folder picker from browser surfaces.
+
+structure from public/local-folder/js/local-folder-scanner.js:
+    [file-summary] Browser-side local-folder scanner and TaskDB project registry.
+
+structure from public/task-engine/js/task-field-automation.js:
+    [file-summary] Task field automation rules for project and task authoring.
+    class TemplateAutomation  «Populate and repair task/project fields using TEMPLATE_CONFIG defaults.»:
+        constructor(config = TEMPLATE_CONFIG, validator = new TemplateValidator())  «Create an automation helper with config-backed defaults and validation.»
+        generateTaskId(existingTasks = [])  «Generate the next available numeric task id for a task collection.»
+        autoPopulateTask(task, template = null, creatorId = null)  «Fill task defaults, normalize values, and derive missing metadata.»
+        autoPopulateProject(project)  «Fill project-level defaults and normalize configured fields.»
+        createTaskFromTemplate(templateTask, template, customizations = {})  «Create a task from a template record and apply automation defaults.»
+        autoGenerateDependencies(tasks)  «Suggest finish-to-start dependencies by comparing task date ranges.»
+        suggestAssignments(task, workers)  «Rank workers whose skills best match the task tags.»
+        calculateSkillMatch(taskTags, workerSkills)  «Calculate a simple overlap score between task tags and worker skills.»
+        autoCategorize(task, categories)  «Suggest a category name using keyword matches from the task content.»
+        validateAndFix(task, template = null)  «Repair common task issues and return the fixes that were applied.»
+        generateProjectSummary(template)  «Build a derived summary block from the current template task list.»
+
+
+structure from public/task-engine/js/task-schema-validator.js:
+    [file-summary] TaskDB schema validation rules for tasks, projects, workers, and templates.
+    class TemplateValidator  «Validate TaskDB payloads against the configured template schema.»:
+        constructor(config = TEMPLATE_CONFIG)  «Create a validator bound to the active TaskDB template configuration.»
+        validate(data, type = 'task')  «Validate a project, task, or template payload by logical type.»
+        validateTemplate(template)  «Validate a full TaskDB template document including tasks and related records.»
+        validateProject(project)  «Validate project-level metadata and nested planning records.»
+        validateTask(task, template = null)  «Validate an individual task record and its embedded substructures.»
+        validateCategories(categories)  «Validate category definitions and parent-category references.»
+        validateWorkers(workers)  «Validate worker records used by assignments and project staffing.»
+        validateDependencies(tasks)  «Validate cross-task dependency references across the full task list.»
+        isValidDate(dateString)  «Check whether a string matches the configured TaskDB date format.»
+        isValidEmail(email)  «Check whether a string matches the configured email pattern.»
+        normalizeStatus(status)  «Normalize a free-form status value to the canonical TaskDB enum when possible.»
+
+
+structure from public/task-engine/js/task-storage-sync.js:
+    [file-summary] Task storage and synchronization layer for TaskDB projects.
+    class TaskDatabase  «Manage the active project's tasks, metadata, persistence, and exports.»:
+        constructor(githubApi, validator = new TemplateValidator(), automation = new TemplateAutomation())  «Create a task database bound to GitHub, validation, and automation services.»
+        resetLoadedMetadata()  «Reset metadata captured from the last loaded project payload.»
+        applyLoadedPayload(data)  «Apply a loaded project payload and extract its task list and metadata.»
+        cloneTasksSnapshot(tasks)  «Clone a task list snapshot for later history diffing.»
+        getHistoryTaskKey(task)  «Resolve the canonical task key used by history diffing.»
+        summarizeHistoryChanges(changes)  «Summarize changed fields for compact history event messages.»
+        diffTasksForHistory(beforeTasks, afterTasks)  «Diff two task snapshots into create, update, and delete history events.»
+        async appendHistoryNdjsonViaWorkerFallback({ projectId, workerUrl, accessPassword, tasksFile, message, actor, commitSha, beforeTasks, afterTasks })  «Append history events through the worker when server-side history writes are unavailable.»
+        resolveActor()  «Resolve the actor name used for saves and task history.»
+        isLocalDevHost()  «Detect whether the app is running on a local development host.»
+        buildFullData(tasks = this.tasks)  «Build the full persisted TaskDB payload for the current task collection.»
+        generateStateFiles(tasks = this.tasks)  «Generate state summary files grouped by task status.»
+        async saveTasksLocalDisk(message = 'Update tasks')  «Persist the current project through the local disk development API.»
+        async initialize()  «Load tasks and templates needed to initialize the active project database.»
+        async loadTasks()  «Load tasks from the best available source for the active project context.»
+        getDuplicateTaskIds(tasks = this.tasks)  «Collect duplicate numeric task ids from the current task list.»
+        escapeCsvValue(value)  «Escape a scalar value for persisted CSV output.»
+        generatePersistedCSV(tasks = this.tasks)  «Generate the repo-side persisted CSV companion for the active task list.»
+        saveTasksLocal(message = 'Update tasks')  «Persist the current task payload into browser localStorage as a fallback copy.»
+        async saveTasks(message = 'Update tasks')  «Persist the current task set using the best available configured backend.»
+        async saveTasksViaWorker(message, workerUrl)  «Persist tasks through the Cloudflare worker and keep derived files in sync.»
+        getSessionAccessPassword()  «Read the current session's cached access password for the active project.»
+        async saveTasksDirectGitHub(message)  «Persist tasks directly through the GitHub API when browser tokens are enabled.»
+        async loadTemplates()  «Load available project templates from the configured template sources.»
+        async importFromTemplate(template, options = {})  «Import tasks from a validated template into the current project.»
+        exportToCSV(tasks = null)  «Export the provided tasks, or the active task list, as CSV text.»
+        importFromCSV(csvContent, options = {})  «Import tasks from CSV text and merge or replace the current task list.»
+        parseCSVLine(line)  «Parse a CSV line while preserving quoted commas and escaped quotes.»
+        createTask(taskData, creatorId = null)  «Create a validated task and append it to the active task list.»
+        updateTask(taskId, updates)  «Update an existing task with validated changes while preserving its id.»
+        deleteTask(taskId)  «Delete a task from the active task list by id.»
+        getTask(taskId)  «Retrieve a single task by id from the active task list.»
+        getTasks(filters = {})  «Filter the current task list by status, priority, category, assignee, or text.»
+        getStatistics()  «Compute aggregate statistics for the current task collection.»
+
+    function inferProjectIdFromTasksFile(tasksFile)  «Infer a project id from a configured TaskDB tasks file path.»
+    function resolveTemplateConfig()  «Resolve the shared template configuration object from browser or test globals.»
+    function hasValidGitHubToken()  «Determine whether a usable GitHub token is configured for direct saves.»
+    function resolveActiveProjectId()  «Resolve the active project id from config hints or the configured tasks file path.»
+    function getProjectScopedStorageKey()  «Build the localStorage key scoped to the currently active project.»
+
 structure from public/tasksDB/README.md:
     [file-summary] TasksDB — Project Graph Data Format
     [heading-1] # TasksDB — Project Graph Data Format
@@ -2919,7 +3058,7 @@ structure from public/tasksDB/README.md:
     [heading-2] ## Adding a New Project
 
 structure from public/tasksDB/registry.json:
-    [json-array] [6 items]
+    [json-array] [5 items]
 
 structure from public/tasksDB/_examples/career/data.json:
     [json-key] rawNodes: [4 items]
@@ -3010,27 +3149,8 @@ structure from public/tasksDB/external/ai-career-roadmap/tasks.json:
     [json-key] required_fields: [10 items]
     [json-key] optional_fields: [16 items]
 
-structure from public/tasksDB/external/ai-career-roadmap/history/.gitkeep:  (no extractable definitions)
-
-structure from public/tasksDB/external/ai-career-roadmap/history/changes.ndjson:  (no extractable definitions)
-
 structure from public/tasksDB/external/ai-career-roadmap/tour/graph-tour.json:
     [json-array] [9 items]
-
-structure from public/tasksDB/external/extract-project-spec/structure.json:
-    [json-key] rawNodes: [22 items]
-    [json-key] rawRelationships: [21 items]
-    [json-key] details: {root, file:README.md, file:parsers/css_parser.py, file:parsers/csv_parser.py, file:parsers/html_parser.py, +14 more}
-    [json-key] meta: {walkthroughEnabled}
-    [json-key] configOverrides: {}
-
-structure from public/tasksDB/external/extract-project-spec/tasks.json:
-    [json-key] project: {name, description, start_date, end_date, status, +2 more}
-    [json-key] categories: [8 items]
-    [json-key] workers: [1 items]
-    [json-key] tasks: [23 items]
-    [json-key] meta: {legendMode, walkthroughEnabled}
-    [json-key] configOverrides: {colorMode, sizeMode, taskSizing}
 
 structure from public/tasksDB/external/first-graph/tasks.json:
     [json-key] project: {name, description, owner, repo}
@@ -3056,6 +3176,7 @@ structure from public/tasksDB/external/github-task-manager/README.md:
     [heading-3] ### CSV
     [heading-2] ## Schema Validation
     [heading-2] ## Backup & Recovery
+    [heading-3] ### Temporary output artifacts
     [heading-2] ## Integration Points
     [heading-2] ## Best Practices
     [heading-2] ## Future Enhancements
@@ -3063,34 +3184,8 @@ structure from public/tasksDB/external/github-task-manager/README.md:
 structure from public/tasksDB/external/github-task-manager/tasks.json:
     [json-key] project: {name, description, start_date, end_date, status, +2 more}
     [json-key] categories: [19 items]
-    [json-key] workers: [3 items]
-    [json-key] tasks: [31 items]
-
-structure from public/tasksDB/external/github-task-manager/history/changes.ndjson:  (no extractable definitions)
-
-structure from public/tasksDB/external/github-task-manager/history/tasks-root-legacy-20251211-200742.csv:
-    [csv-column] [col 1] task_id
-    [csv-column] [col 2] task_name
-    [csv-column] [col 3] description
-    [csv-column] [col 4] start_date
-    [csv-column] [col 5] end_date
-    [csv-column] [col 6] priority
-    [csv-column] [col 7] status
-    [csv-column] [col 8] progress_percentage
-    [csv-column] [col 9] estimated_hours
-    [csv-column] [col 10] actual_hours
-    [csv-column] [col 11] is_critical_path
-    [csv-column] [col 12] category_name
-    [csv-column] [col 13] parent_task_id
-    [csv-column] [col 14] creator_id
-    [csv-column] [col 15] created_date
-    [csv-column] [col 16] completed_date
-
-structure from public/tasksDB/external/github-task-manager/history/tasks-root-legacy-20251211-200742.json:
-    [json-key] project: {name, description, start_date, end_date, status, +1 more}
-    [json-key] categories: [7 items]
-    [json-key] workers: [3 items]
-    [json-key] tasks: [63 items]
+    [json-key] workers: [4 items]
+    [json-key] tasks: [33 items]
 
 structure from public/tasksDB/external/github-task-manager/tour/graph-tour.json:
     [json-array] [8 items]
@@ -3102,7 +3197,7 @@ structure from tests/run-tests.js:
     function main()  «docstring: none»
 
 structure from tests/e2e/crud-operations.spec.js:
-    [file-summary] No top-level file docstring detected
+    [file-summary] End-to-end coverage for CRUD, filtering, export, and statistics in list-display.
     const BASE_URL  «docstring: none»
     const TIMEOUT  «docstring: none»
     function waitForAppReady(page)  «docstring: none»
@@ -3116,15 +3211,15 @@ structure from tests/e2e/crud-operations.spec.js:
     [describe] GitHub Task Manager - UI/UX  «docstring: none»
 
 structure from tests/e2e/graph-fullscreen.spec.js:
-    [file-summary] No top-level file docstring detected
+    [file-summary] End-to-end checks for graph fullscreen behavior launched from list-display.
     const BASE_URL  «docstring: none»
     const TIMEOUT  «docstring: none»
     function waitForAppReady(page)  «docstring: none»
     [describe] Graph Fullscreen  «docstring: none»
 
 structure from tests/e2e/live-multi-project-saves.spec.js:
-    [file-summary] No top-level file docstring detected
-    const LIVE_URL  «Live Site Multi-Project Save Tests Tests that saves persist to the correct GitHub repo when switching projects on the de»
+    [file-summary] Live-site regression coverage for saving the correct project after project switches.
+    const LIVE_URL  «docstring: none»
     const TIMEOUT  «docstring: none»
     const LIVE_PASSWORD_GITHUB_TASK_MANAGER  «docstring: none»
     const LIVE_PASSWORD_AI_CAREER_ROADMAP  «docstring: none»
@@ -3141,13 +3236,13 @@ structure from tests/e2e/live-multi-project-saves.spec.js:
     [describe] @live Live Site - Multi-Project GitHub Saves  «docstring: none»
 
 structure from tests/e2e/module-navigation.spec.js:
-    [file-summary] No top-level file docstring detected
+    [file-summary] End-to-end validation for synchronized module navigation between list and graph views.
     const TIMEOUT  «docstring: none»
     function waitForAppReady(page)  «docstring: none»
     [describe] module navigation sync  «docstring: none»
 
 structure from tests/e2e/password-timeline-issues.spec.js:
-    [file-summary] No top-level file docstring detected
+    [file-summary] End-to-end regression coverage for password, timeline, and GitHub issue workflows.
     const BASE_URL  «docstring: none»
     const LIVE_URL  «docstring: none»
     const TIMEOUT  «docstring: none»
@@ -3166,7 +3261,7 @@ structure from tests/e2e/smoke.spec.js:
     [describe] @smoke app boot + create task  «docstring: none»
 
 structure from tests/e2e/update-task-via-ui.spec.js:
-    [file-summary] No top-level file docstring detected
+    [file-summary] Playwright utility coverage for updating tasks through the UI instead of raw JSON edits.
     const BASE_URL  «docstring: none»
     const TIMEOUT  «docstring: none»
     function waitForAppReady(page)  «Wait for the app to be ready and all tasks loaded»
@@ -3175,7 +3270,7 @@ structure from tests/e2e/update-task-via-ui.spec.js:
     [describe] Update Tasks Via UI Automation  «docstring: none»
 
 structure from tests/e2e/verify-commit-structure.spec.js:
-    [file-summary] No top-level file docstring detected
+    [file-summary] Live-site verification for TaskDB commit subjects and machine-readable payload structure.
     const LIVE_URL  «docstring: none»
     const TIMEOUT  «docstring: none»
     const RUN_LIVE  «docstring: none»
@@ -3186,40 +3281,44 @@ structure from tests/e2e/verify-commit-structure.spec.js:
     [describe] @live Verify commit subject + payload structure  «docstring: none»
 
 structure from tests/e2e/visual-states.spec.js:
-    [file-summary] No top-level file docstring detected
+    [file-summary] Visual-state checks for list-display task status classes and styling hooks.
     [describe] Task Visual States  «docstring: none»
 
 structure from tests/graph-display/graph-display.spec.js:
-    [file-summary] No top-level file docstring detected
+    [file-summary] Graph-display interaction tests for modal navigation and persistent node selection.
     function parseTranslate(transform)  «docstring: none»
     [describe] graph-display task-management template  «docstring: none»
 
 structure from tests/graph-display/inline-subtask-navigation.spec.js:
-    [file-summary] No top-level file docstring detected
+    [file-summary] Graph-display regression coverage for inline subtask drill-down behavior.
     function waitForNodeCount(page, minimum)  «docstring: none»
     [describe] inline subtask navigation  «docstring: none»
 
 structure from tests/graph-display/playwright.config.js:  (no extractable definitions)
 
 structure from tests/graph-display/server.js:
-    [file-summary] No top-level file docstring detected
+    [file-summary] Minimal static server used by graph-display Playwright tests.
     function contentTypeFor(filePath)  «docstring: none»
     function safeJoin(root, requestPath)  «docstring: none»
 
 structure from tests/graph-display/web-e2e-bussines-navigation.spec.js:
-    [file-summary] No top-level file docstring detected
+    [file-summary] Graph-display navigation coverage for the web-e2e-bussines project template.
     function waitForNodeCount(page, minimum)  «docstring: none»
     [describe] web-e2e-bussines graph navigation  «docstring: none»
 
-structure from tests/unit/folder-project-service.test.js:
-    [file-summary] No top-level file docstring detected
-    function loadFolderProjectService(initialStorage = {})  «docstring: none»
-    [describe] Folder Project Service  «docstring: none»
+structure from tests/unit/generate-project-calendars.test.js:
+    [file-summary] Unit coverage for TaskDB-to-calendar generation and project descriptor discovery.
+    [describe] Calendar Parser  «docstring: none»
 
 structure from tests/unit/graph-data.test.js:
-    [file-summary] No top-level file docstring detected
+    [file-summary] Basic sanity test for `public/graph-display/js/graph-data.js` to ensure it parses without syntax errors in the Node test environment.
     function loadGraphDataModule(windowMock = { location: { pathname: '/public/graph-display/index.html', hostname: '127.0.0.1', search: '' } }, fetchMock = async () => ({ ok: false, status: 404, json: async () => ({}) })  «docstring: none»
     [describe] Graph Data Module  «docstring: none»
+
+structure from tests/unit/local-folder-scanner.test.js:
+    [file-summary] Unit coverage for browser-side local-folder TaskDB discovery and registration.
+    function loadFolderProjectService(initialStorage = {})  «docstring: none»
+    [describe] Folder Project Service  «docstring: none»
 
 structure from tests/unit/projects-config.test.js:
     [file-summary] Projects Config Tests Verify that a centralized PROJECTS_CONFIG is loaded and applied to TEMPLATE_CONFIG
@@ -3231,7 +3330,33 @@ structure from tests/unit/server-api.test.js:
     function httpRequest({ port, method, path: reqPath, body, headers = {} })  «docstring: none»
     [describe] Server API - /api/tasks  «docstring: none»
 
-structure from tests/unit/task-database.test.js:
+structure from tests/unit/task-field-automation.test.js:
+    [file-summary] Template Automation Tests Tests for automated field population
+    const TEMPLATE_CONFIG  «docstring: none»
+    const TemplateValidator  «docstring: none»
+    const TemplateAutomation  «docstring: none»
+    [describe] TemplateAutomation Initialization  «docstring: none»
+    [describe] Task ID Generation  «docstring: none»
+    [describe] Auto-populate Task  «docstring: none»
+    [describe] Auto-populate Project  «docstring: none»
+    [describe] Skill Match Calculation  «docstring: none»
+    [describe] v3 Agentic Field Auto-Population  «docstring: none»
+    [describe] v3 Project Auto-Population  «docstring: none»
+    [describe] validateAndFix v3 Support  «docstring: none»
+
+structure from tests/unit/task-schema-validator.test.js:
+    [file-summary] Template Validator Tests Tests for validation logic
+    const TEMPLATE_CONFIG  «docstring: none»
+    const TemplateValidator  «docstring: none»
+    [describe] TemplateValidator Initialization  «docstring: none»
+    [describe] Date Validation  «docstring: none»
+    [describe] Email Validation  «docstring: none»
+    [describe] Status Normalization  «docstring: none»
+    [describe] Task Validation  «docstring: none»
+    [describe] Project Validation  «docstring: none»
+    [describe] v3 Task Field Validation  «docstring: none»
+
+structure from tests/unit/task-storage-sync.test.js:
     [file-summary] Task Database Tests Tests for task storage and operations
     const TEMPLATE_CONFIG  «docstring: none»
     const TemplateValidator  «docstring: none»
@@ -3259,21 +3384,7 @@ structure from tests/unit/tasks-json-format.test.js:
     function validateTasksJson(filePath)  «docstring: none»
     [describe] tasks.json format validation  «docstring: none»
 
-structure from tests/unit/template-automation.test.js:
-    [file-summary] Template Automation Tests Tests for automated field population
-    const TEMPLATE_CONFIG  «docstring: none»
-    const TemplateValidator  «docstring: none»
-    const TemplateAutomation  «docstring: none»
-    [describe] TemplateAutomation Initialization  «docstring: none»
-    [describe] Task ID Generation  «docstring: none»
-    [describe] Auto-populate Task  «docstring: none»
-    [describe] Auto-populate Project  «docstring: none»
-    [describe] Skill Match Calculation  «docstring: none»
-    [describe] v3 Agentic Field Auto-Population  «docstring: none»
-    [describe] v3 Project Auto-Population  «docstring: none»
-    [describe] validateAndFix v3 Support  «docstring: none»
-
-structure from tests/unit/tasks-template-config.test.js:
+structure from tests/unit/template-config.test.js:
     [file-summary] Template Config Tests Tests for TEMPLATE_CONFIG structure and values
     const TEMPLATE_CONFIG  «docstring: none»
     [describe] TEMPLATE_CONFIG Structure  «docstring: none»
@@ -3285,18 +3396,6 @@ structure from tests/unit/tasks-template-config.test.js:
     [describe] GITHUB Configuration  «docstring: none»
     [describe] CATEGORIES List  «docstring: none»
 
-structure from tests/unit/template-validator.test.js:
-    [file-summary] Template Validator Tests Tests for validation logic
-    const TEMPLATE_CONFIG  «docstring: none»
-    const TemplateValidator  «docstring: none»
-    [describe] TemplateValidator Initialization  «docstring: none»
-    [describe] Date Validation  «docstring: none»
-    [describe] Email Validation  «docstring: none»
-    [describe] Status Normalization  «docstring: none»
-    [describe] Task Validation  «docstring: none»
-    [describe] Project Validation  «docstring: none»
-    [describe] v3 Task Field Validation  «docstring: none»
-
 structure from tests/unit/validate-schema.js:
     [file-summary] Schema Validation Script Validates tasks.json against the template schema
     const PROJECT_STATUS  «docstring: none»
@@ -3306,6 +3405,102 @@ structure from tests/unit/validate-schema.js:
     function validateRequired(obj, fields, prefix = '')  «docstring: none»
     function validateEnum(value, validValues, fieldName)  «docstring: none»
     function validateDateFormat(dateStr, fieldName)  «docstring: none»
+
+structure from tools/calendar/README.md:
+    [file-summary] Calendar Export Tooling
+    [heading-1] # Calendar Export Tooling
+    [heading-2] ## Structure
+    [heading-2] ## Why This Lives In `tools/`
+    [heading-2] ## Schema Coverage Review
+    [heading-2] ## Usage
+
+structure from tools/calendar/calendar-appointment-schema.js:
+    [file-summary] Task-to-calendar field mappings and appointment schema metadata.
+    const TEMPLATE_CONFIG  «Task-to-calendar field mappings and appointment schema metadata.»
+    const TASK_KNOWN_FIELDS  «All known task field names, flattened from TEMPLATE_CONFIG.FIELD_CATEGORIES. Use this as an authoritative whitelist when»
+    const TASK_FIELD_SCHEMA  «Type-annotated schema for documentation purposes. Extends TASK_KNOWN_FIELDS with calendar-alias fields supported by the »
+    const CALENDAR_META_FIELD_NAMES  «Field names that may contain an embedded calendar override inside a task object. The parser checks these in order and me»
+    const WORKER_FIELD_MAP  «Defines how an assigned_workers entry maps to calendar appointment fields.»
+    const PRIORITY_MAP  «Maps TEMPLATE_CONFIG.ENUMS.TASK_PRIORITY string values to numeric appointment priority (1–10 scale). Unknown values fall»
+    const STATUS_TO_APPOINTMENT_MAP  «Maps TEMPLATE_CONFIG.ENUMS.TASK_STATUS values to calendar appointment status. Status values not present here resolve to »
+    const APPOINTMENT_FIELDS  «Ordered list of field names in a normalized calendar appointment object. This is the authoritative shape consumed by cal»
+    const APPOINTMENT_DEFAULTS  «Default values for a normalized appointment, used when a source field is absent or null. Numeric/string defaults align w»
+    const TASK_TO_CALENDAR_FIELD_SOURCES  «Ordered task and meta source paths used to resolve each appointment field.»
+    const CALENDAR_APPOINTMENT_SCHEMA  «Type annotations for calendar appointment output fields (documentation). Keys match APPOINTMENT_FIELDS order exactly.»
+
+structure from tools/calendar/calendar-constants.js:
+    [file-summary] Shared constants for calendar export sorting, recurrence, colors, and defaults.
+    const RECURRENCE_VALUES  «Shared constants for calendar export sorting, recurrence, colors, and defaults.»
+    const SORT_MODES  «Supported appointment sort modes for generated calendar state files.»
+    const APPOINTMENT_STATUSES  «Valid normalized appointment status values for calendar exports.»
+    const DEFAULT_CALENDAR_ID  «Default calendar identifier when no task-specific calendar id is provided.»
+    const DEFAULT_SORT_MODE  «Default sort mode applied to generated calendar exports.»
+    const DEFAULT_TIMEZONE  «Default timezone used when the task or project does not provide one.»
+    const DEFAULT_PRIORITY  «Default numeric appointment priority used when no explicit priority is mapped.»
+    const DEFAULT_CALENDAR_COLOR  «Default fallback color applied to generated calendar definitions.»
+    const CALENDAR_COLOR_PALETTE  «Palette cycled across generated calendars when no explicit color is configured.»
+
+structure from tools/calendar/generate-project-calendars.js:
+    [file-summary] CLI and library entrypoint for generating calendar JSON from TaskDB projects.
+    const EXCLUDED_ROOT_PROJECT_DIRS  «Excluded root project dirs.»
+    const TASK_SCOPE_VALUES  «Task scope values.»
+    const TERMINAL_TASK_STATUSES  «Terminal task statuses.»
+    function isPlainObject(value)  «Is plain object.»
+    function toFlatArray(value)  «To flat array.»
+    function uniqueStrings(values)  «Unique strings.»
+    function normalizeProjectId(rawValue)  «Normalize project id.»
+    function normalizeTaskScope(value, { allowBoth = false } = {})  «Normalize task scope.»
+    function slugify(value)  «Slugify.»
+    function prettifyIdentifier(value)  «Prettify identifier.»
+    function isDateOnlyString(value)  «Is date only string.»
+    function hasExplicitTime(value)  «Has explicit time.»
+    function toIsoDateTime(value, { endOfDay = false } = {})  «To iso date time.»
+    function normalizeNullableNumber(value, { integer = false } = {})  «Normalize nullable number.»
+    function normalizePositiveCount(value)  «Normalize positive count.»
+    function normalizeReminderMinutes(value)  «Normalize reminder minutes.»
+    function getNestedFieldValue(obj, path)  «Get nested field value.»
+    function isDefinedValue(value)  «Is defined value.»
+    function resolveTaskFieldValue(task, meta, sources)  «Resolve task field value.»
+    function normalizeRecurrence(value)  «Normalize recurrence.»
+    function normalizeAppointmentStatus(value, fallback = 'tentative')  «Normalize appointment status.»
+    function mapTaskStatusToAppointmentStatus(taskStatus)  «Map task status to appointment status.»
+    function mapPriorityToNumber(explicitPriority, taskPriority)  «Map priority to number.»
+    function normalizeColor(color, fallback)  «Normalize color.»
+    function looksLikeEmail(value)  «Looks like email.»
+    function createOpaqueWorkerId(seed)  «Create opaque worker id.»
+    function resolveWorkerContact(worker)  «Resolve worker contact.»
+    function resolveWorkerProfessionalLabel(worker)  «Resolve worker professional label.»
+    function resolveWorkerAttendeeLabel(worker)  «Resolve worker attendee label.»
+    function resolveWorkerProfessionalId(worker)  «Resolve worker professional id.»
+    function extractTaskCalendarMeta(task)  «Extract task calendar meta.»
+    function pickFirstUrl(values)  «Pick first url.»
+    function buildAttendees(task, meta)  «Build attendees.»
+    function buildContacts(task, meta)  «Build contacts.»
+    function buildAppointment(task, context)  «Build appointment.»
+    function buildCalendars(appointments, calendarMetaById, projectName)  «Build calendars.»
+    function isPendingTask(task)  «Is pending task.»
+    function filterTasksByScope(tasks, taskScope)  «Filter tasks by scope.»
+    function buildCalendarState(payload, options = {})  «Build calendar state.»
+    function readJson(filePath)  «Read json.»
+    function resolveProjectDescriptor(projectId, repoRoot)  «Resolve project descriptor.»
+    function normalizeTaskPathId(value)  «Normalize task path id.»
+    function findNestedTaskJsonPaths(rootDir, excludePath)  «Find nested task json paths.»
+    function expandProjectDescriptor(descriptor)  «Expand project descriptor.»
+    function listProjectDescriptors(repoRoot)  «List project descriptors.»
+    function getOutputFileName(descriptor)  «Get output file name.»
+    function getProjectOutputDirectory(descriptor, outputDir)  «Get project output directory.»
+    function getCalendarOutputDirectory(descriptor, outputDir, taskScope)  «Get calendar output directory.»
+    function getWorkerOutputDirectory(descriptor, outputDir, taskScope)  «Get worker output directory.»
+    function cleanupLegacyOutputLayout(descriptor, outputDir)  «Cleanup legacy output layout.»
+    function writeCalendarFile(descriptor, state, outputDir, options = {})  «Write calendar file.»
+    function loadDescriptorPayload(descriptor)  «Load descriptor payload.»
+    function extractWorkersFromTasks(tasks)  «Extracts all unique assigned workers from a tasks array. Returns a Map keyed by stable professionalId → { name, email, r»
+    function buildWorkerCalendarState(workerInfo, appointments, options = {})  «Builds a calendar state scoped to a single worker. Filters appointments where the worker appears by stable professionalI»
+    function generateWorkerCalendarFiles(descriptor, globalState, tasks, options = {})  «Generates per-worker calendar files into a `workers-calendar/` subfolder inside the project's output directory.»
+    function generateCalendarFile(descriptor, options = {})  «Generate calendar file.»
+    function parseCliArgs(argv)  «Parse cli args.»
+    function main(argv = process.argv.slice(2))  «Run the calendar generation CLI for one or more TaskDB projects.»
+    function groupAppointmentsByWorker(appointments)  «Groups appointments by assigned worker, returning a Map keyed by worker identifier (professionalId → fallback profession»
 
 structure from tools/cloudflare-worker/README.md:
     [file-summary] Cloudflare Worker for Secure GitHub Writes
@@ -3351,29 +3546,29 @@ structure from tools/cloudflare-worker/package.json:
     [json-key] devDependencies: {wrangler}
 
 structure from tools/cloudflare-worker/validate-secrets.js:
-    [file-summary] No top-level file docstring detected
-    function getEnvVar(keys)  «docstring: none»
-    function checkRepoToken({ owner, repo, branch, path }, token)  «docstring: none»
+    [file-summary] Validate Cloudflare worker GitHub tokens against the target repository.
+    function getEnvVar(keys)  «Return the first configured environment variable from a list of candidate names.»
+    function checkRepoToken({ owner, repo, branch, path }, token)  «Check whether a token can read a known repository path via the GitHub contents API.»
 
 structure from tools/cloudflare-worker/worker.js:
-    [file-summary] No top-level file docstring detected
-    const ALLOWED_ORIGINS  «docstring: none»
-    const ALLOWED_PATHS  «docstring: none»
-    function getTokenForProject(projectId, env)  «docstring: none»
-    function safeProjectId(value)  «docstring: none»
-    function normalizeScope(value)  «docstring: none»
-    function getProjectBasePath(cfg)  «docstring: none»
-    function getProjectConfig(projectId, env)  «docstring: none»
-    function getFileContentAndShaForRepo({ owner, repo, branch }, filePath, token)  «docstring: none»
-    function safeJsonParse(text, fallback = null)  «docstring: none»
-    function getTaskKey(task)  «docstring: none»
-    function summarizeChanges(changes)  «docstring: none»
-    function diffTasks(oldTasks, newTasks)  «docstring: none»
-    function appendNdjsonEvents(projectId, token, events, env)  «docstring: none»
-    function handleGetTaskHistory(request, env, origin)  «docstring: none»
-    function handleTasksUpdate(request, env, origin)  «docstring: none»
-    function handleCORS(request)  «docstring: none»
-    function jsonResponse(data, origin, status = 200)  «docstring: none»
+    [file-summary] Cloudflare worker that brokers secure TaskDB writes and history reads.
+    const ALLOWED_ORIGINS  «Cloudflare worker that brokers secure TaskDB writes and history reads.»
+    const ALLOWED_PATHS  «Allowed repository paths that the worker may read or write.»
+    function getTokenForProject(projectId, env)  «Resolve the GitHub token to use for a specific project write operation.»
+    function safeProjectId(value)  «Sanitize a project id before using it in paths, keys, or env lookups.»
+    function normalizeScope(value)  «Normalize a configured project scope to the supported TaskDB scopes.»
+    function getProjectBasePath(cfg)  «Build the base repository path used for a project's TaskDB files.»
+    function getProjectConfig(projectId, env)  «Resolve project repository configuration from worker env or defaults.»
+    function getFileContentAndShaForRepo({ owner, repo, branch }, filePath, token)  «Fetch an existing repository file and its SHA from the GitHub contents API.»
+    function safeJsonParse(text, fallback = null)  «Parse JSON safely when reading stored history and task payloads.»
+    function getTaskKey(task)  «Resolve the canonical task key used to diff old and new task payloads.»
+    function summarizeChanges(changes)  «Summarize changed fields for compact task-history entries.»
+    function diffTasks(oldTasks, newTasks)  «Diff two task arrays and emit create, update, and delete events.»
+    function appendNdjsonEvents(projectId, token, events, env)  «Append task change events to the project's NDJSON history file.»
+    function handleGetTaskHistory(request, env, origin)  «Read the project task-history stream and return recent matching events.»
+    function handleTasksUpdate(request, env, origin)  «Validate and persist a TaskDB file update through the GitHub contents API.»
+    function handleCORS(request)  «Build the CORS preflight response for allowed browser origins.»
+    function jsonResponse(data, origin, status = 200)  «Serialize a JSON API response with the appropriate CORS headers.»
 
 structure from tools/cloudflare-worker/wrangler.toml:  (no extractable definitions)
 
@@ -3560,83 +3755,83 @@ structure from tools/docs/TESTING.md:
     [heading-2] ## 📝 Test Checklist
 
 structure from tools/scripts/archive-root-tasks.js:
-    [file-summary] No top-level file docstring detected
-    function pad2(n)  «docstring: none»
-    function timestamp()  «docstring: none»
-    function escapeCsvValue(value)  «docstring: none»
-    function generatePersistedCSV(tasks = [])  «docstring: none»
-    function main()  «docstring: none»
+    [file-summary] Archive the legacy root-level TaskDB files with a timestamped backup snapshot.
+    function pad2(n)  «Pad a number to two digits for timestamp formatting.»
+    function timestamp()  «Build a filesystem-safe timestamp string for archive naming.»
+    function escapeCsvValue(value)  «Escape a value for inclusion in generated CSV output.»
+    function generatePersistedCSV(tasks = [])  «Generate a persisted CSV snapshot from a TaskDB task list.»
+    function main()  «Run the script entrypoint for this file.»
 
 structure from tools/scripts/enrich-tasks-workers.js:
     [file-summary] enrich-tasks-workers.js ---------------------- Adds/normalizes tasks/workers expectation fields on a TaskDB JSON file.
-    function isNonEmptyString(v)  «docstring: none»
-    function uniq(arr)  «docstring: none»
-    function loadJson(filePath)  «docstring: none»
-    function saveJson(filePath, obj)  «docstring: none»
-    function buildTasksById(tasks)  «docstring: none»
-    function taskRefToRequisiteString(ref, tasksById)  «docstring: none»
-    function normalizeRequisites(task, tasksById)  «docstring: none»
-    function roleToSkills(role)  «docstring: none»
-    function categoryToRequisites(categoryName)  «docstring: none»
-    function tagsToRequisites(tags)  «docstring: none»
-    function inferReviewerRole(task)  «docstring: none»
-    function main(argv = process.argv)  «docstring: none»
+    function isNonEmptyString(v)  «Check whether a value is a non-empty string.»
+    function uniq(arr)  «Return the ordered unique values from an array.»
+    function loadJson(filePath)  «Load and parse a JSON file from disk.»
+    function saveJson(filePath, obj)  «Write a JSON object to disk with stable formatting.»
+    function buildTasksById(tasks)  «Build a lookup map keyed by task id.»
+    function taskRefToRequisiteString(ref, tasksById)  «Convert a task reference into a normalized requisite string.»
+    function normalizeRequisites(task, tasksById)  «Normalize task requisite fields using task lookup information.»
+    function roleToSkills(role)  «Map a reviewer or worker role to default skill tags.»
+    function categoryToRequisites(categoryName)  «Infer default requisites from a task category.»
+    function tagsToRequisites(tags)  «Infer requisites from task tags.»
+    function inferReviewerRole(task)  «Infer the reviewer role that best matches a task.»
+    function main(argv = process.argv)  «Run the script entrypoint for this file.»
 
 structure from tools/scripts/generate-state-files.js:
     [file-summary] generate-state-files.js ----------------------- Generates derived state JSON files from public/tasksDB/<scope>/<project>/tasks.json Output: public/tasksDB/<scope>/<project>/state/*.json Usage: node to
-    function ensureDir(dirPath)  «docstring: none»
-    function writeJson(filePath, data)  «docstring: none»
-    function generateStateData(tasks)  «docstring: none»
-    function main()  «docstring: none»
+    function ensureDir(dirPath)  «Ensure that a directory exists before writing derived files.»
+    function writeJson(filePath, data)  «Write a JSON file with pretty-printed output.»
+    function generateStateData(tasks)  «Generate derived state payloads from a task list.»
+    function main()  «Run the script entrypoint for this file.»
 
 structure from tools/scripts/prepare-public-graph.js:
-    [file-summary] No top-level file docstring detected
-    function copyGraphDisplayIntoPublic()  «docstring: none»
+    [file-summary] Copy the graph-display app into the public deployment tree.
+    function copyGraphDisplayIntoPublic()  «Copy the graph-display source app into the public deployment directory.»
 
 structure from tools/scripts/regenerate-tasks-csv.js:
     [file-summary] regenerate-tasks-csv.js ------------------------ Generates a flattened CSV export from public/tasksDB/<scope>/<project>/tasks.json Output: public/tasksDB/<scope>/<project>/tasks.csv Usage: node tools/
-    function escapeCsvValue(value)  «docstring: none»
-    function main()  «docstring: none»
+    function escapeCsvValue(value)  «Escape a value for inclusion in generated CSV output.»
+    function main()  «Run the script entrypoint for this file.»
 
 structure from tools/scripts/setup.bat:  (no extractable definitions)
 
 structure from tools/scripts/setup.js:
-    [file-summary] No top-level file docstring detected
-    const GH_TOKEN  «docstring: none»
-    function question(prompt)  «docstring: none»
-    function exec(cmd, options = {})  «docstring: none»
-    function main()  «docstring: none»
+    [file-summary] Repository bootstrap helper for initializing and publishing the project.
+    const GH_TOKEN  «GitHub token used during interactive repository setup commands.»
+    function question(prompt)  «Prompt the user for input from the interactive setup workflow.»
+    function exec(cmd, options = {})  «Execute a shell command for the repository setup workflow.»
+    function main()  «Run the interactive repository bootstrap and publishing flow.»
 
 structure from tools/scripts/validate-commit-format.js:
     [file-summary] TaskDB Commit Format Validator
-    function parseArgs(argv)  «docstring: none»
-    function git(cmd)  «docstring: none»
-    function extractTaskDbPayload(commitBody)  «docstring: none»
-    function validateSubject(subject)  «docstring: none»
-    function determineRange(args)  «docstring: none»
-    function listCommits(range, max)  «docstring: none»
-    function main()  «docstring: none»
+    function parseArgs(argv)  «Parse CLI arguments for this validation or export script.»
+    function git(cmd)  «Run a git command and return its captured output.»
+    function extractTaskDbPayload(commitBody)  «Extract the TaskDB payload block from a commit message body.»
+    function validateSubject(subject)  «Validate that a commit subject matches the expected TaskDB format.»
+    function determineRange(args)  «Resolve the git revision range to validate.»
+    function listCommits(range, max)  «List commits in the requested git revision range.»
+    function main()  «Run the script entrypoint for this file.»
 
 structure from tools/scripts/validate-tasks-schema.js:
     [file-summary] TaskDB Task Schema Validator
-    function parseArgs(argv)  «docstring: none»
-    function sanitizeProjectId(s)  «docstring: none»
-    function loadTasksJson(projectId)  «docstring: none»
-    function isValidDateYYYYMMDD(dateStr)  «docstring: none»
-    function hasTimestampPollution(taskName)  «docstring: none»
-    function validateProjectFile(projectId, tasksJson)  «docstring: none»
-    function main()  «docstring: none»
+    function parseArgs(argv)  «Parse CLI arguments for this validation or export script.»
+    function sanitizeProjectId(s)  «Sanitize a project id passed through CLI arguments.»
+    function loadTasksJson(projectId)  «Load the tasks.json payload for a project.»
+    function isValidDateYYYYMMDD(dateStr)  «Check whether a string matches the YYYY-MM-DD date format.»
+    function hasTimestampPollution(taskName)  «Check whether a task name appears to contain an injected timestamp.»
+    function validateProjectFile(projectId, tasksJson)  «Validate one project tasks.json payload against the expected schema rules.»
+    function main()  «Run the script entrypoint for this file.»
 
 structure from tools/scripts/validate-tasks-workers.js:
     [file-summary] validate-tasks-workers.js ------------------------ Validates tasks/workers expectation fields on TaskDB projects.
-    function parseArgs(argv)  «docstring: none»
-    function sanitizeProjectId(s)  «docstring: none»
-    function loadProjectTasks(projectId)  «docstring: none»
-    function isNonEmptyString(v)  «docstring: none»
-    function isNonEmptyStringArray(v)  «docstring: none»
-    function isNonEmptyArray(v)  «docstring: none»
-    function validate(projectId, tasksJson, { strict })  «docstring: none»
-    function main(argv = process.argv)  «docstring: none»
+    function parseArgs(argv)  «Parse CLI arguments for this validation or export script.»
+    function sanitizeProjectId(s)  «Sanitize a project id passed through CLI arguments.»
+    function loadProjectTasks(projectId)  «Load the TaskDB payload for a worker validation run.»
+    function isNonEmptyString(v)  «Check whether a value is a non-empty string.»
+    function isNonEmptyStringArray(v)  «Check whether a value is an array of non-empty strings.»
+    function isNonEmptyArray(v)  «Check whether a value is a non-empty array.»
+    function validate(projectId, tasksJson, { strict })  «Validate tasks and workers metadata for a TaskDB project.»
+    function main(argv = process.argv)  «Run the script entrypoint for this file.»
 
 ---
 
@@ -3648,32 +3843,15 @@ relations from server.js:
     [require] path
     [require] url
 
-relations from public/index.html:
-    [asset] styles/task-manager.css
-    [asset] config/access-secret.local.js
-    [asset] config/access-secret.js
-    [asset] config/github-token.local.js
-    [asset] config/github-token.js
-    [asset] config/github-oauth.js
-    [asset] config/worker-url.local.js
-    [asset] config/worker-url.js
-    [asset] config/projects-config.js
-    [asset] config/tasks-template-config.js
-    [asset] scripts/template-validator.js
-    [asset] scripts/template-automation.js
-    [asset] scripts/folder-project-service.js
-    [asset] scripts/folder-project-ui.js
-    [asset] scripts/task-database.js
-    [asset] scripts/task-manager-app.js
-
 relations from public/graph-display/index.html:
     [asset] images/favicon.svg
     [asset] images/favicon.png
     [asset] manifest.json
     [asset] css/styles-new.css
     [asset] js/d3.v7.min.js
-    [asset] ../scripts/folder-project-service.js
-    [asset] ../scripts/folder-project-ui.js
+    [asset] ../local-folder/js/local-folder-scanner.js
+    [asset] ../local-folder/js/folder-picker-trigger.js
+    [asset] ../calendar/js/task-ics-export.js
     [asset] js/utils.js
     [asset] js/main-graph.js
     [asset] images/team/profile-placeholder.svg
@@ -3706,6 +3884,29 @@ relations from public/graph-display/js/main-graph.js:
 
 relations from public/graph-display/js/walkthrough.js:
     [import] ./utils.js
+
+relations from public/health/index.html:
+    [asset] ./css/health.css
+    [asset] ./js/runtime-health-checker.js
+
+relations from public/list-display/index.html:
+    [asset] ./css/task-manager.css
+    [asset] ../config/access-secret.local.js
+    [asset] ../config/access-secret.js
+    [asset] ../config/github-token.local.js
+    [asset] ../config/github-token.js
+    [asset] ../config/github-oauth.js
+    [asset] ../config/worker-url.local.js
+    [asset] ../config/worker-url.js
+    [asset] ../config/projects-config.js
+    [asset] ../config/tasks-template-config.js
+    [asset] ../local-folder/js/local-folder-scanner.js
+    [asset] ../local-folder/js/folder-picker-trigger.js
+    [asset] ../task-engine/js/task-schema-validator.js
+    [asset] ../task-engine/js/task-field-automation.js
+    [asset] ../task-engine/js/task-storage-sync.js
+    [asset] ../calendar/js/task-ics-export.js
+    [asset] ./js/list-display-controller.js
 
 relations from tests/playwright.config.js:
     [import] @playwright/test
@@ -3760,11 +3961,16 @@ relations from tests/graph-display/server.js:
 relations from tests/graph-display/web-e2e-bussines-navigation.spec.js:
     [import] @playwright/test
 
-relations from tests/unit/folder-project-service.test.js:
-    [require] fs
+relations from tests/unit/generate-project-calendars.test.js:
+    [require] ../../tools/calendar/generate-project-calendars.js
+    [require] ../../tools/calendar/calendar-constants.js
     [require] path
 
 relations from tests/unit/graph-data.test.js:
+    [require] fs
+    [require] path
+
+relations from tests/unit/local-folder-scanner.test.js:
     [require] fs
     [require] path
 
@@ -3778,7 +3984,15 @@ relations from tests/unit/server-api.test.js:
     [require] path
     [require] ../../server
 
-relations from tests/unit/task-database.test.js:
+relations from tests/unit/task-field-automation.test.js:
+    [require] fs
+    [require] path
+
+relations from tests/unit/task-schema-validator.test.js:
+    [require] fs
+    [require] path
+
+relations from tests/unit/task-storage-sync.test.js:
     [require] fs
     [require] path
 
@@ -3786,21 +4000,23 @@ relations from tests/unit/tasks-json-format.test.js:
     [require] fs
     [require] path
 
-relations from tests/unit/template-automation.test.js:
-    [require] fs
-    [require] path
-
-relations from tests/unit/tasks-template-config.test.js:
-    [require] fs
-    [require] path
-
-relations from tests/unit/template-validator.test.js:
+relations from tests/unit/template-config.test.js:
     [require] fs
     [require] path
 
 relations from tests/unit/validate-schema.js:
     [require] fs
     [require] path
+
+relations from tools/calendar/calendar-appointment-schema.js:
+    [require] ../../public/config/tasks-template-config.js
+
+relations from tools/calendar/generate-project-calendars.js:
+    [require] crypto
+    [require] fs
+    [require] path
+    [require] ./calendar-constants
+    [require] ./calendar-appointment-schema
 
 relations from tools/cloudflare-worker/validate-secrets.js:
     [require] node-fetch
@@ -3875,8 +4091,9 @@ flow from public/graph-display/js/graph-data.js:
     [transform] normalizePriority, buildDependencyLayering, validateAgainstSchema, resolveProjectIdFromTasksPath
 
 flow from public/graph-display/js/main-graph.js:
-    input -> state -> output
-    [input] _openNodeDetails, openNodeModal
+    input -> transform -> state -> output
+    [input] downloadCalendar, _openNodeDetails, openNodeModal
+    [transform] _extractCalendarTasks
     [state] setSelectedTemplateId, setProfileButtonImage, setupNodeInteractions, setupTooltip
     [output] renderError, displayPopup
 
@@ -3897,27 +4114,27 @@ flow from public/graph-display/js/shared/tours.js:
     transform
     [transform] resolveTourUrl, resolveStepsForTemplate
 
-flow from public/scripts/task-database.js:
-    input -> transform -> state -> output
-    [input] resetLoadedMetadata, applyLoadedPayload, loadTasks, loadTemplates
-    [transform] inferProjectIdFromTasksFile, resolveTemplateConfig, resolveActiveProjectId, summarizeHistoryChanges
-    [state] resetLoadedMetadata, saveTasksLocalDisk, generatePersistedCSV, saveTasksLocal
-    [output] exportToCSV
-
-flow from public/scripts/task-manager-app.js:
+flow from public/list-display/js/list-display-controller.js:
     input -> transform -> state -> output
     [input] ensureGraphIframeLoaded, loadConfig, getModuleFetchCandidates, fetchModuleData
     [transform] buildGraphIframeSrc, normalizeModulePath, normalizeModuleEntry, buildTaskFlowSummary
     [state] getStoredFolderProjects, setupProjectSelector, setActiveProject, updateTaskAuthoringAvailability
     [output] formatDisplayDate, renderProjectNavigation, renderHistory, renderTasks
 
-flow from public/scripts/template-automation.js:
+flow from public/task-engine/js/task-field-automation.js:
     transform
     [transform] generateTaskId, autoGenerateDependencies, validateAndFix, generateProjectSummary
 
-flow from public/scripts/template-validator.js:
+flow from public/task-engine/js/task-schema-validator.js:
     transform
     [transform] validate, validateTemplate, validateProject, validateTask
+
+flow from public/task-engine/js/task-storage-sync.js:
+    input -> transform -> state -> output
+    [input] resetLoadedMetadata, applyLoadedPayload, loadTasks, loadTemplates
+    [transform] inferProjectIdFromTasksFile, resolveTemplateConfig, resolveActiveProjectId, summarizeHistoryChanges
+    [state] resetLoadedMetadata, saveTasksLocalDisk, generatePersistedCSV, saveTasksLocal
+    [output] exportToCSV
 
 flow from tests/e2e/crud-operations.spec.js:
     input
@@ -3960,15 +4177,15 @@ flow from tests/graph-display/graph-display.spec.js:
     [transform] parseTranslate
     [state] parseTranslate
 
-flow from tests/unit/folder-project-service.test.js:
-    input
-    [input] loadFolderProjectService
-
 flow from tests/unit/graph-data.test.js:
     input
     [input] loadGraphDataModule
 
-flow from tests/unit/task-database.test.js:
+flow from tests/unit/local-folder-scanner.test.js:
+    input
+    [input] loadFolderProjectService
+
+flow from tests/unit/task-storage-sync.test.js:
     state
     [state] updateFile
 
@@ -3979,6 +4196,12 @@ flow from tests/unit/tasks-json-format.test.js:
 flow from tests/unit/validate-schema.js:
     transform
     [transform] validateRequired, validateEnum, validateDateFormat
+
+flow from tools/calendar/generate-project-calendars.js:
+    input -> transform -> state
+    [input] readJson, loadDescriptorPayload
+    [transform] normalizeProjectId, normalizeTaskScope, normalizeNullableNumber, normalizePositiveCount
+    [state] writeCalendarFile
 
 flow from tools/cloudflare-worker/worker.js:
     transform -> state
@@ -4032,6 +4255,7 @@ api posture:
     [gap] no machine-readable API contract (OpenAPI/JSON) was detected under public/api/
 
 cli entry points:
+    [cli] tools/calendar/generate-project-calendars.js — process.argv CLI
     [cli] tools/scripts/enrich-tasks-workers.js — process.argv CLI
     [cli] tools/scripts/generate-state-files.js — process.argv CLI
     [cli] tools/scripts/regenerate-tasks-csv.js — process.argv CLI
@@ -4040,12 +4264,12 @@ cli entry points:
     [cli] tools/scripts/validate-tasks-workers.js — process.argv CLI
 
 core surface candidates for API/MCP exposure:
-    [candidate] public/scripts/task-database.js: inferProjectIdFromTasksFile, resolveTemplateConfig, hasValidGitHubToken, resolveActiveProjectId, getProjectScopedStorageKey (+3 more)
-    [candidate] public/scripts/task-manager-app.js: TaskManagerApp, constructor, getGraphTemplateIdForActiveProject, getStoredFolderProjects, registerFolderProjectOption (+3 more)
     [candidate] public/graph-display/js/main-graph.js: isEmbeddedMode, getInitialTemplateId, setSelectedTemplateId, CurriculumGraph, constructor (+3 more)
+    [candidate] public/list-display/js/list-display-controller.js: TaskManagerApp, constructor, getGraphTemplateIdForActiveProject, getStoredFolderProjects, registerFolderProjectOption (+3 more)
+    [candidate] public/task-engine/js/task-storage-sync.js: inferProjectIdFromTasksFile, resolveTemplateConfig, hasValidGitHubToken, resolveActiveProjectId, getProjectScopedStorageKey (+3 more)
+    [candidate] tools/calendar/generate-project-calendars.js: isPlainObject, toFlatArray, uniqueStrings, normalizeProjectId, normalizeTaskScope (+3 more)
     [candidate] tools/scripts/enrich-tasks-workers.js: isNonEmptyString, uniq, loadJson, saveJson, buildTasksById (+3 more)
     [candidate] public/graph-display/js/graph-data.js: convertCypherToGraph, normalizePriority, getTaskPredecessorIds, getDependencyLinkType, buildDependencyLayering (+3 more)
-    [candidate] public/graph-display/js/walkthrough.js: debounce, Walkthrough, constructor, setSteps, init (+3 more)
 
 automation suggestions:
     [suggest-mcp] wrap core functions with MCP SDK tool decorators for agent integration
@@ -4065,59 +4289,4 @@ api from tools/cloudflare-worker/worker.js:
     [route] PUT /api/tasks
 
 ---
-
-## Feature exposure
-
-data formats (web-github-task-manager):
-    [format-produce] csv: server.js (+4 more)
-    [format-produce] json: server.js (+27 more)
-    [format-produce] ndjson: server.js (+5 more)
-    [format-consume] csv: server.js (+2 more)
-    [format-consume] json: server.js (+11 more)
-
-schemas and templates:
-    [data-template] public/graph-display/templates/registry.json
-    [schema] public/tasksDB/_schema/graph-template.schema.json
-    [data-template] public/tasksDB/_templates/starter_project_template.csv
-    [data-template] public/tasksDB/_templates/starter_project_template.json
-    [data-template] public/tasksDB/_templates/starter_project_template_v2.json
-
-connectors and mappings:
-    [mapping] public/graph-display/js/graph-data.js: convertCypherToGraph
-
-http endpoints:
-    [route] GET /api/health (server.js)
-    [route] GET /api/projects (server.js)
-    [route] GET /api/module (server.js)
-    [route] GET /api/scan-path (server.js)
-    [route] GET /api/tasks (server.js)
-    [route] PUT /api/tasks (server.js)
-    [route] GET /health (tools/cloudflare-worker/worker.js)
-    [route] GET /api/task-history (tools/cloudflare-worker/worker.js)
-    [route] PUT /api/tasks (tools/cloudflare-worker/worker.js)
-
----
-
-## Bridge analysis: web-github-task-manager ↔ web-appoinment
-
-compatible format bridges:
-    [bridge-ready] csv: web-github-task-manager ↔ web-appoinment via csv
-    [bridge-ready] json: web-github-task-manager ↔ web-appoinment via json
-
-format gaps:
-    [bridge-missing] ics: web-appoinment produces; web-appoinment consumes
-    [bridge-missing] ndjson: web-github-task-manager produces
-
-existing mapping functions:
-    [mapping-exists] public/graph-display/js/graph-data.js: convertCypherToGraph
-    [mapping-exists] src/connectors/githubTaskManagerConnector.js: mapAppointmentToTask
-    [mapping-exists] src/modules/calculator/calculatorTemplates.js: mapTemplateToRuntime
-    [mapping-exists] src/modules/sync/calendarSyncFormats.js: parseStateFromJson
-    [mapping-exists] src/modules/sync/calendarSyncFormats.js: parseStateFromICS
-    [mapping-exists] src/modules/sync/calendarSyncFormats.js: parseStateFromCSV
-
-needed mappings:
-    [mapping-needed] web-github-task-manager → web-appoinment: web-github-task-manager has no connector targeting web-appoinment
-
----
-*136 files indexed · generated by extract_project_spec.py*
+*144 files indexed · generated by extract_project_spec.py*

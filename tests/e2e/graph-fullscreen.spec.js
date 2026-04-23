@@ -1,7 +1,11 @@
+/**
+ * End-to-end checks for graph fullscreen behavior launched from list-display.
+ */
+
 import { test, expect } from '@playwright/test';
 
 // Use the Playwright config baseURL so tests follow the configured server port.
-const BASE_URL = '/';
+const BASE_URL = '/list-display/';
 const TIMEOUT = 30000;
 
 async function waitForAppReady(page) {

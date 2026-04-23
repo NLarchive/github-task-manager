@@ -1,7 +1,11 @@
+/**
+ * End-to-end coverage for CRUD, filtering, export, and statistics in list-display.
+ */
+
 import { test, expect } from '@playwright/test';
 
 // Use the Playwright config baseURL so tests follow the configured server port.
-const BASE_URL = '/';
+const BASE_URL = '/list-display/';
 const TIMEOUT = 30000;
 
 async function waitForAppReady(page) {

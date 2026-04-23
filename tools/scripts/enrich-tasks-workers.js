@@ -16,24 +16,29 @@
 const fs = require('fs');
 const path = require('path');
 
+/** Check whether a value is a non-empty string. */
 function isNonEmptyString(v) {
   return typeof v === 'string' && v.trim().length > 0;
 }
 
+/** Return the ordered unique values from an array. */
 function uniq(arr) {
   return Array.from(new Set((Array.isArray(arr) ? arr : []).map(x => String(x || '').trim()).filter(Boolean)));
 }
 
+/** Load and parse a JSON file from disk. */
 function loadJson(filePath) {
   const raw = fs.readFileSync(filePath, 'utf8');
   return JSON.parse(raw);
 }
 
+/** Write a JSON object to disk with stable formatting. */
 function saveJson(filePath, obj) {
   const content = JSON.stringify(obj, null, 2) + '\n';
   fs.writeFileSync(filePath, content, 'utf8');
 }
 
+/** Build a lookup map keyed by task id. */
 function buildTasksById(tasks) {
   const m = new Map();
   for (const t of Array.isArray(tasks) ? tasks : []) {
@@ -44,6 +49,7 @@ function buildTasksById(tasks) {
   return m;
 }
 
+/** Convert a task reference into a normalized requisite string. */
 function taskRefToRequisiteString(ref, tasksById) {
   if (isNonEmptyString(ref)) return String(ref).trim();
 
@@ -69,6 +75,7 @@ function taskRefToRequisiteString(ref, tasksById) {
   return '';
 }
 
+/** Normalize task requisite fields using task lookup information. */
 function normalizeRequisites(task, tasksById) {
   const deps = Array.isArray(task && task.dependencies) ? task.dependencies : [];
   const derivedFromDeps = deps
@@ -93,6 +100,7 @@ function normalizeRequisites(task, tasksById) {
   return result;
 }
 
+/** Map a reviewer or worker role to default skill tags. */
 function roleToSkills(role) {
   const r = String(role || '').toLowerCase();
   if (r.includes('project manager') || r.includes('pm')) {
@@ -116,6 +124,7 @@ function roleToSkills(role) {
   return [];
 }
 
+/** Infer default requisites from a task category. */
 function categoryToRequisites(categoryName) {
   const c = String(categoryName || '').toLowerCase();
   if (c.includes('discovery') || c.includes('exploration')) {
@@ -133,6 +142,7 @@ function categoryToRequisites(categoryName) {
   return ['Access to repo and relevant docs'];
 }
 
+/** Infer requisites from task tags. */
 function tagsToRequisites(tags) {
   const t = new Set((Array.isArray(tags) ? tags : []).map(x => String(x || '').toLowerCase().trim()).filter(Boolean));
   const req = [];
@@ -145,12 +155,14 @@ function tagsToRequisites(tags) {
   return req;
 }
 
+/** Infer the reviewer role that best matches a task. */
 function inferReviewerRole(task) {
   const rr = Array.isArray(task.required_roles) ? task.required_roles : [];
   const first = rr.find(r => r && isNonEmptyString(r.role));
   return first ? String(first.role).trim() : 'Project Manager';
 }
 
+/** Run the script entrypoint for this file. */
 function main(argv = process.argv) {
   const arg = argv[2];
   if (!arg) {

@@ -1,11 +1,21 @@
-// Template Loader - isolates synchronous/optional template builders
-// This file lets developers re-introduce built-in templates when needed
-// without keeping template data inline in `graph-data.js`.
+/**
+ * Optional template-loader helpers for graph-display template registration.
+ *
+ * This module keeps synchronous test-time builders and built-in template wiring
+ * separate from `graph-data.js`, which stays focused on normalization/runtime.
+ */
 
 export const CAREER_TEMPLATE_ID = 'career';
+/** Built-in template id for the task-management/project graph template. */
 export const TASK_MGMT_TEMPLATE_ID = 'task-management';
 
 // Try to synchronously require a local JSON template (useful in Node/test env)
+/**
+ * Try to synchronously require a local JSON payload in Node-based test environments.
+ *
+ * @param {string} path
+ * @returns {object|null}
+ */
 export function tryRequireLocalTemplate(path) {
     try {
         if (typeof module !== 'undefined' && module.exports) {
@@ -20,6 +30,15 @@ export function tryRequireLocalTemplate(path) {
 
 // Lightweight builders that convert JSON payloads to the template objects
 // These are the same shapes the app expects when templates are loaded.
+/**
+ * Build the graph-display career template shape from raw example JSON.
+ *
+ * @param {string} id
+ * @param {string} name
+ * @param {object} data
+ * @param {Function} convertFn
+ * @returns {object}
+ */
 export function buildCareerTemplateFromData(id, name, data, convertFn) {
     const { nodes, links } = (typeof convertFn === 'function') ? convertFn({ rawNodes: data.rawNodes || [], rawRelationships: data.rawRelationships || [] }) : { nodes: [], links: [] };
     return {
@@ -34,6 +53,15 @@ export function buildCareerTemplateFromData(id, name, data, convertFn) {
     };
 }
 
+/**
+ * Build the task-management template shape from TaskDB example data.
+ *
+ * @param {string} id
+ * @param {string} name
+ * @param {object} data
+ * @param {object} helpers
+ * @returns {object}
+ */
 export function buildTaskMgmtFromData(id, name, data, helpers) {
     // helpers: { buildDependencyLayering, normalizePriority, getTaskPredecessorIds }
     const project = data.project || { name: name || 'Project', description: '' };
@@ -141,6 +169,14 @@ export function buildTaskMgmtFromData(id, name, data, helpers) {
 }
 
 // Register built-in templates into an existing registry Map if local files are present.
+/**
+ * Register any locally available built-in templates into the provided registry.
+ *
+ * @param {Map<string, object>} registry
+ * @param {Function} convertFn
+ * @param {object} [helpers={}]
+ * @returns {void}
+ */
 export function syncBuiltInTemplates(registry, convertFn, helpers = {}) {
     if (!registry || typeof registry.set !== 'function') return;
 

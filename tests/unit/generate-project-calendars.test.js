@@ -1,12 +1,16 @@
+/**
+ * Unit coverage for TaskDB-to-calendar generation and project descriptor discovery.
+ */
+
 const {
   buildCalendarState,
   filterTasksByScope,
   listProjectDescriptors
-} = require('../../tools/calendar/parse-task-calendars.js');
+} = require('../../tools/calendar/generate-project-calendars.js');
 const {
   DEFAULT_CALENDAR_ID,
   DEFAULT_SORT_MODE
-} = require('../../tools/calendar/constants.js');
+} = require('../../tools/calendar/calendar-constants.js');
 
 describe('Calendar Parser', () => {
   it('builds normalized appointments from standard task fields', () => {

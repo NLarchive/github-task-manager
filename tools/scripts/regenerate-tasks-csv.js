@@ -8,6 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 
+/** Escape a value for inclusion in generated CSV output. */
 function escapeCsvValue(value) {
   if (value === null || value === undefined) return '';
   const str = String(value);
@@ -16,6 +17,7 @@ function escapeCsvValue(value) {
   return str;
 }
 
+/** Run the script entrypoint for this file. */
 function main() {
   const repoRoot = path.join(__dirname, '..', '..');
   const projectId = (process.argv[2] || 'github-task-manager').replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';

@@ -1,4 +1,4 @@
-/*
+/**
  * IMPORTANT: Graph definitions (nodes, relationships, details) must come from
  * external JSON templates following the schemas in `tasksDB/_schema/`.
  *
@@ -102,6 +102,12 @@ function convertCypherToGraph(cypherData) {
 
 // --- Task Management Template Builder --------------------------------------
 
+/**
+ * Normalize a priority string to the canonical task-management priority enum.
+ *
+ * @param {string} priority
+ * @returns {string}
+ */
 function normalizePriority(priority) {
     const p = String(priority || '').trim();
     if (!p) return 'Medium';
@@ -113,6 +119,13 @@ function normalizePriority(priority) {
     return 'Medium';
 }
 
+/**
+ * Extract valid predecessor task ids from a task's requisites and dependencies.
+ *
+ * @param {object} task
+ * @param {Set<number>} validTaskIds
+ * @returns {number[]}
+ */
 function getTaskPredecessorIds(task, validTaskIds) {
     const predecessorIds = new Set();
 
@@ -148,12 +161,24 @@ function getTaskPredecessorIds(task, validTaskIds) {
     return Array.from(predecessorIds);
 }
 
+/**
+ * Resolve the graph link type string for a structured task dependency.
+ *
+ * @param {object} dep
+ * @returns {string}
+ */
 function getDependencyLinkType(dep) {
     if (!dep || typeof dep !== 'object') return 'DEPENDS_ON';
     if (dep.type) return `DEPENDS_${String(dep.type).toUpperCase()}`;
     return 'DEPENDS_ON';
 }
 
+/**
+ * Compute dependency layers for tasks and flag nodes that participate in cycles.
+ *
+ * @param {object[]} tasks
+ * @returns {{layerById: Map<number, number>, cycleNodes: Set<number>}}
+ */
 function buildDependencyLayering(tasks) {
     const byId = new Map(
         tasks
@@ -198,6 +223,16 @@ function buildDependencyLayering(tasks) {
     return { layerById, cycleNodes };
 }
 
+/**
+ * Scale estimated hours into a rendered node radius using eased clamping.
+ *
+ * @param {number} hours
+ * @param {number} minHours
+ * @param {number} maxHours
+ * @param {number} minRadius
+ * @param {number} maxRadius
+ * @returns {number}
+ */
 function scaleHoursToRadius(hours, minHours, maxHours, minRadius, maxRadius) {
     const h = Number(hours);
     if (!Number.isFinite(h) || h <= 0) return minRadius;
@@ -209,9 +244,17 @@ function scaleHoursToRadius(hours, minHours, maxHours, minRadius, maxRadius) {
 
 // NOTE: Templates are registered at runtime by `initTemplates()` (fetching `tasksDB/registry.json`)
 // or can be populated synchronously using `template-loader.js` helpers (e.g., `syncBuiltInTemplates`).
+/** Global template registry keyed by template id for the graph runtime. */
 const TEMPLATE_REGISTRY = new Map();
 
 // Lightweight schema validation (no external dependency)
+/**
+ * Perform lightweight shape validation for supported graph template payloads.
+ *
+ * @param {object} obj
+ * @param {object} schema
+ * @returns {{valid: boolean, errors?: string[]}}
+ */
 function validateAgainstSchema(obj, schema) {
     // Basic checks based on schema structure provided in tasksDB/_schema/graph-template.schema.json
     if (!obj || typeof obj !== 'object') return { valid: false, errors: ['Not an object'] };
@@ -222,6 +265,12 @@ function validateAgainstSchema(obj, schema) {
     return { valid: false, errors: ['Does not match expected career or task-management schema'] };
 }
 
+/**
+ * Extract a project id from a TaskDB tasks.json path.
+ *
+ * @param {string} path
+ * @returns {string|null}
+ */
 function resolveProjectIdFromTasksPath(path) {
     const s = String(path || '').replace(/\\/g, '/');
     // Handle tasksDB/(external|local/)?projectId/tasks.json
@@ -245,6 +294,13 @@ function resolveProjectScopedBase(path) {
     return scope ? `${scope}/${projectId}` : projectId;
 }
 
+/**
+ * Normalize a walkthrough asset path for a scoped TaskDB project base.
+ *
+ * @param {string} pathValue
+ * @param {string} scopedBase
+ * @returns {string}
+ */
 function normalizeTaskDbWalkthroughPath(pathValue, scopedBase) {
     const raw = String(pathValue || '').trim();
     if (!raw) {
@@ -264,6 +320,15 @@ function normalizeTaskDbWalkthroughPath(pathValue, scopedBase) {
     return `../tasksDB/${scopedBase}/${normalized.replace(/^\.\.\//, '')}`;
 }
 
+/**
+ * Build a graph template from an embedded TaskDB graphTemplate payload.
+ *
+ * @param {object} entry
+ * @param {object} data
+ * @param {string} scopedBase
+ * @param {string} embeddedGraphName
+ * @returns {object|null}
+ */
 function buildEmbeddedTaskDbTemplate(entry, data, scopedBase, embeddedGraphName) {
     const graphTemplate = data && data.graphTemplate;
     if (!graphTemplate || !Array.isArray(graphTemplate.rawNodes) || !Array.isArray(graphTemplate.rawRelationships)) {
@@ -296,6 +361,13 @@ function buildEmbeddedTaskDbTemplate(entry, data, scopedBase, embeddedGraphName)
     };
 }
 
+/**
+ * Resolve a module path relative to the project entry file inside TaskDB.
+ *
+ * @param {string} modulePath
+ * @param {string} entryPath
+ * @returns {string}
+ */
 function normalizeProjectRelativeModulePath(modulePath, entryPath) {
     const raw = String(modulePath || '').trim().replace(/\\/g, '/').replace(/^\.\//, '').replace(/^\/+/, '');
     if (!raw) return '';
@@ -311,6 +383,13 @@ function normalizeProjectRelativeModulePath(modulePath, entryPath) {
     return `${relativeEntryDir}/${raw}`.replace(/^\.\//, '');
 }
 
+/**
+ * Normalize navigation module records and their task id aliases for sidebar use.
+ *
+ * @param {object[]} modules
+ * @param {string} entryPath
+ * @returns {object[]}
+ */
 function normalizeNavigationModules(modules, entryPath) {
     if (!Array.isArray(modules)) return [];
     return modules
@@ -325,14 +404,27 @@ function normalizeNavigationModules(modules, entryPath) {
         .filter(moduleEntry => moduleEntry.path);
 }
 
+    /** Prefix used to encode inline subtask task ids into synthetic navigation paths. */
 const INLINE_TASK_ID_PREFIX = '__inline_task_id__:';
 
+    /**
+     * Build a synthetic inline-task navigation path from a numeric task id.
+     *
+     * @param {number} taskId
+     * @returns {string|null}
+     */
 function buildInlineTaskIdPath(taskId) {
     return typeof taskId === 'number' && Number.isFinite(taskId)
         ? `${INLINE_TASK_ID_PREFIX}${taskId}`
         : null;
 }
 
+/**
+ * Parse an inline-task navigation path back into its task id.
+ *
+ * @param {string} path
+ * @returns {{taskId: number}|null}
+ */
 function parseInlineTaskPath(path) {
     const raw = String(path || '').trim();
     if (!raw.startsWith(INLINE_TASK_ID_PREFIX)) return null;
@@ -340,10 +432,22 @@ function parseInlineTaskPath(path) {
     return Number.isFinite(taskId) ? { taskId } : null;
 }
 
+/**
+ * Determine whether a task owns inline subtask records.
+ *
+ * @param {object} task
+ * @returns {boolean}
+ */
 function hasOwnInlineSubtasks(task) {
     return Array.isArray(task?.subtasks) && task.subtasks.some(Boolean);
 }
 
+/**
+ * Build a parent-task lookup map for hierarchical task relationships.
+ *
+ * @param {object[]} tasks
+ * @returns {Map<number, object[]>}
+ */
 function buildChildrenByParentTaskId(tasks) {
     const childrenByParentId = new Map();
     if (!Array.isArray(tasks)) return childrenByParentId;
@@ -359,6 +463,14 @@ function buildChildrenByParentTaskId(tasks) {
     return childrenByParentId;
 }
 
+/**
+ * Recursively collect descendant tasks for a parent task id.
+ *
+ * @param {Map<number, object[]>} childrenByParentId
+ * @param {number} parentTaskId
+ * @param {Set<number>} [visited=new Set()]
+ * @returns {object[]}
+ */
 function collectDescendantTasks(childrenByParentId, parentTaskId, visited = new Set()) {
     if (!childrenByParentId.has(parentTaskId) || visited.has(parentTaskId)) return [];
     visited.add(parentTaskId);
@@ -375,6 +487,12 @@ function collectDescendantTasks(childrenByParentId, parentTaskId, visited = new 
     return descendants;
 }
 
+/**
+ * Return the first finite number parsed from a list of candidate values.
+ *
+ * @param {...unknown} values
+ * @returns {number}
+ */
 function toFiniteNumber(...values) {
     for (const value of values) {
         const parsed = Number(value);
@@ -383,6 +501,12 @@ function toFiniteNumber(...values) {
     return 0;
 }
 
+/**
+ * Normalize inline subtask assignee data into the assigned_workers shape.
+ *
+ * @param {object} subtask
+ * @returns {object[]}
+ */
 function normalizeInlineAssignedWorkers(subtask) {
     if (Array.isArray(subtask?.assigned_workers)) return subtask.assigned_workers.filter(Boolean);
     if (subtask?.assigned_to) {
@@ -391,6 +515,12 @@ function normalizeInlineAssignedWorkers(subtask) {
     return [];
 }
 
+/**
+ * Escape HTML special characters before rendering task details into popups.
+ *
+ * @param {unknown} value
+ * @returns {string}
+ */
 function escapeHtml(value) {
     return String(value || '')
         .replace(/&/g, '&amp;')
@@ -400,24 +530,52 @@ function escapeHtml(value) {
         .replace(/'/g, '&#39;');
 }
 
+    /**
+     * Normalize a value into a filtered string list, falling back when needed.
+     *
+     * @param {unknown} value
+     * @param {unknown[]} [fallback=[]]
+     * @returns {unknown[]}
+     */
 function normalizeStringList(value, fallback = []) {
     if (Array.isArray(value)) return value.filter(Boolean);
     if (Array.isArray(fallback)) return fallback.filter(Boolean);
     return [];
 }
 
+/**
+ * Resolve the assigned-worker list for a task, falling back to its parent task.
+ *
+ * @param {object} task
+ * @param {object} [fallbackTask={}]
+ * @returns {object[]}
+ */
 function normalizeAssignedWorkersList(task, fallbackTask = {}) {
     const ownWorkers = normalizeInlineAssignedWorkers(task);
     if (ownWorkers.length > 0) return ownWorkers;
     return Array.isArray(fallbackTask?.assigned_workers) ? fallbackTask.assigned_workers.filter(Boolean) : [];
 }
 
+/**
+ * Build a reusable dropdown list section for task-detail popup content.
+ *
+ * @param {string} title
+ * @param {unknown[]} items
+ * @param {Function} renderItem
+ * @returns {string|null}
+ */
 function buildPopupListDropdown(title, items, renderItem) {
     const safeItems = Array.isArray(items) ? items.filter(Boolean) : [];
     if (safeItems.length === 0) return null;
     return `<details class="popup-dropdown"><summary><strong>${escapeHtml(title)}</strong> <span class="popup-dropdown-count">(${safeItems.length})</span></summary><ul>${safeItems.map(renderItem).join('')}</ul></details>`;
 }
 
+/**
+ * Format an assigned worker record into a compact display label.
+ *
+ * @param {object|string} worker
+ * @returns {string}
+ */
 function formatWorkerLabel(worker) {
     if (!worker) return '';
     if (typeof worker === 'string') return worker.trim();
@@ -428,6 +586,12 @@ function formatWorkerLabel(worker) {
     return name || role;
 }
 
+/**
+ * Build supplemental task-detail markup for planning, staffing, links, and notes.
+ *
+ * @param {object} task
+ * @returns {string[]}
+ */
 function buildTaskSupplementalDetailItems(task) {
     const detailItems = [];
 
@@ -517,6 +681,14 @@ function buildTaskSupplementalDetailItems(task) {
     return detailItems;
 }
 
+/**
+ * Normalize an inline subtask into a task-like record for graph rendering.
+ *
+ * @param {object} subtask
+ * @param {number} index
+ * @param {object} [parentTask={}]
+ * @returns {object|null}
+ */
 function normalizeInlineSubtaskTask(subtask, index, parentTask = {}) {
     if (!subtask || typeof subtask !== 'object') return null;
 
@@ -560,6 +732,13 @@ function normalizeInlineSubtaskTask(subtask, index, parentTask = {}) {
     };
 }
 
+/**
+ * Build a task-management payload for a task's inline or child-task subgraph.
+ *
+ * @param {object} sourceData
+ * @param {object} task
+ * @returns {object|null}
+ */
 function buildInlineSubgraphData(sourceData, task) {
     if (!sourceData || !task) return null;
 
@@ -593,6 +772,13 @@ function buildInlineSubgraphData(sourceData, task) {
     };
 }
 
+/**
+ * Build synthetic subtask navigation targets when a task has inline descendants.
+ *
+ * @param {object} task
+ * @param {Map<number, object[]>} childrenByParentId
+ * @returns {{path: string, label: string}[]}
+ */
 function buildInlineSubtaskTargets(task, childrenByParentId) {
     const hasChildSubgraph = hasOwnInlineSubtasks(task)
         || (typeof task?.task_id === 'number' && Number.isFinite(task.task_id) && childrenByParentId.has(task.task_id));
@@ -603,6 +789,12 @@ function buildInlineSubtaskTargets(task, childrenByParentId) {
     return inlinePath ? [{ path: inlinePath, label: 'Subtasks' }] : [];
 }
 
+/**
+ * Normalize explicit subtask navigation targets declared on a task record.
+ *
+ * @param {object} task
+ * @returns {{path: string, label: string}[]}
+ */
 function normalizeExplicitSubtaskTargets(task) {
     const explicitTargets = Array.isArray(task?.subtasksTargets)
         ? task.subtasksTargets
@@ -620,6 +812,13 @@ function normalizeExplicitSubtaskTargets(task) {
     return explicitPath ? [{ path: explicitPath, label: 'Subtasks' }] : [];
 }
 
+/**
+ * Resolve the preferred subtask navigation targets for a task.
+ *
+ * @param {object} task
+ * @param {Map<number, object[]>} childrenByParentId
+ * @returns {{path: string, label: string}[]}
+ */
 function resolveTaskSubtaskTargets(task, childrenByParentId) {
     const inlineTargets = buildInlineSubtaskTargets(task, childrenByParentId);
     if (inlineTargets.length > 0) return inlineTargets;
@@ -628,6 +827,12 @@ function resolveTaskSubtaskTargets(task, childrenByParentId) {
     return explicitTargets.length > 0 ? [explicitTargets[0]] : [];
 }
 
+/**
+ * Build a lowercase narrative string used to classify a task's end-state semantics.
+ *
+ * @param {object} task
+ * @returns {string}
+ */
 function getTaskNarrativeText(task) {
     const tags = Array.isArray(task?.tags) ? task.tags.join(' ') : '';
     return [task?.task_name, task?.description, task?.category_name, tags]
@@ -636,12 +841,25 @@ function getTaskNarrativeText(task) {
         .toLowerCase();
 }
 
+    /**
+     * Resolve the configured graph-end metadata from a project payload.
+     *
+     * @param {object} project
+     * @returns {object}
+     */
 function resolveProjectEndConfig(project) {
     if (project && typeof project.graph_end === 'object' && project.graph_end) return project.graph_end;
     if (project && typeof project.end_node === 'object' && project.end_node) return project.end_node;
     return {};
 }
 
+/**
+ * Infer the semantic end-node mode for a project graph from config and task narratives.
+ *
+ * @param {object} project
+ * @param {object[]} terminalTasks
+ * @returns {string}
+ */
 function resolveProjectEndMode(project, terminalTasks) {
     const endConfig = resolveProjectEndConfig(project);
     const explicitMode = String(endConfig.mode || '').trim().toLowerCase();
@@ -663,6 +881,14 @@ function resolveProjectEndMode(project, terminalTasks) {
     return 'milestone';
 }
 
+/**
+ * Build the end-node popup details for a project graph.
+ *
+ * @param {object} project
+ * @param {object[]} terminalTasks
+ * @param {number} [totalProjectHours=0]
+ * @returns {{title: string, items: string[]}}
+ */
 function buildProjectEndDetails(project, terminalTasks, totalProjectHours = 0) {
     const endConfig = resolveProjectEndConfig(project);
     const endMode = resolveProjectEndMode(project, terminalTasks);
@@ -723,6 +949,14 @@ function buildProjectEndDetails(project, terminalTasks, totalProjectHours = 0) {
 
 // Build a template from project_task_template format that uses string task_names and name-based deps.
 // Converts to the numeric-ID format that buildTaskManagementTemplate expects.
+/**
+ * Convert a string-id project_task_template payload into the numeric task template shape.
+ *
+ * @param {object} entry
+ * @param {object} data
+ * @param {object} [options={}]
+ * @returns {object|null}
+ */
 function buildProjectTaskTemplate(entry, data, options = {}) {
     const tasks = Array.isArray(data.tasks) ? data.tasks : [];
     if (!tasks.length) return null;
@@ -798,6 +1032,14 @@ function buildProjectTaskTemplate(entry, data, options = {}) {
     return buildTaskManagementTemplate(entry, enrichedData, options);
 }
 
+/**
+ * Build a task-management graph template from TaskDB project data.
+ *
+ * @param {object} entry
+ * @param {object} data
+ * @param {object} [options={}]
+ * @returns {object}
+ */
 function buildTaskManagementTemplate(entry, data, options = {}) {
     const scopedBase = resolveProjectScopedBase(entry.path) || resolveProjectIdFromTasksPath(entry.path);
 
@@ -1116,12 +1358,24 @@ function buildTaskManagementTemplate(entry, data, options = {}) {
 }
 
 // Detect if running in development mode (localhost)
+/**
+ * Detect whether the graph app is running on a local development host.
+ *
+ * @returns {boolean}
+ */
 function isDevMode() {
     if (typeof window === 'undefined' || !window.location) return false;
     const host = String(window.location.hostname || '');
     return host === 'localhost' || host === '127.0.0.1' || host === '::1';
 }
 
+/**
+ * Fetch and register a dynamic TaskDB template when the requested id is not preloaded.
+ *
+ * @param {string} requestedTemplateId
+ * @param {object} [options={}]
+ * @returns {Promise<boolean>}
+ */
 export async function ensureDynamicTaskTemplate(requestedTemplateId, options = {}) {
     try {
         const requested = String(requestedTemplateId || new URLSearchParams(window.location.search).get('template') || '').trim();
@@ -1232,6 +1486,11 @@ export async function ensureDynamicTaskTemplate(requestedTemplateId, options = {
 }
 
 // Async template loader: fetch registry.json then fetch templates; used by main-graph.js
+/**
+ * Load all registered graph templates into the runtime registry.
+ *
+ * @returns {Promise<void>}
+ */
 export async function initTemplates() {
     try {
         // Determine base path of the current document (e.g., '/graph-display/') so relative template files resolve correctly
@@ -1317,10 +1576,21 @@ export async function initTemplates() {
     }
 }
 
+/**
+ * Return lightweight metadata for every registered graph template.
+ *
+ * @returns {{id: string, name: string, description: string}[]}
+ */
 export function getAvailableTemplates() {
     return Array.from(TEMPLATE_REGISTRY.values()).map(t => ({ id: t.id, name: t.name, description: t.description }));
 }
 
+/**
+ * Load a registered template with safe fallbacks for empty runtime state.
+ *
+ * @param {string} templateId
+ * @returns {{template: object, nodes: object[], links: object[], details: object, configOverrides: object}}
+ */
 export function loadTemplate(templateId) {
     let tpl = null;
 
@@ -1359,6 +1629,11 @@ export function loadTemplate(templateId) {
     };
 }
 
+/**
+ * Return the default template id used when the caller does not specify one.
+ *
+ * @returns {string}
+ */
 export function getDefaultTemplateId() {
     if (TEMPLATE_REGISTRY.has(CAREER_TEMPLATE_ID)) return CAREER_TEMPLATE_ID;
     if (TEMPLATE_REGISTRY.size > 0) return TEMPLATE_REGISTRY.keys().next().value;
@@ -1366,15 +1641,35 @@ export function getDefaultTemplateId() {
 }
 
 // Backwards-compatible exports (default to the Career template when available in the runtime registry)
+/** Backwards-compatible node export for consumers expecting the Career template payload. */
 export const GRAPH_NODES = (TEMPLATE_REGISTRY.has(CAREER_TEMPLATE_ID) ? (TEMPLATE_REGISTRY.get(CAREER_TEMPLATE_ID).nodes || []) : []);
+/** Backwards-compatible link export for consumers expecting the Career template payload. */
 export const GRAPH_LINKS = (TEMPLATE_REGISTRY.has(CAREER_TEMPLATE_ID) ? (TEMPLATE_REGISTRY.get(CAREER_TEMPLATE_ID).links || []) : []);
+/** Backwards-compatible detail export for consumers expecting the Career template payload. */
 export const GRAPH_DETAILS = (TEMPLATE_REGISTRY.has(CAREER_TEMPLATE_ID) ? (TEMPLATE_REGISTRY.get(CAREER_TEMPLATE_ID).details || {}) : {});
 
 // Public export so dynamic importers (e.g. main-graph.js module navigation) can build templates on the fly
+/**
+ * Public wrapper around project task template construction.
+ *
+ * @param {object} entry
+ * @param {object} data
+ * @param {object} options
+ * @returns {object|null}
+ */
 export function buildProjectTaskTemplatePublic(entry, data, options) {
     return buildProjectTaskTemplate(entry, data, options);
 }
 
+/**
+ * Build a graph template for an inline subtask subgraph selected by synthetic path.
+ *
+ * @param {object} entry
+ * @param {object} data
+ * @param {string} inlinePath
+ * @param {object} options
+ * @returns {object|null}
+ */
 export function buildInlineTaskSubgraphTemplatePublic(entry, data, inlinePath, options) {
     const inlineTarget = parseInlineTaskPath(inlinePath);
     if (!inlineTarget || !Array.isArray(data?.tasks)) return null;

@@ -1,3 +1,7 @@
+/**
+ * Graph-display regression coverage for inline subtask drill-down behavior.
+ */
+
 import { test, expect } from '@playwright/test';
 
 async function waitForNodeCount(page, minimum) {

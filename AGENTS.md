@@ -42,7 +42,24 @@ D:\web\web-github-task-manager\public\graph-display\index.html
 D:\web\web-github-task-manager\public\graph-display\manifest.json
 D:\web\web-github-task-manager\public\graph-display\README.md
 D:\web\web-github-task-manager\public\graph-display\sw.js
+D:\web\web-github-task-manager\public\health
+D:\web\web-github-task-manager\public\health\index.html
+D:\web\web-github-task-manager\public\list-display
+D:\web\web-github-task-manager\public\list-display\README.md
+D:\web\web-github-task-manager\public\list-display\css
+D:\web\web-github-task-manager\public\list-display\css\README.md
+D:\web\web-github-task-manager\public\list-display\css\task-manager.css
+D:\web\web-github-task-manager\public\list-display\index.html
+D:\web\web-github-task-manager\public\list-display\js
+D:\web\web-github-task-manager\public\list-display\js\README.md
+D:\web\web-github-task-manager\public\list-display\js\task-database.js
+D:\web\web-github-task-manager\public\list-display\js\task-manager-app.js
+D:\web\web-github-task-manager\public\list-display\js\template-automation.js
+D:\web\web-github-task-manager\public\list-display\js\template-validator.js
 D:\web\web-github-task-manager\public\scripts
+D:\web\web-github-task-manager\public\calendar\js\task-ics-export.js
+D:\web\web-github-task-manager\public\scripts\folder-project-service.js
+D:\web\web-github-task-manager\public\scripts\folder-project-ui.js
 D:\web\web-github-task-manager\public\scripts\task-database.js
 D:\web\web-github-task-manager\public\scripts\task-manager-app.js
 D:\web\web-github-task-manager\public\scripts\template-automation.js
@@ -88,7 +105,6 @@ D:\web\web-github-task-manager\public\tasksDB\local\test-tasks\tasks.csv
 D:\web\web-github-task-manager\public\tasksDB\local\test-tasks\tasks.json
 D:\web\web-github-task-manager\public\tasksDB\local\digital-income-tasks  (gitignored)
 D:\web\web-github-task-manager\public\tasksDB\local\web-e2e-bussines      (gitignored)
-D:\web\web-github-task-manager\public\health-check.html
 D:\web\web-github-task-manager\public\index.html
 D:\web\web-github-task-manager\public\styles.css
 D:\web\web-github-task-manager\test-results

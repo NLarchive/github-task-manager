@@ -126,12 +126,12 @@ async function main() {
   // Load test files (they register tests into the queue)
   const testFiles = [
     'graph-data.test.js',
-    'folder-project-service.test.js',
-    'calendar-parser.test.js',
+    'local-folder-scanner.test.js',
+    'generate-project-calendars.test.js',
     ['tasks-template-config.test.js', 'template-config.test.js'],
-    'template-validator.test.js',
-    'template-automation.test.js',
-    'task-database.test.js',
+    'task-schema-validator.test.js',
+    'task-field-automation.test.js',
+    'task-storage-sync.test.js',
     'server-api.test.js',
     'tasks-json-format.test.js'
   ];

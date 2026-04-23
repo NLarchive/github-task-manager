@@ -8,14 +8,17 @@
 const fs = require('fs');
 const path = require('path');
 
+/** Ensure that a directory exists before writing derived files. */
 function ensureDir(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
 }
 
+/** Write a JSON file with pretty-printed output. */
 function writeJson(filePath, data) {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
 }
 
+/** Generate derived state payloads from a task list. */
 function generateStateData(tasks) {
   const now = new Date().toISOString();
   const byStatus = {};
@@ -47,6 +50,7 @@ function generateStateData(tasks) {
   };
 }
 
+/** Run the script entrypoint for this file. */
 function main() {
   const repoRoot = path.join(__dirname, '..', '..');
   const projectId = (process.argv[2] || 'github-task-manager').replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';

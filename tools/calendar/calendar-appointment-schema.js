@@ -1,9 +1,9 @@
-// Calendar schema definitions and task-to-calendar field mappings.
-//
-// tasks-template-config.js is the single source of truth for task fields,
-// enums, and defaults.  This file imports from it and derives calendar-
-// specific mappings so that any change to the task schema automatically
-// propagates to the calendar layer.
+/**
+ * Task-to-calendar field mappings and appointment schema metadata.
+ *
+ * The calendar generator imports this module to translate TaskDB records into
+ * normalized appointment objects while staying aligned with TEMPLATE_CONFIG.
+ */
 
 const TEMPLATE_CONFIG = require('../../public/config/tasks-template-config.js');
 
@@ -182,7 +182,7 @@ const APPOINTMENT_FIELDS = Object.freeze([
 
 /**
  * Default values for a normalized appointment, used when a source field is
- * absent or null.  Numeric/string defaults align with constants.js:
+ * absent or null.  Numeric/string defaults align with calendar-constants.js:
  *   priority   5         → DEFAULT_PRIORITY
  *   timezone   null      → resolved at runtime from project settings, then 'UTC'
  *   calendarId 'default' → DEFAULT_CALENDAR_ID
@@ -212,6 +212,7 @@ const APPOINTMENT_DEFAULTS = Object.freeze({
   createdAt: null
 });
 
+/** Ordered task and meta source paths used to resolve each appointment field. */
 const TASK_TO_CALENDAR_FIELD_SOURCES = Object.freeze({
   // ---------------------------------------------------------------------------
   // Task-to-calendar field source paths

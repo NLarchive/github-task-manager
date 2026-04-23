@@ -1,3 +1,10 @@
+/**
+ * Browser-side local-folder scanner and TaskDB project registry.
+ *
+ * It discovers `tasks.json` files from user-selected directories, builds a
+ * normalized project payload, and stores the result for reuse across sessions.
+ */
+
 (function (globalScope) {
     const STORAGE_KEY = 'taskManagerLocalFolderProjects';
     const TASK_FILE_CANDIDATES = ['tasks.json', 'TODO_project_task.json'];

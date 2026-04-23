@@ -1,6 +1,15 @@
+/**
+ * Copy the graph-display app into the public deployment tree.
+ */
+
 const fs = require('fs');
 const path = require('path');
 
+/**
+ * Copy the graph-display source app into the public deployment directory.
+ *
+ * @returns {void}
+ */
 function copyGraphDisplayIntoPublic() {
   const repoRoot = path.resolve(__dirname, '..', '..');
   const src = path.join(repoRoot, 'graph-display');

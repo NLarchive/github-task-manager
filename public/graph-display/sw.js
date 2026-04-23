@@ -1,8 +1,13 @@
-// Service Worker for Interactive Career Graph (Template)
-// Provides offline functionality and performance improvements
+/**
+ * Service worker for the graph-display app.
+ *
+ * It precaches the static graph shell and template assets so the interactive
+ * graph view remains available with faster repeat loads and offline support.
+ */
 
 const CACHE_NAME = 'career-graph-template-v1.1.0';
 
+/** Static graph assets that should be warmed into the service worker cache. */
 const ASSET_PATHS = [
   './',
   // './index.php' removed: not used in this static template and caused noisy 404s in dev
@@ -39,6 +44,12 @@ const ASSET_PATHS = [
 
 const urlsToCache = ASSET_PATHS.map((path) => new URL(path, self.location).toString());
 
+/**
+ * Fetch and cache the graph shell assets during service-worker install.
+ *
+ * @param {Cache} cache
+ * @returns {Promise<void>}
+ */
 const precacheAssets = async (cache) => {
   for (const url of urlsToCache) {
     try {

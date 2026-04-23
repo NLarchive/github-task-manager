@@ -1,8 +1,12 @@
+/**
+ * Unit coverage for browser-side local-folder TaskDB discovery and registration.
+ */
+
 const fs = require('fs');
 const path = require('path');
 
 function loadFolderProjectService(initialStorage = {}) {
-  const filePath = path.join(__dirname, '../../public/scripts/folder-project-service.js');
+  const filePath = path.join(__dirname, '../../public/local-folder/js/local-folder-scanner.js');
   const src = fs.readFileSync(filePath, 'utf8');
   const storageState = { ...initialStorage };
 

@@ -6,9 +6,9 @@
       "json": [
         "server.js",
         "public/graph-display/js/d3.v7.min.js",
-        "public/scripts/folder-project-service.js",
-        "public/scripts/task-database.js",
-        "public/scripts/task-manager-app.js",
+        "public/local-folder/js/local-folder-scanner.js",
+        "public/task-engine/js/task-storage-sync.js",
+        "public/list-display/js/list-display-controller.js",
         "tools/cloudflare-worker/worker.js",
         "tools/scripts/enrich-tasks-workers.js",
         "tools/scripts/generate-state-files.js",
@@ -35,15 +35,15 @@
       ],
       "csv": [
         "server.js",
-        "public/scripts/task-database.js",
+        "public/task-engine/js/task-storage-sync.js",
         "tools/scripts/regenerate-tasks-csv.js",
         "public/tasksDB/_templates/starter_project_template.csv",
         "public/tasksDB/external/github-task-manager/history/tasks-root-legacy-20251211-200742.csv"
       ],
       "ndjson": [
         "server.js",
-        "public/scripts/task-database.js",
-        "public/scripts/task-manager-app.js",
+        "public/task-engine/js/task-storage-sync.js",
+        "public/list-display/js/list-display-controller.js",
         "tools/cloudflare-worker/worker.js",
         "public/tasksDB/external/ai-career-roadmap/history/changes.ndjson",
         "public/tasksDB/external/github-task-manager/history/changes.ndjson"
@@ -52,9 +52,9 @@
     "consume": {
       "json": [
         "server.js",
-        "public/scripts/folder-project-service.js",
-        "public/scripts/task-database.js",
-        "public/scripts/task-manager-app.js",
+        "public/local-folder/js/local-folder-scanner.js",
+        "public/task-engine/js/task-storage-sync.js",
+        "public/list-display/js/list-display-controller.js",
         "tools/cloudflare-worker/worker.js",
         "tools/scripts/archive-root-tasks.js",
         "tools/scripts/enrich-tasks-workers.js",
@@ -66,7 +66,7 @@
       ],
       "csv": [
         "server.js",
-        "public/scripts/task-database.js",
+        "public/task-engine/js/task-storage-sync.js",
         "tools/scripts/regenerate-tasks-csv.js"
       ]
     }

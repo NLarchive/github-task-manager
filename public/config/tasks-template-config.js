@@ -1,5 +1,9 @@
-// Template Validation Configuration
-// Based on TEMPLATE_VALIDATION_GUIDE.md and starter_project_template.json
+/**
+ * Shared TaskDB schema, defaults, enums, and runtime GitHub configuration.
+ *
+ * The browser apps, task-engine modules, tests, and calendar tooling all use
+ * this file as the source of truth for field definitions and project settings.
+ */
 
 const TEMPLATE_CONFIG = {
   version: "2.0",

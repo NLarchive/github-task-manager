@@ -17,12 +17,12 @@ const getConfig = new Function(configContent + '\nreturn TEMPLATE_CONFIG;');
 const TEMPLATE_CONFIG = getConfig();
 
 // Load validator
-const validatorContent = fs.readFileSync(path.join(__dirname, '../../public/scripts/template-validator.js'), 'utf8');
+const validatorContent = fs.readFileSync(path.join(__dirname, '../../public/task-engine/js/task-schema-validator.js'), 'utf8');
 const getValidator = new Function('TEMPLATE_CONFIG', validatorContent + '\nreturn TemplateValidator;');
 const TemplateValidator = getValidator(TEMPLATE_CONFIG);
 
 // Load automation
-const automationContent = fs.readFileSync(path.join(__dirname, '../../public/scripts/template-automation.js'), 'utf8');
+const automationContent = fs.readFileSync(path.join(__dirname, '../../public/task-engine/js/task-field-automation.js'), 'utf8');
 const getAutomation = new Function('TEMPLATE_CONFIG', 'TemplateValidator', automationContent + '\nreturn TemplateAutomation;');
 const TemplateAutomation = getAutomation(TEMPLATE_CONFIG, TemplateValidator);
 

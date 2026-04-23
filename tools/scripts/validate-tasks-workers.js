@@ -17,6 +17,7 @@
 const fs = require('fs');
 const path = require('path');
 
+/** Parse CLI arguments for this validation or export script. */
 function parseArgs(argv) {
   const args = { projectId: '', strict: false };
   for (const a of argv.slice(2)) {
@@ -26,10 +27,12 @@ function parseArgs(argv) {
   return args;
 }
 
+/** Sanitize a project id passed through CLI arguments. */
 function sanitizeProjectId(s) {
   return String(s || '').replace(/[^a-zA-Z0-9_-]/g, '');
 }
 
+/** Load the TaskDB payload for a worker validation run. */
 function loadProjectTasks(projectId) {
   const tasksDbRoot = path.join(__dirname, '../../public/tasksDB');
   // Auto-discover scope
@@ -45,18 +48,22 @@ function loadProjectTasks(projectId) {
   throw new Error(`tasks.json not found for project "${projectId}" in external/, local/, or root.`);
 }
 
+/** Check whether a value is a non-empty string. */
 function isNonEmptyString(v) {
   return typeof v === 'string' && v.trim().length > 0;
 }
 
+/** Check whether a value is an array of non-empty strings. */
 function isNonEmptyStringArray(v) {
   return Array.isArray(v) && v.some(x => isNonEmptyString(x));
 }
 
+/** Check whether a value is a non-empty array. */
 function isNonEmptyArray(v) {
   return Array.isArray(v) && v.length > 0;
 }
 
+/** Validate tasks and workers metadata for a TaskDB project. */
 function validate(projectId, tasksJson, { strict }) {
   const errors = [];
   const warnings = [];
@@ -153,6 +160,7 @@ function validate(projectId, tasksJson, { strict }) {
   return { errors, warnings };
 }
 
+/** Run the script entrypoint for this file. */
 function main(argv = process.argv) {
   const args = parseArgs(argv);
   const projectId = sanitizeProjectId(args.projectId || 'ai-career-roadmap') || 'ai-career-roadmap';

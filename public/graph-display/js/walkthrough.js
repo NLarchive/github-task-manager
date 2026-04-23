@@ -4,24 +4,15 @@
  */
 
 // Included from original - requires debounce from utils.js if not globally available
-// If utils.js is used, import debounce:
 import { debounce } from './utils.js';
-// Otherwise, include the debounce function definition here:
-/*
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func.apply(this, args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-*/
 
+/**
+ * Drive the guided walkthrough overlay and scripted graph interactions.
+ */
 class Walkthrough {
+    /**
+     * Create a walkthrough controller bound to the overlay DOM elements.
+     */
     constructor() {
         this.currentStep = 0;
         // Default steps can be replaced by calling `setSteps()`.
@@ -54,6 +45,11 @@ class Walkthrough {
         this.updateTooltipContent();
     }
 
+    /**
+     * Initialize the overlay content and bind its event handlers.
+     *
+     * @returns {void}
+     */
     init() {
         if (this.overlay && this.tooltip) {
             this.updateTooltipContent(); // Set initial content
@@ -63,6 +59,12 @@ class Walkthrough {
         }
     }
 
+    /**
+     * Attach the active graph instance used for focus and popup simulation.
+     *
+     * @param {object} graphInstance
+     * @returns {void}
+     */
     setGraph(graphInstance) {
         this.graph = graphInstance;
         if (!this.graph) {
@@ -70,6 +72,11 @@ class Walkthrough {
         }
     }
 
+    /**
+     * Bind overlay, keyboard, and resize events for the active walkthrough.
+     *
+     * @returns {void}
+     */
     bindEvents() {
         if (!this.overlay) return;
 
@@ -97,6 +104,11 @@ class Walkthrough {
         }
     };
 
+    /**
+     * Advance from the current step, clearing any pending step simulations.
+     *
+     * @returns {void}
+     */
     handleNext() {
         // Clear any pending simulation timeouts from the previous step
         clearTimeout(this.clickSimulationTimeout);
@@ -110,6 +122,11 @@ class Walkthrough {
         }
     }
 
+    /**
+     * Start the walkthrough unless it has been skipped or previously completed.
+     *
+     * @returns {void}
+     */
     start() {
         if (!this.overlay || this.isActive) {
             console.log("Walkthrough overlay not found or tour already active.");
@@ -156,6 +173,11 @@ class Walkthrough {
         });
     }
 
+    /**
+     * Move from the welcome step into the first guided graph step.
+     *
+     * @returns {void}
+     */
     startTour() {
         // Move from step 0 (Welcome) to step 1 (Profile node)
         if (this.currentStep === 0) {
@@ -165,6 +187,11 @@ class Walkthrough {
         }
     }
 
+    /**
+     * Advance to the next configured walkthrough step or finish the tour.
+     *
+     * @returns {void}
+     */
     nextStep() {
         // Clear previous target styling and simulations
         d3.selectAll(".node").classed("walkthrough-target", false);
@@ -180,6 +207,11 @@ class Walkthrough {
         }
     }
 
+    /**
+     * Execute the current step's focus, highlight, hover, click, and search actions.
+     *
+     * @returns {void}
+     */
     executeStepActions() {
         const step = this.steps[this.currentStep];
         let targetElement = null; // To store the DOM element being targeted
@@ -257,6 +289,11 @@ class Walkthrough {
     }
 
 
+    /**
+     * Render the tooltip content for the current walkthrough step.
+     *
+     * @returns {void}
+     */
     updateTooltipContent() {
         const step = this.steps[this.currentStep];
         if (!this.tooltip) return;
@@ -286,6 +323,11 @@ class Walkthrough {
     }
 
 
+    /**
+     * Position the walkthrough tooltip relative to the current target element.
+     *
+     * @returns {void}
+     */
     positionTooltip() {
         if (!this.tooltip || !this.isActive) return;
 
@@ -390,6 +432,12 @@ class Walkthrough {
 
      // --- Simulation Helpers ---
 
+    /**
+     * Simulate a hover interaction on a graph node for the current step.
+     *
+     * @param {Element} nodeElement
+     * @returns {void}
+     */
      simulateNodeHover(nodeElement) {
         if (!nodeElement || !this.isActive) return;
         const nodeId = d3.select(nodeElement).attr('data-id'); // Get ID for logging
@@ -410,6 +458,12 @@ class Walkthrough {
         }, 2500); // Keep hover effect for 2.5 seconds
     }
 
+    /**
+     * Create the temporary walkthrough cursor anchored to a target element.
+     *
+     * @param {Element} targetElement
+     * @returns {HTMLDivElement|undefined}
+     */
     _createCursor(targetElement) {
         this._removeCursor(); // Remove any existing cursor
         if (!targetElement || !this.isActive) return;
@@ -429,10 +483,21 @@ class Walkthrough {
         return cursor;
     }
 
+    /**
+     * Remove the temporary walkthrough cursor, if present.
+     *
+     * @returns {void}
+     */
     _removeCursor() {
         document.querySelector(".walkthrough-cursor")?.remove();
     }
 
+    /**
+     * Simulate clicking a node so its detail popup opens during a tour step.
+     *
+     * @param {Element} nodeElement
+     * @returns {void}
+     */
     simulateNodeClick(nodeElement) {
         if (!this.graph || !nodeElement || !this.isActive) return;
 
@@ -475,6 +540,12 @@ class Walkthrough {
          }, 300); // Delay before showing popup
     }
 
+        /**
+         * Simulate typing into the graph search input for demonstration steps.
+         *
+         * @param {string} searchTerm
+         * @returns {void}
+         */
      simulateSearch(searchTerm) {
          const searchInput = document.getElementById("search-input");
          if (!searchInput || !this.isActive) return;
@@ -534,6 +605,12 @@ class Walkthrough {
         });
      }
 
+         /**
+            * Ensure a node's label remains visible while the walkthrough focuses it.
+            *
+            * @param {Element} nodeElement
+            * @returns {void}
+            */
      ensureNodeTextVisibility(nodeElement) {
          if (!nodeElement) return;
          requestAnimationFrame(() => { // Ensure styles applied after render updates
@@ -548,6 +625,11 @@ class Walkthrough {
      }
 
 
+    /**
+     * End the walkthrough, clear UI state, and persist the completion flag.
+     *
+     * @returns {void}
+     */
     end() {
         if (!this.isActive) return; // Prevent ending if not active
 

@@ -18,6 +18,15 @@ const defaultCvConfig = {
 };
 
 // --- Helper Functions ---
+/**
+ * Collect direct child nodes linked from a parent through a specific relationship type.
+ *
+ * @param {string} parentNodeId
+ * @param {string} relationshipType
+ * @param {Array<object>} allLinks
+ * @param {Map<string, object>} nodeMap
+ * @returns {object[]}
+ */
 function findChildNodes(parentNodeId, relationshipType, allLinks, nodeMap) {
     if (!parentNodeId || !relationshipType || !allLinks || !nodeMap) {
         console.warn("CV findChildNodes: Missing required arguments.");
@@ -40,6 +49,14 @@ function findChildNodes(parentNodeId, relationshipType, allLinks, nodeMap) {
     return children;
 }
 
+/**
+ * Sort CV section nodes using an alpha, chronology, or explicit-order strategy.
+ *
+ * @param {object[]} nodesToSort
+ * @param {string|string[]} method
+ * @param {object} details
+ * @returns {void}
+ */
 function sortNodes(nodesToSort, method, details) {
      if (!Array.isArray(nodesToSort)) return [];
      const getNodeTitle = (node) => details[node?.id]?.title || node?.label || node?.id || '';

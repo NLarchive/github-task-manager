@@ -1,7 +1,16 @@
-// Main Application Controller
-// Integrates all components for the GitHub Task Manager
+/**
+ * List-display runtime controller for the GitHub Task Manager app.
+ *
+ * This file owns the interactive list UI, project switching, history and issue
+ * workflows, task CRUD, timeline rendering, and synchronization with the
+ * embedded graph display and task-engine modules.
+ */
 
+/**
+ * Coordinate the list-display UI, project context, and persistence services.
+ */
 class TaskManagerApp {
+    /** Create the runtime controller state for this component. */
     constructor() {
         // Defer config loading until initialize() to ensure TEMPLATE_CONFIG is available
         this.config = null;
@@ -42,12 +51,14 @@ class TaskManagerApp {
         this.isModulePanelOpen = false;
     }
 
+    /** Get graph template id for active project. */
     getGraphTemplateIdForActiveProject() {
         const safeProject = String(this.activeProjectId || '').trim().replace(/[^a-zA-Z0-9_-]/g, '');
         if (!safeProject) return null;
         return `${safeProject}-tasks`;
     }
 
+    /** Get stored folder projects. */
     getStoredFolderProjects() {
         if (typeof window === 'undefined' || !window.FolderProjectService || typeof window.FolderProjectService.listProjects !== 'function') {
             return [];
@@ -60,6 +71,7 @@ class TaskManagerApp {
         }));
     }
 
+    /** Register folder project option. */
     registerFolderProjectOption(projectRecord) {
         const select = document.getElementById('projectSelect');
         if (!select || !projectRecord || !projectRecord.id) return;
@@ -82,6 +94,7 @@ class TaskManagerApp {
         select.value = projectRecord.id;
     }
 
+    /** Initialize folder project picker. */
     initializeFolderProjectPicker() {
         if (typeof window === 'undefined' || !window.FolderProjectUI || typeof window.FolderProjectUI.bindFolderProjectPicker !== 'function') return;
 
@@ -106,6 +119,7 @@ class TaskManagerApp {
         });
     }
 
+    /** Build graph iframe src. */
     buildGraphIframeSrc() {
         const templateId = this.getGraphTemplateIdForActiveProject();
         const qp = new URLSearchParams();
@@ -117,14 +131,20 @@ class TaskManagerApp {
         qp.set('embed', '1');
         // Build a host-relative path based on the current pathname so it works both
         // locally and on GitHub Pages where the site may be hosted under a subpath.
-        const baseDir = (typeof window !== 'undefined' && window.location && window.location.pathname)
+        let baseDir = (typeof window !== 'undefined' && window.location && window.location.pathname)
             ? window.location.pathname.replace(/\/[^\/]*$/, '/')
             : '/';
+        // If loaded from the /list-display/ subfolder, go up one level so the
+        // graph-display path resolves to the sibling folder, not a child folder.
+        if (baseDir.endsWith('/list-display/')) {
+            baseDir = baseDir.slice(0, baseDir.length - 'list-display/'.length);
+        }
         // Keep the computed base directory (including '/public/' when present).
         // `ensureGraphIframeLoaded()` already tries multiple candidates for robustness.
         return `${baseDir}graph-display/index.html?${qp.toString()}`;
     }
 
+    /** Ensure graph iframe loaded. */
     async ensureGraphIframeLoaded() {
         const frame = document.getElementById('graphFrame');
         if (!frame) return;
@@ -220,6 +240,7 @@ class TaskManagerApp {
     }
 
     // Initialize the application
+    /** Initialize initialize. */
     async initialize() {
         // Load config now that all scripts should be loaded
         this.loadConfig();
@@ -287,6 +308,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Load config. */
     loadConfig() {
         // Use pre-configured GitHub settings from tasks-template-config
         // Note: The project list may be defined in a centralized file `public/config/projects-config.js`
@@ -334,6 +356,7 @@ class TaskManagerApp {
         this.automation = new TemplateAutomation(templateConfig);
     }
 
+    /** Set up project selector. */
     setupProjectSelector() {
         const templateConfig = window.TEMPLATE_CONFIG || TEMPLATE_CONFIG;
         const select = document.getElementById('projectSelect');
@@ -407,6 +430,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Set active project. */
     async setActiveProject(projectId) {
         const templateConfig = window.TEMPLATE_CONFIG || TEMPLATE_CONFIG;
         if (!templateConfig || !templateConfig.GITHUB) return;
@@ -491,6 +515,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Normalize module path. */
     normalizeModulePath(value) {
         return String(value || '')
             .trim()
@@ -499,6 +524,7 @@ class TaskManagerApp {
             .replace(/^\/+/, '');
     }
 
+    /** Normalize module entry. */
     normalizeModuleEntry(moduleEntry) {
         if (!moduleEntry || typeof moduleEntry !== 'object') return null;
 
@@ -518,6 +544,7 @@ class TaskManagerApp {
         };
     }
 
+    /** Get task key. */
     getTaskKey(task) {
         if (!task || typeof task !== 'object') return '';
         const taskName = String(task.task_name || task.title || '').trim();
@@ -527,12 +554,14 @@ class TaskManagerApp {
         return rawId === null || rawId === undefined ? '' : String(rawId).trim();
     }
 
+    /** Get task code. */
     getTaskCode(task) {
         const taskKey = this.getTaskKey(task);
         if (!taskKey) return '';
         return taskKey.includes(':') ? taskKey.slice(0, taskKey.indexOf(':')).trim() : taskKey;
     }
 
+    /** Get task predecessor keys. */
     getTaskPredecessorKeys(task) {
         if (!task || !Array.isArray(task.dependencies)) return [];
 
@@ -552,6 +581,7 @@ class TaskManagerApp {
         return predecessors.filter(Boolean);
     }
 
+    /** Build task flow summary. */
     buildTaskFlowSummary(tasks = []) {
         const taskList = Array.isArray(tasks) ? tasks.filter(task => task && typeof task === 'object') : [];
         const canonicalKeyByAlias = new Map();
@@ -603,6 +633,7 @@ class TaskManagerApp {
         };
     }
 
+    /** Apply project theme. */
     applyProjectTheme() {
         if (typeof document === 'undefined' || !document.body) return;
         const projectName = String(
@@ -622,6 +653,7 @@ class TaskManagerApp {
         document.body.dataset.projectTheme = themeKey;
     }
 
+    /** Update task authoring availability. */
     updateTaskAuthoringAvailability() {
         const addTaskButton = document.getElementById('addTaskBtn');
         if (!addTaskButton) return;
@@ -637,6 +669,7 @@ class TaskManagerApp {
             : (isTemplateLedger ? 'Template-backed project ledgers are read-only in list mode.' : '');
     }
 
+    /** Sync project context from database. */
     syncProjectContextFromDatabase() {
         this.projectPayload = (this.database && this.database.rawData && typeof this.database.rawData === 'object' && !Array.isArray(this.database.rawData))
             ? this.database.rawData
@@ -673,14 +706,17 @@ class TaskManagerApp {
         this.renderProjectNavigation();
     }
 
+    /** Get module by path. */
     getModuleByPath(modulePath) {
         return this.moduleIndex.get(this.normalizeModulePath(modulePath)) || null;
     }
 
+    /** Get module by name. */
     getModuleByName(moduleName) {
         return this.moduleNameIndex.get(String(moduleName || '').trim().toLowerCase()) || null;
     }
 
+    /** Get context base tasks. */
     getContextBaseTasks() {
         if (this.activeModulePath) {
             return Array.isArray(this.currentContextTasks) ? this.currentContextTasks : [];
@@ -688,6 +724,7 @@ class TaskManagerApp {
         return Array.isArray(this.rootTasks) ? this.rootTasks : [];
     }
 
+    /** Filter task collection. */
     filterTaskCollection(tasks, { status = null, priority = null } = {}) {
         let filtered = Array.isArray(tasks) ? [...tasks] : [];
 
@@ -708,6 +745,7 @@ class TaskManagerApp {
         return filtered;
     }
 
+    /** Resolve task module path. */
     resolveTaskModulePath(task) {
         if (!task || !Array.isArray(this.navigationModules) || this.navigationModules.length === 0) return null;
 
@@ -742,22 +780,26 @@ class TaskManagerApp {
         return null;
     }
 
+    /** Check whether task editing. */
     supportsTaskEditing(task) {
         const rawId = task && (task.task_id ?? task.id);
         if (typeof rawId === 'number' && Number.isFinite(rawId)) return true;
         return typeof rawId === 'string' && /^\d+$/.test(rawId.trim());
     }
 
+    /** Format display date. */
     formatDisplayDate(value) {
         if (!value) return '';
         const parsedDate = new Date(value);
         return Number.isNaN(parsedDate.getTime()) ? '' : parsedDate.toLocaleDateString();
     }
 
+    /** Encode module path. */
     encodeModulePath(modulePath) {
         return encodeURIComponent(this.normalizeModulePath(modulePath));
     }
 
+    /** Get module fetch candidates. */
     getModuleFetchCandidates(projectId, modulePath) {
         const normalizedPath = this.normalizeModulePath(modulePath);
         if (!normalizedPath) return [];
@@ -785,6 +827,7 @@ class TaskManagerApp {
         return Array.from(urlCandidates);
     }
 
+    /** Fetch module data. */
     async fetchModuleData(modulePath) {
         const normalizedPath = this.normalizeModulePath(modulePath);
         if (!normalizedPath) return null;
@@ -817,6 +860,7 @@ class TaskManagerApp {
         return null;
     }
 
+    /** Build module context tasks. */
     buildModuleContextTasks(moduleEntry, moduleData, modulePath = '') {
         const normalizedPath = this.normalizeModulePath(modulePath || (moduleEntry && moduleEntry.path) || '');
         const rootTasksByKey = new Map();
@@ -854,6 +898,7 @@ class TaskManagerApp {
         return this.rootTasks.filter(task => this.resolveTaskModulePath(task) === normalizedPath);
     }
 
+    /** Get active module label. */
     getActiveModuleLabel() {
         const moduleEntry = this.getModuleByPath(this.activeModulePath);
         return String(
@@ -863,6 +908,7 @@ class TaskManagerApp {
         ).trim();
     }
 
+    /** Sync graph module state. */
     syncGraphModuleState() {
         try {
             const frame = document.getElementById('graphFrame');
@@ -879,6 +925,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Set active module. */
     async setActiveModule(modulePath, options = {}) {
         const normalizedPath = this.normalizeModulePath(modulePath);
         const shouldSyncGraph = options.syncGraph !== false;
@@ -921,6 +968,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Restore current context. */
     async restoreCurrentContext(options = {}) {
         if (this.activeModulePath && this.getModuleByPath(this.activeModulePath)) {
             await this.setActiveModule(this.activeModulePath, { ...options, forceReload: true });
@@ -930,11 +978,13 @@ class TaskManagerApp {
         await this.setActiveModule('', options);
     }
 
+    /** Open module view. */
     openModuleView(encodedModulePath) {
         const decodedPath = decodeURIComponent(String(encodedModulePath || ''));
         return this.setActiveModule(decodedPath);
     }
 
+    /** Open module relation. */
     openModuleRelation(encodedModuleName) {
         const decodedName = decodeURIComponent(String(encodedModuleName || ''));
         const moduleEntry = this.getModuleByName(decodedName);
@@ -942,15 +992,18 @@ class TaskManagerApp {
         return this.setActiveModule(moduleEntry.path);
     }
 
+    /** Clear module view. */
     clearModuleView() {
         return this.setActiveModule('');
     }
 
+    /** Toggle project navigation panel. */
     toggleProjectNavigationPanel() {
         this.isModulePanelOpen = !this.isModulePanelOpen;
         this.renderProjectNavigation();
     }
 
+    /** Render project navigation. */
     renderProjectNavigation() {
         const shell = document.getElementById('projectNavigationShell');
         const titleEl = document.getElementById('projectContextTitle');
@@ -1140,6 +1193,7 @@ class TaskManagerApp {
         `;
     }
 
+    /** Get available category names. */
     getAvailableCategoryNames() {
         // Preferred source: per-project categories loaded from tasks.json
         const fromDb = (this.database && Array.isArray(this.database.categories))
@@ -1169,6 +1223,7 @@ class TaskManagerApp {
         return existing;
     }
 
+    /** Refresh category options. */
     refreshCategoryOptions({ preserveValue = true } = {}) {
         const select = document.getElementById('taskCategory');
         if (!select) return;
@@ -1204,17 +1259,20 @@ class TaskManagerApp {
         }
     }
 
+    /** Get project auth key. */
     getProjectAuthKey(projectId) {
         const safe = String(projectId || '').trim().replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
         return `taskManagerAuth:${safe}`;
     }
 
+    /** Get project password key. */
     getProjectPasswordKey(projectId) {
         const safe = String(projectId || '').trim().replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
         return `taskManagerAccessPassword:${safe}`;
     }
 
     // User Management
+    /** Load user name. */
     loadUserName() {
         const saved = localStorage.getItem('taskManagerUserName');
         if (saved) {
@@ -1226,12 +1284,14 @@ class TaskManagerApp {
         }
     }
 
+    /** Save user name. */
     saveUserName(name) {
         this.currentUser = name;
         localStorage.setItem('taskManagerUserName', name);
     }
 
     // Password Protection Methods
+    /** Get access config. */
     getAccessConfig() {
         const templateConfig = window.TEMPLATE_CONFIG || TEMPLATE_CONFIG;
         const baseConfig = templateConfig.ACCESS || { PASSWORD: '', PUBLIC_READ: true, SESSION_DURATION: 30 };
@@ -1266,12 +1326,14 @@ class TaskManagerApp {
         };
     }
 
+    /** Check whether git hub pages host. */
     isGitHubPagesHost() {
         if (typeof window === 'undefined' || !window.location) return false;
         const hostname = window.location.hostname || '';
         return hostname.endsWith('github.io');
     }
 
+    /** Get query param. */
     getQueryParam(name) {
         try {
             if (typeof window === 'undefined' || !window.location) return null;
@@ -1282,12 +1344,14 @@ class TaskManagerApp {
         }
     }
 
+    /** Check whether local host. */
     isLocalHost() {
         if (typeof window === 'undefined' || !window.location) return true;
         const hostname = window.location.hostname || '';
         return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '';
     }
 
+    /** Check whether password protection enabled. */
     isPasswordProtectionEnabled() {
         // For local E2E validation: /?forcePassword=1
         if (this.getQueryParam('forcePassword') === '1') return true;
@@ -1299,12 +1363,14 @@ class TaskManagerApp {
         return this.isGitHubPagesHost();
     }
 
+    /** Check whether password protected. */
     isPasswordProtected() {
         // “Protected” means we enforce auth for modifications in this environment.
         return this.isPasswordProtectionEnabled();
     }
 
 
+    /** Check auth. */
     checkAuth() {
         // If password protection is not enabled for this environment, allow all actions
         if (!this.isPasswordProtected()) {
@@ -1339,6 +1405,7 @@ class TaskManagerApp {
         return false;
     }
 
+    /** Require auth. */
     requireAuth(action, ...args) {
         // Check if already authenticated
         if (this.checkAuth()) {
@@ -1352,6 +1419,7 @@ class TaskManagerApp {
         this.showPasswordModal();
     }
 
+    /** Show password modal. */
     showPasswordModal() {
         const modal = document.getElementById('passwordModal');
         if (modal) {
@@ -1371,6 +1439,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Close password modal. */
     closePasswordModal() {
         const modal = document.getElementById('passwordModal');
         if (modal) {
@@ -1379,6 +1448,7 @@ class TaskManagerApp {
         this.pendingAction = null;
     }
 
+    /** Verify password. */
     async verifyPassword(event) {
         event.preventDefault();
         
@@ -1466,6 +1536,7 @@ class TaskManagerApp {
         return false;
     }
 
+    /** Logout. */
     logout() {
         this.isAuthenticated = false;
         this.authExpiry = null;
@@ -1499,6 +1570,7 @@ class TaskManagerApp {
     }
 
     // --- GitHub OAuth Device Flow ---
+    /** Get git hub oauth token. */
     getGitHubOAuthToken() {
         try {
             const token = sessionStorage.getItem('githubOAuthToken');
@@ -1509,6 +1581,7 @@ class TaskManagerApp {
         return '';
     }
 
+    /** Set git hub oauth token. */
     setGitHubOAuthToken(token, user = '') {
         try {
             if (token && String(token).trim()) {
@@ -1526,6 +1599,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Clear git hub oauth token. */
     clearGitHubOAuthToken() {
         try {
             sessionStorage.removeItem('githubOAuthToken');
@@ -1536,10 +1610,12 @@ class TaskManagerApp {
         if (this.config) this.config.token = '';
     }
 
+    /** Check whether git hub connected. */
     isGitHubConnected() {
         return !!this.getGitHubOAuthToken();
     }
 
+    /** Show git hub login modal. */
     showGitHubLoginModal() {
         const modal = document.getElementById('githubLoginModal');
         if (!modal) return;
@@ -1552,6 +1628,7 @@ class TaskManagerApp {
         if (err) { err.style.display = 'none'; err.textContent = ''; }
     }
 
+    /** Close git hub login modal. */
     closeGitHubLoginModal() {
         const modal = document.getElementById('githubLoginModal');
         if (modal) modal.style.display = 'none';
@@ -1562,6 +1639,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Start git hub device flow. */
     async startGitHubDeviceFlow() {
         const oauthConfig = window.GITHUB_OAUTH_CONFIG;
         if (!oauthConfig || !oauthConfig.CLIENT_ID) {
@@ -1583,6 +1661,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Show manual oauth instructions. */
     showManualOAuthInstructions() {
         const oauthConfig = window.GITHUB_OAUTH_CONFIG;
         const clientId = oauthConfig && oauthConfig.CLIENT_ID;
@@ -1608,6 +1687,7 @@ class TaskManagerApp {
         `;
     }
 
+    /** Show git hub login error. */
     showGitHubLoginError(message) {
         const err = document.getElementById('githubLoginError');
         if (err) {
@@ -1616,6 +1696,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Copy device code. */
     copyDeviceCode() {
         const code = document.getElementById('deviceUserCode').textContent;
         if (code && navigator.clipboard) {
@@ -1624,6 +1705,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Update access indicator. */
     updateAccessIndicator() {
         const indicator = document.getElementById('accessIndicator');
         if (!indicator) return;
@@ -1647,6 +1729,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Toggle auth indicator. */
     toggleAuthIndicator() {
         if (this.checkAuth()) {
             // Already authenticated - log out
@@ -1657,11 +1740,13 @@ class TaskManagerApp {
         }
     }
 
+    /** Check whether configured. */
     isConfigured() {
         // For GitHub Pages deployment, we can use public repos without auth token
         return this.config.owner && this.config.repo;
     }
 
+    /** Show config error. */
     showConfigError() {
         const mainElement = document.querySelector('main');
         mainElement.innerHTML = `
@@ -1679,6 +1764,7 @@ class TaskManagerApp {
         `;
     }
 
+    /** Show task manager. */
     async showTaskManager() {
         const taskManager = document.getElementById('taskManager');
         if (taskManager) {
@@ -1718,6 +1804,7 @@ class TaskManagerApp {
     }
 
     // Task Management
+    /** Load tasks. */
     async loadTasks() {
         if (!this.database) return;
 
@@ -1747,6 +1834,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Save tasks. */
     async saveTasks() {
         if (!this.database) return;
 
@@ -1801,6 +1889,7 @@ class TaskManagerApp {
     }
 
     // History
+    /** Open history modal. */
     openHistoryModal() {
         const modal = document.getElementById('historyModal');
         if (!modal) return;
@@ -1808,11 +1897,13 @@ class TaskManagerApp {
         this.refreshHistory();
     }
 
+    /** Close history modal. */
     closeHistoryModal() {
         const modal = document.getElementById('historyModal');
         if (modal) modal.style.display = 'none';
     }
 
+    /** Set history status. */
     setHistoryStatus(message, type = 'info') {
         const el = document.getElementById('historyStatus');
         if (!el) return;
@@ -1826,6 +1917,7 @@ class TaskManagerApp {
         el.textContent = message;
     }
 
+    /** Get worker url. */
     getWorkerUrl() {
         try {
             const templateConfig = window.TEMPLATE_CONFIG || TEMPLATE_CONFIG;
@@ -1836,6 +1928,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Get raw history url. */
     getRawHistoryUrl(projectId) {
         const owner = this.config && this.config.owner ? this.config.owner : '';
         const repo = this.config && this.config.repo ? this.config.repo : '';
@@ -1864,10 +1957,12 @@ class TaskManagerApp {
         return `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/${historyPath}`;
     }
 
+    /** Apply history filter. */
     applyHistoryFilter() {
         this.refreshHistory();
     }
 
+    /** Refresh history. */
     async refreshHistory() {
         const projectId = this.activeProjectId || 'github-task-manager';
         const filterEl = document.getElementById('historyTaskIdFilter');
@@ -1885,6 +1980,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Load history items. */
     async loadHistoryItems({ projectId, taskId = '', limit = 200 }) {
         const safeProject = String(projectId || '').replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
         const workerUrl = this.getWorkerUrl();
@@ -1926,6 +2022,7 @@ class TaskManagerApp {
         return parsed;
     }
 
+    /** Render history. */
     renderHistory(items) {
         const list = document.getElementById('historyList');
         if (!list) return;
@@ -1979,6 +2076,7 @@ class TaskManagerApp {
         }).join('');
     }
 
+    /** Render tasks. */
     renderTasks() {
         const tasksList = document.getElementById('tasksList');
         const timelineView = document.getElementById('timelineView');
@@ -2119,6 +2217,7 @@ class TaskManagerApp {
         `;}).join('');
     }
 
+    /** Set view mode. */
     setViewMode(mode) {
         const next = (mode === 'timeline' || mode === 'graph') ? mode : 'list';
         if (this.viewMode === next) return;
@@ -2179,6 +2278,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Update view toggle. */
     updateViewToggle() {
         const listBtn = document.getElementById('viewListBtn');
         const timelineBtn = document.getElementById('viewTimelineBtn');
@@ -2188,23 +2288,27 @@ class TaskManagerApp {
         if (graphBtn) graphBtn.classList.toggle('active', this.viewMode === 'graph');
     }
 
+    /** Set timeline scale. */
     setTimelineScale(scale) {
         const next = (scale === 'week') ? 'week' : 'day';
         this.timelineScale = next;
         if (this.viewMode === 'timeline') this.renderTasks();
     }
 
+    /** Parse date. */
     parseDate(dateStr) {
         if (!dateStr || typeof dateStr !== 'string') return null;
         const d = new Date(`${dateStr}T00:00:00`);
         return Number.isNaN(d.getTime()) ? null : d;
     }
 
+    /** Calculate the number of days between two dates. */
     daysBetween(a, b) {
         const ms = 24 * 60 * 60 * 1000;
         return Math.floor((b.getTime() - a.getTime()) / ms);
     }
 
+    /** Format short date. */
     formatShortDate(d) {
         try {
             return d.toISOString().slice(0, 10);
@@ -2213,6 +2317,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Render timeline. */
     renderTimeline() {
         const timelineView = document.getElementById('timelineView');
         if (!timelineView) return;
@@ -2289,6 +2394,7 @@ class TaskManagerApp {
     }
 
     // GitHub Issues Sync
+    /** Open issues sync modal. */
     openIssuesSyncModal() {
         if (this.isPasswordProtected()) {
             this.requireAuth(this._openIssuesSyncModal);
@@ -2297,6 +2403,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Open issues sync modal. */
     _openIssuesSyncModal() {
         const modal = document.getElementById('issuesModal');
         if (!modal) return;
@@ -2304,11 +2411,13 @@ class TaskManagerApp {
         this.loadIssuesForSync();
     }
 
+    /** Close issues sync modal. */
     closeIssuesSyncModal() {
         const modal = document.getElementById('issuesModal');
         if (modal) modal.style.display = 'none';
     }
 
+    /** Set issues sync status. */
     setIssuesSyncStatus(message, type = 'info') {
         const el = document.getElementById('issuesSyncStatus');
         if (!el) return;
@@ -2322,6 +2431,7 @@ class TaskManagerApp {
         el.textContent = message;
     }
 
+    /** Load issues for sync. */
     async loadIssuesForSync() {
         if (!this.githubApi) {
             this.setIssuesSyncStatus('GitHub API not initialized yet.', 'error');
@@ -2343,6 +2453,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Render issues list. */
     renderIssuesList() {
         const list = document.getElementById('issuesList');
         if (!list) return;
@@ -2372,6 +2483,7 @@ class TaskManagerApp {
         }).join('');
     }
 
+    /** Check whether issue already imported. */
     isIssueAlreadyImported(issueNumber) {
         const tag = `issue-#${issueNumber}`;
         return (this.database && Array.isArray(this.database.tasks))
@@ -2379,6 +2491,7 @@ class TaskManagerApp {
             : false;
     }
 
+    /** Import selected issues. */
     async importSelectedIssues() {
         if (this.isPasswordProtected()) {
             this.requireAuth(this._importSelectedIssues);
@@ -2387,11 +2500,13 @@ class TaskManagerApp {
         }
     }
 
+    /** Import selected issues. */
     _importSelectedIssues() {
         // async wrapper below
         this._importSelectedIssuesAsync();
     }
 
+    /** Import selected issues async. */
     async _importSelectedIssuesAsync() {
         const list = document.getElementById('issuesList');
         if (!list) return;
@@ -2460,6 +2575,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Get linked issue. */
     getLinkedIssue(task) {
         const tags = Array.isArray(task && task.tags) ? task.tags : [];
         const match = tags.find(t => typeof t === 'string' && /^issue-#\d+$/.test(t));
@@ -2472,6 +2588,7 @@ class TaskManagerApp {
         };
     }
 
+    /** Create issue for task. */
     createIssueForTask(taskId) {
         if (this.isPasswordProtected()) {
             this.requireAuth(this._createIssueForTask, taskId);
@@ -2480,6 +2597,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Create issue for task. */
     async _createIssueForTask(taskId) {
         if (!this.githubApi) {
             this.showToast('GitHub API not initialized', 'error');
@@ -2536,6 +2654,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Update stats. */
     updateStats(taskSource = null) {
         const tasks = Array.isArray(taskSource) ? taskSource : this.getContextBaseTasks();
         const stats = (this.automation && typeof this.automation.generateProjectSummary === 'function')
@@ -2550,6 +2669,7 @@ class TaskManagerApp {
         document.getElementById('doneTasks').textContent = ((stats.tasks_by_status && stats.tasks_by_status['Done']) || 0) + ((stats.tasks_by_status && stats.tasks_by_status['Completed']) || 0);
     }
 
+    /** Set active stat card. */
     setActiveStatCard(statusValue) {
         const cards = Array.from(document.querySelectorAll('.stat-card[data-status]'));
         cards.forEach(card => card.classList.remove('active'));
@@ -2557,6 +2677,7 @@ class TaskManagerApp {
         if (match) match.classList.add('active');
     }
 
+    /** Set up stat card filters. */
     setupStatCardFilters() {
         const cards = Array.from(document.querySelectorAll('.stat-card[data-status]'));
         if (cards.length === 0) return;
@@ -2585,6 +2706,7 @@ class TaskManagerApp {
         this.setActiveStatCard(current);
     }
 
+    /** Filter tasks. */
     filterTasks() {
         const statusFilter = document.getElementById('filterStatus').value;
         const priorityFilter = document.getElementById('filterPriority').value;
@@ -2601,6 +2723,7 @@ class TaskManagerApp {
     }
 
     // Modal Functions (with password protection)
+    /** Show add task modal. */
     showAddTaskModal() {
         // Require password for adding tasks
         if (this.isPasswordProtected()) {
@@ -2610,6 +2733,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Show add task modal. */
     _showAddTaskModal() {
         const modal = document.getElementById('taskModal');
         if (!modal) {
@@ -2631,6 +2755,7 @@ class TaskManagerApp {
         }, 100);
     }
 
+    /** Edit task. */
     editTask(taskId) {
         // Require password for editing tasks
         if (this.isPasswordProtected()) {
@@ -2641,6 +2766,7 @@ class TaskManagerApp {
     }
 
     /** Open task detail by filteredTasks index (works for all task types, numeric and string IDs). */
+    /** Open the detail view for a task by its rendered index. */
     openTaskDetail(taskIndex) {
         const task = this.filteredTasks[taskIndex];
         if (!task) return;
@@ -2651,6 +2777,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Open read only task. */
     _openReadOnlyTask(task) {
         const modal = document.getElementById('taskModal');
         if (!modal) return;
@@ -2719,6 +2846,7 @@ class TaskManagerApp {
         setTimeout(() => this.openTaskDetail(idx), 120);
     }
 
+    /** Edit task. */
     _editTask(taskId) {
         const task = this.database.getTask(taskId);
         if (!task) {
@@ -2746,6 +2874,7 @@ class TaskManagerApp {
         }, 100);
     }
 
+    /** Set task modal read only. */
     setTaskModalReadOnly(readOnly = false) {
         const modal = document.getElementById('taskModal');
         const form = document.getElementById('taskForm');
@@ -2778,6 +2907,7 @@ class TaskManagerApp {
         modal.classList.toggle('modal-readonly', readOnly);
     }
 
+    /** Populate form with defaults. */
     populateFormWithDefaults() {
         // Set default values based on template
         document.getElementById('taskStatus').value = this.automation.config.DEFAULTS.TASK.status;
@@ -2805,6 +2935,7 @@ class TaskManagerApp {
         document.getElementById('displayCompletedDate').textContent = '--';
     }
 
+    /** Populate form with task. */
     populateFormWithTask(task) {
         document.getElementById('taskId').value = task.task_id || task.id;
         document.getElementById('taskName').value = task.task_name || task.title;
@@ -2845,6 +2976,7 @@ class TaskManagerApp {
         document.getElementById('displayCompletedDate').textContent = task.completed_date ? new Date(task.completed_date).toLocaleString() : '--';
     }
 
+    /** Close modal. */
     closeModal() {
         const modal = document.getElementById('taskModal');
         if (modal) {
@@ -2858,6 +2990,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Save task. */
     async saveTask(event) {
         event.preventDefault();
 
@@ -2896,6 +3029,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Collect the current task form values into a task payload. */
     getFormData() {
         // Save user name if provided
         const userNameInput = document.getElementById('userName');
@@ -2930,6 +3064,7 @@ class TaskManagerApp {
         };
     }
 
+    /** Parse assigned worker input into structured worker records. */
     parseAssignedWorkers(input) {
         if (!input.trim()) return [];
         return input.split(',').map(w => {
@@ -2946,6 +3081,7 @@ class TaskManagerApp {
         }).filter(w => w.worker_id || w.email || w.name);
     }
 
+    /** Parse dependency input into structured dependency records. */
     parseDependencies(input) {
         if (!input.trim()) return [];
         const dependencies = [];
@@ -2965,11 +3101,13 @@ class TaskManagerApp {
         return dependencies;
     }
 
+    /** Parse the parent task id from form input. */
     parseParentTaskId(value) {
         const parsed = parseInt(value);
         return parsed > 0 ? parsed : null;
     }
 
+    /** Delete task. */
     async deleteTask(taskId) {
         // Require password for deleting tasks
         if (this.isPasswordProtected()) {
@@ -2979,6 +3117,7 @@ class TaskManagerApp {
         }
     }
 
+    /** Delete task. */
     async _deleteTask(taskId) {
         if (!confirm('Are you sure you want to delete this task?')) return;
 
@@ -2999,6 +3138,7 @@ class TaskManagerApp {
     }
 
     // Template Management
+    /** Update template ui. */
     updateTemplateUI() {
         const templateSection = document.getElementById('templateSection');
         if (!templateSection) return;
@@ -3023,6 +3163,7 @@ class TaskManagerApp {
         templateSection.innerHTML = html;
     }
 
+    /** Import template. */
     async importTemplate(templateType) {
         const template = this.database.templates.find(t => t.template_type === templateType);
         if (!template) {
@@ -3052,6 +3193,7 @@ class TaskManagerApp {
     }
 
     // Export Functions
+    /** Export to csv. */
     exportToCSV() {
         try {
             if (!this.database) {
@@ -3088,7 +3230,210 @@ class TaskManagerApp {
         }
     }
 
+    /** Get download format. */
+    getDownloadFormat() {
+        const formatSelect = document.getElementById('downloadFormat');
+        const selected = String(formatSelect?.value || 'ics').trim().toLowerCase();
+        return ['ics', 'csv', 'json'].includes(selected) ? selected : 'ics';
+    }
+
+    /** Get download tasks by scope. */
+    getDownloadTasksByScope(scope, workerName = '') {
+        const tasks = Array.isArray(this.database?.tasks) ? [...this.database.tasks] : [];
+        const normalizedScope = String(scope || 'all').trim().toLowerCase();
+
+        const isPending = (task) => {
+            const status = String(task?.status || '').trim().toLowerCase().replace(/_/g, ' ');
+            return !['done', 'completed', 'cancelled', 'canceled'].includes(status);
+        };
+
+        const isCritical = (task) => task && (task.is_critical_path === true || task.is_critical_path === 'true' || task.is_critical_path === 1);
+
+        const matchesWorker = (task) => {
+            if (!workerName) return false;
+            const normalizedWorker = String(workerName).trim().toLowerCase();
+            const assigned = Array.isArray(task?.assigned_workers) ? task.assigned_workers : [];
+            const matched = assigned.some((worker) => {
+                const candidate = String(worker?.name || worker?.role || worker?.worker_id || worker?.workerId || worker?.id || worker?.email || '').trim().toLowerCase();
+                return candidate === normalizedWorker;
+            });
+            return matched || String(task?.creator_id || '').trim().toLowerCase() === normalizedWorker;
+        };
+
+        if (normalizedScope === 'pending') {
+            return tasks.filter(isPending);
+        }
+        if (normalizedScope === 'critical') {
+            return tasks.filter(isCritical);
+        }
+        if (normalizedScope === 'mine') {
+            return tasks.filter(matchesWorker);
+        }
+        return tasks;
+    }
+
+    /** Download blob. */
+    downloadBlob(content, mimeType, filename) {
+        const blob = new Blob([content], { type: mimeType });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+    }
+
+    /** Download tasks file. */
+    downloadTasksFile(tasks, format, fileBase) {
+        if (!Array.isArray(tasks) || tasks.length === 0) {
+            this.showToast('No tasks to export for the selected scope', 'warning');
+            return;
+        }
+
+        const fileDate = new Date().toISOString().split('T')[0];
+        if (format === 'json') {
+            const json = JSON.stringify(tasks, null, 2);
+            this.downloadBlob(json, 'application/json;charset=utf-8;', `${fileBase}-${fileDate}.json`);
+            this.showToast('JSON export completed', 'success');
+            return;
+        }
+
+        if (format === 'csv') {
+            const csv = this.database.exportToCSV(tasks);
+            if (!csv) {
+                this.showToast('No tasks to export', 'warning');
+                return;
+            }
+            this.downloadBlob(csv, 'text/csv;charset=utf-8;', `${fileBase}-${fileDate}.csv`);
+            this.showToast('CSV export completed', 'success');
+            return;
+        }
+
+        this.showToast('Unsupported download format', 'error');
+    }
+
+    /**
+     * Download the current project's tasks in the selected format.
+     * @param {string} scope - 'all' | 'pending' | 'critical' | 'mine'
+     */
+    downloadCalendar(scope) {
+        if (typeof calendarExport === 'undefined') {
+            this.showToast('Calendar export module not loaded', 'error');
+            return;
+        }
+
+        const format = this.getDownloadFormat();
+        const tasks = this.database?.tasks || [];
+        if (!tasks.length) {
+            this.showToast('No tasks to export', 'warning');
+            return;
+        }
+
+        const projectName = String(this.database?.project?.name || this.activeProjectId || 'tasks').replace(/[^a-zA-Z0-9-_ ]+/g, '').trim() || 'tasks';
+        const fileBase = `${projectName}-${scope || 'all'}`;
+
+        if (scope === 'mine') {
+            const nameInput = document.getElementById('userName');
+            const workerName = nameInput?.value?.trim() || '';
+            if (!workerName) {
+                this.showToast('Enter your name in the "Your Name" field to download your tasks', 'warning');
+                return;
+            }
+
+            const filteredTasks = this.getDownloadTasksByScope('mine', workerName);
+            if (!filteredTasks.length) {
+                this.showToast('No tasks assigned to your name', 'warning');
+                return;
+            }
+
+            if (format === 'ics') {
+                calendarExport.downloadCalendar(tasks, { scope: 'worker', projectName, workerName });
+                return;
+            }
+
+            this.downloadTasksFile(filteredTasks, format, `${projectName}-mine`);
+            return;
+        }
+
+        const filteredTasks = this.getDownloadTasksByScope(scope || 'all');
+        if (!filteredTasks.length) {
+            this.showToast('No tasks available for the selected export scope', 'warning');
+            return;
+        }
+
+        if (format === 'ics') {
+            calendarExport.downloadCalendar(filteredTasks, { scope: scope || 'all', projectName });
+            return;
+        }
+
+        if (format === 'json') {
+            calendarExport.downloadCalendarJson(filteredTasks, { scope: scope || 'all', projectName });
+            return;
+        }
+
+        this.downloadTasksFile(filteredTasks, format, fileBase);
+    }
+
+    /**
+     * Download one file per worker found in the current project's tasks.
+     */
+    downloadCalendarWorkers() {
+        if (typeof calendarExport === 'undefined') {
+            this.showToast('Calendar export module not loaded', 'error');
+            return;
+        }
+
+        const format = this.getDownloadFormat();
+        const tasks = this.database?.tasks || [];
+        if (!tasks.length) {
+            this.showToast('No tasks to export', 'warning');
+            return;
+        }
+
+        const projectName = String(this.database?.project?.name || this.activeProjectId || 'tasks').replace(/[^a-zA-Z0-9-_ ]+/g, '').trim() || 'tasks';
+        const workers = calendarExport.getWorkersFromTasks(tasks);
+        if (!workers.length) {
+            this.showToast('No workers assigned in current tasks', 'warning');
+            return;
+        }
+
+        if (format === 'ics') {
+            workers.forEach(w => calendarExport.downloadCalendar(tasks, { scope: 'worker', projectName, workerName: w }));
+            this.showToast(`Downloaded ${workers.length} worker calendar${workers.length > 1 ? 's' : ''}`, 'success');
+            return;
+        }
+
+        if (format === 'json') {
+            workers.forEach(w => calendarExport.downloadCalendarJson(tasks, { scope: 'worker', projectName, workerName: w }));
+            this.showToast(`Downloaded ${workers.length} worker calendar${workers.length > 1 ? 's' : ''}`, 'success');
+            return;
+        }
+
+        let exportCount = 0;
+        workers.forEach((workerName) => {
+            const workerTasks = this.getDownloadTasksByScope('mine', workerName);
+            if (!workerTasks.length) return;
+
+            const safeWorkerName = String(workerName).replace(/[^a-zA-Z0-9-_ ]+/g, '').trim().replace(/\s+/g, '-');
+            this.downloadTasksFile(workerTasks, format, `${projectName}-${safeWorkerName}`);
+            exportCount += 1;
+        });
+
+        if (exportCount > 0) {
+            this.showToast(`Downloaded ${exportCount} worker file${exportCount > 1 ? 's' : ''}`, 'success');
+        } else {
+            this.showToast('No worker task files were generated', 'warning');
+        }
+    }
+
     // Validation UI
+    /** Show validation messages. */
     showValidationMessages(errors, warnings) {
         const container = document.getElementById('validationMessages');
         if (!container) return;
@@ -3104,26 +3449,31 @@ class TaskManagerApp {
         });
     }
 
+    /** Clear validation messages. */
     clearValidationMessages() {
         const container = document.getElementById('validationMessages');
         if (container) container.innerHTML = '';
     }
 
     // Utility Functions
+    /** Escape HTML text for safe rendering. */
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
 
+    /** Show loading. */
     showLoading() {
         document.getElementById('loadingOverlay').style.display = 'flex';
     }
 
+    /** Hide loading. */
     hideLoading() {
         document.getElementById('loadingOverlay').style.display = 'none';
     }
 
+    /** Show toast. */
     showToast(message, type = 'success') {
         const toast = document.getElementById('toast');
         toast.textContent = message;
@@ -3136,6 +3486,7 @@ class TaskManagerApp {
     }
 
     // Event Listeners
+    /** Set up the main UI event listeners. */
     setupEventListeners() {
         // Form submissions
         document.getElementById('taskForm').addEventListener('submit', (e) => this.saveTask(e));
@@ -3174,12 +3525,16 @@ class TaskManagerApp {
     }
 }
 
-// GitHub API Wrapper
+/**
+ * Minimal GitHub REST wrapper for file and issue operations used by the UI.
+ */
 class GitHubAPI {
+    /** Create the runtime controller state for this component. */
     constructor(config) {
         this.config = config;
     }
 
+    /** Send a GitHub API request with the configured authentication. */
     async request(endpoint, method = 'GET', body = null) {
         const url = `https://api.github.com${endpoint}`;
         const headers = {
@@ -3205,6 +3560,7 @@ class GitHubAPI {
         return await response.json();
     }
 
+    /** Get file content from the configured GitHub repository. */
     async getFileContent(path) {
         try {
             const data = await this.request(`/repos/${this.config.owner}/${this.config.repo}/contents/${path}?ref=${this.config.branch}`);
@@ -3218,6 +3574,7 @@ class GitHubAPI {
         }
     }
 
+    /** Update a file in the configured GitHub repository. */
     async updateFile(path, content, message, sha = null) {
         const body = {
             message,
@@ -3232,11 +3589,13 @@ class GitHubAPI {
         return await this.request(`/repos/${this.config.owner}/${this.config.repo}/contents/${path}`, 'PUT', body);
     }
 
+    /** List GitHub issues for the configured repository. */
     async listIssues(state = 'open') {
         const qs = new URLSearchParams({ state, per_page: '100' }).toString();
         return await this.request(`/repos/${this.config.owner}/${this.config.repo}/issues?${qs}`);
     }
 
+    /** Create a GitHub issue for the configured repository. */
     async createIssue(title, body, labels = []) {
         const payload = {
             title,
@@ -3257,9 +3616,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Global functions for HTML onclick handlers
+/** Show add task modal. */
 function showAddTaskModal() { app.showAddTaskModal(); }
+/** Close modal. */
 function closeModal() { app.closeModal(); }
+/** Export to csv. */
 function exportToCSV() { app.exportToCSV(); }
+/** Load tasks. */
 function loadTasks() { app.loadTasks(); }
+/** Close password modal. */
 function closePasswordModal() { app.closePasswordModal(); }
+/** Verify password. */
 function verifyPassword(event) { app.verifyPassword(event); return false; }

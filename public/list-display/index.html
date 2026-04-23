@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Task Manager</title>
+    <link rel="stylesheet" href="./css/task-manager.css">
+</head>
+<body>
+    <a class="skip-link" href="#taskManager">Skip to main content</a>
+    <div class="container">
+        <header>
+            <h1>📋 GitHub Task Manager</h1>
+            <p class="header-subtitle">Collaborative Task Management - Connected to GitHub Repository</p>
+            <div class="auth-section">
+                <div id="authStatus" class="auth-status">
+                    <span id="repoInfo">Repository: Loading...</span>
+                    <span id="workerInfo" class="worker-info">Worker: Not configured</span>
+                    <span id="tasksInfo" class="tasks-info">TasksFile: -</span>
+                    <label for="projectSelect" class="project-select-label">Project:</label>
+                    <select id="projectSelect" class="project-select" aria-label="Select project"></select>
+                    <button type="button" id="folderProjectLoadBtn" class="btn-secondary folder-project-trigger" title="Open a local project folder from your system">📂 Open Local Folder</button>
+                    <div id="accessIndicator" class="auth-indicator locked" onclick="app.toggleAuthIndicator()" title="Click to unlock for editing">
+                        🔒 <span>Read-Only</span>
+                    </div>
+                    <div id="folderProjectLoadResult" class="folder-project-result" hidden></div>
+                </div>
+            </div>
+        </header>
+
+        <main>
+
+            <div id="taskManager" class="task-manager">
+                <!-- User Section -->
+                <section class="user-section">
+                    <div class="user-info">
+                        <label for="userName">Your Name (for task updates):</label>
+                        <input type="text" id="userName" placeholder="Enter your name (optional)" autocomplete="name" aria-label="Your name for task updates" />
+                        <small>Your name will appear when you create or update tasks</small>
+                    </div>
+                </section>
+
+                <section class="controls">
+                    <button id="addTaskBtn" onclick="showAddTaskModal()" class="btn-primary">+ Add New Task</button>
+                    <button onclick="loadTasks()" class="btn-secondary">🔄 Refresh</button>
+                    <button onclick="exportToCSV()" class="btn-secondary">📥 Export CSV</button>
+                    <details class="calendar-dropdown" id="calendarDropdown">
+                        <summary class="btn-secondary" data-testid="calendar-btn" title="Download tasks and calendars">📅 Export ▾</summary>
+                        <div class="calendar-dropdown-menu">
+                            <div class="calendar-dropdown-section">
+                                <label for="downloadFormat">Format</label>
+                                <select id="downloadFormat" class="calendar-format-select" aria-label="Choose download format">
+                                    <option value="ics">ICS (Calendar)</option>
+                                    <option value="csv">CSV (Tasks)</option>
+                                    <option value="json">JSON (Calendar)</option>
+                                </select>
+                            </div>
+                            <button type="button" onclick="app.downloadCalendar('all')">📋 All Tasks</button>
+                            <button type="button" onclick="app.downloadCalendar('pending')">⏳ Pending Tasks</button>
+                            <button type="button" onclick="app.downloadCalendar('critical')">🔴 Critical Path</button>
+                            <button type="button" onclick="app.downloadCalendar('mine')">👤 My Tasks</button>
+                            <hr class="calendar-dropdown-divider">
+                            <button type="button" onclick="app.downloadCalendarWorkers()">👥 Per-Worker Files</button>
+                        </div>
+                    </details>
+                    <button type="button" onclick="app.openIssuesSyncModal()" class="btn-secondary" data-testid="sync-issues">🐙 Sync Issues</button>
+                    <button type="button" onclick="app.openHistoryModal()" class="btn-secondary" data-testid="open-history">🕘 History</button>
+                    <div class="view-toggle" role="group" aria-label="View mode">
+                        <button type="button" id="viewListBtn" onclick="app.setViewMode('list')" class="btn-secondary active" data-testid="view-list">📋 List</button>
+                        <button type="button" id="viewTimelineBtn" onclick="app.setViewMode('timeline')" class="btn-secondary" data-testid="view-timeline">📅 Timeline</button>
+                        <button type="button" id="viewGraphBtn" onclick="app.setViewMode('graph')" class="btn-secondary" data-testid="view-graph">🕸️ Graph</button>
+                    </div>
+                    <div class="filter-section">
+                        <select id="filterStatus" onchange="app.filterTasks()">
+                            <option value="all">All Tasks</option>
+                            <option value="Not Started">Not Started</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="On Hold">On Hold</option>
+                            <option value="Blocked">Blocked</option>
+                            <option value="Done">Done</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Pending Review">Pending Review</option>
+                        </select>
+                        <select id="filterPriority" onchange="app.filterTasks()">
+                            <option value="all">All Priorities</option>
+                            <option value="Critical">Critical</option>
+                            <option value="High">High</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Low">Low</option>
+                        </select>
+                    </div>
+                </section>
+
+                <section class="stats">
+                    <div class="stat-card" data-status="all" data-testid="stat-total" role="button" tabindex="0" aria-label="Filter: All Tasks">
+                        <h3>Total Tasks</h3>
+                        <p id="totalTasks">0</p>
+                    </div>
+                    <div class="stat-card" data-status="Not Started" data-testid="stat-not-started" role="button" tabindex="0" aria-label="Filter: Not Started">
+                        <h3>Not Started</h3>
+                        <p id="todoTasks">0</p>
+                    </div>
+                    <div class="stat-card" data-status="In Progress" data-testid="stat-in-progress" role="button" tabindex="0" aria-label="Filter: In Progress">
+                        <h3>In Progress</h3>
+                        <p id="inProgressTasks">0</p>
+                    </div>
+                    <div class="stat-card" data-status="Done" data-testid="stat-completed" role="button" tabindex="0" aria-label="Filter: Done">
+                        <h3>Done</h3>
+                        <p id="doneTasks">0</p>
+                    </div>
+                </section>
+
+                <section class="tasks-section">
+                    <div id="projectNavigationShell" class="project-navigation-shell" style="display: none;" data-testid="project-nav-shell">
+                        <div class="project-navigation-bar">
+                            <div class="project-navigation-copy">
+                                <div id="projectContextEyebrow" class="project-context-eyebrow">Project Taskflow</div>
+                                <h2 id="projectContextTitle" class="project-context-title">Root Project</h2>
+                                <p id="projectContextDescription" class="project-context-description"></p>
+                            </div>
+                            <div class="project-navigation-actions">
+                                <button type="button" id="projectNavToggleBtn" class="btn-secondary" onclick="app.toggleProjectNavigationPanel()" data-testid="project-nav-toggle" aria-expanded="false">Browse Modules</button>
+                                <button type="button" id="projectNavUpBtn" class="btn-secondary" onclick="app.clearModuleView()" data-testid="project-nav-up">Up</button>
+                                <button type="button" id="projectNavRootBtn" class="btn-secondary" onclick="app.clearModuleView()" data-testid="project-nav-root">Root</button>
+                            </div>
+                        </div>
+                        <div id="projectContextFlow" class="project-context-flow"></div>
+                        <div id="projectNavigationPanel" class="project-navigation-panel" hidden data-testid="project-nav-panel"></div>
+                    </div>
+                    <div id="timelineView" class="timeline-view" style="display: none;" data-testid="timeline-view"></div>
+                    <div id="graphView" class="graph-view" style="display: none;" data-testid="graph-view">
+                        <iframe id="graphFrame" class="graph-frame" title="Project Graph View" loading="lazy"></iframe>
+                        <div id="graphFrameError" class="graph-frame-error" style="display: none; margin-top: 12px; padding: 12px; background: #fff8f0; border: 1px solid #ffd8b0; color: #663300;">
+                            <strong>Graph could not be loaded.</strong>
+                            <div id="graphFrameErrorMessage" style="margin-top:6px;">Please check that <code>/public/graph-display/index.html</code> is accessible from your server.</div>
+                            <div style="margin-top:8px;"><a id="graphFrameOpenDirect" href="#" target="_blank">Open graph template directly</a></div>
+                        </div>
+                    </div>
+                    <div id="tasksList" class="tasks-list" data-testid="tasks-list"></div>
+                    <div id="emptyState" class="empty-state" style="display: none;">
+                        <p>No tasks found. Click "Add New Task" to get started, or import a template above!</p>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Task Modal -->
+        <div id="taskModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2 id="modalTitle">Add New Task</h2>
+                <div id="validationMessages" class="validation-messages"></div>
+                <form id="taskForm">
+                    <input type="hidden" id="taskId" />
+
+                    <div class="form-group">
+                        <label for="taskName" class="required-field">Task Name *</label>
+                        <input type="text" id="taskName" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taskDescription">Description *</label>
+                        <textarea id="taskDescription" rows="4" required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taskStatus" class="required-field">Status *</label>
+                            <select id="taskStatus" required>
+                                <option value="Not Started">Not Started</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="On Hold">On Hold</option>
+                                <option value="Blocked">Blocked</option>
+                                <option value="Done">Done</option>
+                                <option value="Cancelled">Cancelled</option>
+                                <option value="Pending Review">Pending Review</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="taskPriority" class="required-field">Priority *</label>
+                            <select id="taskPriority" required>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                                <option value="Critical">Critical</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taskStartDate">Start Date *</label>
+                            <input type="date" id="taskStartDate" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="taskEndDate">End Date *</label>
+                            <input type="date" id="taskEndDate" required />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taskEstimatedHours">Estimated Hours *</label>
+                            <input type="number" id="taskEstimatedHours" min="0" step="0.5" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="taskActualHours">Actual Hours</label>
+                            <input type="number" id="taskActualHours" min="0" step="0.5" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taskProgress">Progress (%)</label>
+                            <input type="number" id="taskProgress" min="0" max="100" value="0" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="taskCategory">Category *</label>
+                            <select id="taskCategory" required>
+                                <option value="">Select Category</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taskTags">Tags (comma-separated)</label>
+                        <input type="text" id="taskTags" placeholder="frontend, api, critical" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="parentTaskId">Parent Task ID (for subtasks)</label>
+                        <input type="number" id="parentTaskId" min="0" placeholder="Leave empty for top-level tasks" />
+                        <small style="color: var(--text-secondary);">Leave empty if this is not a subtask</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taskDependencies">Task Dependencies</label>
+                        <textarea id="taskDependencies" placeholder="Task ID: Dependency Type (FS/SS/FF/SF)&#10;Example: 1: FS, 2: SS" rows="3"></textarea>
+                        <small style="color: var(--text-secondary);">Format: taskId: dependencyType (FS=Finish-to-Start, SS=Start-to-Start, FF=Finish-to-Finish, SF=Start-to-Finish)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taskAssignedWorkers">Assigned Workers</label>
+                        <input type="text" id="taskAssignedWorkers" placeholder="Name or email address" />
+                        <small style="color: var(--text-secondary);">Enter names/emails separated by commas</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="taskCriticalPath" />
+                            Critical Path Task
+                        </label>
+                    </div>
+
+                    <!-- Automatic Fields Section -->
+                    <div class="automatic-fields-section">
+                        <h3>Automatic Fields</h3>
+                        <div class="automatic-fields-grid">
+                            <div class="form-group">
+                                <label>Task ID</label>
+                                <div id="displayTaskId" class="readonly-field">--</div>
+                            </div>
+                            <div class="form-group">
+                                <label>Created Date</label>
+                                <div id="displayCreatedDate" class="readonly-field">--</div>
+                            </div>
+                            <div class="form-group">
+                                <label>Creator ID</label>
+                                <div id="displayCreatorId" class="readonly-field">--</div>
+                            </div>
+                            <div class="form-group">
+                                <label>Completed Date</label>
+                                <div id="displayCompletedDate" class="readonly-field">--</div>
+                            </div>
+                        </div>
+                        <small style="color: var(--text-secondary);">These fields are automatically managed and cannot be edited manually.</small>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" onclick="closeModal()" class="btn-secondary">Cancel</button>
+                        <button type="submit" class="btn-primary">Save Task</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+            <div class="spinner"></div>
+            <p>Processing...</p>
+        </div>
+
+        <!-- Password Modal -->
+        <div id="passwordModal" class="modal">
+            <div class="modal-content" style="max-width: 400px;">
+                <span class="close" onclick="app.closePasswordModal()">&times;</span>
+                <h2>🔐 Access Required</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Enter the collaboration password to make changes.
+                    <br><small>Viewing tasks is always free and public.</small>
+                </p>
+                <form id="passwordForm" onsubmit="return app.verifyPassword(event)">
+                    <div class="form-group">
+                        <label for="accessPassword">Password</label>
+                        <input type="password" id="accessPassword" placeholder="Enter password" required autofocus autocomplete="current-password" />
+                    </div>
+                    <div id="passwordError" class="validation-messages" style="display: none;"></div>
+                        <div id="passwordHelp" style="margin-top: 8px; color: var(--text-secondary); font-size: 0.9em;"></div>
+                    <div class="form-actions">
+                        <button type="button" onclick="app.closePasswordModal()" class="btn-secondary">Cancel</button>
+                        <button type="submit" class="btn-primary">Unlock</button>
+                    </div>
+                </form>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+                    <small style="color: var(--text-secondary);">
+                        💡 Don't have the password? Contact the project owner or check the README.
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- GitHub Login Modal (OAuth Device Flow) -->
+        <div id="githubLoginModal" class="modal">
+            <div class="modal-content" style="max-width: 480px;">
+                <span class="close" onclick="app.closeGitHubLoginModal()">&times;</span>
+                <h2>🐙 Connect to GitHub</h2>
+                <div id="githubLoginStep1" style="display: block;">
+                    <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                        To save changes to GitHub, you need to authorize this app with your GitHub account.
+                        <br><small>This is a one-time setup. Your login is stored in this browser only.</small>
+                    </p>
+                    <div class="form-actions">
+                        <button type="button" onclick="app.closeGitHubLoginModal()" class="btn-secondary">Not now</button>
+                        <button type="button" onclick="app.startGitHubDeviceFlow()" class="btn-primary">🔗 Start GitHub Login</button>
+                    </div>
+                </div>
+                <div id="githubLoginStep2" style="display: none;">
+                    <p style="margin-bottom: 16px;">
+                        <strong>Step 1:</strong> Copy this code:
+                    </p>
+                    <div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 16px;">
+                        <code id="deviceUserCode" style="font-size: 1.5em; letter-spacing: 2px; font-weight: bold;">--------</code>
+                        <button type="button" onclick="app.copyDeviceCode()" class="btn-secondary" style="margin-left: 12px;">📋 Copy</button>
+                    </div>
+                    <p style="margin-bottom: 16px;">
+                        <strong>Step 2:</strong> Open GitHub and paste the code:
+                    </p>
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        <a id="deviceVerificationLink" href="https://github.com/login/device" target="_blank" rel="noopener" class="btn-primary" style="display: inline-block; text-decoration: none;">
+                            Open github.com/login/device →
+                        </a>
+                    </div>
+                    <p id="devicePollStatus" style="color: var(--text-secondary); text-align: center;">
+                        ⏳ Waiting for you to authorize...
+                    </p>
+                </div>
+                <div id="githubLoginSuccess" style="display: none; text-align: center;">
+                    <p style="font-size: 2em; margin-bottom: 8px;">✅</p>
+                    <p style="color: var(--success-color); font-weight: bold;">Connected to GitHub!</p>
+                    <p id="githubLoginUser" style="color: var(--text-secondary);"></p>
+                </div>
+                <div id="githubLoginError" class="validation-messages" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- GitHub Issues Sync Modal -->
+        <div id="issuesModal" class="modal">
+            <div class="modal-content" style="max-width: 720px;">
+                <span class="close" onclick="app.closeIssuesSyncModal()">&times;</span>
+                <h2>🐙 GitHub Issues Sync</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 14px;">
+                    Import open issues as tasks.
+                    <br><small>Tip: Click an issue title to open it in GitHub.</small>
+                </p>
+
+                <div id="issuesSyncStatus" class="validation-messages" style="display: none;"></div>
+
+                <div class="issues-toolbar">
+                    <button type="button" class="btn-secondary" onclick="app.loadIssuesForSync()">🔄 Refresh Issues</button>
+                    <button type="button" class="btn-primary" onclick="app.importSelectedIssues()">⬇️ Import Selected</button>
+                </div>
+
+                <div id="issuesList" class="issues-list" data-testid="issues-list"></div>
+
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+                    <small style="color: var(--text-secondary);">
+                        Note: This is a client-side integration; public issue reads may be rate-limited without a token.
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Modal -->
+        <div id="historyModal" class="modal">
+            <div class="modal-content" style="max-width: 920px;">
+                <span class="close" onclick="app.closeHistoryModal()">&times;</span>
+                <h2>🕘 Change History</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 14px;">
+                    Audit trail for task changes in the selected project.
+                    <br><small>Tip: Expand an item to see full field-level changes.</small>
+                </p>
+
+                <div class="issues-toolbar">
+                    <button type="button" class="btn-secondary" onclick="app.refreshHistory()">🔄 Refresh History</button>
+                    <input type="text" id="historyTaskIdFilter" placeholder="Filter by Task ID (optional)" style="flex: 1; min-width: 220px;" autocomplete="off" aria-label="Filter history by task ID" />
+                    <button type="button" class="btn-primary" onclick="app.applyHistoryFilter()">Apply</button>
+                </div>
+
+                <div id="historyStatus" class="validation-messages" style="display: none;"></div>
+                <div id="historyList" class="history-list" data-testid="history-list"></div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="toast"></div>
+    </div>
+
+    <!-- Load Components -->
+    <!-- Password config MUST load before tasks-template-config so ACCESS_PASSWORD is available -->
+    <script src="../config/access-secret.local.js"></script>
+    <script src="../config/access-secret.js"></script>
+    <!-- GitHub token config -->
+    <script src="../config/github-token.local.js"></script>
+    <script src="../config/github-token.js"></script>
+    <!-- GitHub OAuth config -->
+    <script src="../config/github-oauth.js"></script>
+    <!-- Worker URL config (for secure writes via Cloudflare Worker) -->
+    <script src="../config/worker-url.local.js"></script>
+    <script src="../config/worker-url.js"></script>
+    <!-- Centralized projects list (overrides tasks-template-config defaults when present) -->
+    <script src="../config/projects-config.js"></script>
+    <!-- Main config (depends on ACCESS_PASSWORD from access-secret) -->
+    <script src="../config/tasks-template-config.js"></script>
+    <!-- Rest of the scripts -->
+    <script src="../local-folder/js/local-folder-scanner.js"></script>
+    <script src="../local-folder/js/folder-picker-trigger.js"></script>
+    <script src="../task-engine/js/task-schema-validator.js"></script>
+    <script src="../task-engine/js/task-field-automation.js"></script>
+    <script src="../task-engine/js/task-storage-sync.js"></script>
+    <script src="../calendar/js/task-ics-export.js"></script>
+    <script src="./js/list-display-controller.js"></script>
+</body>
+</html>
+

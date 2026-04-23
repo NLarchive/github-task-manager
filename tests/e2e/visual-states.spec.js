@@ -1,3 +1,7 @@
+/**
+ * Visual-state checks for list-display task status classes and styling hooks.
+ */
+
 import { test, expect } from '@playwright/test';
 
 test.describe('Task Visual States', () => {

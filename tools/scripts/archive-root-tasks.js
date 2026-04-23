@@ -1,15 +1,22 @@
+/**
+ * Archive the legacy root-level TaskDB files with a timestamped backup snapshot.
+ */
+
 const fs = require('fs');
 const path = require('path');
 
+/** Pad a number to two digits for timestamp formatting. */
 function pad2(n) {
   return String(n).padStart(2, '0');
 }
 
+/** Build a filesystem-safe timestamp string for archive naming. */
 function timestamp() {
   const d = new Date();
   return `${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}-${pad2(d.getHours())}${pad2(d.getMinutes())}${pad2(d.getSeconds())}`;
 }
 
+/** Escape a value for inclusion in generated CSV output. */
 function escapeCsvValue(value) {
   if (value === null || value === undefined) return '';
   const str = String(value);
@@ -18,6 +25,7 @@ function escapeCsvValue(value) {
   return str;
 }
 
+/** Generate a persisted CSV snapshot from a TaskDB task list. */
 function generatePersistedCSV(tasks = []) {
   const fields = [
     'task_id',
@@ -43,6 +51,7 @@ function generatePersistedCSV(tasks = []) {
   return [header, ...rows].join('\n') + '\n';
 }
 
+/** Run the script entrypoint for this file. */
 function main() {
   const repoRoot = path.join(__dirname, '..', '..');
   const legacyPath = path.join(repoRoot, 'tasks.json');

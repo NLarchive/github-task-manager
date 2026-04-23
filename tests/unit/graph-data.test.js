@@ -1,4 +1,4 @@
-/*
+/**
  * Basic sanity test for `public/graph-display/js/graph-data.js` to ensure
  * it parses without syntax errors in the Node test environment.
  */

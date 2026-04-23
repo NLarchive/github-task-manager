@@ -26,6 +26,7 @@ const colors = {
   cyan: '\x1b[36m'
 };
 
+/** Parse CLI arguments for this validation or export script. */
 function parseArgs(argv) {
   const args = { projects: [], all: false };
   for (const a of argv.slice(2)) {
@@ -35,10 +36,12 @@ function parseArgs(argv) {
   return args;
 }
 
+/** Sanitize a project id passed through CLI arguments. */
 function sanitizeProjectId(s) {
   return String(s || '').replace(/[^a-zA-Z0-9_-]/g, '');
 }
 
+/** Load the tasks.json payload for a project. */
 function loadTasksJson(projectId) {
   const tasksDbRoot = path.join(__dirname, '../../public/tasksDB');
   // Auto-discover scope: check external/, local/, then root (backward compat)
@@ -54,25 +57,33 @@ function loadTasksJson(projectId) {
   throw new Error(`tasks.json not found for project "${projectId}" in external/, local/, or root.`);
 }
 
+/** Check whether a string matches the YYYY-MM-DD date format. */
 function isValidDateYYYYMMDD(dateStr) {
   return typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateStr);
 }
 
+/** Check whether a task name appears to contain an injected timestamp. */
 function hasTimestampPollution(taskName) {
   if (typeof taskName !== 'string') return false;
   // common pattern from earlier test tasks: "... - 1765725892303" (10+ digits)
   return /\b\d{10,}\b/.test(taskName);
 }
 
+/** Validate one project tasks.json payload against the expected schema rules. */
 function validateProjectFile(projectId, tasksJson) {
   const errors = [];
   const warnings = [];
 
+  /** Project status. */
   const PROJECT_STATUS = ['Not Started', 'In Progress', 'On Hold', 'Completed', 'Cancelled'];
+  /** Task status. */
   const TASK_STATUS = ['Not Started', 'In Progress', 'On Hold', 'Blocked', 'Completed', 'Cancelled', 'Pending Review'];
+  /** Task priority. */
   const TASK_PRIORITY = ['Low', 'Medium', 'High', 'Critical'];
+  /** Dependency types. */
   const DEPENDENCY_TYPES = ['FS', 'SS', 'FF', 'SF'];
 
+  /** Require field. */
   function requireField(obj, fieldPath) {
     const [root, ...rest] = fieldPath.split('.');
     let cur = obj;
@@ -88,11 +99,13 @@ function validateProjectFile(projectId, tasksJson) {
     }
   }
 
+  /** Enum field. */
   function enumField(value, valid, fieldPath) {
     if (value == null) return;
     if (!valid.includes(value)) errors.push(`Invalid ${fieldPath}: "${value}". Valid values: ${valid.join(', ')}`);
   }
 
+  /** Date field. */
   function dateField(value, fieldPath) {
     if (value == null) return;
     if (!isValidDateYYYYMMDD(value)) errors.push(`Invalid date format for ${fieldPath}: "${value}" (expected YYYY-MM-DD)`);
@@ -213,6 +226,7 @@ function validateProjectFile(projectId, tasksJson) {
   return { errors, warnings };
 }
 
+/** Run the script entrypoint for this file. */
 function main() {
   const args = parseArgs(process.argv);
 

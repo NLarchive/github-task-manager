@@ -1,8 +1,21 @@
+/**
+ * Local development server and runtime API bridge for the public TaskDB apps.
+ *
+ * This module serves the static frontend under `public/`, exposes project and
+ * module discovery endpoints for local workflows, and persists `tasks.json`,
+ * derived CSV, and state files when the app runs outside GitHub Pages.
+ */
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { URL } = require('url');
 
+/**
+ * Escape a scalar value for inclusion in the persisted CSV export.
+ *
+ * @param {unknown} value
+ * @returns {string}
+ */
 function escapeCsvValue(value) {
   if (value === null || value === undefined) return '';
   const str = String(value);
@@ -11,6 +24,12 @@ function escapeCsvValue(value) {
   return str;
 }
 
+/**
+ * Build the repo-side flattened CSV companion for a TaskDB task list.
+ *
+ * @param {object[]} [tasks=[]]
+ * @returns {string}
+ */
 function generatePersistedCSV(tasks = []) {
   const fields = [
     'task_id',
@@ -36,6 +55,12 @@ function generatePersistedCSV(tasks = []) {
   return [header, ...rows].join('\n') + '\n';
 }
 
+/**
+ * Collect duplicate numeric task identifiers before persisting project data.
+ *
+ * @param {object[]} [tasks=[]]
+ * @returns {number[]}
+ */
 function getDuplicateTaskIds(tasks = []) {
   const seen = new Set();
   const dupes = new Set();
@@ -48,6 +73,13 @@ function getDuplicateTaskIds(tasks = []) {
   return Array.from(dupes).sort((a, b) => a - b);
 }
 
+/**
+ * Resolve a request-relative path within a trusted root, rejecting traversal.
+ *
+ * @param {string} root
+ * @param {string} requestPath
+ * @returns {string|null}
+ */
 function safeJoin(root, requestPath) {
   const decoded = decodeURIComponent(requestPath);
   const cleaned = decoded.replace(/^\/+/, '');
@@ -56,6 +88,12 @@ function safeJoin(root, requestPath) {
   return resolved;
 }
 
+/**
+ * Map a file path extension to the HTTP content type used by static serving.
+ *
+ * @param {string} filePath
+ * @returns {string}
+ */
 function contentTypeFor(filePath) {
   const ext = path.extname(filePath).toLowerCase();
   if (ext === '.html') return 'text/html; charset=utf-8';
@@ -69,6 +107,14 @@ function contentTypeFor(filePath) {
   return 'application/octet-stream';
 }
 
+/**
+ * Send a JSON response with no-store caching for API endpoints.
+ *
+ * @param {import('http').ServerResponse} res
+ * @param {number} status
+ * @param {unknown} payload
+ * @returns {void}
+ */
 function sendJson(res, status, payload) {
   const body = JSON.stringify(payload, null, 2);
   res.writeHead(status, {
@@ -78,6 +124,12 @@ function sendJson(res, status, payload) {
   res.end(body);
 }
 
+/**
+ * Read the full request body into memory with a conservative size guard.
+ *
+ * @param {import('http').IncomingMessage} req
+ * @returns {Promise<string>}
+ */
 function readBody(req) {
   return new Promise((resolve, reject) => {
     let data = '';
@@ -93,6 +145,12 @@ function readBody(req) {
   });
 }
 
+/**
+ * Read and parse a JSON file, returning null when it does not exist or fails.
+ *
+ * @param {string} filePath
+ * @returns {object|null}
+ */
 function readJsonFile(filePath) {
   if (!filePath || !fs.existsSync(filePath)) return null;
   try {
@@ -102,12 +160,24 @@ function readJsonFile(filePath) {
   }
 }
 
+/**
+ * Normalize a project-relative path to forward slashes without leading markers.
+ *
+ * @param {string} value
+ * @returns {string}
+ */
 function normalizeRelativePath(value) {
   const normalized = String(value || '').replace(/\\/g, '/').replace(/^\/+/, '').replace(/^\.\//, '');
   if (!normalized) return '';
   return normalized.split('/').filter(Boolean).join('/');
 }
 
+/**
+ * Infer the department/group label for a discovered module path.
+ *
+ * @param {string} relativePath
+ * @returns {string}
+ */
 function inferModuleDepartment(relativePath) {
   const normalized = normalizeRelativePath(relativePath);
   if (!normalized) return 'other';
@@ -123,6 +193,13 @@ function inferModuleDepartment(relativePath) {
   return first;
 }
 
+/**
+ * Infer a coarse module type when the module file does not declare one.
+ *
+ * @param {string} relativePath
+ * @param {object} moduleData
+ * @returns {string}
+ */
 function inferModuleType(relativePath, moduleData) {
   if (moduleData && moduleData.type) return moduleData.type;
   const normalized = normalizeRelativePath(relativePath);
@@ -134,13 +211,28 @@ function inferModuleType(relativePath, moduleData) {
   return 'module';
 }
 
+/** Preferred task filenames searched within a TaskDB project tree. */
 const TASK_FILE_CANDIDATES = ['tasks.json', 'TODO_project_task.json'];
+
+/** Directories skipped while scanning project modules and derived artifacts. */
 const DISCOVERY_IGNORED_DIRS = new Set(['history', 'state', 'tour', 'node_modules', '.git']);
 
+/**
+ * Determine whether a filename is a supported TaskDB source file.
+ *
+ * @param {string} fileName
+ * @returns {boolean}
+ */
 function isTaskFileCandidate(fileName) {
   return TASK_FILE_CANDIDATES.includes(String(fileName || '').trim());
 }
 
+/**
+ * Read directory entries safely, returning an empty list on filesystem errors.
+ *
+ * @param {string} dirPath
+ * @returns {import('fs').Dirent[]}
+ */
 function readDirectoryEntries(dirPath) {
   try {
     return fs.readdirSync(dirPath, { withFileTypes: true });
@@ -149,6 +241,12 @@ function readDirectoryEntries(dirPath) {
   }
 }
 
+/**
+ * Pick the preferred task source file from a directory listing.
+ *
+ * @param {import('fs').Dirent[]} entries
+ * @returns {string}
+ */
 function pickPreferredTaskFileName(entries) {
   for (const candidate of TASK_FILE_CANDIDATES) {
     const match = (entries || []).find((entry) => entry && entry.isFile() && entry.name === candidate);
@@ -157,6 +255,12 @@ function pickPreferredTaskFileName(entries) {
   return '';
 }
 
+/**
+ * Recursively discover TaskDB task files under a project directory.
+ *
+ * @param {string} projectDir
+ * @returns {string[]}
+ */
 function discoverProjectTaskFiles(projectDir) {
   if (!projectDir || !fs.existsSync(projectDir)) return [];
 
@@ -180,6 +284,12 @@ function discoverProjectTaskFiles(projectDir) {
   return Array.from(new Set(discovered.filter(Boolean))).sort((a, b) => a.localeCompare(b));
 }
 
+/**
+ * Resolve the canonical task key used for dependency and flow matching.
+ *
+ * @param {object} task
+ * @returns {string}
+ */
 function getTaskKey(task) {
   if (!task || typeof task !== 'object') return '';
   const name = String(task.task_name || task.title || '').trim();
@@ -188,12 +298,24 @@ function getTaskKey(task) {
   return rawId === null || rawId === undefined ? '' : String(rawId).trim();
 }
 
+/**
+ * Extract the short task code prefix from a task key when present.
+ *
+ * @param {object} task
+ * @returns {string}
+ */
 function getTaskCode(task) {
   const key = getTaskKey(task);
   if (!key) return '';
   return key.includes(':') ? key.slice(0, key.indexOf(':')).trim() : key;
 }
 
+/**
+ * Collect predecessor identifiers from a task dependency list.
+ *
+ * @param {object} task
+ * @returns {string[]}
+ */
 function getTaskPredecessorKeys(task) {
   if (!task || !Array.isArray(task.dependencies)) return [];
 
@@ -213,6 +335,12 @@ function getTaskPredecessorKeys(task) {
   return predecessors.filter(Boolean);
 }
 
+/**
+ * Compute start/end tasks for a task list based on dependency relationships.
+ *
+ * @param {object[]} tasks
+ * @returns {{startTaskKeys: string[], endTaskKeys: string[], startTasks: string[], endTasks: string[]}}
+ */
 function computeTaskFlowSummary(tasks) {
   const taskList = Array.isArray(tasks) ? tasks.filter(task => task && typeof task === 'object') : [];
   const canonicalKeyByAlias = new Map();
@@ -263,6 +391,13 @@ function computeTaskFlowSummary(tasks) {
   };
 }
 
+/**
+ * Score a candidate tasks file when selecting the root module for a project.
+ *
+ * @param {string} relativePath
+ * @param {object|null} rawData
+ * @returns {number}
+ */
 function scoreRootModuleCandidate(relativePath, rawData) {
   const normalized = normalizeRelativePath(relativePath);
   if (!normalized) return -1;
@@ -281,6 +416,13 @@ function scoreRootModuleCandidate(relativePath, rawData) {
   return score;
 }
 
+/**
+ * Resolve the project root module path from navigation metadata or discovered files.
+ *
+ * @param {string} projectDir
+ * @param {object|null} tasksIndexData
+ * @returns {string}
+ */
 function resolveRootModuleRelative(projectDir, tasksIndexData) {
   const explicitRoot = normalizeRelativePath(
     tasksIndexData && tasksIndexData.navigation && tasksIndexData.navigation.rootModule
@@ -314,6 +456,13 @@ function resolveRootModuleRelative(projectDir, tasksIndexData) {
   return '';
 }
 
+/**
+ * Build module metadata entries for all non-root task files in a project.
+ *
+ * @param {string} projectDir
+ * @param {string} rootModuleRelative
+ * @returns {object[]}
+ */
 function collectProjectModules(projectDir, rootModuleRelative) {
   const modules = [];
   const normalizedRootModule = normalizeRelativePath(rootModuleRelative || '');
@@ -357,6 +506,13 @@ function collectProjectModules(projectDir, rootModuleRelative) {
   return modules;
 }
 
+/**
+ * Rebase module paths so the root module can reference them relative to itself.
+ *
+ * @param {object[]} modules
+ * @param {string} rootModuleRelative
+ * @returns {object[]}
+ */
 function buildRootRelativeModules(modules, rootModuleRelative) {
   const rootDir = normalizeRelativePath(rootModuleRelative || 'src/tasks.json').replace(/\/[^\/]*$/, '');
   const prefix = rootDir ? `${rootDir}/` : '';
@@ -375,6 +531,12 @@ function buildRootRelativeModules(modules, rootModuleRelative) {
   });
 }
 
+/**
+ * Build the synchronized project payload served to the browser and graph runtime.
+ *
+ * @param {string} projectDir
+ * @returns {{payload: object, tasksJsonPath: string, rootModulePath: string|null, rootModuleRelative: string, modules: object[]}|null}
+ */
 function buildProjectPayload(projectDir) {
   const tasksJsonPath = path.join(projectDir, 'tasks.json');
   const tasksIndexData = readJsonFile(tasksJsonPath);
@@ -404,6 +566,13 @@ function buildProjectPayload(projectDir) {
   };
 }
 
+/**
+ * Persist the project index and root module payloads with regenerated navigation.
+ *
+ * @param {string} projectDir
+ * @param {object} fullData
+ * @returns {{tasksJsonPath: string, rootModulePath: string|null, modules: object[], rootModuleRelative: string}}
+ */
 function writeProjectPayload(projectDir, fullData) {
   const current = buildProjectPayload(projectDir);
   const rootModuleRelative = normalizeRelativePath(
@@ -447,10 +616,22 @@ function writeProjectPayload(projectDir, fullData) {
   return { tasksJsonPath, rootModulePath, modules, rootModuleRelative };
 }
 
+/**
+ * Ensure a directory exists before writing project artifacts.
+ *
+ * @param {string} dirPath
+ * @returns {void}
+ */
 function ensureDir(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
 }
 
+/**
+ * Sanitize a project identifier used to address project folders.
+ *
+ * @param {string} value
+ * @returns {string|null}
+ */
 function sanitizeProjectId(value) {
   if (!value) return null;
   const id = String(value).trim();
@@ -460,6 +641,13 @@ function sanitizeProjectId(value) {
   return safe || null;
 }
 
+/**
+ * Seed the writable tasks directory from bundled public TaskDB data when needed.
+ *
+ * @param {string} tasksDbDir
+ * @param {string} fallbackDir
+ * @returns {void}
+ */
 function maybeBootstrapTasksDb(tasksDbDir, fallbackDir) {
   try {
     ensureDir(tasksDbDir);
@@ -497,6 +685,13 @@ function maybeBootstrapTasksDb(tasksDbDir, fallbackDir) {
   }
 }
 
+/**
+ * Recursively copy a directory tree into the writable tasks workspace.
+ *
+ * @param {string} sourceDir
+ * @param {string} targetDir
+ * @returns {void}
+ */
 function copyDirRecursive(sourceDir, targetDir) {
   if (!sourceDir || !targetDir) return;
   if (path.resolve(sourceDir) === path.resolve(targetDir)) return;
@@ -521,6 +716,13 @@ function copyDirRecursive(sourceDir, targetDir) {
   }
 }
 
+/**
+ * Regenerate the lightweight status-oriented state files for a project.
+ *
+ * @param {string} tasksDbDir
+ * @param {object} fullData
+ * @returns {void}
+ */
 function writeStateFiles(tasksDbDir, fullData) {
   const stateDir = path.join(tasksDbDir, 'state');
   ensureDir(stateDir);
@@ -557,6 +759,12 @@ function writeStateFiles(tasksDbDir, fullData) {
   makeStatusFile('Completed', 'tasks-completed.json');
 }
 
+/**
+ * Create the local HTTP server used by development, tests, and file-backed saves.
+ *
+ * @param {{ publicDir: string, tasksDbDir: string, graphDir: string }} options
+ * @returns {import('http').Server}
+ */
 function createServer({ publicDir, tasksDbDir, graphDir }) {
   const fallbackTasksDbDir = path.join(publicDir, 'tasksDB');
   maybeBootstrapTasksDb(tasksDbDir, fallbackTasksDbDir);
@@ -835,19 +1043,27 @@ function createServer({ publicDir, tasksDbDir, graphDir }) {
         return;
       }
 
-      if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+      let resolvedFilePath = filePath;
+      if (fs.existsSync(resolvedFilePath) && fs.statSync(resolvedFilePath).isDirectory()) {
+        const indexPath = path.join(resolvedFilePath, 'index.html');
+        if (fs.existsSync(indexPath)) {
+          resolvedFilePath = indexPath;
+        }
+      }
+
+      if (!fs.existsSync(resolvedFilePath) || fs.statSync(resolvedFilePath).isDirectory()) {
         res.writeHead(404);
         res.end('Not found');
         return;
       }
 
-      const ct = contentTypeFor(filePath);
-      const isTasksDbAsset = pathname.startsWith('/tasksDB/') && (filePath.endsWith('.json') || filePath.endsWith('.csv'));
+      const ct = contentTypeFor(resolvedFilePath);
+      const isTasksDbAsset = pathname.startsWith('/tasksDB/') && (resolvedFilePath.endsWith('.json') || resolvedFilePath.endsWith('.csv'));
       res.writeHead(200, {
         'Content-Type': ct,
         ...(isTasksDbAsset ? { 'Cache-Control': 'no-store' } : {})
       });
-      fs.createReadStream(filePath).pipe(res);
+      fs.createReadStream(resolvedFilePath).pipe(res);
     } catch (err) {
       res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
       res.end(String(err && err.message ? err.message : err));

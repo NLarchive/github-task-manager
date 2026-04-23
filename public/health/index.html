@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Task Manager - Health Check</title>
+    <link rel="stylesheet" href="./css/health.css">
+</head>
+<body>
+    <main class="health-shell">
+        <section class="health-card">
+            <header class="health-header">
+                <div class="health-title-group">
+                    <h1>GitHub Task Manager</h1>
+                    <p>Health Check and deployment overview for the modular public frontend.</p>
+                </div>
+                <div class="health-pill">Deployment Active</div>
+            </header>
+
+            <div class="health-grid">
+                <section class="health-panel">
+                    <h2>Project</h2>
+                    <p><strong>Repository:</strong> github-task-manager</p>
+                    <p><strong>Owner:</strong> NLarchive</p>
+                    <p><strong>Source:</strong> <a class="health-link" href="https://github.com/NLarchive/github-task-manager">github.com/NLarchive/github-task-manager</a></p>
+                    <p><strong>Live site:</strong> <a class="health-link" href="https://nlarchive.github.io/github-task-manager/">nlarchive.github.io/github-task-manager</a></p>
+                </section>
+
+                <section class="health-panel">
+                    <h2>Route Map</h2>
+                    <p><code>/</code> hub and landing page</p>
+                    <p><code>/list-display/</code> list task manager app</p>
+                    <p><code>/graph-display/</code> graph visualization app</p>
+                    <p><code>/health/</code> health and diagnostics app</p>
+                </section>
+
+                <section class="health-panel">
+                    <h2>TaskDB</h2>
+                    <p><strong>Location:</strong> <code>/public/tasksDB/</code></p>
+                    <p><strong>Formats:</strong> JSON and CSV</p>
+                    <p><strong>Status:</strong> ready for browser reads and managed updates through the app surface.</p>
+                </section>
+
+                <section class="health-panel">
+                    <h2>Module Layout</h2>
+                    <ul>
+                        <li><code>list-display/</code> owns list UI HTML, CSS, and JS.</li>
+                        <li><code>graph-display/</code> owns graph UI HTML, CSS, and JS.</li>
+                        <li><code>shared/</code> owns calendar and folder-project helpers.</li>
+                        <li><code>health/</code> owns its own CSS and JS instead of inline assets.</li>
+                    </ul>
+                </section>
+            </div>
+
+            <section class="health-runtime">
+                <strong>Runtime Diagnostics</strong>
+                <p><strong>Current URL:</strong> <span id="healthRuntimeUrl"></span></p>
+                <p><strong>Loaded at:</strong> <span id="healthRuntimeTimestamp"></span></p>
+            </section>
+
+            <nav class="health-actions" aria-label="Health page navigation">
+                <a href="../list-display/" class="primary-link">Open Task Manager</a>
+                <a href="../graph-display/" class="secondary-link">Open Graph View</a>
+                <a href="../" class="secondary-link">Back to Hub</a>
+            </nav>
+
+            <footer class="health-footer">
+                <p>Static deployment is available and the modular frontend routes are reachable from this surface.</p>
+            </footer>
+        </section>
+    </main>
+
+    <script src="./js/runtime-health-checker.js"></script>
+</body>
+</html>

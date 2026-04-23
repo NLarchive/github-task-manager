@@ -1,7 +1,5 @@
-#!/usr/bin/env node
 /**
- * GitHub Task Manager - Setup Script
- * Initializes the repository and pushes to GitHub
+ * Repository bootstrap helper for initializing and publishing the project.
  */
 
 const { execSync } = require('child_process');
@@ -9,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 
+/** ANSI color codes used by the interactive setup script output. */
 const colors = {
   reset: '\x1b[0m',
   red: '\x1b[31m',
@@ -23,12 +22,25 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
+/**
+ * Prompt the user for input from the interactive setup workflow.
+ *
+ * @param {string} prompt
+ * @returns {Promise<string>}
+ */
 function question(prompt) {
   return new Promise((resolve) => {
     rl.question(prompt, resolve);
   });
 }
 
+/**
+ * Execute a shell command for the repository setup workflow.
+ *
+ * @param {string} cmd
+ * @param {object} [options={}]
+ * @returns {Buffer|string}
+ */
 function exec(cmd, options = {}) {
   try {
     return execSync(cmd, { stdio: 'inherit', ...options });
@@ -38,6 +50,11 @@ function exec(cmd, options = {}) {
   }
 }
 
+/**
+ * Run the interactive repository bootstrap and publishing flow.
+ *
+ * @returns {Promise<void>}
+ */
 async function main() {
   console.log(`${colors.blue}🚀 GitHub Task Manager Setup${colors.reset}`);
   console.log('='.repeat(50));
@@ -63,6 +80,7 @@ async function main() {
   // Create local token file
   const tokenContent = `// GitHub Token Configuration (Local Development)
 // ⚠️ THIS FILE IS GITIGNORED - DO NOT COMMIT
+/** GitHub token used during interactive repository setup commands. */
 const GH_TOKEN = '${token}';
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { GH_TOKEN };

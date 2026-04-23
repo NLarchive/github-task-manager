@@ -1,12 +1,31 @@
-// Template Validation Component
-// Validates tasks and projects against template rules
+/**
+ * TaskDB schema validation rules for tasks, projects, workers, and templates.
+ *
+ * This validator centralizes enum checks, date validation, and cross-record
+ * integrity rules so UI saves and tooling share the same expectations.
+ */
 
+/**
+ * Validate TaskDB payloads against the configured template schema.
+ */
 class TemplateValidator {
+  /**
+   * Create a validator bound to the active TaskDB template configuration.
+   *
+   * @param {object} [config=TEMPLATE_CONFIG]
+   */
   constructor(config = TEMPLATE_CONFIG) {
     this.config = config;
   }
 
   // Main validation method
+  /**
+   * Validate a project, task, or template payload by logical type.
+   *
+   * @param {object} data
+   * @param {string} [type='task']
+   * @returns {{isValid: boolean, errors: string[], warnings: string[]}|{errors: string[], warnings: string[]}}
+   */
   validate(data, type = 'task') {
     const errors = [];
     const warnings = [];
@@ -23,6 +42,12 @@ class TemplateValidator {
   }
 
   // Validate entire project template
+  /**
+   * Validate a full TaskDB template document including tasks and related records.
+   *
+   * @param {object} template
+   * @returns {{isValid: boolean, errors: string[], warnings: string[]}}
+   */
   validateTemplate(template) {
     const errors = [];
     const warnings = [];
@@ -93,6 +118,12 @@ class TemplateValidator {
   }
 
   // Validate project object
+  /**
+   * Validate project-level metadata and nested planning records.
+   *
+   * @param {object} project
+   * @returns {{errors: string[], warnings: string[]}}
+   */
   validateProject(project) {
     const errors = [];
     const warnings = [];
@@ -247,6 +278,13 @@ class TemplateValidator {
   }
 
   // Validate task object
+  /**
+   * Validate an individual task record and its embedded substructures.
+   *
+   * @param {object} task
+   * @param {object|null} [template=null]
+   * @returns {{isValid: boolean, errors: string[], warnings: string[]}}
+   */
   validateTask(task, template = null) {
     const errors = [];
     const warnings = [];
@@ -488,6 +526,12 @@ class TemplateValidator {
   }
 
   // Validate categories
+  /**
+   * Validate category definitions and parent-category references.
+   *
+   * @param {object[]} categories
+   * @returns {{errors: string[], warnings: string[]}}
+   */
   validateCategories(categories) {
     const errors = [];
     const warnings = [];
@@ -521,6 +565,12 @@ class TemplateValidator {
   }
 
   // Validate workers
+  /**
+   * Validate worker records used by assignments and project staffing.
+   *
+   * @param {object[]} workers
+   * @returns {{errors: string[], warnings: string[]}}
+   */
   validateWorkers(workers) {
     const errors = [];
     const warnings = [];
@@ -577,6 +627,12 @@ class TemplateValidator {
   }
 
   // Validate dependencies across all tasks
+  /**
+   * Validate cross-task dependency references across the full task list.
+   *
+   * @param {object[]} tasks
+   * @returns {string[]}
+   */
   validateDependencies(tasks) {
     const errors = [];
     const taskIds = new Set(tasks.map(t => t.task_id).filter(id => id));
@@ -599,14 +655,32 @@ class TemplateValidator {
   }
 
   // Utility methods
+  /**
+   * Check whether a string matches the configured TaskDB date format.
+   *
+   * @param {string} dateString
+   * @returns {boolean}
+   */
   isValidDate(dateString) {
     return this.config.VALIDATION_RULES.DATE_FORMAT.test(dateString);
   }
 
+  /**
+   * Check whether a string matches the configured email pattern.
+   *
+   * @param {string} email
+   * @returns {boolean}
+   */
   isValidEmail(email) {
     return this.config.VALIDATION_RULES.EMAIL_FORMAT.test(email);
   }
 
+  /**
+   * Normalize a free-form status value to the canonical TaskDB enum when possible.
+   *
+   * @param {string} status
+   * @returns {string|null}
+   */
   normalizeStatus(status) {
     return this.config.STATUS_NORMALIZATION[status.toLowerCase()] || null;
   }

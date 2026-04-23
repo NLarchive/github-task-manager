@@ -4,8 +4,11 @@ This folder contains a TaskDB-to-calendar exporter for systems that expect a nor
 
 ## Structure
 
-- `constants.js`: allowed recurrence values, sort modes, and calendar defaults
-- `parse-task-calendars.js`: CLI + reusable converter from `tasks.json` to appointment/calendar JSON
+- `calendar-constants.js`: allowed recurrence values, sort modes, and calendar defaults
+- `calendar-appointment-schema.js`: task-to-calendar field mappings and calendar appointment schema
+- `generate-project-calendars.js`: CLI + reusable converter from `tasks.json` to appointment/calendar JSON
+
+This folder contains the calendar generation pipeline for static exports and worker calendar state. Runtime browser export behavior is implemented separately in `public/calendar/`.
 - `output/`: generated calendar export files for downstream systems, organized by project scope, root project name, and task scope
 
 This exporter also discovers nested `tasks.json` files inside graph-supported project layouts (for example, folder-based subprojects under `public/tasksDB/local/web-e2e-bussines`) so the `--all` command exports both root TaskDB projects and their nested module payloads.
@@ -96,31 +99,31 @@ For privacy-safe worker management, prefer storing a stable `worker_id` on worke
 Generate both full and pending exports for one project:
 
 ```bash
-node tools/calendar/parse-task-calendars.js github-task-manager --task-scope both
+node tools/calendar/generate-project-calendars.js github-task-manager --task-scope both
 ```
 
 Generate only the pending view for one project:
 
 ```bash
-node tools/calendar/parse-task-calendars.js github-task-manager --task-scope pending
+node tools/calendar/generate-project-calendars.js github-task-manager --task-scope pending
 ```
 
 Generate only the full-task view for one project:
 
 ```bash
-node tools/calendar/parse-task-calendars.js github-task-manager --task-scope all
+node tools/calendar/generate-project-calendars.js github-task-manager --task-scope all
 ```
 
 Generate both views for all discoverable root TaskDB projects:
 
 ```bash
-node tools/calendar/parse-task-calendars.js --all --task-scope both
+node tools/calendar/generate-project-calendars.js --all --task-scope both
 ```
 
 Write to a custom output directory:
 
 ```bash
-node tools/calendar/parse-task-calendars.js github-task-manager --task-scope pending --output-dir ./tmp/calendar-output
+node tools/calendar/generate-project-calendars.js github-task-manager --task-scope pending --output-dir ./tmp/calendar-output
 ```
 
 Package script shortcuts:

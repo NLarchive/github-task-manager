@@ -1,17 +1,9 @@
-// Cloudflare Worker for GitHub Task Manager
-// This worker acts as a secure proxy for GitHub API writes
-// Deploy to Cloudflare Workers (free tier: 100k requests/day)
-//
-// Setup:
-// 1. Create a Cloudflare account and go to Workers
-// 2. Create a new Worker with this code
-// 3. Add environment variables:
-//    - GITHUB_TOKEN: Your fine-grained PAT with contents:write
-//    - ACCESS_PASSWORD_MASTER: Master password for all projects
-//    - ACCESS_PASSWORD_GITHUB_TASK_MANAGER: Password for github-task-manager project
-//    - ACCESS_PASSWORD_AI_CAREER_ROADMAP: Password for ai-career-roadmap project
-// 4. Update the ALLOWED_ORIGINS with your GitHub Pages URL
-// 5. Set your worker URL in the app config
+/**
+ * Cloudflare worker that brokers secure TaskDB writes and history reads.
+ *
+ * The public app never ships GitHub write tokens; instead this worker validates
+ * project access, constrains writable paths, and proxies the GitHub API.
+ */
 
 const ALLOWED_ORIGINS = [
   'https://nlarchive.github.io',
@@ -26,6 +18,7 @@ const ALLOWED_ORIGINS = [
 // - public/tasksDB/local/<projectId>/...
 // - public/tasksDB/<projectId>/...           (legacy)
 // - tasksDB/<projectId>/...                  (legacy)
+/** Allowed repository paths that the worker may read or write. */
 const ALLOWED_PATHS = [
   /^(?:public\/)?tasksDB\/(?:(?:external|local)\/)?[a-zA-Z0-9_-]+\/tasks\.json$/,
   /^(?:public\/)?tasksDB\/(?:(?:external|local)\/)?[a-zA-Z0-9_-]+\/tasks\.csv$/,
@@ -34,6 +27,13 @@ const ALLOWED_PATHS = [
   /^(?:public\/)?tasksDB\/(?:(?:external|local)\/)?[a-zA-Z0-9_-]+\/history\/[a-zA-Z0-9_-]+\.ndjson$/
 ];
 
+/**
+ * Resolve the GitHub token to use for a specific project write operation.
+ *
+ * @param {string} projectId
+ * @param {Record<string, string>} env
+ * @returns {string}
+ */
 function getTokenForProject(projectId, env) {
   const id = safeProjectId(projectId);
   if (!env) return '';
@@ -57,15 +57,33 @@ function getTokenForProject(projectId, env) {
   return '';
 }
 
+/**
+ * Sanitize a project id before using it in paths, keys, or env lookups.
+ *
+ * @param {string} value
+ * @returns {string}
+ */
 function safeProjectId(value) {
   return String(value || '').trim().replace(/[^a-zA-Z0-9_-]/g, '');
 }
 
+/**
+ * Normalize a configured project scope to the supported TaskDB scopes.
+ *
+ * @param {string} value
+ * @returns {string}
+ */
 function normalizeScope(value) {
   const scope = String(value || '').trim().replace(/^\/+|\/+$/g, '');
   return scope === 'external' || scope === 'local' ? scope : '';
 }
 
+/**
+ * Build the base repository path used for a project's TaskDB files.
+ *
+ * @param {object} cfg
+ * @returns {string}
+ */
 function getProjectBasePath(cfg) {
   const root = String((cfg && cfg.tasksRoot) || 'public/tasksDB').replace(/\/+$/g, '');
   const scope = normalizeScope(cfg && cfg.scope);
@@ -75,6 +93,13 @@ function getProjectBasePath(cfg) {
   return root.endsWith(`/${scope}`) ? `${root}/${id}` : `${root}/${scope}/${id}`;
 }
 
+/**
+ * Resolve project repository configuration from worker env or defaults.
+ *
+ * @param {string} projectId
+ * @param {Record<string, string>} env
+ * @returns {object|null}
+ */
 function getProjectConfig(projectId, env) {
   const id = safeProjectId(projectId);
   if (!id) return null;
@@ -145,6 +170,14 @@ export default {
   }
 };
 
+/**
+ * Fetch an existing repository file and its SHA from the GitHub contents API.
+ *
+ * @param {{ owner: string, repo: string, branch: string }} repoInfo
+ * @param {string} filePath
+ * @param {string} token
+ * @returns {Promise<{content: string, sha: string}|null>}
+ */
 async function getFileContentAndShaForRepo({ owner, repo, branch }, filePath, token) {
   try {
     const res = await fetch(
@@ -166,6 +199,13 @@ async function getFileContentAndShaForRepo({ owner, repo, branch }, filePath, to
   }
 }
 
+/**
+ * Parse JSON safely when reading stored history and task payloads.
+ *
+ * @param {string} text
+ * @param {any} [fallback=null]
+ * @returns {any}
+ */
 function safeJsonParse(text, fallback = null) {
   try {
     return JSON.parse(text);
@@ -174,18 +214,37 @@ function safeJsonParse(text, fallback = null) {
   }
 }
 
+/**
+ * Resolve the canonical task key used to diff old and new task payloads.
+ *
+ * @param {object} task
+ * @returns {string}
+ */
 function getTaskKey(task) {
   if (!task || typeof task !== 'object') return '';
   const id = (task.task_id ?? task.id ?? task.taskId ?? '').toString();
   return id ? id : '';
 }
 
+/**
+ * Summarize changed fields for compact task-history entries.
+ *
+ * @param {Array<{field: string}>} changes
+ * @returns {string}
+ */
 function summarizeChanges(changes) {
   if (!Array.isArray(changes) || changes.length === 0) return 'No field changes';
   const fields = changes.map(c => c.field).filter(Boolean);
   return fields.slice(0, 6).join(', ') + (fields.length > 6 ? ` (+${fields.length - 6} more)` : '');
 }
 
+/**
+ * Diff two task arrays and emit create, update, and delete events.
+ *
+ * @param {object[]} oldTasks
+ * @param {object[]} newTasks
+ * @returns {object[]}
+ */
 function diffTasks(oldTasks, newTasks) {
   const oldMap = new Map();
   const newMap = new Map();
@@ -235,6 +294,15 @@ function diffTasks(oldTasks, newTasks) {
   return events;
 }
 
+/**
+ * Append task change events to the project's NDJSON history file.
+ *
+ * @param {string} projectId
+ * @param {string} token
+ * @param {object[]} events
+ * @param {Record<string, string>} env
+ * @returns {Promise<void>}
+ */
 async function appendNdjsonEvents(projectId, token, events, env) {
   if (!Array.isArray(events) || events.length === 0) return;
   // Default: keep old behavior if project config cannot be resolved.
@@ -274,6 +342,14 @@ async function appendNdjsonEvents(projectId, token, events, env) {
   );
 }
 
+/**
+ * Read the project task-history stream and return recent matching events.
+ *
+ * @param {Request} request
+ * @param {Record<string, string>} env
+ * @param {string} origin
+ * @returns {Promise<Response>}
+ */
 async function handleGetTaskHistory(request, env, origin) {
   try {
     const url = new URL(request.url);
@@ -309,6 +385,14 @@ async function handleGetTaskHistory(request, env, origin) {
   }
 }
 
+/**
+ * Validate and persist a TaskDB file update through the GitHub contents API.
+ *
+ * @param {Request} request
+ * @param {Record<string, string>} env
+ * @param {string} origin
+ * @returns {Promise<Response>}
+ */
 async function handleTasksUpdate(request, env, origin) {
   try {
     const body = await request.json();
@@ -470,6 +554,12 @@ async function handleTasksUpdate(request, env, origin) {
   }
 }
 
+/**
+ * Build the CORS preflight response for allowed browser origins.
+ *
+ * @param {Request} request
+ * @returns {Response}
+ */
 function handleCORS(request) {
   const origin = request.headers.get('Origin') || '';
   const headers = {
@@ -481,6 +571,14 @@ function handleCORS(request) {
   return new Response(null, { status: 204, headers });
 }
 
+/**
+ * Serialize a JSON API response with the appropriate CORS headers.
+ *
+ * @param {unknown} data
+ * @param {string} origin
+ * @param {number} [status=200]
+ * @returns {Response}
+ */
 function jsonResponse(data, origin, status = 200) {
   return new Response(JSON.stringify(data), {
     status,

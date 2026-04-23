@@ -1,12 +1,19 @@
-// Task Database Component
-// Handles task storage, retrieval, and synchronization with GitHub
+/**
+ * Task storage and synchronization layer for TaskDB projects.
+ *
+ * This module loads project payloads from local folders, static files,
+ * localStorage, GitHub, or the Cloudflare worker, then persists tasks together
+ * with derived CSV, state, and history artifacts.
+ */
 
+/** Infer a project id from a configured TaskDB tasks file path. */
 function inferProjectIdFromTasksFile(tasksFile) {
   const normalized = String(tasksFile || '').replace(/\\/g, '/');
   const match = normalized.match(/tasksDB\/(?:(?:external|local)\/)?([^\/]+)\/(?:tasks\.(?:json|csv)|TODO_project_task\.json)$/i);
   return match && match[1] ? String(match[1]).trim() : '';
 }
 
+/** Resolve the shared template configuration object from browser or test globals. */
 function resolveTemplateConfig() {
   if (typeof window !== 'undefined' && window.TEMPLATE_CONFIG) return window.TEMPLATE_CONFIG;
   if (typeof globalThis !== 'undefined' && globalThis.TEMPLATE_CONFIG) return globalThis.TEMPLATE_CONFIG;
@@ -15,6 +22,7 @@ function resolveTemplateConfig() {
   return null;
 }
 
+/** Determine whether a usable GitHub token is configured for direct saves. */
 function hasValidGitHubToken() {
   const templateConfig = resolveTemplateConfig();
   if (!templateConfig || !templateConfig.GITHUB) return false;
@@ -22,6 +30,7 @@ function hasValidGitHubToken() {
   return typeof token === 'string' && token.trim().length > 0;
 }
 
+/** Resolve the active project id from config hints or the configured tasks file path. */
 function resolveActiveProjectId() {
   const templateConfig = resolveTemplateConfig();
   const gh = templateConfig && templateConfig.GITHUB ? templateConfig.GITHUB : null;
@@ -38,13 +47,18 @@ function resolveActiveProjectId() {
   return 'github-task-manager';
 }
 
+/** Build the localStorage key scoped to the currently active project. */
 function getProjectScopedStorageKey() {
   const projectId = resolveActiveProjectId();
   const safe = String(projectId || '').replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
   return `taskManagerData:${safe}`;
 }
 
+/**
+ * Manage the active project's tasks, metadata, persistence, and exports.
+ */
 class TaskDatabase {
+  /** Create a task database bound to GitHub, validation, and automation services. */
   constructor(githubApi, validator = new TemplateValidator(), automation = new TemplateAutomation()) {
     this.githubApi = githubApi;
     this.validator = validator;
@@ -66,6 +80,7 @@ class TaskDatabase {
     this.localSourceMeta = null;
   }
 
+  /** Reset metadata captured from the last loaded project payload. */
   resetLoadedMetadata() {
     this.rawData = null;
     this.templateType = null;
@@ -77,6 +92,7 @@ class TaskDatabase {
     this.localSourceMeta = null;
   }
 
+  /** Apply a loaded project payload and extract its task list and metadata. */
   applyLoadedPayload(data) {
     if (!data || Array.isArray(data)) {
       return Array.isArray(data) ? data : [];
@@ -95,6 +111,7 @@ class TaskDatabase {
     return Array.isArray(data.tasks) ? data.tasks : [];
   }
 
+  /** Clone a task list snapshot for later history diffing. */
   cloneTasksSnapshot(tasks) {
     try {
       return JSON.parse(JSON.stringify(Array.isArray(tasks) ? tasks : []));
@@ -103,18 +120,21 @@ class TaskDatabase {
     }
   }
 
+  /** Resolve the canonical task key used by history diffing. */
   getHistoryTaskKey(task) {
     if (!task || typeof task !== 'object') return '';
     const id = (task.task_id ?? task.id ?? task.taskId ?? '').toString();
     return id ? id : '';
   }
 
+  /** Summarize changed fields for compact history event messages. */
   summarizeHistoryChanges(changes) {
     if (!Array.isArray(changes) || changes.length === 0) return 'No field changes';
     const fields = changes.map(c => c.field).filter(Boolean);
     return fields.slice(0, 6).join(', ') + (fields.length > 6 ? ` (+${fields.length - 6} more)` : '');
   }
 
+  /** Diff two task snapshots into create, update, and delete history events. */
   diffTasksForHistory(beforeTasks, afterTasks) {
     const beforeMap = new Map();
     const afterMap = new Map();
@@ -162,6 +182,7 @@ class TaskDatabase {
     return events;
   }
 
+  /** Append history events through the worker when server-side history writes are unavailable. */
   async appendHistoryNdjsonViaWorkerFallback({ projectId, workerUrl, accessPassword, tasksFile, message, actor, commitSha, beforeTasks, afterTasks }) {
     try {
       const templateConfig = resolveTemplateConfig();
@@ -242,6 +263,7 @@ class TaskDatabase {
     }
   }
 
+  /** Resolve the actor name used for saves and task history. */
   resolveActor() {
     try {
       if (this.actor && String(this.actor).trim()) return String(this.actor).trim();
@@ -255,6 +277,7 @@ class TaskDatabase {
     return '';
   }
 
+  /** Detect whether the app is running on a local development host. */
   isLocalDevHost() {
     try {
       if (typeof window === 'undefined' || !window.location) return false;
@@ -265,6 +288,7 @@ class TaskDatabase {
     }
   }
 
+  /** Build the full persisted TaskDB payload for the current task collection. */
   buildFullData(tasks = this.tasks) {
     const templateConfig = resolveTemplateConfig();
     const categoriesFromConfig = templateConfig && Array.isArray(templateConfig.CATEGORIES)
@@ -323,6 +347,7 @@ class TaskDatabase {
     };
   }
 
+  /** Generate state summary files grouped by task status. */
   generateStateFiles(tasks = this.tasks) {
     const now = new Date().toISOString();
     const byStatus = {};
@@ -357,6 +382,7 @@ class TaskDatabase {
     };
   }
 
+  /** Persist the current project through the local disk development API. */
   async saveTasksLocalDisk(message = 'Update tasks') {
     // Block saving if duplicates exist
     const duplicateIds = this.getDuplicateTaskIds(this.tasks);
@@ -402,6 +428,7 @@ class TaskDatabase {
   }
 
   // Initialize database
+  /** Load tasks and templates needed to initialize the active project database. */
   async initialize() {
     try {
       await this.loadTasks();
@@ -414,6 +441,7 @@ class TaskDatabase {
   }
 
   // Load tasks from localStorage, GitHub, or local file
+  /** Load tasks from the best available source for the active project context. */
   async loadTasks() {
     try {
       let loadedTasks = null;
@@ -490,9 +518,10 @@ class TaskDatabase {
           const currentDir = (typeof window !== 'undefined' && window.location && window.location.pathname)
             ? window.location.pathname.replace(/\/[^\/]*$/, '/')
             : '/';
+          const appRoot = currentDir.replace(/\/(?:list-display|graph-display|health)\/?$/, '/');
           const normalizedBase = basePath
             ? (basePath.endsWith('/') ? basePath : `${basePath}/`)
-            : currentDir;
+            : appRoot;
           const fetchUrl = `${normalizedBase}${localPath}`;
           console.log('Attempting local fetch from URL:', fetchUrl);
 
@@ -597,6 +626,7 @@ class TaskDatabase {
     }
   }
 
+  /** Collect duplicate numeric task ids from the current task list. */
   getDuplicateTaskIds(tasks = this.tasks) {
     const seen = new Set();
     const duplicates = new Set();
@@ -609,6 +639,7 @@ class TaskDatabase {
     return Array.from(duplicates).sort((a, b) => a - b);
   }
 
+  /** Escape a scalar value for persisted CSV output. */
   escapeCsvValue(value) {
     if (value === null || value === undefined) return '';
     const str = String(value);
@@ -622,6 +653,7 @@ class TaskDatabase {
   }
 
   // Persisted reporting CSV (kept in repo alongside tasks.json)
+  /** Generate the repo-side persisted CSV companion for the active task list. */
   generatePersistedCSV(tasks = this.tasks) {
     const fields = [
       'task_id',
@@ -657,6 +689,7 @@ class TaskDatabase {
   }
 
   // Save tasks locally (browser localStorage)
+  /** Persist the current task payload into browser localStorage as a fallback copy. */
   saveTasksLocal(message = 'Update tasks') {
     try {
       // Block saving if duplicates exist
@@ -706,6 +739,7 @@ class TaskDatabase {
   }
 
   // Save tasks to GitHub
+  /** Persist the current task set using the best available configured backend. */
   async saveTasks(message = 'Update tasks') {
     try {
       if (this.sourceKind === 'folder') {
@@ -774,6 +808,7 @@ class TaskDatabase {
   }
 
   // Save via Cloudflare Worker (secure - token stays server-side)
+  /** Persist tasks through the Cloudflare worker and keep derived files in sync. */
   async saveTasksViaWorker(message, workerUrl) {
     const templateConfig = resolveTemplateConfig();
     const projectId = resolveActiveProjectId();
@@ -893,6 +928,7 @@ class TaskDatabase {
     return { success: true, source: 'worker', committed: true };
   }
 
+  /** Read the current session's cached access password for the active project. */
   getSessionAccessPassword() {
     // Retrieve the password from sessionStorage (set when user unlocked)
     try {
@@ -905,6 +941,7 @@ class TaskDatabase {
   }
 
   // Direct GitHub API mode (token in browser - legacy, not recommended)
+  /** Persist tasks directly through the GitHub API when browser tokens are enabled. */
   async saveTasksDirectGitHub(message) {
       // Save with full project structure to match tasks.json format
       const fullData = this.buildFullData(this.tasks);
@@ -986,6 +1023,7 @@ class TaskDatabase {
   }
 
   // Load project templates
+  /** Load available project templates from the configured template sources. */
   async loadTemplates() {
     try {
       // Load from task-templates directory
@@ -1009,6 +1047,7 @@ class TaskDatabase {
   }
 
   // Import tasks from template
+  /** Import tasks from a validated template into the current project. */
   async importFromTemplate(template, options = {}) {
     try {
       // Validate template
@@ -1060,6 +1099,7 @@ class TaskDatabase {
   }
 
   // Export tasks to CSV
+  /** Export the provided tasks, or the active task list, as CSV text. */
   exportToCSV(tasks = null) {
     const exportTasks = tasks || this.tasks;
 
@@ -1109,6 +1149,7 @@ class TaskDatabase {
   }
 
   // Import tasks from CSV
+  /** Import tasks from CSV text and merge or replace the current task list. */
   importFromCSV(csvContent, options = {}) {
     try {
       const lines = csvContent.split('\n').filter(line => line.trim());
@@ -1191,6 +1232,7 @@ class TaskDatabase {
   }
 
   // Parse CSV line handling quotes
+  /** Parse a CSV line while preserving quoted commas and escaped quotes. */
   parseCSVLine(line) {
     const result = [];
     let current = '';
@@ -1219,6 +1261,7 @@ class TaskDatabase {
   }
 
   // CRUD operations
+  /** Create a validated task and append it to the active task list. */
   createTask(taskData, creatorId = null) {
     const task = this.automation.autoPopulateTask(taskData, { tasks: this.tasks }, creatorId);
     const validation = this.validator.validate(task, 'task');
@@ -1231,6 +1274,7 @@ class TaskDatabase {
     return { success: true, task };
   }
 
+  /** Update an existing task with validated changes while preserving its id. */
   updateTask(taskId, updates) {
     const id = typeof taskId === 'string' ? parseInt(taskId, 10) : taskId;
     const taskIndex = this.tasks.findIndex(t => t.task_id === id);
@@ -1251,6 +1295,7 @@ class TaskDatabase {
     return { success: true, task: updatedTask };
   }
 
+  /** Delete a task from the active task list by id. */
   deleteTask(taskId) {
     const id = typeof taskId === 'string' ? parseInt(taskId, 10) : taskId;
     const taskIndex = this.tasks.findIndex(t => t.task_id === id);
@@ -1262,11 +1307,13 @@ class TaskDatabase {
     return { success: true, task: deletedTask };
   }
 
+  /** Retrieve a single task by id from the active task list. */
   getTask(taskId) {
     const id = typeof taskId === 'string' ? parseInt(taskId, 10) : taskId;
     return this.tasks.find(t => t.task_id === id);
   }
 
+  /** Filter the current task list by status, priority, category, assignee, or text. */
   getTasks(filters = {}) {
     let filtered = [...this.tasks];
 
@@ -1302,6 +1349,7 @@ class TaskDatabase {
   }
 
   // Get project statistics
+  /** Compute aggregate statistics for the current task collection. */
   getStatistics() {
     return this.automation.generateProjectSummary({ tasks: this.tasks });
   }

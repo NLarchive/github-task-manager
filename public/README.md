@@ -16,9 +16,8 @@ Everything outside `public/` is support infrastructure for that core surface:
 
 | File | Purpose |
 |---|---|
-| `index.html` | Task Manager list UI (CRUD operations) |
-| `styles.css` | Styles for the list UI |
-| `health-check.html` | Simple liveness check page |
+| `index.html` | Public hub page that redirects to `list-display/` by default |
+| `styles.css` | Root-level styling surface reserved for the hub / shared public landing styles |
 
 ---
 
@@ -28,18 +27,23 @@ These files form the main execution path of the product:
 
 | File | Role |
 |---|---|
-| `index.html` | Bootstraps the list-based task manager UI |
-| `scripts/task-manager-app.js` | Main controller for project selection, auth, rendering, and UI actions |
-| `scripts/task-database.js` | Canonical task payload read/write layer and sync logic |
-| `scripts/template-validator.js` | Validation rules for task and project payloads |
-| `scripts/template-automation.js` | Auto-population and task-template helpers |
+| `list-display/index.html` | Bootstraps the list-based task manager UI |
+| `list-display/js/list-display-controller.js` | List-app controller entrypoint |
 | `graph-display/index.html` | Bootstraps the graph visualization app |
 | `graph-display/js/main-graph.js` | Main graph runtime/controller |
 | `graph-display/js/graph-data.js` | Converts TaskDB payloads into graph-ready nodes/links/details |
+| `task-engine/js/task-storage-sync.js` | Shared task payload / persistence entrypoint |
+| `task-engine/js/task-schema-validator.js` | Shared validation entrypoint |
+| `task-engine/js/task-field-automation.js` | Shared automation entrypoint |
+| `local-folder/js/local-folder-scanner.js` | Shared local-folder discovery/runtime service |
+| `local-folder/js/folder-picker-trigger.js` | Shared UI binder for folder-project controls |
+| `calendar/js/task-ics-export.js` | Shared browser ICS export engine |
 | `config/projects-config.js` | Declares which projects the UI can open |
 | `tasksDB/registry.json` | Registry used for project discovery |
 
-`server.js` sits outside `public/`, but it is the local runtime bridge used by the core app for local reads, writes, and module loading.
+Shared cross-app helpers now live under `task-engine/`, `local-folder/`, and `calendar/`, keeping feature-owned code in `list-display/` and reusable code in clearly named modules.
+
+`server.js` sits outside `public/`, but it is the local runtime bridge used by the core apps for local reads, writes, and module loading.
 
 ---
 
@@ -47,10 +51,13 @@ These files form the main execution path of the product:
 
 ```
 public/
+  health/          ← Health diagnostics mini-app
+  list-display/    ← List-based task manager mini-app (HTML + CSS + JS entrypoints)
   config/          ← Runtime configuration (tokens, project list, worker URL)
   graph-display/   ← Interactive D3 graph engine (its own mini-app)
-  scripts/         ← JS modules for the list UI
-  styles/          ← CSS for the list UI
+  task-engine/     ← Shared validation, automation, and storage modules
+  local-folder/    ← Shared browser folder-discovery helpers
+  calendar/        ← Shared browser calendar export helpers
   tasksDB/         ← All project data (tasks.json files + registry)
   api/             ← Documentation and integration guidance for the current API surface
 ```
@@ -59,7 +66,7 @@ public/
 
 ## Application Modes
 
-### 1. Task Manager List UI (`index.html`)
+### 1. Task Manager List UI (`list-display/index.html`)
 A GitHub-dark-themed CRUD interface for managing tasks.
 
 Features:
@@ -71,10 +78,13 @@ Features:
 - Commit to GitHub via the Cloudflare Worker proxy
 
 Key scripts:
-- `scripts/task-manager-app.js` — Main app class
-- `scripts/template-automation.js` — Auto-fill helpers
-- `scripts/template-validator.js` — Task form validation
-- `scripts/task-database.js` — In-memory task store with JSON/CSV read-write
+- `list-display/js/list-display-controller.js` — Main app entrypoint
+- `task-engine/js/task-field-automation.js` — Auto-fill helpers
+- `task-engine/js/task-schema-validator.js` — Task form validation helpers
+- `task-engine/js/task-storage-sync.js` — In-memory task store entrypoint
+- `local-folder/js/local-folder-scanner.js` — Shared local-folder integration helper
+- `local-folder/js/folder-picker-trigger.js` — Shared folder UI helper
+- `calendar/js/task-ics-export.js` — Shared calendar export helper
 
 ### 2. Graph Display (`graph-display/index.html`)
 An interactive D3 force-directed graph showing the project task network.

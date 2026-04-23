@@ -1,0 +1,31 @@
+<!-- List display dropdown -->
+<details class="calendar-dropdown">
+    <summary class="btn-secondary" title="Download calendar">Calendar ▾</summary>
+    <div class="calendar-dropdown-menu">
+        <div class="calendar-dropdown-section">
+            <label for="downloadFormat">Format</label>
+            <select id="downloadFormat" class="calendar-format-select" aria-label="Choose download format">
+                <option value="ics">ICS (Calendar)</option>
+                <option value="csv">CSV (Tasks)</option>
+                <option value="json">JSON (Calendar)</option>
+            </select>
+        </div>
+        <button type="button" onclick="app.downloadCalendar('all')">All Tasks</button>
+        <button type="button" onclick="app.downloadCalendar('pending')">Pending Tasks</button>
+        <button type="button" onclick="app.downloadCalendar('critical')">Critical Path</button>
+        <button type="button" onclick="app.downloadCalendar('mine')">My Tasks</button>
+        <hr class="calendar-dropdown-divider">
+        <button type="button" onclick="app.downloadCalendarWorkers()">Per-Worker Calendars</button>
+    </div>
+</details>
+
+<!-- Graph display dropdown -->
+<details class="calendar-ctrl-details">
+    <summary class="control-button">Download Calendar ▾</summary>
+    <div class="calendar-ctrl-menu" role="menu">
+        <button type="button" class="calendar-ctrl-item" data-scope="all">All Tasks</button>
+        <button type="button" class="calendar-ctrl-item" data-scope="pending">Pending Tasks</button>
+        <button type="button" class="calendar-ctrl-item" data-scope="critical">Critical Path</button>
+        <button type="button" class="calendar-ctrl-item" data-scope="workers">Per-Worker Calendars</button>
+    </div>
+</details>

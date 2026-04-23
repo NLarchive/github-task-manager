@@ -25,6 +25,7 @@ const colors = {
   cyan: '\x1b[36m'
 };
 
+/** Parse CLI arguments for this validation or export script. */
 function parseArgs(argv) {
   const out = { range: null, max: 200 };
   for (let i = 2; i < argv.length; i++) {
@@ -40,10 +41,12 @@ function parseArgs(argv) {
   return out;
 }
 
+/** Run a git command and return its captured output. */
 function git(cmd) {
   return execSync(`git ${cmd}`, { stdio: ['ignore', 'pipe', 'pipe'] }).toString('utf8');
 }
 
+/** Extract the TaskDB payload block from a commit message body. */
 function extractTaskDbPayload(commitBody) {
   const start = '---TASKDB_CHANGE_V1---';
   const end = '---/TASKDB_CHANGE_V1---';
@@ -58,6 +61,7 @@ function extractTaskDbPayload(commitBody) {
   }
 }
 
+/** Validate that a commit subject matches the expected TaskDB format. */
 function validateSubject(subject) {
   const raw = String(subject || '').trim();
   if (!raw.startsWith('TaskDB|')) {
@@ -84,6 +88,7 @@ function validateSubject(subject) {
   return { valid: true, raw, action, id, name, summary };
 }
 
+/** Resolve the git revision range to validate. */
 function determineRange(args) {
   if (args.range) return args.range;
 
@@ -103,6 +108,7 @@ function determineRange(args) {
   return null;
 }
 
+/** List commits in the requested git revision range. */
 function listCommits(range, max) {
   const format = '%H%x00%s%x00%b%x00';
   const rangeArg = range ? `${range} ` : '';
@@ -120,6 +126,7 @@ function listCommits(range, max) {
   return commits;
 }
 
+/** Run the script entrypoint for this file. */
 function main() {
   const args = parseArgs(process.argv);
   const range = determineRange(args);

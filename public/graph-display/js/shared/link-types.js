@@ -13,19 +13,38 @@ export const COMMON_LINK_TYPES = Object.freeze({
   LEADS_TO: 'LEADS_TO'
 });
 
+/** Task-management specific link types layered on top of the shared graph set. */
 export const TASK_LINK_TYPES = Object.freeze({
   HAS_TASK: 'HAS_TASK',
   DEPENDS_PREFIX: 'DEPENDS_'
 });
 
+/**
+ * Check whether a link type encodes a dependency edge in the task template.
+ *
+ * @param {string} type
+ * @returns {boolean}
+ */
 export function isDependsLinkType(type) {
   return String(type || '').startsWith(TASK_LINK_TYPES.DEPENDS_PREFIX);
 }
 
+/**
+ * Check whether a link type represents an in-layer subcategory relationship.
+ *
+ * @param {string} type
+ * @returns {boolean}
+ */
 export function isSubcategoryLinkType(type) {
   return String(type || '') === COMMON_LINK_TYPES.HAS_SUBCATEGORY;
 }
 
+/**
+ * Identify link types that should render with the stronger cohesion force.
+ *
+ * @param {string} type
+ * @returns {boolean}
+ */
 export function isStrongCohesionLinkType(type) {
   const t = String(type || '');
   return (
@@ -36,6 +55,12 @@ export function isStrongCohesionLinkType(type) {
   );
 }
 
+/**
+ * Identify link types that should use the wider layer-spacing distance.
+ *
+ * @param {string} type
+ * @returns {boolean}
+ */
 export function isLayerSpacingLinkType(type) {
   const t = String(type || '');
   return (

@@ -1,13 +1,19 @@
-#!/usr/bin/env node
-/*
-  Validate Cloudflare Worker tokens locally against GitHub API.
-  Usage:
-    GH_TOKEN_AI_CAREER_ROADMAP=... node validate-secrets.js
-    GITHUB_TOKEN_AI_CAREER_ROADMAP=... node validate-secrets.js
-*/
+/**
+ * Validate Cloudflare worker GitHub tokens against the target repository.
+ *
+ * Usage:
+ *   GH_TOKEN_AI_CAREER_ROADMAP=... node validate-secrets.js
+ *   GITHUB_TOKEN_AI_CAREER_ROADMAP=... node validate-secrets.js
+ */
 
 const fetch = global.fetch || (typeof require !== 'undefined' ? require('node-fetch') : null);
 
+/**
+ * Return the first configured environment variable from a list of candidate names.
+ *
+ * @param {string[]} keys
+ * @returns {string|null}
+ */
 function getEnvVar(keys) {
   for (const k of keys) {
     if (process.env[k] && String(process.env[k]).trim()) return process.env[k].trim();
@@ -15,6 +21,13 @@ function getEnvVar(keys) {
   return null;
 }
 
+/**
+ * Check whether a token can read a known repository path via the GitHub contents API.
+ *
+ * @param {{ owner: string, repo: string, branch: string, path: string }} repoInfo
+ * @param {string} token
+ * @returns {Promise<object>}
+ */
 async function checkRepoToken({ owner, repo, branch, path }, token) {
   if (!token) return { ok: false, reason: 'no token provided' };
   try {

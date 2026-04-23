@@ -1,3 +1,7 @@
+/**
+ * Minimal static server used by graph-display Playwright tests.
+ */
+
 const http = require('http');
 const fs = require('fs');
 const path = require('path');

@@ -1,15 +1,11 @@
-import { test, expect } from '@playwright/test';
-
 /**
- * Playwright utility for updating tasks through the UI instead of editing JSON files directly.
- * Use this to programmatically update task data via the web interface.
- *
- * Usage example:
- *   npx playwright test tests/e2e/update-task-via-ui.spec.js --config=tests/playwright.config.js --headed
+ * Playwright utility coverage for updating tasks through the UI instead of raw JSON edits.
  */
 
+import { test, expect } from '@playwright/test';
+
 // Use the Playwright config baseURL so tests follow the configured server port.
-const BASE_URL = '/';
+const BASE_URL = '/list-display/';
 const TIMEOUT = 30000;
 
 /**

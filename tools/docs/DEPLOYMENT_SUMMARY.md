@@ -40,7 +40,7 @@ Not Started: 6 tasks
 
 ### 3. GitHub Pages Setup Files
 - **GITHUB_PAGES_SETUP.md** - Complete setup guide with step-by-step instructions
-- **public/health-check.html** - Diagnostics page to verify deployment status
+- **public/health/index.html** - Diagnostics page to verify deployment status
 
 ---
 
@@ -74,8 +74,8 @@ Not Started: 6 tasks
 ### Step 5: Test Live Site
 After successful deployment:
 - 🌐 Site URL: **https://nlarchive.github.io/github-task-manager/**
-- Health Check: **https://nlarchive.github.io/github-task-manager/health-check.html**
-- Task Manager: **https://nlarchive.github.io/github-task-manager/index.html**
+- Health Check: **https://nlarchive.github.io/github-task-manager/health/**
+- Task Manager: **https://nlarchive.github.io/github-task-manager/list-display/**
 
 ---
 
@@ -86,22 +86,27 @@ github-task-manager/
 ├── .github/workflows/
 │   └── deploy.yml                 # GitHub Actions deployment (FIXED)
 ├── public/
+│   ├── index.html                # Public hub / redirect
+│   ├── list-display/
+│   │   ├── index.html            # Main list UI
+│   │   ├── js/                   # List entrypoints
+│   │   └── css/                  # List CSS entrypoints
+│   ├── health/
+│   │   └── index.html            # Diagnostics page
 │   ├── config/
 │   │   ├── github-token.js       # Token config (injected at deployment)
 │   │   └── tasks-template-config.js    # Template schema configuration
-│   ├── scripts/
-│   │   ├── task-manager-app.js   # Main application
-│   │   ├── template-automation.js
-│   │   └── template-validator.js
+│   ├── task-engine/
+│   │   └── js/                   # Shared validation, automation, and storage
+│   ├── local-folder/
+│   │   └── js/                   # Shared folder discovery and picker bindings
+│   ├── calendar/
+│   │   └── js/                   # Shared browser calendar export
 │   ├── tasksDB/                  # TASK DATABASE (NEW)
-│   │   ├── tasks.json            # JSON format
-│   │   ├── tasks.csv             # CSV format
+│   │   ├── external/
+│   │   ├── local/
 │   │   └── README.md             # DB documentation
-│   ├── styles/
-│   │   └── task-manager.css
-│   ├── index.html                # Main application
-│   ├── health-check.html         # Diagnostics page
-│   └── tasks.json                # Legacy (superseded by tasksDB)
+│   └── graph-display/            # Graph mini-app
 ├── GITHUB_PAGES_SETUP.md         # Setup guide (NEW)
 ├── README.md                      # Project documentation
 └── package.json                   # Project configuration

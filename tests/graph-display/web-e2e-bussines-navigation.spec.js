@@ -1,3 +1,7 @@
+/**
+ * Graph-display navigation coverage for the web-e2e-bussines project template.
+ */
+
 import { test, expect } from '@playwright/test';
 
 async function waitForNodeCount(page, minimum) {

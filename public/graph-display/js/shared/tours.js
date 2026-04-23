@@ -83,6 +83,13 @@ export function getStepsForTemplate(templateId, nodes = [], details = {}, meta =
   return [];
 }
 
+/**
+ * Resolve a walkthrough JSON path relative to the graph app base path.
+ *
+ * @param {string} path
+ * @param {string} basePath
+ * @returns {string|null}
+ */
 function resolveTourUrl(path, basePath) {
   const p = String(path || '').trim();
   if (!p) return null;

@@ -91,39 +91,39 @@
 
 /* ===== Layer Color Variants ===== */
 /* Layer 0 (Profile Purple) */
-.node.layer-0.color-variant-0 circle { fill: var(--layer0-variant-0, var(--fallback-color)); }
-.node.layer-0.color-variant-1 circle { fill: var(--layer0-variant-1, var(--fallback-color)); }
-.node.layer-0.color-variant-2 circle { fill: var(--layer0-variant-2, var(--fallback-color)); }
-.node.layer-0.color-variant-3 circle { fill: var(--layer0-variant-3, var(--fallback-color)); }
-.node.layer-0.color-variant-4 circle { fill: var(--layer0-variant-4, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-0.color-variant-0 circle { fill: var(--layer0-variant-0, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-0.color-variant-1 circle { fill: var(--layer0-variant-1, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-0.color-variant-2 circle { fill: var(--layer0-variant-2, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-0.color-variant-3 circle { fill: var(--layer0-variant-3, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-0.color-variant-4 circle { fill: var(--layer0-variant-4, var(--fallback-color)); }
 
 /* Layer 1 (Foundations Blue) */
-.node.layer-1.color-variant-0 circle { fill: var(--layer1-variant-0, var(--fallback-color)); }
-.node.layer-1.color-variant-1 circle { fill: var(--layer1-variant-1, var(--fallback-color)); }
-.node.layer-1.color-variant-2 circle { fill: var(--layer1-variant-2, var(--fallback-color)); }
-.node.layer-1.color-variant-3 circle { fill: var(--layer1-variant-3, var(--fallback-color)); }
-.node.layer-1.color-variant-4 circle { fill: var(--layer1-variant-4, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-1.color-variant-0 circle { fill: var(--layer1-variant-0, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-1.color-variant-1 circle { fill: var(--layer1-variant-1, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-1.color-variant-2 circle { fill: var(--layer1-variant-2, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-1.color-variant-3 circle { fill: var(--layer1-variant-3, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-1.color-variant-4 circle { fill: var(--layer1-variant-4, var(--fallback-color)); }
 
 /* Layer 2 (Skills Orange) */
-.node.layer-2.color-variant-0 circle { fill: var(--layer2-variant-0, var(--fallback-color)); }
-.node.layer-2.color-variant-1 circle { fill: var(--layer2-variant-1, var(--fallback-color)); }
-.node.layer-2.color-variant-2 circle { fill: var(--layer2-variant-2, var(--fallback-color)); }
-.node.layer-2.color-variant-3 circle { fill: var(--layer2-variant-3, var(--fallback-color)); }
-.node.layer-2.color-variant-4 circle { fill: var(--layer2-variant-4, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-2.color-variant-0 circle { fill: var(--layer2-variant-0, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-2.color-variant-1 circle { fill: var(--layer2-variant-1, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-2.color-variant-2 circle { fill: var(--layer2-variant-2, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-2.color-variant-3 circle { fill: var(--layer2-variant-3, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-2.color-variant-4 circle { fill: var(--layer2-variant-4, var(--fallback-color)); }
 
 /* Layer 3 (Impact Green) */
-.node.layer-3.color-variant-0 circle { fill: var(--layer3-variant-0, var(--fallback-color)); }
-.node.layer-3.color-variant-1 circle { fill: var(--layer3-variant-1, var(--fallback-color)); }
-.node.layer-3.color-variant-2 circle { fill: var(--layer3-variant-2, var(--fallback-color)); }
-.node.layer-3.color-variant-3 circle { fill: var(--layer3-variant-3, var(--fallback-color)); }
-.node.layer-3.color-variant-4 circle { fill: var(--layer3-variant-4, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-3.color-variant-0 circle { fill: var(--layer3-variant-0, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-3.color-variant-1 circle { fill: var(--layer3-variant-1, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-3.color-variant-2 circle { fill: var(--layer3-variant-2, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-3.color-variant-3 circle { fill: var(--layer3-variant-3, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-3.color-variant-4 circle { fill: var(--layer3-variant-4, var(--fallback-color)); }
 
 /* Layer 4 (Outcome Purple) */
-.node.layer-4.color-variant-0 circle { fill: var(--layer4-variant-0, var(--fallback-color)); }
-.node.layer-4.color-variant-1 circle { fill: var(--layer4-variant-1, var(--fallback-color)); }
-.node.layer-4.color-variant-2 circle { fill: var(--layer4-variant-2, var(--fallback-color)); }
-.node.layer-4.color-variant-3 circle { fill: var(--layer4-variant-3, var(--fallback-color)); }
-.node.layer-4.color-variant-4 circle { fill: var(--layer4-variant-4, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-4.color-variant-0 circle { fill: var(--layer4-variant-0, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-4.color-variant-1 circle { fill: var(--layer4-variant-1, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-4.color-variant-2 circle { fill: var(--layer4-variant-2, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-4.color-variant-3 circle { fill: var(--layer4-variant-3, var(--fallback-color)); }
+#graph-container[data-color-mode="layer"] .node.layer-4.color-variant-4 circle { fill: var(--layer4-variant-4, var(--fallback-color)); }
 
 /* ===== SVG Text Color Classes (High Specificity for Consistency) ===== */
 /* Ensures all node text has consistent, high-contrast styling */
@@ -382,4 +382,16 @@
 }
 #graph-container .link.category-dimmed {
     stroke-opacity: 0.05 !important;
+}
+
+/* ===== Legend Status Sample Indicators ===== */
+/* Tiny circles inside the legend that demonstrate each task-status visual effect */
+.legend-color.legend-sample-done {
+    opacity: 0.45;
+    filter: grayscale(0.8) contrast(0.9);
+}
+
+.legend-color.legend-sample-in-progress {
+    animation: pulse-in-progress 2.5s infinite ease-in-out;
+    filter: drop-shadow(0 0 6px rgba(255, 235, 59, 0.7));
 }

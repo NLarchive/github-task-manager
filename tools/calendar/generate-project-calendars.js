@@ -1,3 +1,10 @@
+/**
+ * CLI and library entrypoint for generating calendar JSON from TaskDB projects.
+ *
+ * It discovers project descriptors, normalizes task records into appointment
+ * data, writes project-level calendar files, and optionally emits worker views.
+ */
+
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -12,7 +19,7 @@ const {
   DEFAULT_PRIORITY,
   DEFAULT_CALENDAR_COLOR,
   CALENDAR_COLOR_PALETTE
-} = require('./constants');
+} = require('./calendar-constants');
 
 const {
   TASK_FIELD_SCHEMA,
@@ -22,22 +29,34 @@ const {
   WORKER_FIELD_MAP,
   PRIORITY_MAP,
   STATUS_TO_APPOINTMENT_MAP
-} = require('./calendar-schema');
+} = require('./calendar-appointment-schema');
 
+/** Root-level TaskDB directories excluded from root project discovery. */
+/** Excluded root project dirs. */
 const EXCLUDED_ROOT_PROJECT_DIRS = new Set(['external', 'local', '_examples', '_schema', '_templates']);
+/** Supported CLI values for filtering exported task scope. */
+/** Task scope values. */
 const TASK_SCOPE_VALUES = Object.freeze(['all', 'pending', 'both']);
+/** Task statuses treated as terminal when generating pending-only calendar views. */
+/** Terminal task statuses. */
 const TERMINAL_TASK_STATUSES = new Set(['done', 'completed', 'cancelled', 'canceled']);
 
+/** Check whether a value is a plain object rather than an array or primitive. */
+/** Is plain object. */
 function isPlainObject(value) {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 }
 
+/** Flatten nested or scalar values into a single-level array. */
+/** To flat array. */
 function toFlatArray(value) {
   if (value === null || value === undefined || value === '') return [];
   if (!Array.isArray(value)) return [value];
   return value.reduce((accumulator, item) => accumulator.concat(toFlatArray(item)), []);
 }
 
+/** Return the ordered set of unique normalized string values from mixed inputs. */
+/** Unique strings. */
 function uniqueStrings(values) {
   const seen = new Set();
   const result = [];
@@ -58,10 +77,14 @@ function uniqueStrings(values) {
   return result;
 }
 
+/** Sanitize a project id for descriptor lookup and output naming. */
+/** Normalize project id. */
 function normalizeProjectId(rawValue) {
   return String(rawValue || '').trim().replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
 }
 
+/** Normalize a requested task scope to the supported export values. */
+/** Normalize task scope. */
 function normalizeTaskScope(value, { allowBoth = false } = {}) {
   const normalized = String(value || '').trim().toLowerCase();
   if (!normalized) return allowBoth ? 'both' : 'all';
@@ -69,6 +92,8 @@ function normalizeTaskScope(value, { allowBoth = false } = {}) {
   return normalized === 'pending' ? 'pending' : 'all';
 }
 
+/** Convert text into a filesystem-friendly slug. */
+/** Slugify. */
 function slugify(value) {
   return String(value || '')
     .trim()
@@ -77,6 +102,8 @@ function slugify(value) {
     .replace(/^-+|-+$/g, '') || 'untitled';
 }
 
+/** Convert an identifier into a human-readable title. */
+/** Prettify identifier. */
 function prettifyIdentifier(value) {
   return String(value || '')
     .trim()
@@ -85,14 +112,20 @@ function prettifyIdentifier(value) {
     .replace(/\b\w/g, (match) => match.toUpperCase()) || 'Default';
 }
 
+/** Check whether a value is a date-only string in YYYY-MM-DD form. */
+/** Is date only string. */
 function isDateOnlyString(value) {
   return /^\d{4}-\d{2}-\d{2}$/.test(String(value || '').trim());
 }
 
+/** Check whether a value includes an explicit time component. */
+/** Has explicit time. */
 function hasExplicitTime(value) {
   return /T\d{2}:\d{2}/.test(String(value || '').trim());
 }
 
+/** Normalize a date-like value into an ISO date-time string. */
+/** To iso date time. */
 function toIsoDateTime(value, { endOfDay = false } = {}) {
   const rawValue = String(value || '').trim();
   if (!rawValue) return null;
@@ -111,22 +144,30 @@ function toIsoDateTime(value, { endOfDay = false } = {}) {
   return parsed.toISOString();
 }
 
+/** Parse an optional numeric value, optionally forcing integer conversion. */
+/** Normalize nullable number. */
 function normalizeNullableNumber(value, { integer = false } = {}) {
   if (value === null || value === undefined || value === '') return null;
   const parsed = integer ? Number.parseInt(value, 10) : Number(value);
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+/** Parse a positive integer count or return null when invalid. */
+/** Normalize positive count. */
 function normalizePositiveCount(value) {
   const parsed = normalizeNullableNumber(value, { integer: true });
   return parsed && parsed > 0 ? parsed : null;
 }
 
+/** Parse reminder minutes, keeping only non-negative integer values. */
+/** Normalize reminder minutes. */
 function normalizeReminderMinutes(value) {
   const parsed = normalizeNullableNumber(value, { integer: true });
   return parsed !== null && parsed >= 0 ? parsed : null;
 }
 
+/** Resolve a dotted property path from a nested object. */
+/** Get nested field value. */
 function getNestedFieldValue(obj, path) {
   if (!obj || typeof obj !== 'object' || !path) return undefined;
   return String(path).split('.').reduce((current, segment) => {
@@ -137,12 +178,16 @@ function getNestedFieldValue(obj, path) {
   }, obj);
 }
 
+/** Check whether a candidate value should be treated as present. */
+/** Is defined value. */
 function isDefinedValue(value) {
   if (value === null || value === undefined) return false;
   if (typeof value === 'string') return value.trim() !== '';
   return true;
 }
 
+/** Resolve the first defined appointment field value from task and meta sources. */
+/** Resolve task field value. */
 function resolveTaskFieldValue(task, meta, sources) {
   if (!Array.isArray(sources)) return null;
 
@@ -167,22 +212,30 @@ function resolveTaskFieldValue(task, meta, sources) {
   return null;
 }
 
+/** Normalize recurrence input to the supported recurrence enum. */
+/** Normalize recurrence. */
 function normalizeRecurrence(value) {
   const normalized = String(value || 'none').trim().toLowerCase();
   return RECURRENCE_VALUES.includes(normalized) ? normalized : 'none';
 }
 
+/** Normalize appointment status input to the supported status enum. */
+/** Normalize appointment status. */
 function normalizeAppointmentStatus(value, fallback = 'tentative') {
   const normalized = String(value || '').trim().toLowerCase();
   return APPOINTMENT_STATUSES.includes(normalized) ? normalized : fallback;
 }
 
+/** Map a TaskDB task status to the calendar appointment status model. */
+/** Map task status to appointment status. */
 function mapTaskStatusToAppointmentStatus(taskStatus) {
   const normalized = String(taskStatus || '').trim().toLowerCase().replace(/_/g, ' ');
   if (!normalized) return 'tentative';
   return STATUS_TO_APPOINTMENT_MAP[normalized] || 'confirmed';
 }
 
+/** Resolve a numeric appointment priority from explicit or task-level priority values. */
+/** Map priority to number. */
 function mapPriorityToNumber(explicitPriority, taskPriority) {
   const explicitNumber = normalizeNullableNumber(explicitPriority);
   if (explicitNumber !== null) {
@@ -193,21 +246,29 @@ function mapPriorityToNumber(explicitPriority, taskPriority) {
   return PRIORITY_MAP[normalized] || DEFAULT_PRIORITY;
 }
 
+/** Resolve a calendar color with the configured fallback chain. */
+/** Normalize color. */
 function normalizeColor(color, fallback) {
   const candidate = String(color || '').trim();
   return candidate || fallback || DEFAULT_CALENDAR_COLOR;
 }
 
+/** Check whether a string appears to be an email address. */
+/** Looks like email. */
 function looksLikeEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
 }
 
+/** Create a deterministic opaque worker id from a private seed value. */
+/** Create opaque worker id. */
 function createOpaqueWorkerId(seed) {
   const normalized = String(seed || '').trim().toLowerCase();
   if (!normalized) return null;
   return `worker-${crypto.createHash('sha256').update(normalized).digest('hex').slice(0, 12)}`;
 }
 
+/** Resolve the worker contact email used in calendar contact fields. */
+/** Resolve worker contact. */
 function resolveWorkerContact(worker) {
   if (isPlainObject(worker)) {
     const email = String(worker[WORKER_FIELD_MAP.contactEmail] || worker.email || '').trim();
@@ -218,6 +279,8 @@ function resolveWorkerContact(worker) {
   return looksLikeEmail(normalized) ? normalized : '';
 }
 
+/** Resolve the public-facing worker label used for professional or resource views. */
+/** Resolve worker professional label. */
 function resolveWorkerProfessionalLabel(worker) {
   if (!isPlainObject(worker)) {
     const normalized = String(worker || '').trim();
@@ -234,6 +297,8 @@ function resolveWorkerProfessionalLabel(worker) {
   ).trim();
 }
 
+/** Resolve the attendee label used in appointment attendee lists. */
+/** Resolve worker attendee label. */
 function resolveWorkerAttendeeLabel(worker) {
   if (!isPlainObject(worker)) {
     return String(worker || '').trim();
@@ -251,6 +316,8 @@ function resolveWorkerAttendeeLabel(worker) {
   ).trim();
 }
 
+/** Resolve a stable worker identifier suitable for calendar exports. */
+/** Resolve worker professional id. */
 function resolveWorkerProfessionalId(worker) {
   if (!worker) return null;
 
@@ -276,6 +343,8 @@ function resolveWorkerProfessionalId(worker) {
   return fallbackSeed ? createOpaqueWorkerId(fallbackSeed) : null;
 }
 
+/** Extract embedded calendar metadata overrides from a task record. */
+/** Extract task calendar meta. */
 function extractTaskCalendarMeta(task) {
   const candidates = [
     task && task.calendar,
@@ -288,6 +357,8 @@ function extractTaskCalendarMeta(task) {
   return candidates.find((candidate) => isPlainObject(candidate)) || {};
 }
 
+/** Pick the first non-empty URL-like value from a mixed list of candidates. */
+/** Pick first url. */
 function pickFirstUrl(values) {
   const flattened = toFlatArray(values);
   for (const entry of flattened) {
@@ -300,6 +371,8 @@ function pickFirstUrl(values) {
   return '';
 }
 
+/** Build the appointment attendee list for a task. */
+/** Build attendees. */
 function buildAttendees(task, meta) {
   if (Array.isArray(meta.attendees) && meta.attendees.length > 0) {
     return uniqueStrings(meta.attendees);
@@ -312,6 +385,8 @@ function buildAttendees(task, meta) {
   return uniqueStrings(attendeeCandidates);
 }
 
+/** Build the appointment contact list for a task. */
+/** Build contacts. */
 function buildContacts(task, meta) {
   if (Array.isArray(meta.contact) && meta.contact.length > 0) {
     return uniqueStrings(meta.contact);
@@ -337,6 +412,8 @@ function buildContacts(task, meta) {
   return uniqueStrings(contactCandidates);
 }
 
+/** Build a normalized calendar appointment object from a TaskDB task. */
+/** Build appointment. */
 function buildAppointment(task, context) {
   if (!isPlainObject(task)) return null;
 
@@ -397,6 +474,8 @@ function buildAppointment(task, context) {
   };
 }
 
+/** Build calendar definitions for the calendar ids referenced by appointments. */
+/** Build calendars. */
 function buildCalendars(appointments, calendarMetaById, projectName) {
   const calendarIds = uniqueStrings(appointments.map((appointment) => appointment.calendarId));
   const ids = calendarIds.length > 0 ? calendarIds : [DEFAULT_CALENDAR_ID];
@@ -412,12 +491,16 @@ function buildCalendars(appointments, calendarMetaById, projectName) {
   });
 }
 
+/** Check whether a task should be treated as pending for calendar export. */
+/** Is pending task. */
 function isPendingTask(task) {
   if (!isPlainObject(task)) return false;
   const normalizedStatus = String(task.status || '').trim().toLowerCase().replace(/_/g, ' ');
   return !TERMINAL_TASK_STATUSES.has(normalizedStatus);
 }
 
+/** Filter a task list according to the requested calendar task scope. */
+/** Filter tasks by scope. */
 function filterTasksByScope(tasks, taskScope) {
   const normalizedScope = normalizeTaskScope(taskScope);
   if (normalizedScope === 'pending') {
@@ -426,6 +509,8 @@ function filterTasksByScope(tasks, taskScope) {
   return Array.isArray(tasks) ? [...tasks] : [];
 }
 
+/** Build a full calendar state payload from a TaskDB project payload. */
+/** Build calendar state. */
 function buildCalendarState(payload, options = {}) {
   const rawTasks = Array.isArray(payload && payload.tasks) ? payload.tasks : [];
   const taskScope = normalizeTaskScope(options.taskScope);
@@ -465,10 +550,14 @@ function buildCalendarState(payload, options = {}) {
   };
 }
 
+/** Read and parse a JSON file from disk. */
+/** Read json. */
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
+/** Resolve the root descriptor for a TaskDB project id within the repo. */
+/** Resolve project descriptor. */
 function resolveProjectDescriptor(projectId, repoRoot) {
   const safeProjectId = normalizeProjectId(projectId);
   const tasksDbRoot = path.join(repoRoot, 'public', 'tasksDB');
@@ -493,6 +582,8 @@ function resolveProjectDescriptor(projectId, repoRoot) {
   return null;
 }
 
+/** Normalize a nested task path into a stable id suffix. */
+/** Normalize task path id. */
 function normalizeTaskPathId(value) {
   return String(value || '')
     .replace(/\\/g, '/')
@@ -502,9 +593,13 @@ function normalizeTaskPathId(value) {
     .toLowerCase();
 }
 
+/** Find nested tasks.json files under a project directory. */
+/** Find nested task json paths. */
 function findNestedTaskJsonPaths(rootDir, excludePath) {
   const results = [];
 
+  /** Traverse. */
+  /** Traverse. */
   function traverse(dir) {
     const entries = fs.readdirSync(dir, { withFileTypes: true });
     for (const entry of entries) {
@@ -526,6 +621,8 @@ function findNestedTaskJsonPaths(rootDir, excludePath) {
   return results;
 }
 
+/** Expand a root project descriptor to include nested module task files. */
+/** Expand project descriptor. */
 function expandProjectDescriptor(descriptor) {
   if (!descriptor) return [];
 
@@ -546,6 +643,8 @@ function expandProjectDescriptor(descriptor) {
   return descriptors;
 }
 
+/** List all calendar-exportable TaskDB project descriptors in the repository. */
+/** List project descriptors. */
 function listProjectDescriptors(repoRoot) {
   const tasksDbRoot = path.join(repoRoot, 'public', 'tasksDB');
   const results = [];
@@ -581,15 +680,21 @@ function listProjectDescriptors(repoRoot) {
   return Array.from(deduped.values()).sort((left, right) => `${left.scope}:${left.projectId}`.localeCompare(`${right.scope}:${right.projectId}`));
 }
 
+/** Build the output filename for a generated calendar export. */
+/** Get output file name. */
 function getOutputFileName(descriptor) {
   return `${descriptor.projectId}.calendar.json`;
 }
 
+/** Resolve the base output directory for a project's generated artifacts. */
+/** Get project output directory. */
 function getProjectOutputDirectory(descriptor, outputDir) {
   const rootProjectId = descriptor.rootProjectId || descriptor.projectId;
   return path.join(outputDir, descriptor.scope, rootProjectId);
 }
 
+/** Resolve the output directory for project calendar files at a given task scope. */
+/** Get calendar output directory. */
 function getCalendarOutputDirectory(descriptor, outputDir, taskScope) {
   return path.join(
     getProjectOutputDirectory(descriptor, outputDir),
@@ -598,6 +703,8 @@ function getCalendarOutputDirectory(descriptor, outputDir, taskScope) {
   );
 }
 
+/** Resolve the output directory for per-worker calendar files. */
+/** Get worker output directory. */
 function getWorkerOutputDirectory(descriptor, outputDir, taskScope) {
   return path.join(
     getProjectOutputDirectory(descriptor, outputDir),
@@ -606,6 +713,8 @@ function getWorkerOutputDirectory(descriptor, outputDir, taskScope) {
   );
 }
 
+/** Remove legacy output paths from older calendar export layouts. */
+/** Cleanup legacy output layout. */
 function cleanupLegacyOutputLayout(descriptor, outputDir) {
   const projectOutputDir = getProjectOutputDirectory(descriptor, outputDir);
   const workerOutputDir = path.join(projectOutputDir, 'workers-calendar');
@@ -631,6 +740,8 @@ function cleanupLegacyOutputLayout(descriptor, outputDir) {
     });
 }
 
+/** Write a generated calendar state file to disk. */
+/** Write calendar file. */
 function writeCalendarFile(descriptor, state, outputDir, options = {}) {
   const targetDir = getCalendarOutputDirectory(descriptor, outputDir, options.taskScope);
   fs.mkdirSync(targetDir, { recursive: true });
@@ -639,6 +750,8 @@ function writeCalendarFile(descriptor, state, outputDir, options = {}) {
   return outputPath;
 }
 
+/** Load the effective payload used to generate a descriptor's calendar exports. */
+/** Load descriptor payload. */
 function loadDescriptorPayload(descriptor) {
   const payload = readJson(descriptor.tasksJsonPath);
   const projectName = String(payload.project?.name || descriptor.projectId).trim();
@@ -804,6 +917,8 @@ function generateWorkerCalendarFiles(descriptor, globalState, tasks, options = {
   return results;
 }
 
+/** Generate all requested calendar variants for a single project descriptor. */
+/** Generate calendar file. */
 function generateCalendarFile(descriptor, options = {}) {
   const { payload, projectName } = loadDescriptorPayload(descriptor);
   const taskScopes = normalizeTaskScope(options.taskScope, { allowBoth: true }) === 'both'
@@ -845,6 +960,8 @@ function generateCalendarFile(descriptor, options = {}) {
   };
 }
 
+/** Parse CLI arguments for the calendar generation command. */
+/** Parse cli args. */
 function parseCliArgs(argv) {
   const args = [...argv];
   const projectIds = [];
@@ -884,6 +1001,7 @@ function parseCliArgs(argv) {
   };
 }
 
+/** Run the calendar generation CLI for one or more TaskDB projects. */
 function main(argv = process.argv.slice(2)) {
   const repoRoot = path.join(__dirname, '..', '..');
   const options = parseCliArgs(argv);

@@ -1,3 +1,10 @@
+/**
+ * UI binding layer for launching the local-folder picker from browser surfaces.
+ *
+ * This module keeps DOM wiring separate from folder scanning so list and graph
+ * UIs can reuse the same picker behavior with feature-specific callbacks.
+ */
+
 (function (globalScope) {
     function resolveElement(target) {
         if (!target) return null;

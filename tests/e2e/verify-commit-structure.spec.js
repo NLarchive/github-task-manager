@@ -1,3 +1,7 @@
+/**
+ * Live-site verification for TaskDB commit subjects and machine-readable payload structure.
+ */
+
 import { test, expect } from '@playwright/test';
 
 // Live E2E: Verify compact commit subject structure and TASKDB_CHANGE_V1 payload

@@ -95,8 +95,14 @@ const config = {
     // REMOVED touchHoverDuration
 };
 
+/** Persist the last selected graph template across page reloads. */
 const TEMPLATE_STORAGE_KEY = 'careerGraphTemplateId';
 
+/**
+ * Detect whether the graph is running in embedded iframe mode.
+ *
+ * @returns {boolean}
+ */
 function isEmbeddedMode() {
     try {
         const urlParams = new URLSearchParams(window.location.search);
@@ -106,6 +112,11 @@ function isEmbeddedMode() {
     }
 }
 
+/**
+ * Resolve the initial template id from the URL, storage, or default registry entry.
+ *
+ * @returns {string}
+ */
 function getInitialTemplateId() {
     const urlParams = new URLSearchParams(window.location.search);
     const fromUrl = urlParams.get('template');
@@ -117,13 +128,31 @@ function getInitialTemplateId() {
     return getDefaultTemplateId();
 }
 
+/**
+ * Persist the currently selected template id for future visits.
+ *
+ * @param {string} templateId
+ * @returns {void}
+ */
 function setSelectedTemplateId(templateId) {
     localStorage.setItem(TEMPLATE_STORAGE_KEY, templateId);
 }
 
 
 // --- MAIN GRAPH CLASS ---
+/**
+ * Render and manage the interactive curriculum/task graph experience.
+ */
 class CurriculumGraph {
+    /**
+     * Create a graph instance bound to a container, template data, and config.
+     *
+     * @param {string} elId
+     * @param {{nodes: object[], links: object[]}} graphData
+     * @param {object} detailsData
+     * @param {object} cfg
+     * @param {object} [templateContext={}]
+     */
     constructor(elId, graphData, detailsData, cfg, templateContext = {}) {
         this.container = document.getElementById(elId);
         if (!this.container) throw new Error(`Graph container #${elId} not found.`);
@@ -132,6 +161,7 @@ class CurriculumGraph {
 
         // Deep merge user config with defaults
         this.config = this.deepMerge(config, cfg || {});
+        this.container.dataset.colorMode = this.config.colorMode;
 
         // Store data and create node map
         this.data = graphData;
@@ -174,6 +204,13 @@ class CurriculumGraph {
     }
 
     // Helper for deep merging configuration objects recursively
+    /**
+     * Deep-merge nested configuration objects while preserving existing defaults.
+     *
+     * @param {object} target
+     * @param {object} source
+     * @returns {object}
+     */
     deepMerge(target, source) {
         const isObject = (obj) => obj && typeof obj === 'object' && !Array.isArray(obj);
         let output = { ...target };
@@ -331,6 +368,7 @@ class CurriculumGraph {
     init() {
         try {
             console.log("Graph Initializing...");
+            this.container.dataset.colorMode = this.config.colorMode;
             this.setProfileButtonImage();
             this.calculateParentTargetX();
             this.createSvg();
@@ -1188,28 +1226,64 @@ class CurriculumGraph {
         const legendContent = document.querySelector("#legend-popup .legend-content");
         if (!legendContent) return;
 
-        // Task-management template: color encodes priority, vertical position encodes dependency depth
+        // Task-management template: color encodes priority, status encodes visual effects
         if (this.legendMode === 'task-management' || this.config.colorMode === 'priority') {
             const maxLayer = this.maxLayer;
-            const priorityEntries = Object.entries(this.config.priorityColorsHex || {});
-            const priorityHtml = priorityEntries.map(([p, hex]) => {
-                const swatch = `<div class="legend-color" style="background:${hex};"></div>`;
-                return `<div class="legend-item">${swatch}<span>${p}</span></div>`;
-            }).join('');
+            const priorityOrder = ['Critical', 'High', 'Medium', 'Low'];
+            const priorityIcons = { Critical: '🔴', High: '🟠', Medium: '🔵', Low: '🟢' };
+            const colorsHex = this.config.priorityColorsHex || {};
+            const fallback = this.config.fallbackColorHex || '#aabbc8';
+
+            const priorityHtml = priorityOrder
+                .filter(p => colorsHex[p])
+                .map(p => {
+                    const hex = colorsHex[p];
+                    const icon = priorityIcons[p] || '⚪';
+                    return `<div class="legend-item">
+                        <div class="legend-color" style="background:${hex};border:1.5px solid rgba(0,0,0,0.15);"></div>
+                        <span>${icon} ${p}</span>
+                    </div>`;
+                }).join('') +
+                `<div class="legend-item" style="opacity:0.75;">
+                    <div class="legend-color" style="background:${fallback};border:1.5px solid rgba(0,0,0,0.12);"></div>
+                    <span>⚪ No priority set</span>
+                </div>`;
+
+            // Use a sample color (High) for status demo circles
+            const sampleHex = colorsHex['High'] || colorsHex['Medium'] || '#4e79a7';
+            const statusHtml = `
+                <div class="legend-item">
+                    <div class="legend-color" style="background:${sampleHex};border:1.5px solid rgba(0,0,0,0.15);"></div>
+                    <span>Not Started — normal display</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-sample-in-progress" style="background:${sampleHex};border:1.5px solid rgba(0,0,0,0.15);"></div>
+                    <span>In Progress — pulsing yellow glow</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-sample-done" style="background:${sampleHex};border:1.5px solid rgba(0,0,0,0.12);"></div>
+                    <span>Done — faded &amp; greyscale</span>
+                </div>`;
+
+            const sizeNote = this.config.sizeMode === 'hours'
+                ? 'Larger circle = more estimated hours; smaller = fewer hours.'
+                : 'Category nodes are larger; task detail nodes are smaller.';
 
             legendContent.innerHTML = `
-                <h3>Task Priority (Node Color)</h3>
+                <h3>🎨 Priority (Node Color)</h3>
                 ${priorityHtml}
-                <h3 style="margin-top: 20px;">Dependency Layers (Vertical)</h3>
-                <div class="legend-item" style="opacity: 0.85;">
-                    <span>Layer 1 = tasks with no dependencies. Layer N depends on earlier layers. Current max layer: ${maxLayer}</span>
-                </div>
-                <h3 style="margin-top: 20px;">Connection Types</h3>
+                <h3 style="margin-top:16px;">📊 Status (Visual Effect)</h3>
+                ${statusHtml}
+                <h3 style="margin-top:16px;">⭕ Node Size</h3>
+                <div class="legend-item" style="opacity:0.85;"><span>${sizeNote}</span></div>
+                <h3 style="margin-top:16px;">↔ Connection Types</h3>
                 <div class="legend-item"><div class="legend-color line rel-has-foundation"></div><span>Project anchors first-layer tasks</span></div>
-                <div class="legend-item"><div class="legend-color line rel-develops"></div><span>Dependency (FS/SS/FF/SF)</span></div>
-                <div class="legend-item" style="margin-top: 20px;">
-                    <span style="font-style: italic;">Tip: Click a task to see hours, priority, and dependencies.</span>
-                </div>
+                <div class="legend-item"><div class="legend-color line rel-develops"></div><span>Task dependency (FS / SS / FF / SF)</span></div>
+                <h3 style="margin-top:16px;">💡 Interactions</h3>
+                <div class="legend-item"><span><strong>Hover:</strong> highlights connected nodes</span></div>
+                <div class="legend-item"><span><strong>Click / Tap:</strong> open task details &amp; subtasks</span></div>
+                <div class="legend-item"><span><strong>Search:</strong> pin matching nodes</span></div>
+                <div class="legend-item" style="opacity:0.75;"><span>Dependency depth layers: <strong>${maxLayer}</strong></span></div>
             `;
             return;
         }
@@ -1401,6 +1475,11 @@ class CurriculumGraph {
     }
 
 
+    /**
+     * Clear persistent node selection and restore the default graph emphasis state.
+     *
+     * @returns {void}
+     */
     clearSelectedNodeState() {
         this.node?.classed("faded", false);
         this.link?.classed("highlighted faded", false);
@@ -1525,11 +1604,82 @@ class CurriculumGraph {
         if (guideCloseBtn) {
              guideCloseBtn.addEventListener("click", () => this.toggleGraphGuide());
         }
+
+        // Calendar download dropdown
+        const calDetails = panelEl.querySelector('#calendarCtrlDetails');
+        if (calDetails) {
+            calDetails.querySelectorAll('.calendar-ctrl-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const scope = item.dataset.scope;
+                    this.downloadCalendar(scope);
+                    calDetails.removeAttribute('open');
+                    // Close the menu panel after the download action
+                    setTimeout(() => {
+                        const aside = document.getElementById('menu-aside');
+                        if (aside) aside.classList.remove('menu-open');
+                        document.getElementById('profile-legend-button')?.setAttribute('aria-expanded', 'false');
+                    }, 200);
+                });
+            });
+        }
+    }
+
+    /**
+     * Download the current graph's task data as an ICS calendar file.
+     * @param {string} scope - 'all' | 'pending' | 'critical' | 'workers'
+     */
+    downloadCalendar(scope) {
+        if (typeof calendarExport === 'undefined') {
+            console.warn('calendarExport module not loaded — calendar download unavailable.');
+            return;
+        }
+        const tasks = this._extractCalendarTasks();
+        if (!tasks.length) {
+            console.warn('No task data found in graph for calendar download.');
+            return;
+        }
+        const projectName = (this.details && this.profileNodeId && this.details[this.profileNodeId]?.name)
+            || this.config?.projectName
+            || 'graph-tasks';
+
+        if (scope === 'workers') {
+            const workers = calendarExport.getWorkersFromTasks(tasks);
+            if (!workers.length) {
+                console.warn('No workers found in graph task data.');
+                return;
+            }
+            workers.forEach(w => calendarExport.downloadCalendar(tasks, { scope: 'worker', projectName, workerName: w }));
+        } else {
+            calendarExport.downloadCalendar(tasks, { scope: scope || 'all', projectName });
+        }
+    }
+
+    /**
+     * Extract task-like objects from graph nodes for use with calendar export.
+     * @returns {Array} array of plain task objects
+     */
+    _extractCalendarTasks() {
+        if (!this.data?.nodes) return [];
+        return this.data.nodes
+            .filter(n => n.task_id || n.id)
+            .map(n => ({
+                task_id:         n.task_id || n.id,
+                task_name:       n.task_name || n.label || n.id,
+                status:          n.status || 'Not Started',
+                priority:        n.priority,
+                start_date:      n.start_date  || n.startDate,
+                end_date:        n.end_date    || n.endDate,
+                estimated_hours: n.estimated_hours || n.estimatedHours,
+                category_name:   n.category_name  || n.categoryName,
+                description:     n.description,
+                is_critical_path:n.is_critical_path || n.isCriticalPath,
+                assigned_workers:n.assigned_workers || n.assignedWorkers,
+            }));
     }
 
     /** Reset graph view, zoom, clear search, and close popups */
-    resetViewAndSearch() {
-        console.log("Resetting view and search...");
+    resetViewAndSearch() {        console.log("Resetting view and search...");
 
         // --- Close UI Elements First ---
         this.hideNodeDetails({ clearSelection: true });
