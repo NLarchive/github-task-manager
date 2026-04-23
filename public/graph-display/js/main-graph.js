@@ -371,6 +371,7 @@ class CurriculumGraph {
             this.container.dataset.colorMode = this.config.colorMode;
             this.setProfileButtonImage();
             this.calculateParentTargetX();
+            this._prePositionNodes(); // Seed x/y so _tryOpenNodeModal succeeds immediately
             this.createSvg();
             this.initializeForces();
             this.createVisualElements(); // Creates elements, CSS handles initial text visibility
@@ -391,6 +392,19 @@ class CurriculumGraph {
             console.error("Critical error during init():", err);
             this.renderError(`Error initializing graph: ${err.message}`);
         }
+    }
+
+    /**
+     * Pre-seed each node's x/y from its target layout band so that
+     * _tryOpenNodeModal can pan to an accurate position immediately after
+     * init() — without waiting for the simulation to stabilise.
+     * Existing finite coordinates (e.g. from a previous render) are preserved.
+     */
+    _prePositionNodes() {
+        this.data.nodes.forEach(node => {
+            if (!Number.isFinite(node.x)) node.x = this.getNodeTargetX(node);
+            if (!Number.isFinite(node.y)) node.y = this.getBandY(node);
+        });
     }
 
     /** Renders an error message in the container */
@@ -2913,8 +2927,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             const targetDepth = subtaskStack.length - 2;
             navigateToDepth(targetDepth);
             if (targetNodeId && window.graphInstance) {
-                // Wait for the parent graph simulation to stabilise before centering.
-                window.graphInstance.onStable(() => {
+                // Nodes are pre-positioned during init(), so _tryOpenNodeModal
+                // can centre immediately — one rAF ensures the SVG has painted.
+                requestAnimationFrame(() => {
                     window.graphInstance.openNodeModal(targetNodeId);
                 });
             }
@@ -3065,10 +3080,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                     parentSuccessors
                 });
                 restoreGraphState(subtaskStack[subtaskStack.length - 1]);
-                // Defer openNodeModal until the freshly-rendered graph simulation has
-                // stabilised so the target node has valid x/y coordinates for centering.
+                // Nodes are pre-positioned during init(), so _tryOpenNodeModal
+                // can centre immediately — one rAF ensures the SVG has painted.
                 if (resolvedTargetNodeId && window.graphInstance) {
-                    window.graphInstance.onStable(() => {
+                    requestAnimationFrame(() => {
                         window.graphInstance.openNodeModal(resolvedTargetNodeId);
                     });
                 }
