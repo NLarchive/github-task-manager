@@ -52,12 +52,12 @@ GITHUB: {
 
 ### Path Validation
 The worker only allows writes to these patterns:
-- `public/tasksDB/<scope>/<projectId>/tasks.json`
+- `public/tasksDB/<scope>/<projectId>/node.tasks.json`
 - `public/tasksDB/<scope>/<projectId>/tasks.csv`
 - `public/tasksDB/<scope>/<projectId>/state/*.json`
 - `public/tasksDB/<scope>/<projectId>/history/*.json`
 
-Current production projects use the `external` scope, for example `public/tasksDB/external/github-task-manager/tasks.json`. The worker still accepts the legacy one-level layout for backward compatibility.
+Current production projects use the `external` scope, for example `public/tasksDB/external/github-task-manager/node.tasks.json`. The worker still accepts the legacy one-level layout for backward compatibility.
 
 Any attempt to write elsewhere (e.g., `README.md`, `index.html`) will be rejected with 403.
 
@@ -81,7 +81,7 @@ Update a TaskDB file.
 {
   "projectId": "github-task-manager",
   "accessPassword": "your-password",
-  "filePath": "public/tasksDB/external/github-task-manager/tasks.json",
+  "filePath": "public/tasksDB/external/github-task-manager/node.tasks.json",
   "content": "{ ... JSON content ... }",
   "message": "Update tasks"
 }

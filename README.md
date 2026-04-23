@@ -309,7 +309,7 @@ Add more categories by editing `TEMPLATE_CONFIG` in `public/config/tasks-templat
 ```
 ├── Repository: nlarchive/github-task-manager
 │   ├── main branch (deployed)
-│   ├── tasks.json (source of truth)
+│   ├── node.tasks.json (source of truth)
 │   ├── public/ (GitHub Pages content)
 │   └── .github/workflows/deploy.yml (CI/CD)
 │
@@ -317,7 +317,7 @@ Add more categories by editing `TEMPLATE_CONFIG` in `public/config/tasks-templat
 │   └── https://nlarchive.github.io/github-task-manager/
 │
 └── GitHub API
-    └── Reads/writes tasks.json via REST API
+    └── Reads/writes node.tasks.json via REST API
 ```
 
 ### Data Sync Flow
@@ -331,7 +331,7 @@ Task Database (In-Memory)
     ↓
 GitHub API Request
     ↓
-Update tasks.json in Repository
+Update node.tasks.json in Repository
     ↓
 GitHub Commit (Tracked in history)
     ↓
@@ -362,7 +362,7 @@ You can provide reusable graph templates that the **Interactive Career Graph** (
 - Standalone graph demos live under: `public/graph-display/templates/`
 - Published graph experiences are indexed by: `public/tasksDB/registry.json`
 - JSON schema (validation): `public/tasksDB/_schema/graph-template.schema.json`
-- Canonical per-project data lives under: `public/tasksDB/<scope>/<projectId>/tasks.json`
+- Canonical per-project data lives under: `public/tasksDB/<scope>/<projectId>/node.tasks.json`
 - Canonical per-project graph tours live under: `public/tasksDB/<scope>/<projectId>/tour/graph-tour.json`
 
 Supported template types (see schema):
@@ -382,8 +382,8 @@ Supported template types (see schema):
 
 Best practices and notes:
 
-- Treat `public/tasksDB/<scope>/<projectId>/tasks.json` as the source of truth for real projects. If a project needs a custom graph, embed it under `graphTemplate` in that file instead of keeping a second copy under `graph-display/templates/`.
-- Use `public/tasksDB/registry.json` as the publishing/index layer. Entries can point either to standalone demo files under `tasksDB/_examples/` or directly to `/tasksDB/<scope>/<projectId>/tasks.json`.
+- Treat `public/tasksDB/<scope>/<projectId>/node.tasks.json` as the source of truth for real projects. If a project needs a custom graph, embed it under `graphTemplate` in that file instead of keeping a second copy under `graph-display/templates/`.
+- Use `public/tasksDB/registry.json` as the publishing/index layer. Entries can point either to standalone demo files under `tasksDB/_examples/` or directly to `/tasksDB/<scope>/<projectId>/node.tasks.json`.
 - Keep standalone demos in `public/graph-display/templates/` only when they are intentionally generic examples and not tied to a project dataset.
 - Put project-specific tours in `public/tasksDB/<scope>/<projectId>/tour/graph-tour.json`. The graph loader normalizes relative tour paths from `tasks.json` into graph-display-safe URLs.
 - Use `tools/task-templates/` only for authoring scaffolds. Those files are not loaded by the runtime.
@@ -524,7 +524,7 @@ github-task-manager/
 │   └── workflows/
 │       └── deploy.yml              # GitHub Actions CI/CD
 │
-├── public/tasksDB/<scope>/<project>/tasks.json  # Task database (source of truth)
+├── public/tasksDB/<scope>/<project>/node.tasks.json  # Task database (source of truth)
 ├── package.json                     # Node.js dependencies
 ├── README.md                        # This file
 ├── QUICKSTART.md                    # Quick start guide
@@ -605,7 +605,7 @@ Security note: These passwords are injected into client-side code and are not a 
 |-------|-------|----------|
 | 401 Unauthorized | Invalid token | Regenerate token in GitHub settings |
 | 403 Forbidden | Token lacks permissions | Ensure `repo` scope is selected |
-| 404 Not Found | File not found | Tasks.json missing in repo root |
+| 404 Not Found | File not found | node.tasks.json missing in repo root |
 | 422 Validation | Invalid data format | Check task JSON structure |
 
 ## Contributing 🤝

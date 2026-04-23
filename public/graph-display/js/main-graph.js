@@ -1888,6 +1888,29 @@ class CurriculumGraph {
         this.hideTooltip();
     }
 
+    _tryOpenNodeModal(nodeData, nodeId) {
+        if (!nodeData || !Number.isFinite(nodeData.x) || !Number.isFinite(nodeData.y)) {
+            return false;
+        }
+
+        const targetNodeSelection = this.node?.filter((d) => d.id === nodeId);
+        if (!targetNodeSelection || targetNodeSelection.empty() || !this.svg || !this.zoom) {
+            return false;
+        }
+
+        const scale = this.config.animation.focusScale;
+        const x = this.width / 2 - nodeData.x * scale;
+        const y = this.height / 2 - nodeData.y * scale;
+        const transform = d3.zoomIdentity.translate(x, y).scale(scale);
+
+        targetNodeSelection.raise();
+        this.svg.transition().duration(this.config.animation.duration)
+            .call(this.zoom.transform, transform)
+            .on('end', () => this._openNodeDetails(nodeData));
+
+        return true;
+    }
+
     /**
      * Pan & zoom to a node by ID, then open its detail modal and keep it selected
      * with a permanent blink. Used by dep-link buttons and the sidebar tree view.
@@ -1897,24 +1920,17 @@ class CurriculumGraph {
         const nodeData = this.nodeMap.get(nodeId);
         if (!nodeData) { console.warn(`openNodeModal: node not found: ${nodeId}`); return; }
 
+        if (this._tryOpenNodeModal(nodeData, nodeId)) {
+            return;
+        }
+
         this.onStable(() => {
-            if (nodeData.x === undefined || isNaN(nodeData.x)) return;
-
-            const scale = this.config.animation.focusScale;
-            const x = this.width / 2 - nodeData.x * scale;
-            const y = this.height / 2 - nodeData.y * scale;
-            const transform = d3.zoomIdentity.translate(x, y).scale(scale);
-            const targetNodeSelection = this.node?.filter(d => d.id === nodeId);
-
-            if (targetNodeSelection && !targetNodeSelection.empty() && this.svg && this.zoom) {
-                targetNodeSelection.raise();
-                this.svg.transition().duration(this.config.animation.duration)
-                    .call(this.zoom.transform, transform)
-                    .on('end', () => this._openNodeDetails(nodeData));
-            } else {
-                // Fallback: just open details without panning
-                this._openNodeDetails(nodeData);
+            if (this._tryOpenNodeModal(nodeData, nodeId)) {
+                return;
             }
+            // Fallback: ensure the node is centered before opening details.
+            this.focusOnNode(nodeId);
+            this._openNodeDetails(nodeData);
         });
     }
 
@@ -2897,6 +2913,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const targetDepth = subtaskStack.length - 2;
             navigateToDepth(targetDepth);
             if (targetNodeId && window.graphInstance) {
+                // Wait for the parent graph simulation to stabilise before centering.
                 window.graphInstance.onStable(() => {
                     window.graphInstance.openNodeModal(targetNodeId);
                 });
@@ -3048,6 +3065,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                     parentSuccessors
                 });
                 restoreGraphState(subtaskStack[subtaskStack.length - 1]);
+                // Defer openNodeModal until the freshly-rendered graph simulation has
+                // stabilised so the target node has valid x/y coordinates for centering.
                 if (resolvedTargetNodeId && window.graphInstance) {
                     window.graphInstance.onStable(() => {
                         window.graphInstance.openNodeModal(resolvedTargetNodeId);

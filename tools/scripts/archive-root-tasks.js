@@ -58,7 +58,7 @@ function main() {
   const historyDir = path.join(repoRoot, 'public', 'tasksDB', 'history');
 
   if (!fs.existsSync(legacyPath)) {
-    console.error('Legacy tasks.json not found at:', legacyPath);
+    console.error('Legacy node.tasks.json not found at:', legacyPath);
     process.exitCode = 1;
     return;
   }
@@ -80,7 +80,7 @@ function main() {
     // Keep JSON snapshot only.
   }
 
-  console.log('Archived legacy tasks.json to:', outJson);
+  console.log('Archived legacy node.tasks.json to:', outJson);
 }
 
 main();

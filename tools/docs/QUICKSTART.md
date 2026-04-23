@@ -67,9 +67,9 @@ Site will be live at: https://nlarchive.github.io/github-task-manager/
 | File | Change | Status |
 |------|--------|--------|
 | `.github/workflows/deploy.yml` | Removed npm dependency | ✅ Pushed |
-| `public/tasksDB/external/github-task-manager/tasks.json` | Created task database | ✅ Pushed |
+| `public/tasksDB/external/github-task-manager/node.tasks.json` | Created task database | ✅ Pushed |
 
-> Multi-project note: each project lives in `public/tasksDB/<scope>/<projectId>/tasks.json`.
+> Multi-project note: each project lives in `public/tasksDB/<scope>/<projectId>/node.tasks.json`.
 | `public/tasksDB/external/github-task-manager/tasks.csv` | Created CSV export | ✅ Pushed |
 | `public/tasksDB/README.md` | Database docs | ✅ Pushed |
 | `public/health/index.html` | Diagnostics page | ✅ Pushed |

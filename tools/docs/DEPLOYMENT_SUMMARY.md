@@ -128,7 +128,7 @@ github-task-manager/
 ```
 ✓ Checkout code
 ✓ Create token config
-✓ Validate tasks.json
+✓ Validate node.tasks.json
 ✓ Setup Pages
 ✓ Upload artifact
 ✓ Deploy to GitHub Pages
@@ -145,7 +145,7 @@ github-task-manager/
 ## 📝 Task Database Management
 
 ### How Tasks Are Stored
-- **Primary format**: JSON (`public/tasksDB/<scope>/<projectId>/tasks.json`)
+- **Primary format**: JSON (`public/tasksDB/<scope>/<projectId>/node.tasks.json`)
 - **Export format**: CSV (`public/tasksDB/<scope>/<projectId>/tasks.csv`)
 - **Version control**: Both files committed to git for audit trail
 

@@ -382,6 +382,64 @@ class TaskDatabase {
     };
   }
 
+  /**
+   * Write edited tasks back to the original local folder file via FolderProjectService.
+   * Uses the FS Access API writeback if a directory handle is cached, otherwise
+   * updates the in-memory / localStorage record only.
+   */
+  async saveTasksToLocalFolder(message = 'Update tasks') {
+    // Validate and dedup first
+    const duplicateIds = this.getDuplicateTaskIds(this.tasks);
+    if (duplicateIds.length > 0) {
+      return { success: false, error: `Duplicate task_id detected: ${duplicateIds.join(', ')}` };
+    }
+    const validationResults = this.tasks.map(task => this.validator.validate(task, 'task'));
+    const hasErrors = validationResults.some(r => !r.isValid);
+    if (hasErrors) {
+      const errors = validationResults.flatMap(r => r.errors);
+      return { success: false, error: `Validation failed: ${errors.join(', ')}` };
+    }
+
+    const isBrowser = (typeof window !== 'undefined');
+    const service = isBrowser && window.FolderProjectService;
+    const projectId = this.localSourceMeta && this.localSourceMeta.id;
+    const relativePath = this.localSourceMeta && this.localSourceMeta.rootModuleRelative
+      ? this.localSourceMeta.rootModuleRelative
+      : 'node.tasks.json';
+
+    if (!projectId || !service) {
+      // No FolderProjectService or no projectId — fall back to localStorage
+      this.saveTasksLocal(message);
+      return { success: true, source: 'localStorage-only', note: 'FolderProjectService unavailable' };
+    }
+
+    const fullData = this.buildFullData(this.tasks);
+
+    // Write-back via FolderProjectService (handles FS Access API + localStorage + cache)
+    if (typeof service.writeModuleToDisk === 'function') {
+      const result = await service.writeModuleToDisk(projectId, relativePath, fullData);
+      // Keep localStorage copy as backup regardless of write result
+      this.saveTasksLocal(message);
+      if (result && result.success) {
+        return { success: true, source: result.source || 'folder', committed: true };
+      }
+      // FS writeback failed but localStorage was updated — warn user
+      return {
+        success: true,
+        source: 'localStorage-only',
+        committed: false,
+        note: result && result.error ? result.error : 'File write unavailable — saved to browser cache only'
+      };
+    }
+
+    // FolderProjectService doesn't have writeModuleToDisk yet — update in-memory record
+    if (typeof service.updateModuleData === 'function') {
+      service.updateModuleData(projectId, relativePath, fullData);
+    }
+    this.saveTasksLocal(message);
+    return { success: true, source: 'localStorage-only', committed: false };
+  }
+
   /** Persist the current project through the local disk development API. */
   async saveTasksLocalDisk(message = 'Update tasks') {
     // Block saving if duplicates exist
@@ -742,8 +800,11 @@ class TaskDatabase {
   /** Persist the current task set using the best available configured backend. */
   async saveTasks(message = 'Update tasks') {
     try {
+      // ── Local-folder write-back ─────────────────────────────────────────
+      // When the active project was loaded from a browser-selected local folder,
+      // write edits back to the original file via FolderProjectService.writeModuleToDisk.
       if (this.sourceKind === 'folder') {
-        return { success: false, error: 'Local folder projects are read-only in the browser loader. Re-open the source files in the workspace if you need to edit them.' };
+        return await this.saveTasksToLocalFolder(message);
       }
 
       // Block saving if duplicates exist (prevents corrupting tasks.csv and node.tasks.json)
@@ -943,7 +1004,7 @@ class TaskDatabase {
   // Direct GitHub API mode (token in browser - legacy, not recommended)
   /** Persist tasks directly through the GitHub API when browser tokens are enabled. */
   async saveTasksDirectGitHub(message) {
-      // Save with full project structure to match tasks.json format
+      // Save with full project structure to match node.tasks.json format
       const fullData = this.buildFullData(this.tasks);
 
       const content = JSON.stringify(fullData, null, 2);

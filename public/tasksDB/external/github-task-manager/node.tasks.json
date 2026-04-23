@@ -758,8 +758,8 @@
     },
     {
       "task_id": 12,
-      "task_name": "Sync tasks.csv with tasks.json",
-      "description": "Update /public/tasksDB/tasks.csv so it reflects the same project state as /public/tasksDB/tasks.json (statuses, dates, and any newly added tasks).",
+      "task_name": "Sync tasks.csv with node.tasks.json",
+      "description": "Update /public/tasksDB/tasks.csv so it reflects the same project state as /public/tasksDB/node.tasks.json (statuses, dates, and any newly added tasks).",
       "start_date": "2025-12-11",
       "end_date": "2025-12-12",
       "priority": "Medium",
@@ -841,8 +841,8 @@
     },
     {
       "task_id": 14,
-      "task_name": "Archive legacy root tasks.json",
-      "description": "Preserve the older repo-root tasks.json as an immutable history snapshot under /public/tasksDB/history without changing the canonical runtime database.",
+      "task_name": "Archive legacy root node.tasks.json",
+      "description": "Preserve the older repo-root node.tasks.json as an immutable history snapshot under /public/tasksDB/history without changing the canonical runtime database.",
       "start_date": "2025-12-11",
       "end_date": "2025-12-11",
       "priority": "Medium",
@@ -1170,7 +1170,7 @@
     {
       "task_id": 21,
       "task_name": "Add Task Schema Validation Script",
-      "description": "Create tools/scripts/validate-tasks-schema.js that validates both projects' tasks.json against required fields, date ordering, and no timestamp pollution in task_name. Ensure all required fields (task_id, task_name, description, start_date, end_date, priority, status, estimated_hours, category_name) are present. Run on every save and add to CI.",
+      "description": "Create tools/scripts/validate-tasks-schema.js that validates both projects' node.tasks.json against required fields, date ordering, and no timestamp pollution in task_name. Ensure all required fields (task_id, task_name, description, start_date, end_date, priority, status, estimated_hours, category_name) are present. Run on every save and add to CI.",
       "start_date": "2025-12-17",
       "end_date": "2025-12-18",
       "priority": "High",
@@ -1417,7 +1417,7 @@
     {
       "task_id": 26,
       "task_name": "create and mcp endpoint",
-      "description": "Create a new API endpoint /api/create-mcp that accepts a POST request with a list of task IDs and marks them as critical path tasks (is_critical_path=true). Validate input, update tasks.json, and return success/failure response.",
+      "description": "Create a new API endpoint /api/create-mcp that accepts a POST request with a list of task IDs and marks them as critical path tasks (is_critical_path=true). Validate input, update node.tasks.json, and return success/failure response.",
       "start_date": "2025-12-18",
       "end_date": "2025-12-19",
       "priority": "High",
@@ -1457,7 +1457,7 @@
     {
       "task_id": 27,
       "task_name": "Popup Dropdown Menus for Acceptance Criteria & Subtasks",
-      "description": "Add collapsible <details> dropdown sections inside node popup modals to display acceptance_criteria and subtasks arrays from tasks.json. Each dropdown shows a count badge, styled with .popup-dropdown component. Acceptance criteria render as bullet lists; subtasks show name, status, and estimated hours.",
+      "description": "Add collapsible <details> dropdown sections inside node popup modals to display acceptance_criteria and subtasks arrays from node.tasks.json. Each dropdown shows a count badge, styled with .popup-dropdown component. Acceptance criteria render as bullet lists; subtasks show name, status, and estimated hours.",
       "start_date": "2026-04-12",
       "end_date": "2026-04-12",
       "priority": "Medium",
@@ -1530,7 +1530,7 @@
     {
       "task_id": 28,
       "task_name": "Inline Subtask Drill-Down Navigation with Parent & Successor Nav",
-      "description": "Enable recursive drill-down into inline subtasks directly from node popup. Clicking '📂 View Subtasks' on a task that has subtasks[] in tasks.json builds a temporary subgraph from those subtasks. The subgraph start node shows a '↩ Parent Task Name' button that navigates back to the parent graph and opens the parent task modal. The subgraph end node shows 'Next tasks in parent graph' buttons for successor tasks. Breadcrumbs track navigation depth. Supports recursive nesting (subtasks within subtasks).",
+      "description": "Enable recursive drill-down into inline subtasks directly from node popup. Clicking '📂 View Subtasks' on a task that has subtasks[] in node.tasks.json builds a temporary subgraph from those subtasks. The subgraph start node shows a '↩ Parent Task Name' button that navigates back to the parent graph and opens the parent task modal. The subgraph end node shows 'Next tasks in parent graph' buttons for successor tasks. Breadcrumbs track navigation depth. Supports recursive nesting (subtasks within subtasks).",
       "start_date": "2026-04-12",
       "end_date": "2026-04-13",
       "priority": "High",
@@ -1625,7 +1625,7 @@
     {
       "task_id": 29,
       "task_name": "tasks.json Format Validation Test Suite",
-      "description": "Create a comprehensive test suite that walks all public/tasksDB/ project folders recursively, discovers every tasks.json file, and validates format correctness: valid JSON, project metadata, task required fields, enum values, dependency integrity, subtask/acceptance_criteria array format, date formats, and duplicate detection. Provides actionable feedback for any format issues found.",
+      "description": "Create a comprehensive test suite that walks all public/tasksDB/ project folders recursively, discovers every node.tasks.json file, and validates format correctness: valid JSON, project metadata, task required fields, enum values, dependency integrity, subtask/acceptance_criteria array format, date formats, and duplicate detection. Provides actionable feedback for any format issues found.",
       "start_date": "2026-04-13",
       "end_date": "2026-04-13",
       "priority": "Medium",
@@ -1650,7 +1650,7 @@
         }
       ],
       "acceptance_criteria": [
-        "Test suite discovers all tasks.json files under public/tasksDB/ recursively",
+        "Test suite discovers all node.tasks.json files under public/tasksDB/ recursively",
         "Validates JSON parsing, project metadata, task structure, enums, dates, dependencies",
         "Detects duplicate task_ids and task_names",
         "Validates subtasks[] and acceptance_criteria[] array format",
@@ -1672,7 +1672,7 @@
       ],
       "subtasks": [
         {
-          "name": "Implement recursive tasks.json file discovery",
+          "name": "Implement recursive node.tasks.json file discovery",
           "status": "Done",
           "estimated_hours": 0.5,
           "assigned_workers": []
@@ -1876,7 +1876,7 @@
     {
       "task_id": 32,
       "task_name": "Document task source audit workflow and output artifact paths",
-      "description": "Capture the recommended Git history and blame workflow for public/tasksDB/external/github-task-manager/tasks.json, and document that temporary outputs such as tmp-test-output.txt, tmp-calendar-run.txt, and live-test-run.log belong under outputs/local-runs/ instead of the repo root.",
+      "description": "Capture the recommended Git history and blame workflow for public/tasksDB/external/github-task-manager/node.tasks.json, and document that temporary outputs such as tmp-test-output.txt, tmp-calendar-run.txt, and live-test-run.log belong under outputs/local-runs/ instead of the repo root.",
       "start_date": "2026-04-21",
       "end_date": "2026-04-22",
       "priority": "Medium",

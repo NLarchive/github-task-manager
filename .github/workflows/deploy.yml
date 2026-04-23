@@ -108,8 +108,8 @@ jobs:
       - name: Validate project files
         run: |
           echo "=== Checking required files ==="
-          test -f public/tasksDB/external/github-task-manager/tasks.json && echo "✓ tasksDB/external/github-task-manager/tasks.json" || (echo "✗ Missing: tasksDB/external/github-task-manager/tasks.json" && exit 1)
-          test -f public/tasksDB/external/ai-career-roadmap/tasks.json && echo "✓ tasksDB/external/ai-career-roadmap/tasks.json" || (echo "✗ Missing: tasksDB/external/ai-career-roadmap/tasks.json" && exit 1)
+          test -f public/tasksDB/external/github-task-manager/node.tasks.json && echo "✓ tasksDB/external/github-task-manager/node.tasks.json" || (echo "✗ Missing: tasksDB/external/github-task-manager/node.tasks.json" && exit 1)
+          test -f public/tasksDB/external/ai-career-roadmap/node.tasks.json && echo "✓ tasksDB/external/ai-career-roadmap/node.tasks.json" || (echo "✗ Missing: tasksDB/external/ai-career-roadmap/node.tasks.json" && exit 1)
           test -f public/index.html && echo "✓ index.html" || (echo "✗ Missing: index.html" && exit 1)
           test -f public/config/tasks-template-config.js && echo "✓ tasks-template-config.js" || (echo "✗ Missing: tasks-template-config.js" && exit 1)
           echo "✓ All required files found"

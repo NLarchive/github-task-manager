@@ -390,12 +390,16 @@
     async function pickFolderFiles() {
         if (typeof globalScope.showDirectoryPicker === 'function') {
             try {
-                const directoryHandle = await globalScope.showDirectoryPicker({ mode: 'read' });
+                const directoryHandle = await globalScope.showDirectoryPicker({ mode: 'readwrite' }).catch(async () => {
+                    // Fall back to read-only if readwrite is rejected
+                    return await globalScope.showDirectoryPicker({ mode: 'read' });
+                });
                 if (!directoryHandle) return null;
                 const fileMap = await collectHandleFiles(directoryHandle);
                 return {
                     folderName: directoryHandle.name || 'local-folder',
-                    fileMap
+                    fileMap,
+                    __directoryHandle: directoryHandle
                 };
             } catch (error) {
                 if (error && error.name === 'AbortError') return null;
@@ -500,11 +504,139 @@
         return !!getProjectRecord(projectIdOrTemplateId);
     }
 
+    // ── Write-back helpers ────────────────────────────────────────────────────
+
+    /**
+     * Update a single module's data inside the in-memory localStorage record.
+     * Also pushes the change to FolderCache (IndexedDB) if available.
+     *
+     * @param {string} projectId
+     * @param {string} relativePath - e.g. "src/node.tasks.json"
+     * @param {object} updatedData  - full JSON payload to write
+     * @returns {boolean} true when the localStorage record was updated
+     */
+    function updateModuleData(projectId, relativePath, updatedData) {
+        const raw = String(projectId || '').trim();
+        if (!raw) return false;
+        const id = raw.endsWith('-tasks') ? raw.slice(0, -'-tasks'.length) : raw;
+        const store = readStore();
+        const project = store.projects && store.projects[id];
+        if (!project) return false;
+
+        const normalizedPath = normalizeRelativePath(relativePath);
+        project.moduleDataByPath = project.moduleDataByPath || {};
+        project.moduleDataByPath[normalizedPath] = deepClone(updatedData);
+
+        // Refresh root payload tasks if this is the root module
+        if (normalizedPath === normalizeRelativePath(project.rootModuleRelative || '')) {
+            project.payload = { ...deepClone(updatedData) };
+        }
+
+        project.lastEditedAt = new Date().toISOString();
+        store.projects[id] = project;
+        writeStore(store);
+
+        // Push to IndexedDB cache if FolderCache is available
+        if (globalScope.FolderCache && typeof globalScope.FolderCache.updateModuleInCache === 'function') {
+            globalScope.FolderCache.updateModuleInCache(id, normalizedPath, updatedData).catch((err) => {
+                console.warn('FolderCache.updateModuleInCache failed:', err && err.message ? err.message : err);
+            });
+        }
+
+        return true;
+    }
+
+    /**
+     * Write-back a module file to disk using the FileSystemDirectoryHandle stored
+     * in FolderCache.  Requires a browser that supports the FS Access API and a
+     * handle that was obtained while requesting "readwrite" permission.
+     *
+     * @param {string} projectId
+     * @param {string} relativePath - e.g. "src/node.tasks.json"
+     * @param {object} updatedData  - full JSON payload to write
+     * @returns {Promise<{success: boolean, error?: string, source: string}>}
+     */
+    async function writeModuleToDisk(projectId, relativePath, updatedData) {
+        const id = String(projectId || '').trim().replace(/-tasks$/, '');
+        if (!id || !relativePath) return { success: false, error: 'Missing projectId or path', source: 'none' };
+
+        // First update the in-memory / localStorage record
+        updateModuleData(id, relativePath, updatedData);
+
+        // Try FS Access API writeback if we have a cached directory handle
+        if (globalScope.FolderCache && typeof globalScope.FolderCache.loadProjectCache === 'function') {
+            try {
+                const cached = await globalScope.FolderCache.loadProjectCache(id);
+                const dirHandle = cached && cached.directoryHandle;
+                if (dirHandle && typeof dirHandle.getFileHandle === 'function') {
+                    // Verify we still have write permission; request it if needed
+                    const perm = await dirHandle.queryPermission({ mode: 'readwrite' });
+                    if (perm !== 'granted') {
+                        const requested = await dirHandle.requestPermission({ mode: 'readwrite' });
+                        if (requested !== 'granted') {
+                            return { success: false, error: 'Write permission denied by browser', source: 'fs-access' };
+                        }
+                    }
+
+                    // Navigate to the correct sub-directory
+                    const segments = normalizeRelativePath(relativePath).split('/').filter(Boolean);
+                    const fileName = segments.pop();
+                    let dirRef = dirHandle;
+                    for (const seg of segments) {
+                        dirRef = await dirRef.getDirectoryHandle(seg, { create: false });
+                    }
+                    const fileHandle = await dirRef.getFileHandle(fileName, { create: false });
+                    const writable   = await fileHandle.createWritable();
+                    await writable.write(JSON.stringify(updatedData, null, 2));
+                    await writable.close();
+
+                    return { success: true, source: 'fs-access' };
+                }
+            } catch (fsErr) {
+                const msg = fsErr && fsErr.message ? fsErr.message : String(fsErr);
+                console.warn('FolderCache FS writeback failed:', msg);
+                return { success: false, error: msg, source: 'fs-access' };
+            }
+        }
+
+        // Fallback: saved to localStorage only — no disk write available
+        return { success: true, source: 'localStorage-only' };
+    }
+
+    /**
+     * Re-request readwrite permission and attach the handle to FolderCache.
+     * Call this from a button click (requires user gesture).
+     *
+     * @param {string} projectId
+     * @param {FileSystemDirectoryHandle} directoryHandle
+     * @returns {Promise<boolean>}
+     */
+    async function attachWriteHandle(projectId, directoryHandle) {
+        if (!directoryHandle || typeof directoryHandle.requestPermission !== 'function') return false;
+        const perm = await directoryHandle.requestPermission({ mode: 'readwrite' });
+        if (perm !== 'granted') return false;
+        const id = String(projectId || '').trim().replace(/-tasks$/, '');
+        if (globalScope.FolderCache && typeof globalScope.FolderCache.attachDirectoryHandle === 'function') {
+            return globalScope.FolderCache.attachDirectoryHandle(id, directoryHandle);
+        }
+        return false;
+    }
+
     async function pickAndRegisterProject() {
         const picked = await pickFolderFiles();
         if (!picked) return null;
         const record = buildProjectRecordFromFileMap(picked);
-        return registerProjectRecord(record);
+        registerProjectRecord(record);
+
+        // Persist full scan to IndexedDB cache with the directory handle if available
+        if (globalScope.FolderCache && typeof globalScope.FolderCache.saveProjectCache === 'function') {
+            const dirHandle = picked.__directoryHandle || null;
+            globalScope.FolderCache.saveProjectCache(record, picked.fileMap, dirHandle).catch((err) => {
+                console.warn('FolderCache.saveProjectCache failed:', err && err.message ? err.message : err);
+            });
+        }
+
+        return record;
     }
 
     globalScope.FolderProjectService = {
@@ -514,6 +646,9 @@
         getProjectRecord,
         getProjectPayload,
         getModuleData,
+        updateModuleData,
+        writeModuleToDisk,
+        attachWriteHandle,
         listProjects,
         isFolderProject,
         __test__: {
@@ -521,7 +656,9 @@
             discoverProjectTaskFilesFromMap,
             resolveRootModuleRelativeFromMap,
             collectProjectModulesFromMap,
-            buildProjectRecordFromFileMap
+            buildProjectRecordFromFileMap,
+            updateModuleData,
+            writeModuleToDisk
         }
     };
 })(typeof window !== 'undefined' ? window : globalThis);

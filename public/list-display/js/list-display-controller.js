@@ -1195,7 +1195,7 @@ class TaskManagerApp {
 
     /** Get available category names. */
     getAvailableCategoryNames() {
-        // Preferred source: per-project categories loaded from tasks.json
+        // Preferred source: per-project categories loaded from node.tasks.json
         const fromDb = (this.database && Array.isArray(this.database.categories))
             ? this.database.categories
                 .map(c => (c && typeof c.name === 'string' ? c.name.trim() : ''))

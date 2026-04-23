@@ -132,6 +132,35 @@ test.describe('inline subtask navigation', () => {
     await expect(popup).toContainText('Implement Task Dependencies');
   });
 
+  test('end node shows sibling nav buttons for parent successors', async ({ page }) => {
+    await page.goto('/graph-display/index.html?template=github-task-manager-tasks&skipTour=true', {
+      waitUntil: 'domcontentloaded'
+    });
+
+    await waitForNodeCount(page, 10);
+
+    const rootTask = page.locator('#graph-container g.node').filter({ hasText: 'Inline Subtask Drill-Down Navigation with Parent & Successor Nav' }).first();
+    await expect(rootTask).toBeVisible();
+    await rootTask.click();
+
+    const popup = page.locator('#popup');
+    await expect(popup).toHaveClass(/visible/);
+    const diveBtn = popup.locator('.task-node-btn[data-subtasks-path]', { hasText: 'View Subtasks' });
+    await expect(diveBtn).toBeVisible();
+    await diveBtn.click();
+
+    await expect(page.locator('#subtask-breadcrumb')).toBeVisible({ timeout: 10000 });
+    const endNode = page.locator('#graph-container g.node').filter({ hasText: 'End: Inline Subtask Drill-Down Navigation with Parent & Successor Nav' }).first();
+    await expect(endNode).toBeVisible({ timeout: 10000 });
+    await endNode.click();
+
+    await expect(popup).toHaveClass(/visible/);
+    const siblingBtns = popup.locator('.task-node-btn.sibling-nav-btn');
+    await expect(siblingBtns).toHaveCount(2);
+    await expect(siblingBtns.nth(0)).toContainText('➡ tasks.json Format Validation Test Suite');
+    await expect(siblingBtns.nth(1)).toContainText('➡ Unify graph relation buttons and stabilize Playwright base URLs');
+  });
+
   test('no Task Sub-graphs folder appears in sidebar', async ({ page }) => {
     await page.goto('/graph-display/index.html?template=github-task-manager-tasks&skipTour=true', {
       waitUntil: 'domcontentloaded'

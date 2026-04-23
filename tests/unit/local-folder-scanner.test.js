@@ -109,3 +109,71 @@ describe('Folder Project Service', () => {
     expect(service.listProjects()).toHaveLength(1);
   });
 });
+
+/** Validate local-folder write-back: updateModuleData persists task edits into the in-memory record. */
+describe('Folder Project Service — write-back', () => {
+  it('updateModuleData updates the moduleDataByPath and refreshes root payload for root module', () => {
+    const { service } = loadFolderProjectService();
+
+    service.registerProjectRecord({
+      id: 'folder-write-test',
+      templateId: 'folder-write-test-tasks',
+      label: 'Write Test',
+      rootModuleRelative: 'src/node.tasks.json',
+      payload: { project: { name: 'Write Test' }, tasks: [], navigation: { rootModule: 'src/node.tasks.json', modules: [] } },
+      moduleDataByPath: { 'src/node.tasks.json': { tasks: [] } }
+    });
+
+    const updated = { project: { name: 'Write Test' }, tasks: [{ task_id: 1, task_name: 'New Task', status: 'Not Started', priority: 'High' }], navigation: { rootModule: 'src/node.tasks.json', modules: [] } };
+    const ok = service.updateModuleData('folder-write-test', 'src/node.tasks.json', updated);
+
+    expect(ok).toBe(true);
+    const record = service.getProjectRecord('folder-write-test');
+    expect(record.moduleDataByPath['src/node.tasks.json'].tasks).toHaveLength(1);
+    expect(record.moduleDataByPath['src/node.tasks.json'].tasks[0].task_name).toBe('New Task');
+    // Root payload should also be refreshed
+    expect(record.payload.tasks).toHaveLength(1);
+  });
+
+  it('updateModuleData updates a sub-module without touching root payload tasks', () => {
+    const { service } = loadFolderProjectService();
+
+    service.registerProjectRecord({
+      id: 'folder-module-test',
+      templateId: 'folder-module-test-tasks',
+      label: 'Module Test',
+      rootModuleRelative: 'src/node.tasks.json',
+      payload: { project: { name: 'Module Test' }, tasks: [{ task_id: 1, task_name: 'Root Task', status: 'Done', priority: 'Low' }], navigation: { rootModule: 'src/node.tasks.json', modules: [] } },
+      moduleDataByPath: {
+        'src/node.tasks.json': { tasks: [{ task_id: 1, task_name: 'Root Task', status: 'Done', priority: 'Low' }] },
+        'src/apps/PRIVATE/crm/node.tasks.json': { tasks: [] }
+      }
+    });
+
+    const updated = { tasks: [{ task_id: 10, task_name: 'CRM Task', status: 'In Progress', priority: 'Medium' }] };
+    service.updateModuleData('folder-module-test', 'src/apps/PRIVATE/crm/node.tasks.json', updated);
+
+    const record = service.getProjectRecord('folder-module-test');
+    expect(record.moduleDataByPath['src/apps/PRIVATE/crm/node.tasks.json'].tasks[0].task_name).toBe('CRM Task');
+    // Root payload should be unchanged
+    expect(record.payload.tasks[0].task_name).toBe('Root Task');
+  });
+
+  it('writeModuleToDisk falls back to localStorage-only when FolderCache is unavailable', async () => {
+    const { service } = loadFolderProjectService();
+
+    service.registerProjectRecord({
+      id: 'folder-disk-test',
+      templateId: 'folder-disk-test-tasks',
+      label: 'Disk Test',
+      rootModuleRelative: 'node.tasks.json',
+      payload: { tasks: [] },
+      moduleDataByPath: { 'node.tasks.json': { tasks: [] } }
+    });
+
+    const result = await service.writeModuleToDisk('folder-disk-test', 'node.tasks.json', { tasks: [{ task_id: 1, task_name: 'Saved', status: 'Done', priority: 'High' }] });
+    // No FolderCache or FS handle available in test, so it falls back gracefully
+    expect(result.success).toBe(true);
+    expect(['localStorage-only', 'fs-access'].includes(result.source)).toBe(true);
+  });
+});

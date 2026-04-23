@@ -23,7 +23,7 @@ git config pull.rebase true
 
 #### Editing Task Data
 
-The canonical task data source is [`public/tasksDB/<scope>/<project>/tasks.json`](public/tasksDB/) (e.g., `public/tasksDB/external/github-task-manager/tasks.json`).
+The canonical task data source is [`public/tasksDB/<scope>/<project>/node.tasks.json`](public/tasksDB/) (e.g., `public/tasksDB/external/github-task-manager/node.tasks.json`).
 
 For graph-display integration, keep project-specific graph metadata in that same `tasks.json` file under `graphTemplate`, and keep project tours in `public/tasksDB/<scope>/<project>/tour/graph-tour.json`. Reserve `public/graph-display/templates/` for standalone demo templates and schema files, not mirrored project copies.
 
@@ -48,14 +48,14 @@ See [`tests/e2e/update-task-via-ui.spec.js`](tests/e2e/update-task-via-ui.spec.j
 
 If you must edit `tasks.json` directly:
 
-1. Edit [`public/tasksDB/external/github-task-manager/tasks.json`](public/tasksDB/external/github-task-manager/tasks.json)
+1. Edit [`public/tasksDB/external/github-task-manager/node.tasks.json`](public/tasksDB/external/github-task-manager/node.tasks.json)
 2. Regenerate derived files locally:
    ```bash
    npm run tasks:regenerate-all
    ```
 3. Commit **only** the `tasks.json` change:
    ```bash
-   git add public/tasksDB/external/github-task-manager/tasks.json
+   git add public/tasksDB/external/github-task-manager/node.tasks.json
    git commit -m "Update tasks: <short description>"
    ```
 4. The derived files will stay ignored (not committed).
@@ -105,7 +105,7 @@ Only track `tasks.json` and code changes — never commit derived files:
 
 ```bash
 # Good: commit only the source JSON
-git add public/tasksDB/external/github-task-manager/tasks.json
+git add public/tasksDB/external/github-task-manager/node.tasks.json
 git commit -m "Update tasks: document token strategy"
 git push origin main
 
@@ -134,7 +134,7 @@ git rebase --continue
 
 For `tasks.json`, manually inspect and merge if needed, then:
 ```bash
-git add public/tasksDB/external/github-task-manager/tasks.json
+git add public/tasksDB/external/github-task-manager/node.tasks.json
 git rebase --continue
 ```
 

@@ -266,14 +266,14 @@ function validateAgainstSchema(obj, schema) {
 }
 
 /**
- * Extract a project id from a TaskDB tasks.json path.
+ * Extract a project id from a TaskDB node.tasks.json path.
  *
  * @param {string} path
  * @returns {string|null}
  */
 function resolveProjectIdFromTasksPath(path) {
     const s = String(path || '').replace(/\\/g, '/');
-    // Handle tasksDB/(external|local/)?projectId/tasks.json
+    // Handle tasksDB/(external|local/)?projectId/node.tasks.json
     const m = s.match(/tasksDB\/(?:(?:external|local)\/)?([^\/]+)\/tasks\.json$/i);
     return m ? m[1] : null;
 }
@@ -281,9 +281,9 @@ function resolveProjectIdFromTasksPath(path) {
 /**
  * Return the scoped base path segment for a TaskDB URL.
  * Examples:
- *   '/tasksDB/external/first-graph/tasks.json' → 'external/first-graph'
- *   '/tasksDB/local/test-tasks/tasks.json'     → 'local/test-tasks'
- *   '/tasksDB/first-graph/tasks.json'           → 'first-graph'  (legacy)
+ *   '/tasksDB/external/first-graph/node.tasks.json' → 'external/first-graph'
+ *   '/tasksDB/local/test-tasks/node.tasks.json'     → 'local/test-tasks'
+ *   '/tasksDB/first-graph/node.tasks.json'           → 'first-graph'  (legacy)
  */
 function resolveProjectScopedBase(path) {
     const s = String(path || '').replace(/\\/g, '/');
@@ -1466,7 +1466,7 @@ export async function ensureDynamicTaskTemplate(requestedTemplateId, options = {
                     buildEntry = { ...entry, path: rootModuleUrl };
                 }
             } catch {
-                // Fall back to tasks.json payload.
+                // Fall back to node.tasks.json payload.
             }
         }
 
@@ -1557,7 +1557,7 @@ export async function initTemplates() {
         }
 
         // If the app is asked for a <projectId>-tasks template that isn't in registry.json,
-        // try to fetch it directly from /tasksDB/<scope>/<projectId>/tasks.json.
+        // try to fetch it directly from /tasksDB/<scope>/<projectId>/node.tasks.json.
         await ensureDynamicTaskTemplate(null, { basePath, siteRoot, siteRootRaw });
     } catch (e) {
         console.warn('initTemplates failed (fallback to built-in):', e && e.message);

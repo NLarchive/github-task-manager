@@ -105,7 +105,7 @@ TaskDB|create|15|Secure token config|Remove the personal token input section...
   "spec": "taskdb.commit.v1",
   "ts": "2025-12-14T...",
   "projectId": "github-task-manager",
-  "tasksFile": "public/tasksDB/external/github-task-manager/tasks.json",
+  "tasksFile": "public/tasksDB/external/github-task-manager/node.tasks.json",
   "artifact": "tasks.json",
   "actor": "user@example.com",
   "events": [

@@ -1,13 +1,11 @@
 # Project Specification: web-github-task-manager
-Generated: 2026-04-23 11:29
+Generated: 2026-04-23 16:36
 <!-- To update this file, run: python D:\tool\extract_project_spec\app.py --root D:\web\web-github-task-manager -->
 
 ## Folder structure
 
 .github
 .github\workflows
-memories
-memories\repo
 public
 public\api
 public\calendar
@@ -60,7 +58,6 @@ AGENTS.md
 CONTRIBUTING.md
 exposure-bridge.json
 LICENSE
-memories\repo\testing.md
 package.json
 public\api\README.md
 public\calendar\js\task-ics-export.js
@@ -131,13 +128,13 @@ public\tasksDB\_schema\graph-template.schema.json
 public\tasksDB\_templates\starter_project_template.csv
 public\tasksDB\_templates\starter_project_template.json
 public\tasksDB\_templates\starter_project_template_v2.json
+public\tasksDB\external\ai-career-roadmap\node.tasks.json
 public\tasksDB\external\ai-career-roadmap\README.md
-public\tasksDB\external\ai-career-roadmap\tasks.json
 public\tasksDB\external\ai-career-roadmap\tour\graph-tour.json
-public\tasksDB\external\first-graph\tasks.json
+public\tasksDB\external\first-graph\node.tasks.json
 public\tasksDB\external\first-graph\tour\graph-tour.json
+public\tasksDB\external\github-task-manager\node.tasks.json
 public\tasksDB\external\github-task-manager\README.md
-public\tasksDB\external\github-task-manager\tasks.json
 public\tasksDB\external\github-task-manager\tour\graph-tour.json
 public\tasksDB\README.md
 public\tasksDB\registry.json
@@ -409,22 +406,18 @@ structure from server.js:
 
 structure from .github/workflows/deploy.yml:
     [file-summary] Deploy GitHub Task Manager
-    [yaml-key] name: "Deploy GitHub Task Manager"
-    [yaml-key] True: {push, workflow_dispatch}
-    [yaml-key] permissions: {contents, pages, id-token}
-    [yaml-key] concurrency: {group, cancel-in-progress}
-    [yaml-key] jobs: {build}
-    [yaml-job] job: build (10 steps) — Build and Deploy
+    [yaml-key] name:
+    [yaml-key] on:
+    [yaml-key] permissions:
+    [yaml-key] concurrency:
+    [yaml-key] jobs:
 
 structure from .github/workflows/validate-taskdb.yml:
     [file-summary] Validate TaskDB (Schema + Commit Format)
-    [yaml-key] name: "Validate TaskDB (Schema + Commit Format)"
-    [yaml-key] True: {pull_request, push, workflow_dispatch}
-    [yaml-key] permissions: {contents}
-    [yaml-key] jobs: {validate}
-    [yaml-job] job: validate (4 steps)
-
-structure from memories/repo/testing.md:  (no extractable definitions)
+    [yaml-key] name:
+    [yaml-key] on:
+    [yaml-key] permissions:
+    [yaml-key] jobs:
 
 structure from public/README.md:
     [file-summary] Web GitHub Task Manager — Public Frontend
@@ -2235,8 +2228,8 @@ structure from public/graph-display/js/graph-data.js:
     function buildDependencyLayering(tasks)  «Compute dependency layers for tasks and flag nodes that participate in cycles.»
     function scaleHoursToRadius(hours, minHours, maxHours, minRadius, maxRadius)  «Scale estimated hours into a rendered node radius using eased clamping.»
     function validateAgainstSchema(obj, schema)  «Perform lightweight shape validation for supported graph template payloads.»
-    function resolveProjectIdFromTasksPath(path)  «Extract a project id from a TaskDB tasks.json path.»
-    function resolveProjectScopedBase(path)  «Return the scoped base path segment for a TaskDB URL. Examples: '/tasksDB/external/first-graph/tasks.json' → 'external/f»
+    function resolveProjectIdFromTasksPath(path)  «Extract a project id from a TaskDB node.tasks.json path.»
+    function resolveProjectScopedBase(path)  «Return the scoped base path segment for a TaskDB URL. Examples: '/tasksDB/external/first-graph/node.tasks.json' → 'exter»
     function normalizeTaskDbWalkthroughPath(pathValue, scopedBase)  «Normalize a walkthrough asset path for a scoped TaskDB project base.»
     function buildEmbeddedTaskDbTemplate(entry, data, scopedBase, embeddedGraphName)  «Build a graph template from an embedded TaskDB graphTemplate payload.»
     function normalizeProjectRelativeModulePath(modulePath, entryPath)  «Resolve a module path relative to the project entry file inside TaskDB.»
@@ -3132,7 +3125,7 @@ structure from public/tasksDB/external/ai-career-roadmap/README.md:
     [heading-2] ## Files
     [heading-2] ## Regenerating derived files
 
-structure from public/tasksDB/external/ai-career-roadmap/tasks.json:
+structure from public/tasksDB/external/ai-career-roadmap/node.tasks.json:
     [file-summary] Complete task breakdown for the Roadmap Integration on deeplearning.ai project, based on the web-integration-plan.md phases, roles, and sprint plan. Tasks are sorted by priority order (Critical first)
     [json-key] template_type: "project_task_template"
     [json-key] version: "1.2"
@@ -3147,7 +3140,7 @@ structure from public/tasksDB/external/ai-career-roadmap/tasks.json:
 structure from public/tasksDB/external/ai-career-roadmap/tour/graph-tour.json:
     [json-array] [9 items]
 
-structure from public/tasksDB/external/first-graph/tasks.json:
+structure from public/tasksDB/external/first-graph/node.tasks.json:
     [json-key] project: {name, description, owner, repo}
     [json-key] categories: [2 items]
     [json-key] workers: [1 items]
@@ -3161,7 +3154,7 @@ structure from public/tasksDB/external/github-task-manager/README.md:
     [file-summary] Task Database (tasksDB)
     [heading-1] # Task Database (tasksDB)
     [heading-2] ## Files
-    [heading-3] ### tasks.json
+    [heading-3] ### node.tasks.json
     [heading-3] ### tasks.csv
     [heading-3] ### history/
     [heading-2] ## Data Synchronization
@@ -3176,7 +3169,7 @@ structure from public/tasksDB/external/github-task-manager/README.md:
     [heading-2] ## Best Practices
     [heading-2] ## Future Enhancements
 
-structure from public/tasksDB/external/github-task-manager/tasks.json:
+structure from public/tasksDB/external/github-task-manager/node.tasks.json:
     [json-key] project: {name, description, start_date, end_date, status, +2 more}
     [json-key] categories: [19 items]
     [json-key] workers: [4 items]
@@ -3223,7 +3216,7 @@ structure from tests/e2e/live-multi-project-saves.spec.js:
     function selectProjectAndWait(page, projectId, { expectTaskText, minTotalTasks, maxTotalTasks } = {})  «Switch to a project and wait until its task list characteristics are visible.»
     function waitForAppReady(page)  «Wait until the app has rendered either tasks or the empty-state placeholder.»
     function getWorkerUrl(page)  «Read the rendered Worker URL from the live-site diagnostics panel.»
-    function getTasksFile(page)  «Read the active tasks.json path from the live-site diagnostics panel.»
+    function getTasksFile(page)  «Read the active node.tasks.json path from the live-site diagnostics panel.»
     function getRepoInfo(page)  «Read the active repository identifier from the live-site diagnostics panel.»
     function unlockProject(page, password)  «Unlock the current password-protected project before save actions.»
     function createTestTask(page, taskName = 'Test Task ' + Math.random().toString(36).slice(2,8))  «Create a minimal test task through the live UI and return its generated name.»
@@ -3370,16 +3363,16 @@ structure from tests/unit/task-storage-sync.test.js:
     [describe] TaskDatabase Persistence  «Validate that TaskDatabase correctly loads from and saves to the mock GitHub storage backend.»
 
 structure from tests/unit/tasks-json-format.test.js:
-    [file-summary] tasks.json format validation tests.
-    const TASKS_DB_ROOT  «Absolute path to the root tasksDB directory scanned for tasks.json files.»
+    [file-summary] node.tasks.json format validation tests.
+    const TASKS_DB_ROOT  «Absolute path to the root tasksDB directory scanned for node.tasks.json files.»
     const VALID_PROJECT_STATUS  «Allowed values for the project-level `status` field.»
     const VALID_TASK_STATUS  «Allowed values for a task-level `status` field.»
     const VALID_PRIORITY  «Allowed values for a task-level `priority` field.»
     const VALID_DEP_TYPES  «Allowed dependency link type codes (Finish-to-Start, Start-to-Start, Finish-to-Finish, Start-to-Finish).»
     const DATE_RE  «Regular expression that matches the YYYY-MM-DD date format.»
-    function findTasksJsonFiles(dir, results = [])  «Recursively walk a directory tree and collect all `tasks.json` file paths.»
-    function validateTasksJson(filePath)  «Validate a single `tasks.json` file against the expected schema and return all collected errors and warnings.»
-    [describe] tasks.json format validation  «Validate every tasks.json discovered under the tasksDB directory against the project schema.»
+    function findTasksJsonFiles(dir, results = [])  «Recursively walk a directory tree and collect all `node.tasks.json` file paths.»
+    function validateTasksJson(filePath)  «Validate a single `node.tasks.json` file against the expected schema and return all collected errors and warnings.»
+    [describe] node.tasks.json format validation  «Validate every node.tasks.json discovered under the tasksDB directory against the project schema.»
 
 structure from tests/unit/template-config.test.js:
     [file-summary] Template Config Tests Tests for TEMPLATE_CONFIG structure and values
@@ -3394,7 +3387,7 @@ structure from tests/unit/template-config.test.js:
     [describe] CATEGORIES List  «Validate that the CATEGORIES list is populated with the expected category names.»
 
 structure from tests/unit/validate-schema.js:
-    [file-summary] Schema Validation Script Validates tasks.json against the template schema
+    [file-summary] Schema Validation Script Validates node.tasks.json against the template schema
     const PROJECT_STATUS  «Allowed values for the project-level `status` field.»
     const TASK_STATUS  «Allowed values for a task-level `status` field.»
     const TASK_PRIORITY  «Allowed values for a task-level `priority` field.»
@@ -3775,7 +3768,7 @@ structure from tools/scripts/enrich-tasks-workers.js:
     function main(argv = process.argv)  «Run the script entrypoint for this file.»
 
 structure from tools/scripts/generate-state-files.js:
-    [file-summary] generate-state-files.js ----------------------- Generates derived state JSON files from public/tasksDB/<scope>/<project>/tasks.json Output: public/tasksDB/<scope>/<project>/state/*.json Usage: node to
+    [file-summary] generate-state-files.js ----------------------- Generates derived state JSON files from public/tasksDB/<scope>/<project>/node.tasks.json Output: public/tasksDB/<scope>/<project>/state/*.json Usage: no
     function ensureDir(dirPath)  «Ensure that a directory exists before writing derived files.»
     function writeJson(filePath, data)  «Write a JSON file with pretty-printed output.»
     function generateStateData(tasks)  «Generate derived state payloads from a task list.»
@@ -3786,7 +3779,7 @@ structure from tools/scripts/prepare-public-graph.js:
     function copyGraphDisplayIntoPublic()  «Copy the graph-display source app into the public deployment directory.»
 
 structure from tools/scripts/regenerate-tasks-csv.js:
-    [file-summary] regenerate-tasks-csv.js ------------------------ Generates a flattened CSV export from public/tasksDB/<scope>/<project>/tasks.json Output: public/tasksDB/<scope>/<project>/tasks.csv Usage: node tools/
+    [file-summary] regenerate-tasks-csv.js ------------------------ Generates a flattened CSV export from public/tasksDB/<scope>/<project>/node.tasks.json Output: public/tasksDB/<scope>/<project>/tasks.csv Usage: node t
     function escapeCsvValue(value)  «Escape a value for inclusion in generated CSV output.»
     function main()  «Run the script entrypoint for this file.»
 
@@ -3813,10 +3806,10 @@ structure from tools/scripts/validate-tasks-schema.js:
     [file-summary] TaskDB Task Schema Validator
     function parseArgs(argv)  «Parse CLI arguments for this validation or export script.»
     function sanitizeProjectId(s)  «Sanitize a project id passed through CLI arguments.»
-    function loadTasksJson(projectId)  «Load the tasks.json payload for a project.»
+    function loadTasksJson(projectId)  «Load the node.tasks.json payload for a project.»
     function isValidDateYYYYMMDD(dateStr)  «Check whether a string matches the YYYY-MM-DD date format.»
     function hasTimestampPollution(taskName)  «Check whether a task name appears to contain an injected timestamp.»
-    function validateProjectFile(projectId, tasksJson)  «Validate one project tasks.json payload against the expected schema rules.»
+    function validateProjectFile(projectId, tasksJson)  «Validate one project node.tasks.json payload against the expected schema rules.»
     function main()  «Run the script entrypoint for this file.»
 
 structure from tools/scripts/validate-tasks-workers.js:
@@ -4286,4 +4279,4 @@ api from tools/cloudflare-worker/worker.js:
     [route] PUT /api/tasks
 
 ---
-*145 files indexed · generated by extract_project_spec.py*
+*144 files indexed · generated by extract_project_spec.py*

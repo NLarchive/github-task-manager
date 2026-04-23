@@ -4,7 +4,7 @@ This directory contains the task database in both JSON and CSV formats, managed 
 
 ## Files
 
-### tasks.json
+### node.tasks.json
 - **Format**: JSON (JavaScript Object Notation)
 - **Purpose**: Primary database format with full schema support
 - **Usage**: Loaded by the application for all task operations
@@ -87,9 +87,9 @@ All tasks must conform to the template validation schema defined in:
 ## Backup & Recovery
 
 The complete task history is maintained in git commits:
-- View history: `git log --follow --pretty=format:'%h %ad %an %s' --date=iso -- public/tasksDB/external/github-task-manager/tasks.json`
-- Restore previous version: `git checkout <commit> public/tasksDB/external/github-task-manager/tasks.json`
-- Line ownership: `git blame --line-porcelain public/tasksDB/external/github-task-manager/tasks.json`
+- View history: `git log --follow --pretty=format:'%h %ad %an %s' --date=iso -- public/tasksDB/external/github-task-manager/node.tasks.json`
+- Restore previous version: `git checkout <commit> public/tasksDB/external/github-task-manager/node.tasks.json`
+- Line ownership: `git blame --line-porcelain public/tasksDB/external/github-task-manager/node.tasks.json`
 
 ### Temporary output artifacts
 

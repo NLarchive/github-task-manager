@@ -116,10 +116,10 @@ Response shape:
   "resolvedPath": "D:/.../public/tasksDB/local",
   "projectName": "My Project",
   "rootModule": "tasks.json",
-  "tasksJsonUrl": "/tasksDB/local/my-project/tasks.json",
+  "tasksJsonUrl": "/tasksDB/local/my-project/node.tasks.json",
   "files": [
     {
-      "relativePath": "frontend/tasks.json",
+      "relativePath": "frontend/node.tasks.json",
       "name": "Frontend",
       "label": "Frontend",
       "taskCount": 12,
@@ -247,9 +247,9 @@ Required JSON body:
 {
   "projectId": "github-task-manager",
   "accessPassword": "<project-or-master-password>",
-  "filePath": "public/tasksDB/external/github-task-manager/tasks.json",
+  "filePath": "public/tasksDB/external/github-task-manager/node.tasks.json",
   "content": "{\n  \"tasks\": []\n}",
-  "message": "Update tasks.json",
+  "message": "Update node.tasks.json",
   "actor": "automation-bot"
 }
 ```

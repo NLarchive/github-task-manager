@@ -93,7 +93,7 @@ On mobile it closes after navigation.
 
 ```
 registry.json
-    └─ template-loader.js → fetches tasks.json or template JSON
+    └─ template-loader.js → fetches node.tasks.json or template JSON
             └─ graph-data.js
                     ├─ buildTaskManagementTemplate()   (tasks.json with numeric IDs)
                     ├─ buildProjectTaskTemplate()       (tasks.json with string names)

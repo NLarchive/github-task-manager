@@ -86,7 +86,7 @@ All trigger validation errors with helpful messages
 ### 9. **GitHub Integration**
 - View connected repository: "nlarchive/github-task-manager"
 - All changes commit to main branch
-- Task data stored in repository's tasks.json file
+- Task data stored in repository's node.tasks.json file
 
 ### 10. **User Collaboration**
 - Enter your name at top (saved in localStorage)

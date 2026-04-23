@@ -164,9 +164,9 @@ describe('Calendar Parser', () => {
     const repoRoot = path.join(__dirname, '..', '..');
     const descriptors = listProjectDescriptors(repoRoot);
 
-    expect(descriptors.some((d) => d.scope === 'local' && d.projectId === 'web-e2e-bussines')).toBeTruthy();
+    expect(descriptors.some((d) => d.scope === 'local' && d.projectId === 'web-e2e-bussines1')).toBeTruthy();
     expect(descriptors.some((d) => {
-      if (d.scope !== 'local' || !d.projectId.startsWith('web-e2e-bussines-')) return false;
+      if (d.scope !== 'local' || !d.projectId.startsWith('web-e2e-bussines1-')) return false;
       const normalizedPath = d.tasksJsonPath.replace(/\\/g, '/');
       return normalizedPath.endsWith('src/apps/PRIVATE/1-STRATEGY/crm/node.tasks.json');
     })).toBeTruthy();

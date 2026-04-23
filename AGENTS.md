@@ -87,7 +87,7 @@ D:\web\web-github-task-manager\public\tasksDB\external\first-graph
 D:\web\web-github-task-manager\public\tasksDB\external\first-graph\state
 D:\web\web-github-task-manager\public\tasksDB\external\first-graph\tour
 D:\web\web-github-task-manager\public\tasksDB\external\first-graph\tasks.csv
-D:\web\web-github-task-manager\public\tasksDB\external\first-graph\tasks.json
+D:\web\web-github-task-manager\public\tasksDB\external\first-graph\node.tasks.json
 D:\web\web-github-task-manager\public\tasksDB\external\github-task-manager
 D:\web\web-github-task-manager\public\tasksDB\external\github-task-manager\history
 D:\web\web-github-task-manager\public\tasksDB\external\github-task-manager\state
@@ -95,14 +95,14 @@ D:\web\web-github-task-manager\public\tasksDB\external\github-task-manager\tour
 D:\web\web-github-task-manager\public\tasksDB\external\github-task-manager\tour\graph-tour.json
 D:\web\web-github-task-manager\public\tasksDB\external\github-task-manager\README.md
 D:\web\web-github-task-manager\public\tasksDB\external\github-task-manager\tasks.csv
-D:\web\web-github-task-manager\public\tasksDB\external\github-task-manager\tasks.json
+D:\web\web-github-task-manager\public\tasksDB\external\github-task-manager\node.tasks.json
 D:\web\web-github-task-manager\public\tasksDB\local
 D:\web\web-github-task-manager\public\tasksDB\local\test-tasks
 D:\web\web-github-task-manager\public\tasksDB\local\test-tasks\history
 D:\web\web-github-task-manager\public\tasksDB\local\test-tasks\state
 D:\web\web-github-task-manager\public\tasksDB\local\test-tasks\tour
 D:\web\web-github-task-manager\public\tasksDB\local\test-tasks\tasks.csv
-D:\web\web-github-task-manager\public\tasksDB\local\test-tasks\tasks.json
+D:\web\web-github-task-manager\public\tasksDB\local\test-tasks\node.tasks.json
 D:\web\web-github-task-manager\public\tasksDB\local\digital-income-tasks  (gitignored)
 D:\web\web-github-task-manager\public\tasksDB\local\web-e2e-bussines      (gitignored)
 D:\web\web-github-task-manager\public\index.html

@@ -170,7 +170,7 @@ The GitHub Task Manager successfully passed comprehensive functional testing inc
 
 **GitHub Sync Confirmation**:
 - Task data successfully synced to GitHub repository
-- Upon refresh, tasks.json was re-fetched from GitHub
+- Upon refresh, node.tasks.json was re-fetched from GitHub
 - New task #11 persisted in repository
 
 **Task Details After Refresh**:
@@ -210,7 +210,7 @@ The GitHub Task Manager successfully passed comprehensive functional testing inc
 1. Create task in memory
 2. Validate task
 3. Send to database
-4. Serialize and save to tasks.json
+4. Serialize and save to node.tasks.json
 5. Commit to GitHub repository
 6. Retrieve on refresh via GitHub API (with fallback to local file)
 
