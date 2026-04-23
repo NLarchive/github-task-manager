@@ -145,6 +145,52 @@
   ],
   "tasks": [
     {
+    "task_id": 34,
+    "task_name": "Document IndexedDB Cache, FS Write-Back, and Instant Navigation Architecture",
+    "description": "Document the new architecture for local-folder TaskDB projects: IndexedDB-backed FolderCache for instant load, file hash-based change detection, and browser FS write-back. Detail how navigation performance was improved by pre-positioning nodes and removing unnecessary stabilization waits. Include affected modules (folder-cache.js, local-folder-scanner.js, task-storage-sync.js, main-graph.js), test coverage, and validation steps.",
+    "start_date": "2026-04-23",
+    "end_date": "2026-04-23",
+    "priority": "High",
+    "status": "Done",
+    "progress_percentage": 100,
+    "estimated_hours": 2,
+    "actual_hours": 2,
+    "is_critical_path": false,
+    "tags": [
+      "documentation",
+      "architecture",
+      "local-folder",
+      "performance"
+    ],
+    "category_name": "Documentation",
+    "assigned_workers": [
+      {
+        "name": "AI Copilot",
+        "email": "ai@example.com",
+        "role": "AI Copilot",
+        "worker_id": "ai-copilot"
+      }
+    ],
+    "parent_task_id": null,
+    "creator_id": "ai@example.com",
+    "created_date": "2026-04-23T10:00:00Z",
+    "completed_date": "2026-04-23T12:00:00Z",
+    "acceptance_criteria": [
+      "Project state file documents IndexedDB cache and FS write-back for local-folder projects",
+      "Navigation logic improvements (pre-positioning, instant modal) are described",
+      "Affected modules and test coverage are listed",
+      "Validation steps and outcomes are included"
+    ],
+    "comments": [
+      {
+        "author": "ai@example.com",
+        "timestamp": "2026-04-23T12:00:00Z",
+        "text": "Added comprehensive documentation of the new cache/write-back architecture and navigation performance improvements. All tests passing."
+      }
+    ],
+    "attachments": [],
+    "dependencies": []
+  },
       "task_id": 1,
       "task_name": "Secure GitHub Token Configuration",
       "description": "Remove the personal token input section from the UI. Implement pre-configured GitHub token in config to allow public users to collaborate. Token should be stored securely in environment variables for GitHub Pages deployment.",
