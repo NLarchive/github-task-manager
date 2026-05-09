@@ -145,69 +145,24 @@
   ],
   "tasks": [
     {
-    "task_id": 34,
-    "task_name": "Document IndexedDB Cache, FS Write-Back, and Instant Navigation Architecture",
-    "description": "Document the new architecture for local-folder TaskDB projects: IndexedDB-backed FolderCache for instant load, file hash-based change detection, and browser FS write-back. Detail how navigation performance was improved by pre-positioning nodes and removing unnecessary stabilization waits. Include affected modules (folder-cache.js, local-folder-scanner.js, task-storage-sync.js, main-graph.js), test coverage, and validation steps.",
-    "start_date": "2026-04-23",
-    "end_date": "2026-04-23",
-    "priority": "High",
-    "status": "Done",
-    "progress_percentage": 100,
-    "estimated_hours": 2,
-    "actual_hours": 2,
-    "is_critical_path": false,
-    "tags": [
-      "documentation",
-      "architecture",
-      "local-folder",
-      "performance"
-    ],
-    "category_name": "Documentation",
-    "assigned_workers": [
-      {
-        "name": "AI Copilot",
-        "email": "ai@example.com",
-        "role": "AI Copilot",
-        "worker_id": "ai-copilot"
-      }
-    ],
-    "parent_task_id": null,
-    "creator_id": "ai@example.com",
-    "created_date": "2026-04-23T10:00:00Z",
-    "completed_date": "2026-04-23T12:00:00Z",
-    "acceptance_criteria": [
-      "Project state file documents IndexedDB cache and FS write-back for local-folder projects",
-      "Navigation logic improvements (pre-positioning, instant modal) are described",
-      "Affected modules and test coverage are listed",
-      "Validation steps and outcomes are included"
-    ],
-    "comments": [
-      {
-        "author": "ai@example.com",
-        "timestamp": "2026-04-23T12:00:00Z",
-        "text": "Added comprehensive documentation of the new cache/write-back architecture and navigation performance improvements. All tests passing."
-      }
-    ],
-    "attachments": [],
-    "dependencies": []
-  },
-      "task_id": 1,
-      "task_name": "Secure GitHub Token Configuration",
-      "description": "Remove the personal token input section from the UI. Implement pre-configured GitHub token in config to allow public users to collaborate. Token should be stored securely in environment variables for GitHub Pages deployment.",
+      "task_id": 44,
+      "task_name": "Phase 1 – Foundation & Core Setup",
+      "description": "Establish secure token handling, stabilize the local dev and E2E test environment, align task data files, review the public token security model, and archive the legacy task file. These foundational steps unlock all downstream delivery.",
       "start_date": "2025-12-10",
-      "end_date": "2025-12-11",
+      "end_date": "2025-12-13",
       "priority": "Critical",
-      "status": "Done",
+      "status": "Completed",
       "progress_percentage": 100,
-      "estimated_hours": 4,
-      "actual_hours": 4,
+      "estimated_hours": 11,
+      "actual_hours": 11,
       "is_critical_path": true,
+      "category_name": "Project Setup",
       "tags": [
-        "frontend",
-        "authentication",
-        "setup"
+        "setup",
+        "security",
+        "devx",
+        "foundation"
       ],
-      "category_name": "Frontend Development",
       "assigned_workers": [
         {
           "name": "Developer",
@@ -219,1019 +174,957 @@
       "parent_task_id": null,
       "creator_id": "system@example.com",
       "created_date": "2025-12-10T09:00:00Z",
-      "completed_date": "2025-12-10T16:00:00Z",
-      "comments": [
-        {
-          "author": "public@example.com",
-          "timestamp": "2025-12-10T14:00:00Z",
-          "text": "Need to ensure this works with GitHub Actions secrets"
-        },
-        {
-          "author": "dev@example.com",
-          "timestamp": "2025-12-10T16:00:00Z",
-          "text": "Completed - Token is now loaded from github-token.js which is gitignored. For production, GitHub Actions injects the token from secrets."
-        }
-      ],
-      "attachments": [],
-      "dependencies": []
-    },
-    {
-      "task_id": 2,
-      "task_name": "Update Task Form with All Required Fields",
-      "description": "Add form inputs for all non-automatable task fields from template schema. Include fields for: task_name, description, status, priority, start_date, end_date, estimated_hours, category_name, tags, assigned_workers, dependencies, parent_task_id, is_critical_path. Auto-populate task_id, created_date, and creator_id.",
+      "completed_date": "2025-12-13T12:00:00Z",
       "acceptance_criteria": [
-        "All schema fields have corresponding form inputs",
-        "task_id, created_date, creator_id are auto-populated",
-        "Validation errors show before submission",
-        "Form resets after successful creation"
+        "GitHub token loaded securely from config, not from UI input",
+        "Local dev and Playwright tests run without hitting production",
+        "tasks.csv and node.tasks.json are in sync",
+        "Token security model documented and validated",
+        "Legacy root task file archived without modifying canonical database"
       ],
-      "start_date": "2025-12-10",
-      "end_date": "2025-12-12",
-      "priority": "Critical",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 8,
-      "actual_hours": 7,
-      "is_critical_path": true,
-      "tags": [
-        "frontend",
-        "forms",
-        "validation"
-      ],
-      "category_name": "Frontend Development",
-      "assigned_workers": [
-        {
-          "name": "Developer",
-          "email": "dev@example.com",
-          "role": "Full Stack Developer",
-          "worker_id": "dev-fullstack"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-10T09:00:00Z",
-      "completed_date": null,
+      "comments": [],
+      "attachments": [],
+      "dependencies": [],
       "subtasks": [
         {
-          "task_name": "Add text inputs for task_name and description",
+          "task_id": 1,
+          "task_name": "Secure GitHub Token Configuration",
+          "description": "Remove the personal token input section from the UI. Implement pre-configured GitHub token in config to allow public users to collaborate. Token should be stored securely in environment variables for GitHub Pages deployment.",
           "status": "Done",
-          "estimated_hours": 1,
           "priority": "Critical",
-          "assigned_workers": []
+          "estimated_hours": 4,
+          "is_critical_path": true,
+          "category_name": "Frontend Development",
+          "tags": [
+            "frontend",
+            "authentication",
+            "setup"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [],
+          "subtasks": [],
+          "comments": [
+            {
+              "author": "public@example.com",
+              "timestamp": "2025-12-10T14:00:00Z",
+              "text": "Need to ensure this works with GitHub Actions secrets"
+            },
+            {
+              "author": "dev@example.com",
+              "timestamp": "2025-12-10T16:00:00Z",
+              "text": "Completed - Token is now loaded from github-token.js which is gitignored. For production, GitHub Actions injects the token from secrets."
+            }
+          ],
+          "attachments": [],
+          "actual_hours": 4
         },
         {
-          "task_name": "Add dropdowns for status, priority, category",
+          "task_id": 11,
+          "task_name": "Stabilize Local Dev & E2E Test Setup",
+          "description": "Fix local dev/test issues: make token loading safe when no injected variable exists, point the app to the deployed tasks database file, and stabilize Playwright to run locally without hitting production.",
           "status": "Done",
-          "estimated_hours": 2,
           "priority": "High",
-          "assigned_workers": []
+          "estimated_hours": 3,
+          "is_critical_path": true,
+          "category_name": "Testing",
+          "tags": [
+            "bugfix",
+            "playwright",
+            "devx"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 3
         },
         {
-          "task_name": "Add date pickers for start_date and end_date",
+          "task_id": 12,
+          "task_name": "Sync tasks.csv with node.tasks.json",
+          "description": "Update /public/tasksDB/tasks.csv so it reflects the same project state as /public/tasksDB/node.tasks.json (statuses, dates, and any newly added tasks).",
           "status": "Done",
-          "estimated_hours": 1,
-          "priority": "High",
-          "assigned_workers": []
-        },
-        {
-          "task_name": "Add tags input with chip UI",
-          "status": "Done",
-          "estimated_hours": 2,
           "priority": "Medium",
-          "assigned_workers": []
+          "estimated_hours": 1,
+          "is_critical_path": false,
+          "category_name": "Maintenance",
+          "tags": [
+            "data",
+            "reporting"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 1
         },
         {
-          "task_name": "Add dependency selector with type dropdown",
+          "task_id": 13,
+          "task_name": "Review Public Token Strategy",
+          "description": "Confirm the intended security model for public collaboration (token injection, permissions/scoping, abuse prevention). Document the approach and constraints in README/tools docs.",
           "status": "Done",
-          "estimated_hours": 2,
           "priority": "High",
+          "estimated_hours": 2,
+          "is_critical_path": true,
+          "category_name": "Documentation",
+          "tags": [
+            "security",
+            "documentation"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [
+            {
+              "predecessor_task_id": 11,
+              "type": "FS",
+              "lag_days": 0
+            }
+          ],
+          "subtasks": [],
+          "comments": [
+            {
+              "author": "dev@example.com",
+              "timestamp": "2025-12-13T03:00:00Z",
+              "text": "Added README guidance and GH Actions note; next steps: finalize token model and add deployment docs."
+            },
+            {
+              "author": "dev@example.com",
+              "timestamp": "2025-12-13T12:00:00Z",
+              "text": "Completed: token model documented, .gitignore updated for derived files, CI step design ready."
+            }
+          ],
+          "attachments": [],
+          "actual_hours": 2
+        },
+        {
+          "task_id": 14,
+          "task_name": "Archive legacy root node.tasks.json",
+          "description": "Preserve the older repo-root node.tasks.json as an immutable history snapshot under /public/tasksDB/history without changing the canonical runtime database.",
+          "status": "Done",
+          "priority": "Medium",
+          "estimated_hours": 1,
+          "is_critical_path": false,
+          "category_name": "Maintenance",
+          "tags": [
+            "data",
+            "history"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 1
+        }
+      ]
+    },
+    {
+      "task_id": 45,
+      "task_name": "Phase 2 – Core Task Management",
+      "description": "Build the complete task form with all required fields, implement task automation logic, add subtask and parent-child support, define dependencies with critical path detection, enable public collaboration, and add clickable dashboard stat cards.",
+      "start_date": "2025-12-10",
+      "end_date": "2025-12-19",
+      "priority": "Critical",
+      "status": "Completed",
+      "progress_percentage": 100,
+      "estimated_hours": 46,
+      "actual_hours": 44,
+      "is_critical_path": true,
+      "category_name": "Backend Development",
+      "tags": [
+        "forms",
+        "automation",
+        "dependencies",
+        "collaboration",
+        "crud"
+      ],
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
+        }
+      ],
+      "parent_task_id": null,
+      "creator_id": "system@example.com",
+      "created_date": "2025-12-10T09:00:00Z",
+      "completed_date": "2025-12-19T18:00:00Z",
+      "acceptance_criteria": [
+        "All schema fields have form inputs with validation",
+        "task_id, created_date, creator_id auto-populated on create",
+        "Parent-child task relationships supported via parent_task_id",
+        "Dependency types FS/SS/FF/SF with circular cycle detection",
+        "Public collaboration with comment system working",
+        "Dashboard stat cards clickable for status filtering"
+      ],
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 44,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "subtasks": [
+        {
+          "task_id": 2,
+          "task_name": "Update Task Form with All Required Fields",
+          "description": "Add form inputs for all non-automatable task fields from template schema. Include fields for: task_name, description, status, priority, start_date, end_date, estimated_hours, category_name, tags, assigned_workers, dependencies, parent_task_id, is_critical_path. Auto-populate task_id, created_date, and creator_id.",
+          "status": "Done",
+          "priority": "Critical",
+          "estimated_hours": 8,
+          "is_critical_path": true,
+          "category_name": "Frontend Development",
+          "tags": [
+            "frontend",
+            "forms",
+            "validation"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [],
           "subtasks": [
             {
-              "task_name": "Build predecessor task picker",
+              "task_name": "Add text inputs for task_name and description",
               "status": "Done",
               "estimated_hours": 1,
+              "priority": "Critical",
               "assigned_workers": []
             },
             {
-              "task_name": "Add dependency type selector (FS/SS/FF/SF)",
+              "task_name": "Add dropdowns for status, priority, category",
               "status": "Done",
-              "estimated_hours": 0.5,
+              "estimated_hours": 2,
+              "priority": "High",
               "assigned_workers": []
             },
             {
-              "task_name": "Add lag_days input",
+              "task_name": "Add date pickers for start_date and end_date",
               "status": "Done",
-              "estimated_hours": 0.5,
+              "estimated_hours": 1,
+              "priority": "High",
+              "assigned_workers": []
+            },
+            {
+              "task_name": "Add tags input with chip UI",
+              "status": "Done",
+              "estimated_hours": 2,
+              "priority": "Medium",
+              "assigned_workers": []
+            },
+            {
+              "task_name": "Add dependency selector with type dropdown",
+              "status": "Done",
+              "estimated_hours": 2,
+              "priority": "High",
+              "subtasks": [
+                {
+                  "task_name": "Build predecessor task picker",
+                  "status": "Done",
+                  "estimated_hours": 1,
+                  "assigned_workers": []
+                },
+                {
+                  "task_name": "Add dependency type selector (FS/SS/FF/SF)",
+                  "status": "Done",
+                  "estimated_hours": 0.5,
+                  "assigned_workers": []
+                },
+                {
+                  "task_name": "Add lag_days input",
+                  "status": "Done",
+                  "estimated_hours": 0.5,
+                  "assigned_workers": []
+                }
+              ],
               "assigned_workers": []
             }
           ],
-          "assigned_workers": []
-        }
-      ],
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 1,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 3,
-      "task_name": "Implement Task Automation Logic",
-      "description": "Enhance template-automation.js to automatically populate task_id, created_date, creator_id, and other automatable fields. Ensure validation happens before task creation. Support status normalization and default values from TEMPLATE_CONFIG.",
-      "start_date": "2025-12-11",
-      "end_date": "2025-12-13",
-      "priority": "High",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 6,
-      "actual_hours": 5,
-      "is_critical_path": true,
-      "tags": [
-        "backend",
-        "automation",
-        "templates"
-      ],
-      "category_name": "Backend Development",
-      "assigned_workers": [
-        {
-          "name": "Developer",
-          "email": "dev@example.com",
-          "role": "Full Stack Developer",
-          "worker_id": "dev-fullstack"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-10T09:00:00Z",
-      "completed_date": null,
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 2,
-          "type": "SS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 4,
-      "task_name": "Create Subtask Support",
-      "description": "Implement parent_task_id functionality to enable subtask creation. Update the UI to show parent-child relationships and support creating subtasks from task detail view. Ensure dependencies work correctly with subtasks.",
-      "start_date": "2025-12-13",
-      "end_date": "2025-12-15",
-      "priority": "High",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 8,
-      "actual_hours": 8,
-      "is_critical_path": false,
-      "tags": [
-        "frontend",
-        "hierarchy",
-        "subtasks"
-      ],
-      "category_name": "Frontend Development",
-      "assigned_workers": [
-        {
-          "name": "Developer",
-          "email": "dev@example.com",
-          "role": "Full Stack Developer",
-          "worker_id": "dev-fullstack"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-10T09:00:00Z",
-      "completed_date": "2025-12-11T16:00:00Z",
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 2,
-          "type": "FS",
-          "lag_days": 1
-        }
-      ]
-    },
-    {
-      "task_id": 5,
-      "task_name": "Implement Task Dependencies & Critical Path",
-      "description": "Add UI controls for defining task dependencies with types (FS, SS, FF, SF) and lag_days. Implement critical path visualization. Validate dependency chains to prevent circular dependencies.",
-      "acceptance_criteria": [
-        "Dependency type selector supports FS, SS, FF, SF",
-        "Lag days field accepts positive integers",
-        "Circular dependency detection prevents invalid chains",
-        "Critical path highlighted visually on the graph",
-        "Dependency links render correctly between nodes"
-      ],
-      "start_date": "2025-12-14",
-      "end_date": "2025-12-17",
-      "priority": "High",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 10,
-      "actual_hours": 10,
-      "is_critical_path": true,
-      "tags": [
-        "frontend",
-        "dependencies",
-        "project-management"
-      ],
-      "category_name": "Frontend Development",
-      "assigned_workers": [
-        {
-          "name": "Developer",
-          "email": "dev@example.com",
-          "role": "Full Stack Developer",
-          "worker_id": "dev-fullstack"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-10T09:00:00Z",
-      "completed_date": "2025-12-11T16:00:00Z",
-      "subtasks": [
-        {
-          "task_name": "Build dependency type UI (FS/SS/FF/SF)",
-          "status": "Done",
-          "estimated_hours": 3,
-          "priority": "High",
-          "assigned_workers": []
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 7,
+          "acceptance_criteria": [
+            "All schema fields have corresponding form inputs",
+            "task_id, created_date, creator_id are auto-populated",
+            "Validation errors show before submission",
+            "Form resets after successful creation"
+          ]
         },
         {
-          "task_name": "Implement circular dependency validator",
+          "task_id": 3,
+          "task_name": "Implement Task Automation Logic",
+          "description": "Enhance template-automation.js to automatically populate task_id, created_date, creator_id, and other automatable fields. Ensure validation happens before task creation. Support status normalization and default values from TEMPLATE_CONFIG.",
           "status": "Done",
-          "estimated_hours": 3,
           "priority": "High",
+          "estimated_hours": 6,
+          "is_critical_path": true,
+          "category_name": "Backend Development",
+          "tags": [
+            "backend",
+            "automation",
+            "templates"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [
+            {
+              "predecessor_task_id": 2,
+              "type": "FS",
+              "lag_days": 0
+            }
+          ],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 5
+        },
+        {
+          "task_id": 4,
+          "task_name": "Create Subtask Support",
+          "description": "Implement parent_task_id functionality to enable subtask creation. Update the UI to show parent-child relationships and support creating subtasks from task detail view. Ensure dependencies work correctly with subtasks.",
+          "status": "Done",
+          "priority": "High",
+          "estimated_hours": 8,
+          "is_critical_path": false,
+          "category_name": "Frontend Development",
+          "tags": [
+            "frontend",
+            "hierarchy",
+            "subtasks"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [
+            {
+              "predecessor_task_id": 2,
+              "type": "FS",
+              "lag_days": 0
+            }
+          ],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 8
+        },
+        {
+          "task_id": 5,
+          "task_name": "Implement Task Dependencies & Critical Path",
+          "description": "Add UI controls for defining task dependencies with types (FS, SS, FF, SF) and lag_days. Implement critical path visualization. Validate dependency chains to prevent circular dependencies.",
+          "status": "Done",
+          "priority": "High",
+          "estimated_hours": 10,
+          "is_critical_path": true,
+          "category_name": "Frontend Development",
+          "tags": [
+            "frontend",
+            "dependencies",
+            "project-management"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [
+            {
+              "predecessor_task_id": 3,
+              "type": "FS",
+              "lag_days": 0
+            }
+          ],
           "subtasks": [
             {
-              "task_name": "Build task dependency graph traversal",
+              "task_name": "Build dependency type UI (FS/SS/FF/SF)",
               "status": "Done",
-              "estimated_hours": 1.5,
+              "estimated_hours": 3,
+              "priority": "High",
               "assigned_workers": []
             },
             {
-              "task_name": "Add cycle detection algorithm",
+              "task_name": "Implement circular dependency validator",
               "status": "Done",
-              "estimated_hours": 1.5,
+              "estimated_hours": 3,
+              "priority": "High",
+              "subtasks": [
+                {
+                  "task_name": "Build task dependency graph traversal",
+                  "status": "Done",
+                  "estimated_hours": 1.5,
+                  "assigned_workers": []
+                },
+                {
+                  "task_name": "Add cycle detection algorithm",
+                  "status": "Done",
+                  "estimated_hours": 1.5,
+                  "assigned_workers": []
+                }
+              ],
+              "assigned_workers": []
+            },
+            {
+              "task_name": "Implement critical path highlighting",
+              "status": "Done",
+              "estimated_hours": 4,
+              "priority": "High",
               "assigned_workers": []
             }
           ],
-          "assigned_workers": []
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 10,
+          "acceptance_criteria": [
+            "Dependency type selector supports FS, SS, FF, SF",
+            "Lag days field accepts positive integers",
+            "Circular dependency detection prevents invalid chains",
+            "Critical path highlighted visually on the graph",
+            "Dependency links render correctly between nodes"
+          ]
         },
         {
-          "task_name": "Implement critical path highlighting",
+          "task_id": 6,
+          "task_name": "Implement Public Collaboration Features",
+          "description": "Add user name input for public collaborators. Implement comment system on tasks. Add worker assignment without authentication. Enable status updates and progress tracking for all users. Show who made changes and when.",
           "status": "Done",
-          "estimated_hours": 4,
           "priority": "High",
-          "assigned_workers": []
+          "estimated_hours": 12,
+          "is_critical_path": true,
+          "category_name": "Frontend Development",
+          "tags": [
+            "frontend",
+            "collaboration",
+            "ux"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [
+            {
+              "predecessor_task_id": 2,
+              "type": "FS",
+              "lag_days": 0
+            }
+          ],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 12
+        },
+        {
+          "task_id": 15,
+          "task_name": "Clickable dashboard stat cards",
+          "description": "Make the dashboard stat cards clickable so users can quickly filter tasks by status (All, Not Started, In Progress, Completed).",
+          "status": "Done",
+          "priority": "Medium",
+          "estimated_hours": 2,
+          "is_critical_path": false,
+          "category_name": "Feature",
+          "tags": [
+            "ux",
+            "filters"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 2
         }
+      ]
+    },
+    {
+      "task_id": 46,
+      "task_name": "Phase 3 – Security, Timeline & GitHub Integration",
+      "description": "Add password protection for all modification operations, create a timeline/Gantt visualization, implement two-way GitHub Issues sync, and expose an MCP endpoint for marking critical path tasks. This phase completes the core feature surface.",
+      "start_date": "2025-12-11",
+      "end_date": "2025-12-19",
+      "priority": "High",
+      "status": "Completed",
+      "progress_percentage": 100,
+      "estimated_hours": 22,
+      "actual_hours": 22,
+      "is_critical_path": true,
+      "category_name": "Feature",
+      "tags": [
+        "security",
+        "timeline",
+        "github-issues",
+        "api"
+      ],
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
+        }
+      ],
+      "parent_task_id": null,
+      "creator_id": "system@example.com",
+      "created_date": "2025-12-11T21:00:00Z",
+      "completed_date": "2025-12-19T18:00:00Z",
+      "acceptance_criteria": [
+        "View-only operations work without password; create/edit/delete blocked without correct password",
+        "Timeline/Gantt view renders task date axis with status colours and dependency lines",
+        "Two-way GitHub Issues sync creates/updates issues from tasks and vice versa",
+        "MCP endpoint accepts POST and marks tasks as critical path"
       ],
       "comments": [],
       "attachments": [],
       "dependencies": [
         {
-          "predecessor_task_id": 3,
+          "predecessor_task_id": 45,
           "type": "FS",
           "lag_days": 0
+        }
+      ],
+      "subtasks": [
+        {
+          "task_id": 16,
+          "task_name": "Add Password Protection for Modifications",
+          "description": "Implement a simple password gate for all modification actions (create, edit, delete tasks). Users can view tasks and dashboard freely, but must enter a shared password before making changes. GitHub Pages uses a repo Secret injected at deploy time; local dev is unlocked by default.",
+          "status": "Done",
+          "priority": "High",
+          "estimated_hours": 3,
+          "is_critical_path": true,
+          "category_name": "Feature",
+          "tags": [
+            "security",
+            "authentication",
+            "ux"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [],
+          "subtasks": [
+            {
+              "task_name": "Create password prompt modal",
+              "status": "Done",
+              "estimated_hours": 1,
+              "priority": "High",
+              "assigned_workers": []
+            },
+            {
+              "task_name": "Wire password check to all mutation actions",
+              "status": "Done",
+              "estimated_hours": 1,
+              "priority": "High",
+              "assigned_workers": []
+            },
+            {
+              "task_name": "Add sessionStorage persistence",
+              "status": "Done",
+              "estimated_hours": 0.5,
+              "priority": "Medium",
+              "assigned_workers": []
+            },
+            {
+              "task_name": "Add config toggle for local dev bypass",
+              "status": "Done",
+              "estimated_hours": 0.5,
+              "priority": "Medium",
+              "assigned_workers": []
+            }
+          ],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 3,
+          "acceptance_criteria": [
+            "View-only operations work without password",
+            "Create/edit/delete blocked without correct password",
+            "Password persists in sessionStorage",
+            "Local dev unlocked by default"
+          ]
+        },
+        {
+          "task_id": 17,
+          "task_name": "Create Task Timeline Visualization",
+          "description": "Add a visual timeline/Gantt-style view showing tasks on a date axis. Display task start/end dates, status colors, dependencies as connecting lines. Allow toggle between list view and timeline view. Show clear distinction between completed and pending tasks.",
+          "status": "Done",
+          "priority": "High",
+          "estimated_hours": 6,
+          "is_critical_path": true,
+          "category_name": "Feature",
+          "tags": [
+            "visualization",
+            "timeline",
+            "dashboard",
+            "ux"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [
+            {
+              "predecessor_task_id": 16,
+              "type": "FS",
+              "lag_days": 0
+            }
+          ],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 6
+        },
+        {
+          "task_id": 18,
+          "task_name": "GitHub Issues Sync",
+          "description": "Two-way sync between tasks and GitHub Issues. Create issues from tasks, import issues as tasks. Keep status synchronized. Show issue number and link on task cards. Use GitHub API to read/write issues.",
+          "status": "Done",
+          "priority": "High",
+          "estimated_hours": 8,
+          "is_critical_path": true,
+          "category_name": "Feature",
+          "tags": [
+            "github",
+            "issues",
+            "sync",
+            "integration"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [
+            {
+              "predecessor_task_id": 17,
+              "type": "FS",
+              "lag_days": 0
+            }
+          ],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 8
+        },
+        {
+          "task_id": 26,
+          "task_name": "create and mcp endpoint",
+          "description": "Create a new API endpoint /api/create-mcp that accepts a POST request with a list of task IDs and marks them as critical path tasks (is_critical_path=true). Validate input, update node.tasks.json, and return success/failure response.",
+          "status": "In Progress",
+          "priority": "High",
+          "estimated_hours": 5,
+          "is_critical_path": false,
+          "category_name": "Backend Development",
+          "tags": [
+            "backend",
+            "api",
+            "critical-path"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 0
         }
       ]
     },
     {
-      "task_id": 6,
-      "task_name": "Implement Public Collaboration Features",
-      "description": "Add user name input for public collaborators. Implement comment system on tasks. Add worker assignment without authentication. Enable status updates and progress tracking for all users. Show who made changes and when.",
+      "task_id": 47,
+      "task_name": "Phase 4 – Testing & Deployment",
+      "description": "Comprehensive testing of the task creation flow, E2E tests for password, timeline, and GitHub Issues, and deployment to GitHub Pages via GitHub Actions with environment secrets injection.",
+      "start_date": "2025-12-16",
+      "end_date": "2025-12-23",
+      "priority": "High",
+      "status": "Completed",
+      "progress_percentage": 100,
+      "estimated_hours": 18,
+      "actual_hours": 15,
+      "is_critical_path": true,
+      "category_name": "Testing",
+      "tags": [
+        "testing",
+        "playwright",
+        "deployment",
+        "ci-cd"
+      ],
+      "assigned_workers": [
+        {
+          "name": "QA Tester",
+          "email": "qa@example.com",
+          "role": "Quality Assurance Engineer",
+          "worker_id": "qa-engineer"
+        },
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
+        }
+      ],
+      "parent_task_id": null,
+      "creator_id": "system@example.com",
+      "created_date": "2025-12-16T09:00:00Z",
+      "completed_date": "2025-12-23T18:00:00Z",
+      "acceptance_criteria": [
+        "All task creation field types tested including auto-population",
+        "E2E tests cover password protection, timeline, and GitHub Issues sync",
+        "GitHub Actions workflow triggers on push to main",
+        "Token injected from repo secrets at deploy time",
+        "Public URL serves the app and all CRUD operations work on live deployment"
+      ],
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 46,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "subtasks": [
+        {
+          "task_id": 7,
+          "task_name": "Test Task Creation & Automation",
+          "description": "Comprehensive testing of task creation flow with all field types. Verify auto-population of task_id, dates, and creator. Test validation error messages. Test with various input combinations.",
+          "status": "Done",
+          "priority": "High",
+          "estimated_hours": 8,
+          "is_critical_path": false,
+          "category_name": "Testing",
+          "tags": [
+            "testing",
+            "qa",
+            "validation"
+          ],
+          "assigned_workers": [
+            {
+              "name": "QA Tester",
+              "email": "qa@example.com",
+              "role": "Quality Assurance Engineer",
+              "worker_id": "qa-engineer"
+            }
+          ],
+          "dependencies": [],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 6
+        },
+        {
+          "task_id": 19,
+          "task_name": "E2E Tests for New Features",
+          "description": "Create Playwright E2E tests for: 1) Password protection flow (blocked without password, allowed with password), 2) Timeline view rendering and interaction, 3) GitHub Issues sync operations. Test locally before deploying.",
+          "status": "Done",
+          "priority": "High",
+          "estimated_hours": 4,
+          "is_critical_path": false,
+          "category_name": "Testing",
+          "tags": [
+            "testing",
+            "playwright",
+            "e2e"
+          ],
+          "assigned_workers": [
+            {
+              "name": "QA Tester",
+              "email": "qa@example.com",
+              "role": "Quality Assurance Engineer",
+              "worker_id": "qa-engineer"
+            }
+          ],
+          "dependencies": [],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 4
+        },
+        {
+          "task_id": 9,
+          "task_name": "Deploy to GitHub Pages",
+          "description": "Setup GitHub Actions workflow to deploy the task manager to GitHub Pages. Configure environment variables for GitHub token. Test public access and collaboration features on live deployment.",
+          "status": "Done",
+          "priority": "Critical",
+          "estimated_hours": 6,
+          "is_critical_path": true,
+          "category_name": "Deployment",
+          "tags": [
+            "deployment",
+            "ci-cd",
+            "github-actions"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [
+            {
+              "predecessor_task_id": 7,
+              "type": "FS",
+              "lag_days": 0
+            }
+          ],
+          "subtasks": [
+            {
+              "task_name": "Create deploy.yml GitHub Actions workflow",
+              "status": "Done",
+              "estimated_hours": 2,
+              "priority": "Critical",
+              "assigned_workers": []
+            },
+            {
+              "task_name": "Configure environment secrets injection",
+              "status": "Done",
+              "estimated_hours": 1,
+              "priority": "High",
+              "assigned_workers": []
+            },
+            {
+              "task_name": "Smoke test live deployment",
+              "status": "Done",
+              "estimated_hours": 2,
+              "priority": "High",
+              "subtasks": [
+                {
+                  "task_name": "Verify task list renders",
+                  "status": "Done",
+                  "estimated_hours": 0.5,
+                  "assigned_workers": []
+                },
+                {
+                  "task_name": "Verify CRUD operations",
+                  "status": "Done",
+                  "estimated_hours": 1,
+                  "assigned_workers": []
+                },
+                {
+                  "task_name": "Verify password protection gate",
+                  "status": "Done",
+                  "estimated_hours": 0.5,
+                  "assigned_workers": []
+                }
+              ],
+              "assigned_workers": []
+            }
+          ],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 5,
+          "acceptance_criteria": [
+            "GitHub Actions workflow triggers on push to main",
+            "Token injected from repo secrets at deploy time",
+            "Public URL serves the app correctly",
+            "All CRUD operations work on live deployment"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": 48,
+      "task_name": "Phase 5 – Quality & Validation Tooling",
+      "description": "Implement automated CI checks for commit format compliance, create a schema validation script for all node.tasks.json files, and standardize validation/enrichment tooling under consistent naming conventions.",
       "start_date": "2025-12-15",
       "end_date": "2025-12-18",
       "priority": "High",
-      "status": "Done",
+      "status": "Completed",
       "progress_percentage": 100,
       "estimated_hours": 12,
       "actual_hours": 12,
       "is_critical_path": true,
-      "tags": [
-        "frontend",
-        "collaboration",
-        "ux"
-      ],
-      "category_name": "Frontend Development",
-      "assigned_workers": [
-        {
-          "name": "Developer",
-          "email": "dev@example.com",
-          "role": "Full Stack Developer",
-          "worker_id": "dev-fullstack"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-10T09:00:00Z",
-      "completed_date": "2025-12-11T16:00:00Z",
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 2,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 7,
-      "task_name": "Test Task Creation & Automation",
-      "description": "Comprehensive testing of task creation flow with all field types. Verify auto-population of task_id, dates, and creator. Test validation error messages. Test with various input combinations.",
-      "start_date": "2025-12-16",
-      "end_date": "2025-12-19",
-      "priority": "High",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 8,
-      "actual_hours": 6,
-      "is_critical_path": false,
-      "tags": [
-        "testing",
-        "qa",
-        "validation"
-      ],
-      "category_name": "Testing",
-      "assigned_workers": [
-        {
-          "name": "QA Tester",
-          "email": "qa@example.com",
-          "role": "Quality Assurance Engineer",
-          "worker_id": "qa-engineer"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-10T09:00:00Z",
-      "completed_date": null,
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 3,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 8,
-      "task_name": "Update Documentation & README",
-      "description": "Create comprehensive documentation for public users on how to use the task manager. Include examples of creating tasks, managing dependencies, setting status, and collaborating. Add developer setup guide for GitHub Pages deployment.",
-      "start_date": "2025-12-20",
-      "end_date": "2025-12-22",
-      "priority": "Medium",
-      "status": "In Progress",
-      "progress_percentage": 60,
-      "estimated_hours": 6,
-      "actual_hours": 3,
-      "is_critical_path": false,
-      "tags": [
-        "documentation",
-        "guides",
-        "user-manual"
-      ],
-      "category_name": "Documentation",
-      "assigned_workers": [
-        {
-          "name": "Developer",
-          "email": "dev@example.com",
-          "role": "Full Stack Developer",
-          "worker_id": "dev-fullstack"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-10T09:00:00Z",
-      "completed_date": null,
-      "comments": [
-        {
-          "author": "dev@example.com",
-          "timestamp": "2025-12-13T03:00:00Z",
-          "text": "Added contributing guidance on generated task files and workflow; more docs pending."
-        },
-        {
-          "author": "dev@example.com",
-          "timestamp": "2025-12-13T12:00:00Z",
-          "text": "Added CONTRIBUTING.md draft and npm regeneration scripts to package.json."
-        }
-      ],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 6,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 9,
-      "task_name": "Deploy to GitHub Pages",
-      "description": "Setup GitHub Actions workflow to deploy the task manager to GitHub Pages. Configure environment variables for GitHub token. Test public access and collaboration features on live deployment.",
-      "acceptance_criteria": [
-        "GitHub Actions workflow triggers on push to main",
-        "Token injected from repo secrets at deploy time",
-        "Public URL serves the app correctly",
-        "All CRUD operations work on live deployment"
-      ],
-      "start_date": "2025-12-20",
-      "end_date": "2025-12-23",
-      "priority": "Critical",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 6,
-      "actual_hours": 5,
-      "is_critical_path": true,
-      "tags": [
-        "deployment",
-        "ci-cd",
-        "github-actions"
-      ],
-      "category_name": "Deployment",
-      "assigned_workers": [
-        {
-          "name": "Developer",
-          "email": "dev@example.com",
-          "role": "Full Stack Developer",
-          "worker_id": "dev-fullstack"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-10T09:00:00Z",
-      "completed_date": "2025-12-23T18:00:00Z",
-      "subtasks": [
-        {
-          "task_name": "Create deploy.yml GitHub Actions workflow",
-          "status": "Done",
-          "estimated_hours": 2,
-          "priority": "Critical",
-          "assigned_workers": []
-        },
-        {
-          "task_name": "Configure environment secrets injection",
-          "status": "Done",
-          "estimated_hours": 1,
-          "priority": "High",
-          "assigned_workers": []
-        },
-        {
-          "task_name": "Smoke test live deployment",
-          "status": "Done",
-          "estimated_hours": 2,
-          "priority": "High",
-          "subtasks": [
-            {
-              "task_name": "Verify task list renders",
-              "status": "Done",
-              "estimated_hours": 0.5,
-              "assigned_workers": []
-            },
-            {
-              "task_name": "Verify CRUD operations",
-              "status": "Done",
-              "estimated_hours": 1,
-              "assigned_workers": []
-            },
-            {
-              "task_name": "Verify password protection gate",
-              "status": "Done",
-              "estimated_hours": 0.5,
-              "assigned_workers": []
-            }
-          ],
-          "assigned_workers": []
-        }
-      ],
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 7,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 10,
-      "task_name": "Project Retrospective",
-      "description": "Conduct project retrospective to review what went well, what could be improved, and lessons learned. Document findings and create improvement tasks for next iteration.",
-      "start_date": "2025-12-24",
-      "end_date": "2025-12-26",
-      "priority": "Medium",
-      "status": "In Progress",
-      "progress_percentage": 25,
-      "estimated_hours": 4,
-      "actual_hours": 0,
-      "is_critical_path": false,
-      "tags": [
-        "retrospective",
-        "process-improvement",
-        "team"
-      ],
-      "category_name": "Retrospective",
-      "assigned_workers": [
-        {
-          "name": "Public User",
-          "email": "public@example.com",
-          "role": "Collaborator",
-          "worker_id": "collab-public"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-10T09:00:00Z",
-      "completed_date": null,
-      "comments": [
-        {
-          "author": "dev@example.com",
-          "timestamp": "2025-12-13T03:00:00Z",
-          "text": "Kickoff: captured conflicts and workstream improvements (ignore derived files; rebase workflow)."
-        }
-      ],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 9,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 11,
-      "task_name": "Stabilize Local Dev & E2E Test Setup",
-      "description": "Fix local dev/test issues: make token loading safe when no injected variable exists, point the app to the deployed tasks database file, and stabilize Playwright to run locally without hitting production.",
-      "start_date": "2025-12-11",
-      "end_date": "2025-12-11",
-      "priority": "High",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 3,
-      "actual_hours": 3,
-      "is_critical_path": true,
-      "tags": [
-        "bugfix",
-        "playwright",
-        "devx"
-      ],
-      "category_name": "Testing",
-      "assigned_workers": [
-        {
-          "name": "Developer",
-          "email": "dev@example.com",
-          "role": "Full Stack Developer",
-          "worker_id": "dev-fullstack"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-11T17:30:00Z",
-      "completed_date": "2025-12-11T18:00:00Z",
-      "comments": [],
-      "attachments": [],
-      "dependencies": []
-    },
-    {
-      "task_id": 12,
-      "task_name": "Sync tasks.csv with node.tasks.json",
-      "description": "Update /public/tasksDB/tasks.csv so it reflects the same project state as /public/tasksDB/node.tasks.json (statuses, dates, and any newly added tasks).",
-      "start_date": "2025-12-11",
-      "end_date": "2025-12-12",
-      "priority": "Medium",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 1,
-      "actual_hours": 1,
-      "is_critical_path": false,
-      "tags": [
-        "data",
-        "reporting"
-      ],
       "category_name": "Maintenance",
-      "assigned_workers": [
-        {
-          "name": "Developer",
-          "email": "dev@example.com",
-          "role": "Full Stack Developer",
-          "worker_id": "dev-fullstack"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-11T18:00:00Z",
-      "completed_date": "2025-12-11T19:30:00Z",
-      "comments": [],
-      "attachments": [],
-      "dependencies": []
-    },
-    {
-      "task_id": 13,
-      "task_name": "Review Public Token Strategy",
-      "description": "Confirm the intended security model for public collaboration (token injection, permissions/scoping, abuse prevention). Document the approach and constraints in README/tools docs.",
-      "start_date": "2025-12-12",
-      "end_date": "2025-12-13",
-      "priority": "High",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 2,
-      "actual_hours": 2,
-      "is_critical_path": true,
-      "tags": [
-        "security",
-        "documentation"
-      ],
-      "category_name": "Documentation",
-      "assigned_workers": [
-        {
-          "name": "Developer",
-          "email": "dev@example.com",
-          "role": "Full Stack Developer",
-          "worker_id": "dev-fullstack"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-11T18:00:00Z",
-      "completed_date": "2025-12-13T12:00:00Z",
-      "comments": [
-        {
-          "author": "dev@example.com",
-          "timestamp": "2025-12-13T03:00:00Z",
-          "text": "Added README guidance and GH Actions note; next steps: finalize token model and add deployment docs."
-        },
-        {
-          "author": "dev@example.com",
-          "timestamp": "2025-12-13T12:00:00Z",
-          "text": "Completed: token model documented, .gitignore updated for derived files, CI step design ready."
-        }
-      ],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 11,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 14,
-      "task_name": "Archive legacy root node.tasks.json",
-      "description": "Preserve the older repo-root node.tasks.json as an immutable history snapshot under /public/tasksDB/history without changing the canonical runtime database.",
-      "start_date": "2025-12-11",
-      "end_date": "2025-12-11",
-      "priority": "Medium",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 1,
-      "actual_hours": 1,
-      "is_critical_path": false,
-      "tags": [
-        "data",
-        "history"
-      ],
-      "category_name": "Maintenance",
-      "assigned_workers": [
-        {
-          "name": "Developer",
-          "email": "dev@example.com",
-          "role": "Full Stack Developer",
-          "worker_id": "dev-fullstack"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-11T20:00:00Z",
-      "completed_date": "2025-12-11T20:15:00Z",
-      "comments": [],
-      "attachments": [],
-      "dependencies": []
-    },
-    {
-      "task_id": 15,
-      "task_name": "Clickable dashboard stat cards",
-      "description": "Make the dashboard stat cards clickable so users can quickly filter tasks by status (All, Not Started, In Progress, Completed).",
-      "start_date": "2025-12-11",
-      "end_date": "2025-12-11",
-      "priority": "Medium",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 2,
-      "actual_hours": 2,
-      "is_critical_path": false,
-      "tags": [
-        "ux",
-        "filters"
-      ],
-      "category_name": "Feature",
-      "assigned_workers": [
-        {
-          "name": "Developer",
-          "email": "dev@example.com",
-          "role": "Full Stack Developer",
-          "worker_id": "dev-fullstack"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-11T20:00:00Z",
-      "completed_date": "2025-12-11T20:30:00Z",
-      "comments": [],
-      "attachments": [],
-      "dependencies": []
-    },
-    {
-      "task_id": 16,
-      "task_name": "Add Password Protection for Modifications",
-      "description": "Implement a simple password gate for all modification actions (create, edit, delete tasks). Users can view tasks and dashboard freely, but must enter a shared password before making changes. GitHub Pages uses a repo Secret injected at deploy time; local dev is unlocked by default.",
-      "acceptance_criteria": [
-        "View-only operations work without password",
-        "Create/edit/delete blocked without correct password",
-        "Password persists in sessionStorage",
-        "Local dev unlocked by default"
-      ],
-      "start_date": "2025-12-11",
-      "end_date": "2025-12-12",
-      "priority": "High",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 3,
-      "actual_hours": 3,
-      "is_critical_path": true,
-      "tags": [
-        "security",
-        "authentication",
-        "ux"
-      ],
-      "category_name": "Feature",
-      "assigned_workers": [
-        {
-          "name": "Developer",
-          "email": "dev@example.com",
-          "role": "Full Stack Developer",
-          "worker_id": "dev-fullstack"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-11T21:00:00Z",
-      "completed_date": "2025-12-12T12:00:00Z",
-      "subtasks": [
-        {
-          "task_name": "Create password prompt modal",
-          "status": "Done",
-          "estimated_hours": 1,
-          "priority": "High",
-          "assigned_workers": []
-        },
-        {
-          "task_name": "Wire password check to all mutation actions",
-          "status": "Done",
-          "estimated_hours": 1,
-          "priority": "High",
-          "assigned_workers": []
-        },
-        {
-          "task_name": "Add sessionStorage persistence",
-          "status": "Done",
-          "estimated_hours": 0.5,
-          "priority": "Medium",
-          "assigned_workers": []
-        },
-        {
-          "task_name": "Add config toggle for local dev bypass",
-          "status": "Done",
-          "estimated_hours": 0.5,
-          "priority": "Medium",
-          "assigned_workers": []
-        }
-      ],
-      "comments": [],
-      "attachments": [],
-      "dependencies": []
-    },
-    {
-      "task_id": 17,
-      "task_name": "Create Task Timeline Visualization",
-      "description": "Add a visual timeline/Gantt-style view showing tasks on a date axis. Display task start/end dates, status colors, dependencies as connecting lines. Allow toggle between list view and timeline view. Show clear distinction between completed and pending tasks.",
-      "start_date": "2025-12-12",
-      "end_date": "2025-12-13",
-      "priority": "High",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 6,
-      "actual_hours": 6,
-      "is_critical_path": true,
-      "tags": [
-        "visualization",
-        "timeline",
-        "dashboard",
-        "ux"
-      ],
-      "category_name": "Feature",
-      "assigned_workers": [
-        {
-          "name": "Developer",
-          "email": "dev@example.com",
-          "role": "Full Stack Developer",
-          "worker_id": "dev-fullstack"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-11T21:00:00Z",
-      "completed_date": "2025-12-11T23:10:00Z",
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 16,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 18,
-      "task_name": "GitHub Issues Sync",
-      "description": "Two-way sync between tasks and GitHub Issues. Create issues from tasks, import issues as tasks. Keep status synchronized. Show issue number and link on task cards. Use GitHub API to read/write issues.",
-      "start_date": "2025-12-13",
-      "end_date": "2025-12-15",
-      "priority": "High",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 8,
-      "actual_hours": 8,
-      "is_critical_path": true,
-      "tags": [
-        "github",
-        "issues",
-        "sync",
-        "integration"
-      ],
-      "category_name": "Feature",
-      "assigned_workers": [
-        {
-          "name": "Developer",
-          "email": "dev@example.com",
-          "role": "Full Stack Developer",
-          "worker_id": "dev-fullstack"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-11T21:00:00Z",
-      "completed_date": "2025-12-11T23:25:00Z",
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 17,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 19,
-      "task_name": "E2E Tests for New Features",
-      "description": "Create Playwright E2E tests for: 1) Password protection flow (blocked without password, allowed with password), 2) Timeline view rendering and interaction, 3) GitHub Issues sync operations. Test locally before deploying.",
-      "start_date": "2025-12-13",
-      "end_date": "2025-12-14",
-      "priority": "High",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 4,
-      "actual_hours": 4,
-      "is_critical_path": false,
-      "tags": [
-        "testing",
-        "playwright",
-        "e2e"
-      ],
-      "category_name": "Testing",
-      "assigned_workers": [
-        {
-          "name": "QA Tester",
-          "email": "qa@example.com",
-          "role": "Quality Assurance Engineer",
-          "worker_id": "qa-engineer"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-11T21:00:00Z",
-      "completed_date": "2025-12-11T23:35:00Z",
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 16,
-          "type": "SS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 20,
-      "task_name": "Implement Commit Format Validation CI",
-      "description": "Add automated CI checks to validate all commits match the TaskDB|action|id|name|summary format. Create tools/scripts/validate-commit-format.js that parses recent commits and enforces the structured subject format. Add GitHub Actions workflow to run on PRs and nightly. Report compliance metrics.",
-      "acceptance_criteria": [
-        "validate-commit-format.js parses git log output",
-        "Non-compliant commits flagged with line number",
-        "GitHub Actions workflow runs on PR and nightly",
-        "Compliance percentage reported in CI output"
-      ],
-      "start_date": "2025-12-15",
-      "end_date": "2025-12-17",
-      "priority": "High",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 6,
-      "actual_hours": 6,
-      "is_critical_path": true,
       "tags": [
         "validation",
         "ci",
         "automation",
-        "quality"
-      ],
-      "category_name": "Maintenance",
-      "assigned_workers": [
-        {
-          "name": "Developer",
-          "email": "dev@example.com",
-          "role": "Full Stack Developer",
-          "worker_id": "dev-fullstack"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-14T16:00:00Z",
-      "completed_date": "2025-12-17T18:00:00Z",
-      "subtasks": [
-        {
-          "task_name": "Build commit message parser",
-          "status": "Done",
-          "estimated_hours": 2,
-          "priority": "High",
-          "assigned_workers": []
-        },
-        {
-          "task_name": "Create GitHub Actions workflow",
-          "status": "Done",
-          "estimated_hours": 2,
-          "priority": "High",
-          "assigned_workers": []
-        },
-        {
-          "task_name": "Add compliance metrics reporter",
-          "status": "Done",
-          "estimated_hours": 2,
-          "priority": "Medium",
-          "assigned_workers": []
-        }
-      ],
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 9,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 21,
-      "task_name": "Add Task Schema Validation Script",
-      "description": "Create tools/scripts/validate-tasks-schema.js that validates both projects' node.tasks.json against required fields, date ordering, and no timestamp pollution in task_name. Ensure all required fields (task_id, task_name, description, start_date, end_date, priority, status, estimated_hours, category_name) are present. Run on every save and add to CI.",
-      "start_date": "2025-12-17",
-      "end_date": "2025-12-18",
-      "priority": "High",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 4,
-      "actual_hours": 4,
-      "is_critical_path": true,
-      "tags": [
-        "validation",
-        "schema",
         "quality",
-        "data-integrity"
+        "schema"
       ],
-      "category_name": "Maintenance",
       "assigned_workers": [
         {
           "name": "Developer",
@@ -1240,766 +1133,919 @@
           "worker_id": "dev-fullstack"
         }
       ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-14T16:00:00Z",
-      "completed_date": "2025-12-18T12:00:00Z",
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 20,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 22,
-      "task_name": "Standardize Scripts as Tasks-Workers Tools",
-      "description": "Standardize validation/enrichment tooling under tools/scripts/validate-tasks-workers.js and tools/scripts/enrich-tasks-workers.js; keep old script names as deprecated wrappers for backwards compatibility.",
-      "start_date": "2025-12-15",
-      "end_date": "2025-12-15",
-      "priority": "Medium",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 2,
-      "actual_hours": 2,
-      "is_critical_path": false,
-      "tags": [
-        "tooling",
-        "validation",
-        "maintenance"
-      ],
-      "category_name": "Maintenance",
-      "assigned_workers": [],
       "parent_task_id": null,
       "creator_id": "system@example.com",
       "created_date": "2025-12-15T10:00:00Z",
-      "completed_date": "2025-12-15T12:00:00Z",
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 21,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 23,
-      "task_name": "Remove Legacy Terminology from Roadmap Artifacts",
-      "description": "Update roadmap plan/docs and task metadata to use neutral terms (contributors/unassigned). Rename legacy capacity field names to assignee_capacity via enrichment so task data matches the project concept.",
-      "start_date": "2025-12-15",
-      "end_date": "2025-12-15",
-      "priority": "Medium",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 2,
-      "actual_hours": 2,
-      "is_critical_path": false,
-      "tags": [
-        "docs",
-        "data",
-        "roadmap"
-      ],
-      "category_name": "Documentation",
-      "assigned_workers": [],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-15T12:00:00Z",
-      "completed_date": "2025-12-15T14:00:00Z",
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 22,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 24,
-      "task_name": "Node Visual States (Completed=Grey, In-Progress=Pulse)",
-      "description": "Update graph node rendering so nodes reflect task status: Completed tasks render greyed/desaturated with reduced opacity; In Progress tasks show a pulsing/irradiated aura (CSS animation + SVG glow). Not Started tasks remain static. Apply changes to the graph-display component and list nodes, add CSS variables and a feature toggle. Include unit and E2E tests to verify visual states.",
+      "completed_date": "2025-12-18T18:00:00Z",
       "acceptance_criteria": [
-        "Done tasks render greyed/desaturated",
-        "In Progress tasks show pulsing aura animation",
-        "Not Started tasks remain static default styling",
-        "CSS variables allow customizing visual states",
-        "Feature toggle enables/disables status rendering",
-        "E2E test verifies each visual state"
+        "validate-commit-format.js parses git log and flags non-compliant commits with line number",
+        "GitHub Actions workflow runs commit validation on PR and nightly",
+        "validate-tasks-schema.js validates all node.tasks.json required fields and date ordering",
+        "Scripts standardised under validate-tasks-workers / enrich-tasks-workers naming"
       ],
-      "start_date": "2025-12-17",
-      "end_date": "2025-12-18",
-      "priority": "High",
-      "status": "Done",
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 47,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "subtasks": [
+        {
+          "task_id": 20,
+          "task_name": "Implement Commit Format Validation CI",
+          "description": "Add automated CI checks to validate all commits match the TaskDB|action|id|name|summary format. Create tools/scripts/validate-commit-format.js that parses recent commits and enforces the structured subject format. Add GitHub Actions workflow to run on PRs and nightly. Report compliance metrics.",
+          "status": "Done",
+          "priority": "High",
+          "estimated_hours": 6,
+          "is_critical_path": true,
+          "category_name": "Maintenance",
+          "tags": [
+            "validation",
+            "ci",
+            "automation",
+            "quality"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [],
+          "subtasks": [
+            {
+              "task_name": "Build commit message parser",
+              "status": "Done",
+              "estimated_hours": 2,
+              "priority": "High",
+              "assigned_workers": []
+            },
+            {
+              "task_name": "Create GitHub Actions workflow",
+              "status": "Done",
+              "estimated_hours": 2,
+              "priority": "High",
+              "assigned_workers": []
+            },
+            {
+              "task_name": "Add compliance metrics reporter",
+              "status": "Done",
+              "estimated_hours": 2,
+              "priority": "Medium",
+              "assigned_workers": []
+            }
+          ],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 6,
+          "acceptance_criteria": [
+            "validate-commit-format.js parses git log output",
+            "Non-compliant commits flagged with line number",
+            "GitHub Actions workflow runs on PR and nightly",
+            "Compliance percentage reported in CI output"
+          ]
+        },
+        {
+          "task_id": 21,
+          "task_name": "Add Task Schema Validation Script",
+          "description": "Create tools/scripts/validate-tasks-schema.js that validates both projects' node.tasks.json against required fields, date ordering, and no timestamp pollution in task_name. Ensure all required fields (task_id, task_name, description, start_date, end_date, priority, status, estimated_hours, category_name) are present. Run on every save and add to CI.",
+          "status": "Done",
+          "priority": "High",
+          "estimated_hours": 4,
+          "is_critical_path": true,
+          "category_name": "Maintenance",
+          "tags": [
+            "validation",
+            "schema",
+            "quality",
+            "data-integrity"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [
+            {
+              "predecessor_task_id": 20,
+              "type": "FS",
+              "lag_days": 0
+            }
+          ],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 4
+        },
+        {
+          "task_id": 22,
+          "task_name": "Standardize Scripts as Tasks-Workers Tools",
+          "description": "Standardize validation/enrichment tooling under tools/scripts/validate-tasks-workers.js and tools/scripts/enrich-tasks-workers.js; keep old script names as deprecated wrappers for backwards compatibility.",
+          "status": "Done",
+          "priority": "Medium",
+          "estimated_hours": 2,
+          "is_critical_path": false,
+          "category_name": "Maintenance",
+          "tags": [
+            "tooling",
+            "validation",
+            "maintenance"
+          ],
+          "assigned_workers": [],
+          "dependencies": [
+            {
+              "predecessor_task_id": 21,
+              "type": "FS",
+              "lag_days": 0
+            }
+          ],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 2
+        }
+      ]
+    },
+    {
+      "task_id": 49,
+      "task_name": "Phase 6 – Documentation & Retrospective",
+      "description": "Write comprehensive documentation for public users and developers, conduct a project retrospective, remove legacy terminology from roadmap artifacts, and document the task source audit workflow and output artifact paths.",
+      "start_date": "2025-12-20",
+      "end_date": "2026-04-22",
+      "priority": "Medium",
+      "status": "Completed",
       "progress_percentage": 100,
-      "estimated_hours": 6,
-      "actual_hours": 6,
+      "estimated_hours": 14,
+      "actual_hours": 9,
       "is_critical_path": false,
+      "category_name": "Documentation",
       "tags": [
-        "frontend",
-        "visualization",
-        "ux",
-        "graph-display"
+        "documentation",
+        "retrospective",
+        "audit",
+        "guides"
       ],
-      "category_name": "Frontend Development",
       "assigned_workers": [
         {
           "name": "Developer",
           "email": "dev@example.com",
           "role": "Full Stack Developer",
           "worker_id": "dev-fullstack"
+        }
+      ],
+      "parent_task_id": null,
+      "creator_id": "system@example.com",
+      "created_date": "2025-12-20T09:00:00Z",
+      "completed_date": "2026-04-22T16:15:00Z",
+      "acceptance_criteria": [
+        "Comprehensive README and contributing guide published for public users and developers",
+        "Project retrospective findings documented",
+        "Legacy terminology removed from roadmap artifacts",
+        "Git history workflow and temporary output path conventions documented"
+      ],
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 48,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "subtasks": [
+        {
+          "task_id": 8,
+          "task_name": "Update Documentation & README",
+          "description": "Create comprehensive documentation for public users on how to use the task manager. Include examples of creating tasks, managing dependencies, setting status, and collaborating. Add developer setup guide for GitHub Pages deployment.",
+          "status": "In Progress",
+          "priority": "Medium",
+          "estimated_hours": 6,
+          "is_critical_path": false,
+          "category_name": "Documentation",
+          "tags": [
+            "documentation",
+            "guides",
+            "user-manual"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [],
+          "subtasks": [],
+          "comments": [
+            {
+              "author": "dev@example.com",
+              "timestamp": "2025-12-13T03:00:00Z",
+              "text": "Added contributing guidance on generated task files and workflow; more docs pending."
+            },
+            {
+              "author": "dev@example.com",
+              "timestamp": "2025-12-13T12:00:00Z",
+              "text": "Added CONTRIBUTING.md draft and npm regeneration scripts to package.json."
+            }
+          ],
+          "attachments": [],
+          "actual_hours": 3
+        },
+        {
+          "task_id": 10,
+          "task_name": "Project Retrospective",
+          "description": "Conduct project retrospective to review what went well, what could be improved, and lessons learned. Document findings and create improvement tasks for next iteration.",
+          "status": "In Progress",
+          "priority": "Medium",
+          "estimated_hours": 4,
+          "is_critical_path": false,
+          "category_name": "Retrospective",
+          "tags": [
+            "retrospective",
+            "process-improvement",
+            "team"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Public User",
+              "email": "public@example.com",
+              "role": "Collaborator",
+              "worker_id": "collab-public"
+            }
+          ],
+          "dependencies": [],
+          "subtasks": [],
+          "comments": [
+            {
+              "author": "dev@example.com",
+              "timestamp": "2025-12-13T03:00:00Z",
+              "text": "Kickoff: captured conflicts and workstream improvements (ignore derived files; rebase workflow)."
+            }
+          ],
+          "attachments": [],
+          "actual_hours": 0
+        },
+        {
+          "task_id": 23,
+          "task_name": "Remove Legacy Terminology from Roadmap Artifacts",
+          "description": "Update roadmap plan/docs and task metadata to use neutral terms (contributors/unassigned). Rename legacy capacity field names to assignee_capacity via enrichment so task data matches the project concept.",
+          "status": "Done",
+          "priority": "Medium",
+          "estimated_hours": 2,
+          "is_critical_path": false,
+          "category_name": "Documentation",
+          "tags": [
+            "docs",
+            "data",
+            "roadmap"
+          ],
+          "assigned_workers": [],
+          "dependencies": [],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 2
+        },
+        {
+          "task_id": 32,
+          "task_name": "Document task source audit workflow and output artifact paths",
+          "description": "Capture the recommended Git history and blame workflow for public/tasksDB/external/github-task-manager/node.tasks.json, and document that temporary outputs such as tmp-test-output.txt, tmp-calendar-run.txt, and live-test-run.log belong under outputs/local-runs/ instead of the repo root.",
+          "status": "Done",
+          "priority": "Medium",
+          "estimated_hours": 2,
+          "is_critical_path": false,
+          "category_name": "Documentation",
+          "tags": [
+            "documentation",
+            "git",
+            "audit",
+            "taskdb"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [],
+          "subtasks": [
+            {
+              "name": "Add git history command examples to README",
+              "status": "Done",
+              "estimated_hours": 0.5,
+              "assigned_workers": []
+            },
+            {
+              "name": "Document which outputs are temporary and should live outside source directories",
+              "status": "Done",
+              "estimated_hours": 0.5,
+              "assigned_workers": []
+            },
+            {
+              "name": "Capture what current task and git status means for the project state",
+              "status": "Done",
+              "estimated_hours": 1,
+              "assigned_workers": []
+            }
+          ],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 2
+        }
+      ]
+    },
+    {
+      "task_id": 50,
+      "task_name": "Phase 7 – Graph Display & UX Enhancements",
+      "description": "Implement node visual states (done/in-progress animations), add in-graph task editing, popup dropdown sections for acceptance criteria and subtasks, inline subtask drill-down navigation with parent/successor nav, priority-coloured dependency buttons, a tasks.json format validation test suite, and stabilise the graph renderer and Playwright base URLs.",
+      "start_date": "2025-12-17",
+      "end_date": "2026-04-18",
+      "priority": "High",
+      "status": "Completed",
+      "progress_percentage": 100,
+      "estimated_hours": 37,
+      "actual_hours": 31,
+      "is_critical_path": true,
+      "category_name": "Frontend Development",
+      "tags": [
+        "graph-display",
+        "ux",
+        "visualization",
+        "navigation",
+        "popup"
+      ],
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
+        },
+        {
+          "name": "AI Copilot",
+          "email": "ai@example.com",
+          "role": "AI Copilot",
+          "worker_id": "ai-copilot"
         }
       ],
       "parent_task_id": null,
       "creator_id": "system@example.com",
       "created_date": "2025-12-17T09:00:00Z",
-      "completed_date": "2025-12-18T18:00:00Z",
+      "completed_date": "2026-04-18T21:30:00Z",
+      "acceptance_criteria": [
+        "Done tasks render greyed/desaturated; In Progress tasks show pulsing aura animation",
+        "Edit button in graph node modals opens pre-populated form with password gate",
+        "Popups show acceptance_criteria and subtasks as collapsible dropdowns with count badges",
+        "Recursive inline subtask drill-down with breadcrumbs, parent nav, and successor nav",
+        "Dependency and subtask buttons display with priority colour and status animations",
+        "tasks.json format validation test suite passes for all project folders",
+        "All graph popup navigation buttons unified through shared handler with configured baseURL"
+      ],
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 46,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
       "subtasks": [
         {
-          "task_name": "Add CSS classes for Done/In-Progress/Not-Started states",
+          "task_id": 24,
+          "task_name": "Node Visual States (Completed=Grey, In-Progress=Pulse)",
+          "description": "Update graph node rendering so nodes reflect task status: Completed tasks render greyed/desaturated with reduced opacity; In Progress tasks show a pulsing/irradiated aura (CSS animation + SVG glow). Not Started tasks remain static. Apply changes to the graph-display component and list nodes, add CSS variables and a feature toggle. Include unit and E2E tests to verify visual states.",
           "status": "Done",
-          "estimated_hours": 2,
           "priority": "High",
-          "assigned_workers": []
-        },
-        {
-          "task_name": "Implement pulse animation for In-Progress nodes",
-          "status": "Done",
-          "estimated_hours": 1.5,
-          "priority": "High",
+          "estimated_hours": 6,
+          "is_critical_path": false,
+          "category_name": "Frontend Development",
+          "tags": [
+            "frontend",
+            "visualization",
+            "ux",
+            "graph-display"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [],
           "subtasks": [
             {
-              "task_name": "Create CSS keyframe animation",
+              "task_name": "Add CSS classes for Done/In-Progress/Not-Started states",
+              "status": "Done",
+              "estimated_hours": 2,
+              "priority": "High",
+              "assigned_workers": []
+            },
+            {
+              "task_name": "Implement pulse animation for In-Progress nodes",
+              "status": "Done",
+              "estimated_hours": 1.5,
+              "priority": "High",
+              "subtasks": [
+                {
+                  "task_name": "Create CSS keyframe animation",
+                  "status": "Done",
+                  "estimated_hours": 0.5,
+                  "assigned_workers": []
+                },
+                {
+                  "task_name": "Add SVG glow filter",
+                  "status": "Done",
+                  "estimated_hours": 0.5,
+                  "assigned_workers": []
+                },
+                {
+                  "task_name": "Wire animation to status class",
+                  "status": "Done",
+                  "estimated_hours": 0.5,
+                  "assigned_workers": []
+                }
+              ],
+              "assigned_workers": []
+            },
+            {
+              "task_name": "Implement greyed/desaturated style for Done nodes",
+              "status": "Done",
+              "estimated_hours": 1,
+              "priority": "High",
+              "assigned_workers": []
+            },
+            {
+              "task_name": "Write E2E tests for visual states",
+              "status": "Done",
+              "estimated_hours": 1.5,
+              "priority": "Medium",
+              "assigned_workers": []
+            }
+          ],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 6,
+          "acceptance_criteria": [
+            "Done tasks render greyed/desaturated",
+            "In Progress tasks show pulsing aura animation",
+            "Not Started tasks remain static default styling",
+            "CSS variables allow customizing visual states",
+            "Feature toggle enables/disables status rendering",
+            "E2E test verifies each visual state"
+          ]
+        },
+        {
+          "task_id": 25,
+          "task_name": "Graph Task Editing UI (Edit from Graph Modal)",
+          "description": "Add an Edit button to graph node modals to open a pre-populated task edit form. Edits should respect the password protection gate and save back to the runtime store. Update `graph-display` to support in-place editing flow, add unit tests for modal behavior, and add Playwright E2E tests to verify edit/update persistence and UI gating.",
+          "status": "In Progress",
+          "priority": "High",
+          "estimated_hours": 8,
+          "is_critical_path": false,
+          "category_name": "Frontend Development",
+          "tags": [
+            "frontend",
+            "graph-display",
+            "ux",
+            "edit"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [
+            {
+              "predecessor_task_id": 24,
+              "type": "FS",
+              "lag_days": 0
+            }
+          ],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 0
+        },
+        {
+          "task_id": 27,
+          "task_name": "Popup Dropdown Menus for Acceptance Criteria & Subtasks",
+          "description": "Add collapsible <details> dropdown sections inside node popup modals to display acceptance_criteria and subtasks arrays from node.tasks.json. Each dropdown shows a count badge, styled with .popup-dropdown component. Acceptance criteria render as bullet lists; subtasks show name, status, and estimated hours.",
+          "status": "Done",
+          "priority": "Medium",
+          "estimated_hours": 3,
+          "is_critical_path": false,
+          "category_name": "Frontend Development",
+          "tags": [
+            "frontend",
+            "graph-display",
+            "ux",
+            "popup"
+          ],
+          "assigned_workers": [
+            {
+              "name": "AI Copilot",
+              "email": "ai@example.com",
+              "role": "AI Copilot",
+              "worker_id": "ai-copilot"
+            }
+          ],
+          "dependencies": [
+            {
+              "predecessor_task_id": 24,
+              "type": "FS",
+              "lag_days": 0
+            }
+          ],
+          "subtasks": [
+            {
+              "name": "Add acceptance_criteria dropdown HTML to buildTaskManagementTemplate",
+              "status": "Done",
+              "estimated_hours": 1,
+              "assigned_workers": []
+            },
+            {
+              "name": "Add subtasks dropdown HTML to buildTaskManagementTemplate",
+              "status": "Done",
+              "estimated_hours": 1,
+              "assigned_workers": []
+            },
+            {
+              "name": "Create .popup-dropdown CSS component",
               "status": "Done",
               "estimated_hours": 0.5,
               "assigned_workers": []
             },
             {
-              "task_name": "Add SVG glow filter",
-              "status": "Done",
-              "estimated_hours": 0.5,
-              "assigned_workers": []
-            },
-            {
-              "task_name": "Wire animation to status class",
+              "name": "Add unit tests for dropdown rendering",
               "status": "Done",
               "estimated_hours": 0.5,
               "assigned_workers": []
             }
           ],
-          "assigned_workers": []
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 2,
+          "acceptance_criteria": [
+            "Popup shows acceptance_criteria as collapsible dropdown with count badge",
+            "Popup shows subtasks as collapsible dropdown with name/status/hours per subtask",
+            "Dropdowns use <details class='popup-dropdown'> component",
+            "Empty arrays produce no dropdown section"
+          ]
         },
         {
-          "task_name": "Implement greyed/desaturated style for Done nodes",
+          "task_id": 28,
+          "task_name": "Inline Subtask Drill-Down Navigation with Parent & Successor Nav",
+          "description": "Enable recursive drill-down into inline subtasks directly from node popup. Clicking '📂 View Subtasks' on a task that has subtasks[] in node.tasks.json builds a temporary subgraph from those subtasks. The subgraph start node shows a '↩ Parent Task Name' button that navigates back to the parent graph and opens the parent task modal. The subgraph end node shows 'Next tasks in parent graph' buttons for successor tasks. Breadcrumbs track navigation depth. Supports recursive nesting (subtasks within subtasks).",
           "status": "Done",
-          "estimated_hours": 1,
           "priority": "High",
-          "assigned_workers": []
+          "estimated_hours": 8,
+          "is_critical_path": true,
+          "category_name": "Frontend Development",
+          "tags": [
+            "frontend",
+            "graph-display",
+            "navigation",
+            "subtasks",
+            "ux"
+          ],
+          "assigned_workers": [
+            {
+              "name": "AI Copilot",
+              "email": "ai@example.com",
+              "role": "AI Copilot",
+              "worker_id": "ai-copilot"
+            }
+          ],
+          "dependencies": [
+            {
+              "predecessor_task_id": 27,
+              "type": "FS",
+              "lag_days": 0
+            }
+          ],
+          "subtasks": [
+            {
+              "name": "Build buildInlineSubgraphData to convert subtasks into temporary graph data",
+              "status": "Done",
+              "estimated_hours": 2,
+              "assigned_workers": []
+            },
+            {
+              "name": "Build resolveTaskSubtaskTargets with priority: inline > explicit > none",
+              "status": "Done",
+              "estimated_hours": 1,
+              "assigned_workers": []
+            },
+            {
+              "name": "Add parent context to subtaskStack entries (parentTaskNodeId, parentSuccessors)",
+              "status": "Done",
+              "estimated_hours": 1,
+              "assigned_workers": []
+            },
+            {
+              "name": "Implement start-node parent-nav button with openNodeModal after navigateToDepth",
+              "status": "Done",
+              "estimated_hours": 1,
+              "assigned_workers": []
+            },
+            {
+              "name": "Implement end-node successor-nav buttons",
+              "status": "Done",
+              "estimated_hours": 1,
+              "assigned_workers": []
+            },
+            {
+              "name": "Remove broken virtual sidebar modules and Task Sub-graphs folder",
+              "status": "Done",
+              "estimated_hours": 0.5,
+              "assigned_workers": []
+            },
+            {
+              "name": "Add Playwright E2E tests for recursive drill-down and parent/sibling nav",
+              "status": "Done",
+              "estimated_hours": 1.5,
+              "assigned_workers": []
+            }
+          ],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 6,
+          "acceptance_criteria": [
+            "Clicking View Subtasks on a task with inline subtasks builds a subgraph and renders it in place",
+            "Breadcrumbs show the navigation path to the current subgraph level",
+            "Start node of subgraph has a back-to-parent button that navigates up and opens parent task modal",
+            "End node of subgraph shows successor task buttons that navigate up and open successor modal",
+            "Recursive drill-down works (subtask of subtask of subtask)",
+            "No broken 'Task Sub-graphs' sidebar folder or virtual module entries",
+            "resolveTaskSubtaskTargets prioritizes inline subtasks over explicit paths"
+          ]
         },
         {
-          "task_name": "Write E2E tests for visual states",
+          "task_id": 29,
+          "task_name": "tasks.json Format Validation Test Suite",
+          "description": "Create a comprehensive test suite that walks all public/tasksDB/ project folders recursively, discovers every node.tasks.json file, and validates format correctness: valid JSON, project metadata, task required fields, enum values, dependency integrity, subtask/acceptance_criteria array format, date formats, and duplicate detection. Provides actionable feedback for any format issues found.",
           "status": "Done",
-          "estimated_hours": 1.5,
           "priority": "Medium",
-          "assigned_workers": []
-        }
-      ],
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 17,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 25,
-      "task_name": "Graph Task Editing UI (Edit from Graph Modal)",
-      "description": "Add an Edit button to graph node modals to open a pre-populated task edit form. Edits should respect the password protection gate and save back to the runtime store. Update `graph-display` to support in-place editing flow, add unit tests for modal behavior, and add Playwright E2E tests to verify edit/update persistence and UI gating.",
-      "start_date": "2025-12-17",
-      "end_date": "2025-12-19",
-      "priority": "High",
-      "status": "In Progress",
-      "progress_percentage": 0,
-      "estimated_hours": 8,
-      "actual_hours": 0,
-      "is_critical_path": false,
-      "tags": [
-        "frontend",
-        "graph-display",
-        "ux",
-        "edit"
-      ],
-      "category_name": "Frontend Development",
-      "assigned_workers": [
-        {
-          "name": "Developer",
-          "email": "dev@example.com",
-          "role": "Full Stack Developer",
-          "worker_id": "dev-fullstack"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2025-12-17T10:00:00Z",
-      "completed_date": null,
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 24,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 26,
-      "task_name": "create and mcp endpoint",
-      "description": "Create a new API endpoint /api/create-mcp that accepts a POST request with a list of task IDs and marks them as critical path tasks (is_critical_path=true). Validate input, update node.tasks.json, and return success/failure response.",
-      "start_date": "2025-12-18",
-      "end_date": "2025-12-19",
-      "priority": "High",
-      "status": "In Progress",
-      "progress_percentage": 0,
-      "estimated_hours": 5,
-      "actual_hours": 0,
-      "is_critical_path": false,
-      "tags": [
-        "backend",
-        "api",
-        "critical-path"
-      ],
-      "category_name": "Backend Development",
-      "assigned_workers": [
-        {
-          "name": "Developer",
-          "email": "dev@example.com",
-          "role": "Full Stack Developer",
-          "worker_id": "dev-fullstack"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "",
-      "created_date": "2025-12-18T09:00:00Z",
-      "completed_date": null,
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 21,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ]
-    },
-    {
-      "task_id": 27,
-      "task_name": "Popup Dropdown Menus for Acceptance Criteria & Subtasks",
-      "description": "Add collapsible <details> dropdown sections inside node popup modals to display acceptance_criteria and subtasks arrays from node.tasks.json. Each dropdown shows a count badge, styled with .popup-dropdown component. Acceptance criteria render as bullet lists; subtasks show name, status, and estimated hours.",
-      "start_date": "2026-04-12",
-      "end_date": "2026-04-12",
-      "priority": "Medium",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 3,
-      "actual_hours": 2,
-      "is_critical_path": false,
-      "tags": [
-        "frontend",
-        "graph-display",
-        "ux",
-        "popup"
-      ],
-      "category_name": "Frontend Development",
-      "assigned_workers": [
-        {
-          "name": "AI Copilot",
-          "email": "ai@example.com",
-          "role": "AI Copilot",
-          "worker_id": "ai-copilot"
-        }
-      ],
-      "acceptance_criteria": [
-        "Popup shows acceptance_criteria as collapsible dropdown with count badge",
-        "Popup shows subtasks as collapsible dropdown with name/status/hours per subtask",
-        "Dropdowns use <details class='popup-dropdown'> component",
-        "Empty arrays produce no dropdown section"
-      ],
-      "parent_task_id": null,
-      "creator_id": "ai@example.com",
-      "created_date": "2026-04-12T10:00:00Z",
-      "completed_date": "2026-04-12T12:00:00Z",
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 24,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ],
-      "subtasks": [
-        {
-          "name": "Add acceptance_criteria dropdown HTML to buildTaskManagementTemplate",
-          "status": "Done",
-          "estimated_hours": 1,
-          "assigned_workers": []
+          "estimated_hours": 3,
+          "is_critical_path": false,
+          "category_name": "Testing",
+          "tags": [
+            "testing",
+            "validation",
+            "schema",
+            "quality"
+          ],
+          "assigned_workers": [
+            {
+              "name": "AI Copilot",
+              "email": "ai@example.com",
+              "role": "AI Copilot",
+              "worker_id": "ai-copilot"
+            }
+          ],
+          "dependencies": [
+            {
+              "predecessor_task_id": 28,
+              "type": "FS",
+              "lag_days": 0
+            }
+          ],
+          "subtasks": [
+            {
+              "name": "Implement recursive node.tasks.json file discovery",
+              "status": "Done",
+              "estimated_hours": 0.5,
+              "assigned_workers": []
+            },
+            {
+              "name": "Implement validateTasksJson with all field checks",
+              "status": "Done",
+              "estimated_hours": 1,
+              "assigned_workers": []
+            },
+            {
+              "name": "Add per-project dynamic test generation",
+              "status": "Done",
+              "estimated_hours": 0.5,
+              "assigned_workers": []
+            },
+            {
+              "name": "Add graph-builder integration test (subtask targets link correctly)",
+              "status": "Done",
+              "estimated_hours": 1,
+              "assigned_workers": []
+            }
+          ],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 2,
+          "acceptance_criteria": [
+            "Test suite discovers all node.tasks.json files under public/tasksDB/ recursively",
+            "Validates JSON parsing, project metadata, task structure, enums, dates, dependencies",
+            "Detects duplicate task_ids and task_names",
+            "Validates subtasks[] and acceptance_criteria[] array format",
+            "Tests run on github-task-manager and test-tasks projects",
+            "Provides clear error messages with file path and field location"
+          ]
         },
         {
-          "name": "Add subtasks dropdown HTML to buildTaskManagementTemplate",
+          "task_id": 30,
+          "task_name": "Priority-Colored Dependency & Subtask Buttons with Status Animations",
+          "description": "Enhance popup modal rendering so Depends on buttons and Sub-task buttons display with the same priority color as their referenced nodes. In-progress items pulse/blink, done items are faded with line-through, not-started remain static. Sub-task buttons are rendered as node-like pill elements with hours badge. Start node details replaced hardcoded graph legend with dynamic project summary (task count, status, timeline). Category-based sidebar modules auto-generated for flat projects without navigation.modules config.",
           "status": "Done",
-          "estimated_hours": 1,
-          "assigned_workers": []
+          "priority": "High",
+          "estimated_hours": 5,
+          "is_critical_path": true,
+          "category_name": "Frontend Development",
+          "tags": [
+            "ui",
+            "graph",
+            "popup",
+            "colors",
+            "animation",
+            "sidebar"
+          ],
+          "assigned_workers": [
+            {
+              "name": "AI Copilot",
+              "email": "ai@example.com",
+              "role": "AI Copilot",
+              "worker_id": "ai-copilot"
+            }
+          ],
+          "dependencies": [
+            {
+              "predecessor_task_id": 29,
+              "type": "FS",
+              "lag_days": 0
+            }
+          ],
+          "subtasks": [
+            {
+              "name": "Replace hardcoded start node graph legend with dynamic project summary",
+              "status": "Done",
+              "estimated_hours": 0.5,
+              "assigned_workers": []
+            },
+            {
+              "name": "Add priority/status data attributes to dep-link buttons in graph-data.js",
+              "status": "Done",
+              "estimated_hours": 0.5,
+              "assigned_workers": []
+            },
+            {
+              "name": "Render subtasks as node-like pill buttons with color/status/hours",
+              "status": "Done",
+              "estimated_hours": 1,
+              "assigned_workers": []
+            },
+            {
+              "name": "Enrich subtask data from parent task fields",
+              "status": "Done",
+              "estimated_hours": 0.5,
+              "assigned_workers": []
+            },
+            {
+              "name": "Apply priority colors and status CSS classes in showNodeDetails",
+              "status": "Done",
+              "estimated_hours": 1,
+              "assigned_workers": []
+            },
+            {
+              "name": "Generate category-based sidebar modules for flat projects",
+              "status": "Done",
+              "estimated_hours": 0.5,
+              "assigned_workers": []
+            },
+            {
+              "name": "Add CSS for dep-status-done, dep-status-in-progress, subtask-node-btn, btn-pulse, category-dimmed",
+              "status": "Done",
+              "estimated_hours": 1,
+              "assigned_workers": []
+            }
+          ],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 4,
+          "acceptance_criteria": [
+            "Depends on buttons show the priority color of the referenced task node",
+            "Depends on buttons for done tasks are faded with line-through",
+            "Depends on buttons for in-progress tasks pulse with box-shadow animation",
+            "Sub-tasks rendered as colored pill buttons with priority color background",
+            "Sub-tasks show hours badge when available",
+            "Sub-task buttons pulse if in-progress, fade if done",
+            "Start node popup shows project description, task count, status, timeline instead of hardcoded graph legend",
+            "Flat projects without navigation.modules get category-based sidebar entries",
+            "Category sidebar items highlight matching tasks and dim non-matching ones",
+            "Subtask data enriched from parent: priority, status, category, assigned worker inherited when not set"
+          ]
         },
         {
-          "name": "Create .popup-dropdown CSS component",
+          "task_id": 31,
+          "task_name": "Unify graph relation buttons and stabilize Playwright base URLs",
+          "description": "Removed the remaining subtask-dive button split by rendering graph popup relation buttons through the shared task-node-btn path, unified their click handling for subgraph/parent/sibling navigation, updated the graph regression selectors, and fixed local E2E tests to follow Playwright's configured baseURL instead of hardcoded localhost:3000. Also replaced the stale module-navigation color expectation with a theme-variable-backed assertion, aligned CRUD/update-task/fullscreen Playwright expectations with the current Done status and modal field IDs, and restored a stable data-task-id hook for UI automation.",
           "status": "Done",
-          "estimated_hours": 0.5,
-          "assigned_workers": []
-        },
-        {
-          "name": "Add unit tests for dropdown rendering",
-          "status": "Done",
-          "estimated_hours": 0.5,
-          "assigned_workers": []
-        }
-      ]
-    },
-    {
-      "task_id": 28,
-      "task_name": "Inline Subtask Drill-Down Navigation with Parent & Successor Nav",
-      "description": "Enable recursive drill-down into inline subtasks directly from node popup. Clicking '📂 View Subtasks' on a task that has subtasks[] in node.tasks.json builds a temporary subgraph from those subtasks. The subgraph start node shows a '↩ Parent Task Name' button that navigates back to the parent graph and opens the parent task modal. The subgraph end node shows 'Next tasks in parent graph' buttons for successor tasks. Breadcrumbs track navigation depth. Supports recursive nesting (subtasks within subtasks).",
-      "start_date": "2026-04-12",
-      "end_date": "2026-04-13",
-      "priority": "High",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 8,
-      "actual_hours": 6,
-      "is_critical_path": true,
-      "tags": [
-        "frontend",
-        "graph-display",
-        "navigation",
-        "subtasks",
-        "ux"
-      ],
-      "category_name": "Frontend Development",
-      "assigned_workers": [
-        {
-          "name": "AI Copilot",
-          "email": "ai@example.com",
-          "role": "AI Copilot",
-          "worker_id": "ai-copilot"
-        }
-      ],
-      "acceptance_criteria": [
-        "Clicking View Subtasks on a task with inline subtasks builds a subgraph and renders it in place",
-        "Breadcrumbs show the navigation path to the current subgraph level",
-        "Start node of subgraph has a back-to-parent button that navigates up and opens parent task modal",
-        "End node of subgraph shows successor task buttons that navigate up and open successor modal",
-        "Recursive drill-down works (subtask of subtask of subtask)",
-        "No broken 'Task Sub-graphs' sidebar folder or virtual module entries",
-        "resolveTaskSubtaskTargets prioritizes inline subtasks over explicit paths"
-      ],
-      "parent_task_id": null,
-      "creator_id": "ai@example.com",
-      "created_date": "2026-04-12T14:00:00Z",
-      "completed_date": "2026-04-13T10:00:00Z",
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 27,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ],
-      "subtasks": [
-        {
-          "name": "Build buildInlineSubgraphData to convert subtasks into temporary graph data",
-          "status": "Done",
-          "estimated_hours": 2,
-          "assigned_workers": []
-        },
-        {
-          "name": "Build resolveTaskSubtaskTargets with priority: inline > explicit > none",
-          "status": "Done",
-          "estimated_hours": 1,
-          "assigned_workers": []
-        },
-        {
-          "name": "Add parent context to subtaskStack entries (parentTaskNodeId, parentSuccessors)",
-          "status": "Done",
-          "estimated_hours": 1,
-          "assigned_workers": []
-        },
-        {
-          "name": "Implement start-node parent-nav button with openNodeModal after navigateToDepth",
-          "status": "Done",
-          "estimated_hours": 1,
-          "assigned_workers": []
-        },
-        {
-          "name": "Implement end-node successor-nav buttons",
-          "status": "Done",
-          "estimated_hours": 1,
-          "assigned_workers": []
-        },
-        {
-          "name": "Remove broken virtual sidebar modules and Task Sub-graphs folder",
-          "status": "Done",
-          "estimated_hours": 0.5,
-          "assigned_workers": []
-        },
-        {
-          "name": "Add Playwright E2E tests for recursive drill-down and parent/sibling nav",
-          "status": "Done",
-          "estimated_hours": 1.5,
-          "assigned_workers": []
+          "priority": "High",
+          "estimated_hours": 4,
+          "is_critical_path": false,
+          "category_name": "Maintenance",
+          "tags": [
+            "graph-display",
+            "playwright",
+            "navigation",
+            "test-stability"
+          ],
+          "assigned_workers": [
+            {
+              "name": "AI Copilot",
+              "email": "ai@example.com",
+              "role": "AI Copilot",
+              "worker_id": "ai-copilot"
+            }
+          ],
+          "dependencies": [
+            {
+              "predecessor_task_id": 30,
+              "type": "FS",
+              "lag_days": 0
+            }
+          ],
+          "subtasks": [
+            {
+              "name": "Replace leftover subtask-dive modal buttons with task-node-btn variants",
+              "status": "Done",
+              "estimated_hours": 1,
+              "assigned_workers": []
+            },
+            {
+              "name": "Route related graph popup buttons through one shared navigation handler",
+              "status": "Done",
+              "estimated_hours": 1,
+              "assigned_workers": []
+            },
+            {
+              "name": "Update graph and E2E tests to use configured baseURL and current theme expectations",
+              "status": "Done",
+              "estimated_hours": 2,
+              "assigned_workers": []
+            },
+            {
+              "name": "Refresh stale local E2E selectors and assertions for current task card and modal markup",
+              "status": "Done",
+              "estimated_hours": 1,
+              "assigned_workers": []
+            }
+          ],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 4
         }
       ]
     },
     {
-      "task_id": 29,
-      "task_name": "tasks.json Format Validation Test Suite",
-      "description": "Create a comprehensive test suite that walks all public/tasksDB/ project folders recursively, discovers every node.tasks.json file, and validates format correctness: valid JSON, project metadata, task required fields, enum values, dependency integrity, subtask/acceptance_criteria array format, date formats, and duplicate detection. Provides actionable feedback for any format issues found.",
-      "start_date": "2026-04-13",
-      "end_date": "2026-04-13",
-      "priority": "Medium",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 3,
-      "actual_hours": 2,
-      "is_critical_path": false,
-      "tags": [
-        "testing",
-        "validation",
-        "schema",
-        "quality"
-      ],
-      "category_name": "Testing",
-      "assigned_workers": [
-        {
-          "name": "AI Copilot",
-          "email": "ai@example.com",
-          "role": "AI Copilot",
-          "worker_id": "ai-copilot"
-        }
-      ],
-      "acceptance_criteria": [
-        "Test suite discovers all node.tasks.json files under public/tasksDB/ recursively",
-        "Validates JSON parsing, project metadata, task structure, enums, dates, dependencies",
-        "Detects duplicate task_ids and task_names",
-        "Validates subtasks[] and acceptance_criteria[] array format",
-        "Tests run on github-task-manager and test-tasks projects",
-        "Provides clear error messages with file path and field location"
-      ],
-      "parent_task_id": null,
-      "creator_id": "ai@example.com",
-      "created_date": "2026-04-13T10:00:00Z",
-      "completed_date": "2026-04-13T12:00:00Z",
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 28,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ],
-      "subtasks": [
-        {
-          "name": "Implement recursive node.tasks.json file discovery",
-          "status": "Done",
-          "estimated_hours": 0.5,
-          "assigned_workers": []
-        },
-        {
-          "name": "Implement validateTasksJson with all field checks",
-          "status": "Done",
-          "estimated_hours": 1,
-          "assigned_workers": []
-        },
-        {
-          "name": "Add per-project dynamic test generation",
-          "status": "Done",
-          "estimated_hours": 0.5,
-          "assigned_workers": []
-        },
-        {
-          "name": "Add graph-builder integration test (subtask targets link correctly)",
-          "status": "Done",
-          "estimated_hours": 1,
-          "assigned_workers": []
-        }
-      ]
-    },
-    {
-      "task_id": 30,
-      "task_name": "Priority-Colored Dependency & Subtask Buttons with Status Animations",
-      "description": "Enhance popup modal rendering so Depends on buttons and Sub-task buttons display with the same priority color as their referenced nodes. In-progress items pulse/blink, done items are faded with line-through, not-started remain static. Sub-task buttons are rendered as node-like pill elements with hours badge. Start node details replaced hardcoded graph legend with dynamic project summary (task count, status, timeline). Category-based sidebar modules auto-generated for flat projects without navigation.modules config.",
-      "start_date": "2026-04-13",
-      "end_date": "2026-04-13",
-      "priority": "High",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 5,
-      "actual_hours": 4,
-      "is_critical_path": true,
-      "tags": [
-        "ui",
-        "graph",
-        "popup",
-        "colors",
-        "animation",
-        "sidebar"
-      ],
-      "category_name": "Frontend Development",
-      "assigned_workers": [
-        {
-          "name": "AI Copilot",
-          "email": "ai@example.com",
-          "role": "AI Copilot",
-          "worker_id": "ai-copilot"
-        }
-      ],
-      "acceptance_criteria": [
-        "Depends on buttons show the priority color of the referenced task node",
-        "Depends on buttons for done tasks are faded with line-through",
-        "Depends on buttons for in-progress tasks pulse with box-shadow animation",
-        "Sub-tasks rendered as colored pill buttons with priority color background",
-        "Sub-tasks show hours badge when available",
-        "Sub-task buttons pulse if in-progress, fade if done",
-        "Start node popup shows project description, task count, status, timeline instead of hardcoded graph legend",
-        "Flat projects without navigation.modules get category-based sidebar entries",
-        "Category sidebar items highlight matching tasks and dim non-matching ones",
-        "Subtask data enriched from parent: priority, status, category, assigned worker inherited when not set"
-      ],
-      "parent_task_id": null,
-      "creator_id": "ai@example.com",
-      "created_date": "2026-04-13T13:00:00Z",
-      "completed_date": "2026-04-13T17:00:00Z",
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 29,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ],
-      "subtasks": [
-        {
-          "name": "Replace hardcoded start node graph legend with dynamic project summary",
-          "status": "Done",
-          "estimated_hours": 0.5,
-          "assigned_workers": []
-        },
-        {
-          "name": "Add priority/status data attributes to dep-link buttons in graph-data.js",
-          "status": "Done",
-          "estimated_hours": 0.5,
-          "assigned_workers": []
-        },
-        {
-          "name": "Render subtasks as node-like pill buttons with color/status/hours",
-          "status": "Done",
-          "estimated_hours": 1,
-          "assigned_workers": []
-        },
-        {
-          "name": "Enrich subtask data from parent task fields",
-          "status": "Done",
-          "estimated_hours": 0.5,
-          "assigned_workers": []
-        },
-        {
-          "name": "Apply priority colors and status CSS classes in showNodeDetails",
-          "status": "Done",
-          "estimated_hours": 1,
-          "assigned_workers": []
-        },
-        {
-          "name": "Generate category-based sidebar modules for flat projects",
-          "status": "Done",
-          "estimated_hours": 0.5,
-          "assigned_workers": []
-        },
-        {
-          "name": "Add CSS for dep-status-done, dep-status-in-progress, subtask-node-btn, btn-pulse, category-dimmed",
-          "status": "Done",
-          "estimated_hours": 1,
-          "assigned_workers": []
-        }
-      ]
-    },
-    {
-      "task_id": 31,
-      "task_name": "Unify graph relation buttons and stabilize Playwright base URLs",
-      "description": "Removed the remaining subtask-dive button split by rendering graph popup relation buttons through the shared task-node-btn path, unified their click handling for subgraph/parent/sibling navigation, updated the graph regression selectors, and fixed local E2E tests to follow Playwright's configured baseURL instead of hardcoded localhost:3000. Also replaced the stale module-navigation color expectation with a theme-variable-backed assertion, aligned CRUD/update-task/fullscreen Playwright expectations with the current Done status and modal field IDs, and restored a stable data-task-id hook for UI automation.",
-      "start_date": "2026-04-18",
-      "end_date": "2026-04-18",
-      "priority": "High",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 4,
-      "actual_hours": 4,
-      "is_critical_path": false,
-      "tags": [
-        "graph-display",
-        "playwright",
-        "navigation",
-        "test-stability"
-      ],
-      "category_name": "Maintenance",
-      "assigned_workers": [
-        {
-          "name": "AI Copilot",
-          "email": "ai@example.com",
-          "role": "AI Copilot",
-          "worker_id": "ai-copilot"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "ai@example.com",
-      "created_date": "2026-04-18T20:45:00Z",
-      "completed_date": "2026-04-18T21:30:00Z",
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 28,
-          "type": "FS",
-          "lag_days": 0
-        },
-        {
-          "predecessor_task_id": 29,
-          "type": "FS",
-          "lag_days": 0
-        },
-        {
-          "predecessor_task_id": 30,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ],
-      "subtasks": [
-        {
-          "name": "Replace leftover subtask-dive modal buttons with task-node-btn variants",
-          "status": "Done",
-          "estimated_hours": 1,
-          "assigned_workers": []
-        },
-        {
-          "name": "Route related graph popup buttons through one shared navigation handler",
-          "status": "Done",
-          "estimated_hours": 1,
-          "assigned_workers": []
-        },
-        {
-          "name": "Update graph and E2E tests to use configured baseURL and current theme expectations",
-          "status": "Done",
-          "estimated_hours": 2,
-          "assigned_workers": []
-        },
-        {
-          "name": "Refresh stale local E2E selectors and assertions for current task card and modal markup",
-          "status": "Done",
-          "estimated_hours": 1,
-          "assigned_workers": []
-        }
-      ]
-    },
-    {
-      "task_id": 32,
-      "task_name": "Document task source audit workflow and output artifact paths",
-      "description": "Capture the recommended Git history and blame workflow for public/tasksDB/external/github-task-manager/node.tasks.json, and document that temporary outputs such as tmp-test-output.txt, tmp-calendar-run.txt, and live-test-run.log belong under outputs/local-runs/ instead of the repo root.",
-      "start_date": "2026-04-21",
-      "end_date": "2026-04-22",
-      "priority": "Medium",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 2,
-      "actual_hours": 2,
-      "is_critical_path": false,
-      "tags": [
-        "documentation",
-        "git",
-        "audit",
-        "taskdb"
-      ],
-      "category_name": "Documentation",
-      "assigned_workers": [
-        {
-          "name": "Developer",
-          "email": "dev@example.com",
-          "role": "Full Stack Developer",
-          "worker_id": "dev-fullstack"
-        }
-      ],
-      "parent_task_id": null,
-      "creator_id": "system@example.com",
-      "created_date": "2026-04-21T00:00:00Z",
-      "completed_date": "2026-04-22T16:15:00Z",
-      "comments": [],
-      "attachments": [],
-      "dependencies": [
-        {
-          "predecessor_task_id": 8,
-          "type": "FS",
-          "lag_days": 0
-        }
-      ],
-      "subtasks": [
-        {
-          "name": "Add git history command examples to README",
-          "status": "Done",
-          "estimated_hours": 0.5,
-          "assigned_workers": []
-        },
-        {
-          "name": "Document which outputs are temporary and should live outside source directories",
-          "status": "Done",
-          "estimated_hours": 0.5,
-          "assigned_workers": []
-        },
-        {
-          "name": "Capture what current task and git status means for the project state",
-          "status": "Done",
-          "estimated_hours": 1,
-          "assigned_workers": []
-        }
-      ]
-    },
-    {
-      "task_id": 33,
-      "task_name": "Add pending/full calendar variants and organize export folders",
-      "description": "Extend the calendar parser with a first-class task-scope option so it can generate both full and pending task calendars, write sorted project calendars under calendars/all and calendars/pending, nest worker variants under workers-calendar/all and workers-calendar/pending, remove the legacy workers-calendar-pending layout, and keep the custom unit runner aligned while validating the change.",
+      "task_id": 51,
+      "task_name": "Phase 8 – Maintenance, Calendar & Architecture",
+      "description": "Extend the calendar exporter with pending/full variants and organised export folders, document the IndexedDB cache and FS write-back architecture, restrict local folder discovery to canonical node.tasks.json, run a periodic project health review, retire the duplicate bridge package, and move the doc-only API surface into docs.",
       "start_date": "2026-04-22",
-      "end_date": "2026-04-22",
-      "priority": "High",
-      "status": "Done",
-      "progress_percentage": 100,
-      "estimated_hours": 4,
-      "actual_hours": 4,
+      "end_date": "2026-06-30",
+      "priority": "Medium",
+      "status": "In Progress",
+      "progress_percentage": 60,
+      "estimated_hours": 18,
+      "actual_hours": 11,
       "is_critical_path": false,
+      "category_name": "Maintenance",
       "tags": [
         "calendar",
-        "output-structure",
-        "workers",
-        "tests"
+        "architecture",
+        "local-folder",
+        "maintenance",
+        "review"
       ],
-      "category_name": "Maintenance",
       "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
+        },
         {
           "name": "AI Copilot",
           "email": "ai@example.com",
@@ -2010,40 +2056,570 @@
       "parent_task_id": null,
       "creator_id": "ai@example.com",
       "created_date": "2026-04-22T16:00:00Z",
-      "completed_date": "2026-04-22T16:45:00Z",
-      "comments": [],
+      "completed_date": null,
+      "acceptance_criteria": [
+        "Calendar exporter generates both full and pending variants under sorted output folders",
+        "IndexedDB cache, FS write-back, and navigation performance architecture documented",
+        "Local folder discovery restricted to node.tasks.json canonical filename only",
+        "Periodic module health review completed with findings captured as follow-up tasks",
+        "Duplicate task bridge package retired or shim documented",
+        "Documentation-only public/api surface moved to docs with compatibility note"
+      ],
+      "comments": [
+        {
+          "author": "ai@example.com",
+          "timestamp": "2026-05-08T12:00:00Z",
+          "text": "Maintenance follow-up restored list-display parity after the phase regrouping: nested tasks now appear through All Tasks and Layer Tasks modes, the list detail popup was standardized onto the taskNodeModal pattern with graph-style relation buttons and View Subtasks navigation, and the focused module-navigation plus CRUD Playwright regressions were refreshed and passed. Remaining UX follow-up is to reassess whether the current phase grouping best reflects the real project structure once the regression cycle is fully settled."
+        }
+      ],
       "attachments": [],
       "dependencies": [
         {
-          "predecessor_task_id": 32,
+          "predecessor_task_id": 49,
+          "type": "FS",
+          "lag_days": 0
+        },
+        {
+          "predecessor_task_id": 50,
           "type": "FS",
           "lag_days": 0
         }
       ],
       "subtasks": [
         {
-          "name": "Add a parser option to choose all, pending, or both calendar variants",
+          "task_id": 33,
+          "task_name": "Add pending/full calendar variants and organize export folders",
+          "description": "Extend the calendar parser with a first-class task-scope option so it can generate both full and pending task calendars, write sorted project calendars under calendars/all and calendars/pending, nest worker variants under workers-calendar/all and workers-calendar/pending, remove the legacy workers-calendar-pending layout, and keep the custom unit runner aligned while validating the change.",
           "status": "Done",
-          "estimated_hours": 1,
-          "assigned_workers": []
+          "priority": "High",
+          "estimated_hours": 4,
+          "is_critical_path": false,
+          "category_name": "Maintenance",
+          "tags": [
+            "calendar",
+            "output-structure",
+            "workers",
+            "tests"
+          ],
+          "assigned_workers": [
+            {
+              "name": "AI Copilot",
+              "email": "ai@example.com",
+              "role": "AI Copilot",
+              "worker_id": "ai-copilot"
+            }
+          ],
+          "dependencies": [],
+          "subtasks": [
+            {
+              "name": "Add a parser option to choose all, pending, or both calendar variants",
+              "status": "Done",
+              "estimated_hours": 1,
+              "assigned_workers": []
+            },
+            {
+              "name": "Write project and worker calendar variants into sorted output folders",
+              "status": "Done",
+              "estimated_hours": 1,
+              "assigned_workers": []
+            },
+            {
+              "name": "Update calendar docs and package scripts for the new export modes",
+              "status": "Done",
+              "estimated_hours": 1,
+              "assigned_workers": []
+            },
+            {
+              "name": "Validate the parser and repair the custom test runner filename fallback",
+              "status": "Done",
+              "estimated_hours": 1,
+              "assigned_workers": []
+            }
+          ],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 4
         },
         {
-          "name": "Write project and worker calendar variants into sorted output folders",
+          "task_id": 34,
+          "task_name": "Document IndexedDB Cache, FS Write-Back, and Instant Navigation Architecture",
+          "description": "Document the new architecture for local-folder TaskDB projects: IndexedDB-backed FolderCache for instant load, file hash-based change detection, and browser FS write-back. Detail how navigation performance was improved by pre-positioning nodes and removing unnecessary stabilization waits. Include affected modules (folder-cache.js, local-folder-scanner.js, task-storage-sync.js, main-graph.js), test coverage, and validation steps.",
           "status": "Done",
-          "estimated_hours": 1,
-          "assigned_workers": []
+          "priority": "High",
+          "estimated_hours": 2,
+          "is_critical_path": false,
+          "category_name": "Documentation",
+          "tags": [
+            "documentation",
+            "architecture",
+            "local-folder",
+            "performance"
+          ],
+          "assigned_workers": [
+            {
+              "name": "AI Copilot",
+              "email": "ai@example.com",
+              "role": "AI Copilot",
+              "worker_id": "ai-copilot"
+            }
+          ],
+          "dependencies": [],
+          "subtasks": [],
+          "comments": [
+            {
+              "author": "ai@example.com",
+              "timestamp": "2026-04-23T12:00:00Z",
+              "text": "Added comprehensive documentation of the new cache/write-back architecture and navigation performance improvements. All tests passing."
+            }
+          ],
+          "attachments": [],
+          "actual_hours": 2,
+          "acceptance_criteria": [
+            "Project state file documents IndexedDB cache and FS write-back for local-folder projects",
+            "Navigation logic improvements (pre-positioning, instant modal) are described",
+            "Affected modules and test coverage are listed",
+            "Validation steps and outcomes are included"
+          ]
         },
         {
-          "name": "Update calendar docs and package scripts for the new export modes",
+          "task_id": 35,
+          "task_name": "Restrict Local Folder Discovery to node.tasks.json and Index Project Paths Read-Only",
+          "description": "Update the local-folder import flow used by Open Local Folder and Browse Folder so discovery is scoped to the canonical node.tasks.json filename only, legacy TODO_project_task.json is ignored, and the project folder structure is indexed as lightweight path metadata without reading non-task file contents.",
           "status": "Done",
-          "estimated_hours": 1,
-          "assigned_workers": []
+          "priority": "High",
+          "estimated_hours": 3,
+          "is_critical_path": false,
+          "category_name": "Maintenance",
+          "tags": [
+            "local-folder",
+            "node.tasks.json",
+            "project-index",
+            "ux"
+          ],
+          "assigned_workers": [
+            {
+              "name": "AI Copilot",
+              "email": "ai@example.com",
+              "role": "AI Copilot",
+              "worker_id": "ai-copilot"
+            }
+          ],
+          "dependencies": [],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 3,
+          "acceptance_criteria": [
+            "Local folder discovery accepts node.tasks.json as canonical task file and ignores legacy candidates",
+            "Folder scans retain a lightweight directory/file path index without parsing non-task file contents",
+            "Picker feedback explicitly states that paths are indexed and only node.tasks.json files are read"
+          ]
         },
         {
-          "name": "Validate the parser and repair the custom test runner filename fallback",
+          "task_id": 36,
+          "task_name": "Periodic Project Review for Module Health, Issues, and Optimization Opportunities",
+          "description": "Add a near-terminal review node that runs after the remaining documentation, retrospective, graph-editing, API, calendar, and local-folder maintenance work. Walk project modules and delivery surfaces, look for bugs, stale assumptions, performance bottlenecks, and refactor opportunities, then turn findings into concrete follow-up tasks or close the cycle when no further action is needed.",
+          "status": "Not Started",
+          "priority": "Medium",
+          "estimated_hours": 4,
+          "is_critical_path": false,
+          "category_name": "Maintenance",
+          "tags": [
+            "review",
+            "maintenance",
+            "optimization",
+            "quality",
+            "modules"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            },
+            {
+              "name": "AI Copilot",
+              "email": "ai@example.com",
+              "role": "AI Copilot",
+              "worker_id": "ai-copilot"
+            }
+          ],
+          "dependencies": [
+            {
+              "predecessor_task_id": 33,
+              "type": "FS",
+              "lag_days": 0
+            },
+            {
+              "predecessor_task_id": 34,
+              "type": "FS",
+              "lag_days": 0
+            },
+            {
+              "predecessor_task_id": 35,
+              "type": "FS",
+              "lag_days": 0
+            }
+          ],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 0,
+          "acceptance_criteria": [
+            "Review covers main project modules including list-display, graph-display, local-folder, task-engine, API, and project data flows",
+            "Potential issues, regressions, or optimization opportunities documented as follow-up tasks"
+          ]
+        },
+        {
+          "task_id": 38,
+          "task_name": "Retire duplicate public/local-folder/task-bridge-modules/taskbridge package",
+          "description": "Replace the vendored task bridge copy under public/local-folder/task-bridge-modules/taskbridge with an explicit reference or compatibility shim to the canonical tools/task-bridge module so bridge server maintenance only happens in one place.",
+          "status": "Not Started",
+          "priority": "High",
+          "estimated_hours": 3,
+          "is_critical_path": false,
+          "category_name": "Maintenance",
+          "tags": [
+            "task-bridge",
+            "dedupe",
+            "server",
+            "structure"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            },
+            {
+              "name": "AI Copilot",
+              "email": "ai@example.com",
+              "role": "AI Copilot",
+              "worker_id": "ai-copilot"
+            }
+          ],
+          "dependencies": [],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 0,
+          "acceptance_criteria": [
+            "tools/task-bridge remains the only maintained bridge implementation",
+            "Any remaining public/local-folder bridge path becomes a documented shim or is removed",
+            "Bridge startup and integration flows still work after the duplicate package is retired"
+          ]
+        },
+        {
+          "task_id": 40,
+          "task_name": "Move doc-only public/api surface into docs with an explicit compatibility note",
+          "description": "Relocate the public/api documentation-only folder into a docs-oriented location so the project no longer presents a runtime-looking API folder that only contains README content, while leaving a small compatibility note or redirect if existing links still depend on the current path.",
+          "status": "Not Started",
+          "priority": "Medium",
+          "estimated_hours": 2,
+          "is_critical_path": false,
+          "category_name": "Documentation",
+          "tags": [
+            "docs",
+            "structure",
+            "cleanup",
+            "api"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            }
+          ],
+          "dependencies": [],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 0,
+          "acceptance_criteria": [
+            "Documentation moves to a docs-oriented path instead of staying under a runtime-looking public/api folder",
+            "Any existing incoming references still land on a clear compatibility note or redirect"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": 52,
+      "task_name": "Phase 9 – Agentic IDE Platform",
+      "description": "Pilot the manifest.json convention for self-describing Agentic IDE units, unblock validation when optional local model assets are absent, add a root server/ launch surface for the bridge and inference runtime, expand manifest coverage across more units, and extend the folder contract pattern beyond the Agentic IDE pilot into shared repo modules.",
+      "start_date": "2026-05-07",
+      "end_date": "2026-07-31",
+      "priority": "High",
+      "status": "In Progress",
+      "progress_percentage": 50,
+      "estimated_hours": 20,
+      "actual_hours": 6,
+      "is_critical_path": false,
+      "category_name": "Implementation",
+      "tags": [
+        "agentic-ide",
+        "manifest",
+        "schema",
+        "server",
+        "inference"
+      ],
+      "assigned_workers": [
+        {
+          "name": "Developer",
+          "email": "dev@example.com",
+          "role": "Full Stack Developer",
+          "worker_id": "dev-fullstack"
+        },
+        {
+          "name": "AI Copilot",
+          "email": "ai@example.com",
+          "role": "AI Copilot",
+          "worker_id": "ai-copilot"
+        }
+      ],
+      "parent_task_id": null,
+      "creator_id": "ai@example.com",
+      "created_date": "2026-05-07T12:00:00Z",
+      "completed_date": null,
+      "acceptance_criteria": [
+        "manifest.schema.json documents the folder contract; pilot manifests pass the validator",
+        "validate:agentic-cells completes in a clean checkout without requiring absent local model assets",
+        "public/agentic-ide/server/ provides an explicit bridge launch entry with schema, manifest, and health test",
+        "Manifest coverage expanded to additional clean Agentic IDE units visible in registry.json",
+        "At least one shared runtime or UI module outside Agentic IDE adopts the folder contract pattern"
+      ],
+      "comments": [],
+      "attachments": [],
+      "dependencies": [
+        {
+          "predecessor_task_id": 51,
+          "type": "FS",
+          "lag_days": 0
+        }
+      ],
+      "subtasks": [
+        {
+          "task_id": 37,
+          "task_name": "Pilot manifest.json convention for self-describing Agentic IDE units",
+          "description": "Add a manifest schema plus first-pass manifest.json files for already self-contained Agentic IDE folders so each pilot unit can declare its entry file, contract file, tests, and explicit workspace relations without changing the runtime loading model yet.",
           "status": "Done",
-          "estimated_hours": 1,
-          "assigned_workers": []
+          "priority": "High",
+          "estimated_hours": 3,
+          "is_critical_path": false,
+          "category_name": "Implementation",
+          "tags": [
+            "agentic-ide",
+            "manifest",
+            "schema",
+            "registry"
+          ],
+          "assigned_workers": [
+            {
+              "name": "AI Copilot",
+              "email": "ai@example.com",
+              "role": "AI Copilot",
+              "worker_id": "ai-copilot"
+            }
+          ],
+          "dependencies": [],
+          "subtasks": [],
+          "comments": [
+            {
+              "author": "ai@example.com",
+              "timestamp": "2026-05-07T12:45:00Z",
+              "text": "Added manifest.schema.json, created pilot manifests, updated validator, documented in README."
+            }
+          ],
+          "attachments": [],
+          "actual_hours": 3,
+          "acceptance_criteria": [
+            "public/agentic-ide/schema/manifest.schema.json exists and documents the manifest contract",
+            "Pilot units expose manifest.json files with entry, contract, test, and relation metadata",
+            "The Agentic IDE validator recognizes manifests and publishes manifest coverage into registry.json"
+          ]
+        },
+        {
+          "task_id": 41,
+          "task_name": "Unblock full validate:agentic-cells runs when optional local model assets are absent",
+          "description": "Resolve the current Agentic IDE validation blocker where validate-agentic-cells fails when a local GGUF model file is not present in the repo checkout. Decided to treat that asset as optional and downgrade absent files to warnings.",
+          "status": "Done",
+          "priority": "Medium",
+          "estimated_hours": 2,
+          "is_critical_path": false,
+          "category_name": "Validation",
+          "tags": [
+            "validation",
+            "agentic-ide",
+            "models",
+            "tooling"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            },
+            {
+              "name": "AI Copilot",
+              "email": "ai@example.com",
+              "role": "AI Copilot",
+              "worker_id": "ai-copilot"
+            }
+          ],
+          "dependencies": [],
+          "subtasks": [],
+          "comments": [
+            {
+              "author": "ai@example.com",
+              "timestamp": "2026-05-07T18:40:00Z",
+              "text": "Updated model validation to honor model_asset_path and downgrade absent local GGUF assets to warnings; validate:agentic-cells now completes successfully."
+            }
+          ],
+          "attachments": [],
+          "actual_hours": 1,
+          "acceptance_criteria": [
+            "validate-agentic-cells can run to completion in a clean checkout without requiring large local model artifacts",
+            "The chosen behavior for optional model assets is documented clearly for maintainers and CI"
+          ]
+        },
+        {
+          "task_id": 42,
+          "task_name": "Add root server/ launch surface for Agentic IDE bridge and inference",
+          "description": "Create a root-level public/agentic-ide/server folder with a structured launch entry, contract file, manifest, health test definition, and README so the Agentic IDE bridge and inference runtime can be launched from an explicit server surface.",
+          "status": "Done",
+          "priority": "High",
+          "estimated_hours": 2,
+          "is_critical_path": false,
+          "category_name": "Implementation",
+          "tags": [
+            "agentic-ide",
+            "server",
+            "structure",
+            "inference"
+          ],
+          "assigned_workers": [
+            {
+              "name": "AI Copilot",
+              "email": "ai@example.com",
+              "role": "AI Copilot",
+              "worker_id": "ai-copilot"
+            }
+          ],
+          "dependencies": [
+            {
+              "predecessor_task_id": 41,
+              "type": "FS",
+              "lag_days": 0
+            }
+          ],
+          "subtasks": [],
+          "comments": [
+            {
+              "author": "ai@example.com",
+              "timestamp": "2026-05-07T18:50:00Z",
+              "text": "Added public/agentic-ide/server/{main.js,schema.json,manifest.json,tests/health.json,README.md}, switched preferred bridge launch path to server/main.js."
+            }
+          ],
+          "attachments": [],
+          "actual_hours": 2,
+          "acceptance_criteria": [
+            "public/agentic-ide/server/main.js exists as the preferred bridge launch entry",
+            "The server folder contains schema.json, manifest.json, tests/health.json, and README.md",
+            "The launcher resolves the configured local llama runtime and model asset path without manual edits"
+          ]
+        },
+        {
+          "task_id": 39,
+          "task_name": "Expand manifest coverage beyond the first Agentic IDE pilot units",
+          "description": "Continue the manifest rollout from the first four pilot units into the rest of the clean Agentic IDE tools, agents, subgraphs, and workflows so more folders become self-describing and registry coverage can be used as a real progress measure.",
+          "status": "Not Started",
+          "priority": "Medium",
+          "estimated_hours": 5,
+          "is_critical_path": false,
+          "category_name": "Design",
+          "tags": [
+            "agentic-ide",
+            "manifest",
+            "rollout",
+            "registry"
+          ],
+          "assigned_workers": [
+            {
+              "name": "AI Copilot",
+              "email": "ai@example.com",
+              "role": "AI Copilot",
+              "worker_id": "ai-copilot"
+            }
+          ],
+          "dependencies": [
+            {
+              "predecessor_task_id": 37,
+              "type": "FS",
+              "lag_days": 0
+            }
+          ],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 0,
+          "acceptance_criteria": [
+            "Additional clean Agentic IDE units gain manifest.json files without breaking existing discovery",
+            "registry.json makes manifest coverage visible across the unit inventory"
+          ]
+        },
+        {
+          "task_id": 43,
+          "task_name": "Extend manifest/schema/main/tests folder contract across non-Agentic project folders",
+          "description": "Take the folder-structure example beyond Agentic IDE and apply the same manifest/schema/main/tests discipline to the rest of the repo where it makes sense, starting with graph-display, task-engine, task-bridge, calendar, and other self-contained modules.",
+          "status": "Not Started",
+          "priority": "High",
+          "estimated_hours": 8,
+          "is_critical_path": false,
+          "category_name": "Design",
+          "tags": [
+            "structure",
+            "manifest",
+            "schema",
+            "rollout"
+          ],
+          "assigned_workers": [
+            {
+              "name": "Developer",
+              "email": "dev@example.com",
+              "role": "Full Stack Developer",
+              "worker_id": "dev-fullstack"
+            },
+            {
+              "name": "AI Copilot",
+              "email": "ai@example.com",
+              "role": "AI Copilot",
+              "worker_id": "ai-copilot"
+            }
+          ],
+          "dependencies": [
+            {
+              "predecessor_task_id": 39,
+              "type": "FS",
+              "lag_days": 0
+            },
+            {
+              "predecessor_task_id": 42,
+              "type": "FS",
+              "lag_days": 0
+            }
+          ],
+          "subtasks": [],
+          "comments": [],
+          "attachments": [],
+          "actual_hours": 0,
+          "acceptance_criteria": [
+            "A repo-wide shortlist identifies which non-Agentic folders should adopt the explicit folder contract next",
+            "At least one shared runtime or UI module outside Agentic IDE gets the same structured root surface pattern"
+          ]
         }
       ]
     }

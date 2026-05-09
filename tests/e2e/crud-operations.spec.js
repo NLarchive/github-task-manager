@@ -43,7 +43,7 @@ test.describe('GitHub Task Manager - Create Task', () => {
     await page.click('button:has-text("+ Add New Task")');
     
     // Wait for modal to appear
-    await page.waitForSelector('[id="taskModal"]');
+    await page.waitForSelector('[id="taskEditModal"]');
     
     // Fill form fields
     await page.fill('[id="taskName"]', 'Playwright E2E Test Task');
@@ -76,7 +76,7 @@ test.describe('GitHub Task Manager - Create Task', () => {
     await page.click('button:has-text("+ Add New Task")');
     
     // Wait for modal
-    await page.waitForSelector('[id="taskModal"]');
+    await page.waitForSelector('[id="taskEditModal"]');
     
     // Try to submit empty form
     await page.click('button:has-text("Save Task")');
@@ -91,7 +91,7 @@ test.describe('GitHub Task Manager - Create Task', () => {
     await page.click('button:has-text("+ Add New Task")');
     
     // Wait for modal
-    await page.waitForSelector('[id="taskModal"]');
+    await page.waitForSelector('[id="taskEditModal"]');
     
     // Verify default values are set
     const statusValue = await page.inputValue('[id="taskStatus"]');
@@ -131,12 +131,12 @@ test.describe('GitHub Task Manager - Edit Task', () => {
 
     await page.waitForSelector('[class*="task-card"]');
 
-    const editButtons = page.locator('button:has-text("Edit")');
+    const editButtons = page.locator('.task-card button:has-text("Edit")');
     await expect(editButtons.first()).toBeVisible();
 
     // Open edit modal
     await editButtons.first().click();
-    await page.waitForSelector('[id="taskModal"]');
+    await page.waitForSelector('[id="taskEditModal"]');
 
     // Capture the current task id shown in the modal (read-only field)
     const firstTaskId = (await page.locator('[id="displayTaskId"]').innerText()).trim();
@@ -149,7 +149,7 @@ test.describe('GitHub Task Manager - Edit Task', () => {
 
     // Re-open edit modal for the same card again
     await editButtons.first().click();
-    await page.waitForSelector('[id="taskModal"]');
+    await page.waitForSelector('[id="taskEditModal"]');
 
     // Ensure the same task_id is still displayed (not corrupted to string mismatch)
     const secondTaskId = (await page.locator('[id="displayTaskId"]').innerText()).trim();
@@ -165,12 +165,12 @@ test.describe('GitHub Task Manager - Edit Task', () => {
     await page.waitForSelector('[class*="task-card"]');
     
     // Click edit button on first task
-    const editButtons = await page.locator('button:has-text("Edit")');
+    const editButtons = await page.locator('.task-card button:has-text("Edit")');
     if (await editButtons.count() > 0) {
       await editButtons.first().click();
       
       // Wait for modal with task data
-      await page.waitForSelector('[id="taskModal"]');
+      await page.waitForSelector('[id="taskEditModal"]');
       
       // Verify task data is populated
       const taskName = await page.inputValue('[id="taskName"]');
@@ -184,7 +184,7 @@ test.describe('GitHub Task Manager - Edit Task', () => {
   test('should open edit modal when clicking task card', async ({ page }) => {
     // Create a specific task to test with
     await page.click('button:has-text("+ Add New Task")');
-    await page.waitForSelector('[id="taskModal"]');
+    await page.waitForSelector('[id="taskEditModal"]');
     await page.fill('[id="taskName"]', 'Click Test Task');
     await page.fill('[id="taskDescription"]', 'Testing click interaction');
     await page.selectOption('[id="taskStatus"]', 'Not Started');
@@ -199,12 +199,15 @@ test.describe('GitHub Task Manager - Edit Task', () => {
     // Find the task card
     const taskCard = page.locator('.task-card').filter({ hasText: 'Click Test Task' }).first();
     
-    // Click the card (which triggers editTask with string ID from onclick)
+    // Click the card, then continue through the preview popup into the edit modal
     await taskCard.scrollIntoViewIfNeeded();
     await taskCard.click({ force: true });
     
-    // Verify modal opens with correct task
-    await page.waitForSelector('[id="taskModal"]');
+    await page.waitForSelector('#taskNodeModal');
+    await page.locator('#taskNodeModal .task-node-btn[data-popup-action="edit"]').click();
+
+    // Verify edit modal opens with correct task
+    await page.waitForSelector('[id="taskEditModal"]');
     const taskName = await page.inputValue('[id="taskName"]');
     expect(taskName).toBe('Click Test Task');
     
@@ -220,12 +223,12 @@ test.describe('GitHub Task Manager - Edit Task', () => {
     const firstTaskName = await page.locator('[class*="task-card"] h3').first().textContent();
     
     // Click edit on first task
-    const editButtons = await page.locator('button:has-text("Edit")');
+    const editButtons = await page.locator('.task-card button:has-text("Edit")');
     if (await editButtons.count() > 0) {
       await editButtons.first().click();
       
       // Verify task name matches
-      await page.waitForSelector('[id="taskModal"]');
+      await page.waitForSelector('[id="taskEditModal"]');
       const formTaskName = await page.inputValue('[id="taskName"]');
       expect(formTaskName).toContain(firstTaskName.split('\n')[0]);
     }
@@ -434,7 +437,7 @@ test.describe('GitHub Task Manager - Statistics', () => {
     
     // Create task
     await page.click('button:has-text("+ Add New Task")');
-    await page.waitForSelector('[id="taskModal"]');
+    await page.waitForSelector('[id="taskEditModal"]');
     
     // Fill minimal required fields
     await page.fill('[id="taskName"]', 'Stat Test Task');
@@ -517,11 +520,11 @@ test.describe('GitHub Task Manager - UI/UX', () => {
     await page.click('button:has-text("+ Add New Task")');
     
     // Verify modal is visible
-    const modal = page.locator('[id="taskModal"]');
+    const modal = page.locator('[id="taskEditModal"]');
     await expect(modal).toBeVisible();
     
     // Verify modal title specifically in modal
-    await expect(page.locator('#modalTitle')).toHaveText('Add New Task');
+    await expect(page.locator('#taskEditModalTitle')).toHaveText('Add New Task');
   });
 
   test('should display task cards with key information', async ({ page }) => {

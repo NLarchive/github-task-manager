@@ -43,9 +43,7 @@ test.describe('New Features - Password / Timeline / Issues', () => {
     await page.goto(`${BASE_URL}?forcePassword=1`);
     await waitForAppReady(page);
 
-    const editButtons = page.locator('button:has-text("Edit")');
-    await expect(editButtons.first()).toBeVisible();
-    await editButtons.first().click();
+    await page.getByRole('button', { name: '+ Add New Task' }).click();
 
     await expect(page.locator('#passwordModal')).toBeVisible({ timeout: 5000 });
     const passwordInput = page.locator('#accessPassword');
@@ -58,11 +56,11 @@ test.describe('New Features - Password / Timeline / Issues', () => {
     await page.waitForTimeout(200);
     
     // Check if task modal appears or if we need to retry
-    const taskModal = page.locator('#taskModal');
+    const taskModal = page.locator('#taskEditModal');
     const isVisible = await taskModal.isVisible();
     
     if (isVisible) {
-      await page.click('#taskModal button:has-text("Cancel")');
+      await page.click('#taskEditModal button:has-text("Cancel")');
     }
   });
 
@@ -143,7 +141,7 @@ test.describe('Live Site - Password Protection & New Features', () => {
     );
 
     // Find and click first Edit button
-    const editBtn = page.locator('button:has-text("Edit")').first();
+    const editBtn = page.locator('.task-card button:has-text("Edit")').first();
     await editBtn.click();
 
     // Password modal should appear
@@ -164,7 +162,7 @@ test.describe('Live Site - Password Protection & New Features', () => {
     );
 
     // Click first Edit button
-    const editBtn = page.locator('button:has-text("Edit")').first();
+    const editBtn = page.locator('.task-card button:has-text("Edit")').first();
     await editBtn.click();
 
     // Wait for password modal
@@ -181,11 +179,11 @@ test.describe('Live Site - Password Protection & New Features', () => {
     await unlockBtn.click({ force: true });
 
     // Task edit modal should open (password was correct)
-    const taskModal = page.locator('#taskModal');
+    const taskModal = page.locator('#taskEditModal');
     await expect(taskModal).toBeVisible({ timeout: 5000 });
     
     // Close the modal
-    await page.click('#taskModal .close');
+    await page.click('#taskEditModal .close');
   });
 
   test('switching project forces lock again (no cross-project unlock)', async ({ page }) => {
@@ -200,28 +198,28 @@ test.describe('Live Site - Password Protection & New Features', () => {
     );
 
     // Unlock on default project
-    await page.locator('button:has-text("Edit")').first().click();
+    await page.locator('.task-card button:has-text("Edit")').first().click();
     await expect(page.locator('#passwordModal')).toBeVisible({ timeout: 5000 });
     await page.locator('#accessPassword').fill(LIVE_PASSWORD);
     await page.locator('#passwordModal button:has-text("Unlock")').scrollIntoViewIfNeeded();
     await page.locator('#passwordModal button:has-text("Unlock")').click({ force: true });
-    await expect(page.locator('#taskModal')).toBeVisible({ timeout: 5000 });
-    await page.click('#taskModal .close');
+    await expect(page.locator('#taskEditModal')).toBeVisible({ timeout: 5000 });
+    await page.click('#taskEditModal .close');
 
     // Switch project
     await page.locator('#projectSelect').selectOption('ai-career-roadmap');
     await page.waitForTimeout(250);
 
     // Editing should require password again
-    await page.locator('button:has-text("Edit")').first().click();
+    await page.locator('.task-card button:has-text("Edit")').first().click();
     await expect(page.locator('#passwordModal')).toBeVisible({ timeout: 5000 });
 
     // Unlock with the project password and ensure edit opens
     await page.locator('#accessPassword').fill(LIVE_PASSWORD_AI_CAREER_ROADMAP);
     await page.locator('#passwordModal button:has-text("Unlock")').scrollIntoViewIfNeeded();
     await page.locator('#passwordModal button:has-text("Unlock")').click({ force: true });
-    await expect(page.locator('#taskModal')).toBeVisible({ timeout: 5000 });
-    await page.click('#taskModal .close');
+    await expect(page.locator('#taskEditModal')).toBeVisible({ timeout: 5000 });
+    await page.click('#taskEditModal .close');
   });
 
   test('password gate rejects incorrect password', async ({ page }) => {
@@ -233,7 +231,7 @@ test.describe('Live Site - Password Protection & New Features', () => {
     );
 
     // Click first Edit button
-    const editBtn = page.locator('button:has-text("Edit")').first();
+    const editBtn = page.locator('.task-card button:has-text("Edit")').first();
     await editBtn.click();
 
     // Wait for password modal
@@ -255,7 +253,7 @@ test.describe('Live Site - Password Protection & New Features', () => {
     await expect(errorDiv).toContainText('Incorrect password');
 
     // Task modal should NOT be visible
-    const taskModal = page.locator('#taskModal');
+    const taskModal = page.locator('#taskEditModal');
     await expect(taskModal).not.toBeVisible();
   });
 
@@ -347,7 +345,7 @@ test.describe('Live Site - Password Protection & New Features', () => {
     );
 
     // Step 1: Test password protection
-    const editBtn = page.locator('button:has-text("Edit")').first();
+    const editBtn = page.locator('.task-card button:has-text("Edit")').first();
     await editBtn.click();
     await expect(page.locator('#passwordModal')).toBeVisible({ timeout: 5000 });
 
@@ -357,8 +355,8 @@ test.describe('Live Site - Password Protection & New Features', () => {
     await page.locator('#passwordModal button:has-text("Unlock")').click();
 
     // Task modal should open
-    await expect(page.locator('#taskModal')).toBeVisible({ timeout: 5000 });
-    await page.click('#taskModal .close');
+    await expect(page.locator('#taskEditModal')).toBeVisible({ timeout: 5000 });
+    await page.click('#taskEditModal .close');
 
     // Step 2: Test timeline toggle
     const timelineBtn = page.locator('[data-testid="view-timeline"]');

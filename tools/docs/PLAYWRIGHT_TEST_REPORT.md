@@ -1,5 +1,23 @@
 # Playwright Test Report — GitHub Task Manager
 
+Date: 2026-04-24
+Environment: local Node server (`node server.js`) + Playwright Chromium
+
+## 2026-04 Update
+- Runtime now treats `node.tasks.json` as the canonical TaskDB filename.
+- Added local path scan UX (`/api/scan-path`) in list-display to discover projects/modules from a user-specified folder path.
+- Local editing now supports a replacement-copy fallback when direct file writes are blocked by browser permissions.
+- New local regression coverage added: `tests/e2e/local-project-editing.spec.js` for context chips + create/edit/delete flow on local project `test`.
+
+### Verified Improvements
+- Local project selection and CRUD continue working under `project=test`.
+- Save flow clearly distinguishes committed writes from manual-replacement copy saves.
+- Dynamic local projects discovered through scan-path can be registered without static config changes.
+
+### Open Risks
+- Browser support for File System Access API still varies; save-copy fallback is required for non-Chromium browsers.
+- Some documentation still references legacy `tasks.json` wording and should be normalized in a separate docs pass.
+
 Date: 2025-12-10
 Base URL: https://nlarchive.github.io/github-task-manager/
 Browser: Playwright (Chromium)

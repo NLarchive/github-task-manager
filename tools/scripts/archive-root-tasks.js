@@ -54,7 +54,7 @@ function generatePersistedCSV(tasks = []) {
 /** Run the script entrypoint for this file. */
 function main() {
   const repoRoot = path.join(__dirname, '..', '..');
-  const legacyPath = path.join(repoRoot, 'tasks.json');
+  const legacyPath = path.join(repoRoot, 'node.tasks.json');
   const historyDir = path.join(repoRoot, 'public', 'tasksDB', 'history');
 
   if (!fs.existsSync(legacyPath)) {

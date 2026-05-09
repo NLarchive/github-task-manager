@@ -9,8 +9,20 @@
 /** Infer a project id from a configured TaskDB tasks file path. */
 function inferProjectIdFromTasksFile(tasksFile) {
   const normalized = String(tasksFile || '').replace(/\\/g, '/');
-  const match = normalized.match(/tasksDB\/(?:(?:external|local)\/)?([^\/]+)\/(?:tasks\.(?:json|csv)|TODO_project_task\.json)$/i);
+  const match = normalized.match(/tasksDB\/(?:(?:external|local)\/)?([^\/]+)\/(?:node\.tasks\.json|tasks\.csv|TODO_project_task\.json)$/i);
   return match && match[1] ? String(match[1]).trim() : '';
+}
+
+/** Normalize a TaskDB file path so authored modules always use node.tasks.json. */
+function normalizeTaskFilePath(pathValue, fallback = 'node.tasks.json') {
+  const normalized = String(pathValue || '').trim().replace(/\\/g, '/').replace(/^\.\//, '').replace(/^\/+/, '');
+  if (!normalized) return fallback;
+  if (!/\.json$/i.test(normalized)) return normalized;
+
+  const lastSlash = normalized.lastIndexOf('/');
+  return lastSlash >= 0
+    ? `${normalized.slice(0, lastSlash)}/node.tasks.json`
+    : 'node.tasks.json';
 }
 
 /** Resolve the shared template configuration object from browser or test globals. */
@@ -44,6 +56,19 @@ function resolveActiveProjectId() {
   const inferredProjectId = inferProjectIdFromTasksFile(tasksFile);
   if (inferredProjectId) return inferredProjectId;
 
+  // Infer from URL ?template=xxx-tasks parameter — enables local and folder projects
+  // to save to the right project when no explicit config is present.
+  try {
+    if (typeof window !== 'undefined' && window.location) {
+      const templateParam = new URLSearchParams(window.location.search).get('template');
+      if (templateParam && templateParam.endsWith('-tasks')) {
+        return templateParam.slice(0, -'-tasks'.length);
+      }
+    }
+  } catch {
+    // ignore
+  }
+
   return 'github-task-manager';
 }
 
@@ -52,6 +77,12 @@ function getProjectScopedStorageKey() {
   const projectId = resolveActiveProjectId();
   const safe = String(projectId || '').replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
   return `taskManagerData:${safe}`;
+}
+
+/** Normalize a task id from number-like inputs. */
+function normalizeTaskIdValue(taskId) {
+  const normalized = typeof taskId === 'string' ? parseInt(taskId, 10) : taskId;
+  return Number.isFinite(normalized) ? normalized : null;
 }
 
 /**
@@ -78,6 +109,8 @@ class TaskDatabase {
     this.summary = null;
     this.sourceKind = 'remote';
     this.localSourceMeta = null;
+    this.isSaving = false;
+    this._bridgeIntegration = null;
   }
 
   /** Reset metadata captured from the last loaded project payload. */
@@ -288,6 +321,26 @@ class TaskDatabase {
     }
   }
 
+  /** Resolve and memoize the optional local bridge integration adapter. */
+  getBridgeIntegration() {
+    if (this._bridgeIntegration !== null) return this._bridgeIntegration;
+    try {
+      if (typeof window === 'undefined') {
+        this._bridgeIntegration = null;
+        return this._bridgeIntegration;
+      }
+      if (!window.TaskBridgeProjectIntegration || typeof window.TaskBridgeProjectIntegration.createForDatabase !== 'function') {
+        this._bridgeIntegration = null;
+        return this._bridgeIntegration;
+      }
+      this._bridgeIntegration = window.TaskBridgeProjectIntegration.createForDatabase(this);
+      return this._bridgeIntegration;
+    } catch {
+      this._bridgeIntegration = null;
+      return this._bridgeIntegration;
+    }
+  }
+
   /** Build the full persisted TaskDB payload for the current task collection. */
   buildFullData(tasks = this.tasks) {
     const templateConfig = resolveTemplateConfig();
@@ -393,6 +446,8 @@ class TaskDatabase {
     if (duplicateIds.length > 0) {
       return { success: false, error: `Duplicate task_id detected: ${duplicateIds.join(', ')}` };
     }
+    // Auto-populate all tasks to fill in any missing required defaults before saving.
+    this.tasks = this.tasks.map(task => this.automation.autoPopulateTask(task));
     const validationResults = this.tasks.map(task => this.validator.validate(task, 'task'));
     const hasErrors = validationResults.some(r => !r.isValid);
     if (hasErrors) {
@@ -403,12 +458,18 @@ class TaskDatabase {
     const isBrowser = (typeof window !== 'undefined');
     const service = isBrowser && window.FolderProjectService;
     const projectId = this.localSourceMeta && this.localSourceMeta.id;
-    const relativePath = this.localSourceMeta && this.localSourceMeta.rootModuleRelative
-      ? this.localSourceMeta.rootModuleRelative
-      : 'node.tasks.json';
+    const relativePath = normalizeTaskFilePath(
+      this.localSourceMeta && this.localSourceMeta.rootModuleRelative
+        ? this.localSourceMeta.rootModuleRelative
+        : 'node.tasks.json'
+    );
 
     if (!projectId || !service) {
       // No FolderProjectService or no projectId — fall back to localStorage
+      console.warn('[TaskDatabase] saveTasksToLocalFolder:missing-service-or-project', {
+        projectId: projectId || null,
+        hasService: Boolean(service)
+      });
       this.saveTasksLocal(message);
       return { success: true, source: 'localStorage-only', note: 'FolderProjectService unavailable' };
     }
@@ -417,11 +478,25 @@ class TaskDatabase {
 
     // Write-back via FolderProjectService (handles FS Access API + localStorage + cache)
     if (typeof service.writeModuleToDisk === 'function') {
+      console.info('[TaskDatabase] saveTasksToLocalFolder:start', { projectId, relativePath });
       const result = await service.writeModuleToDisk(projectId, relativePath, fullData);
       // Keep localStorage copy as backup regardless of write result
       this.saveTasksLocal(message);
       if (result && result.success) {
-        return { success: true, source: result.source || 'folder', committed: true };
+        const committed = result.source === 'save-copy' ? false : true;
+        console.info('[TaskDatabase] saveTasksToLocalFolder:result', {
+          projectId,
+          relativePath,
+          source: result.source || 'folder',
+          committed,
+          note: result.note || ''
+        });
+        return {
+          success: true,
+          source: result.source || 'folder',
+          committed,
+          note: result.note || ''
+        };
       }
       // FS writeback failed but localStorage was updated — warn user
       return {
@@ -442,6 +517,8 @@ class TaskDatabase {
 
   /** Persist the current project through the local disk development API. */
   async saveTasksLocalDisk(message = 'Update tasks') {
+    this.isSaving = true;
+    try {
     // Block saving if duplicates exist
     const duplicateIds = this.getDuplicateTaskIds(this.tasks);
     if (duplicateIds.length > 0) {
@@ -463,19 +540,53 @@ class TaskDatabase {
     const fullData = this.buildFullData(this.tasks);
     const projectId = resolveActiveProjectId();
     const safeProject = String(projectId || '').replace(/[^a-zA-Z0-9_-]/g, '') || 'github-task-manager';
-    const res = await fetch(`/api/tasks?project=${encodeURIComponent(safeProject)}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(fullData)
-    });
 
-    if (!res.ok) {
-      let msg = `HTTP ${res.status}`;
+    // Preferred path: use the bridge integration layer (ETag-aware + watchdog-safe).
+    const bridge = this.getBridgeIntegration();
+    if (bridge && typeof bridge.saveToBridge === 'function') {
+      const bridgeResult = await bridge.saveToBridge(safeProject, fullData);
+      if (bridgeResult && bridgeResult.handled) {
+        this.saveTasksLocal(message);
+        return { success: true, source: 'local-disk' };
+      }
+    }
+
+    // Attempt save — first try relative /api/tasks (works when served by the Express server on the same port),
+    // then fall back to http://localhost:3000/api/tasks (works when browsing via Live Server at :5500).
+    const apiUrls = [`/api/tasks?project=${encodeURIComponent(safeProject)}`];
+    if (typeof window !== 'undefined' && window.location && window.location.port && window.location.port !== '3000') {
+      apiUrls.push(`http://localhost:3000/api/tasks?project=${encodeURIComponent(safeProject)}`);
+    }
+
+    let res = null;
+    let lastError = null;
+    for (const apiUrl of apiUrls) {
       try {
-        const data = await res.json();
-        if (data && data.error) msg = data.error;
-      } catch {
-        // ignore
+        res = await fetch(apiUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(fullData)
+        });
+        if (res.ok) break;
+        // 404 on relative URL when not on Express server — try fallback
+        if (res.status === 404 && apiUrls.length > 1) { res = null; continue; }
+        break;
+      } catch (err) {
+        lastError = err;
+        res = null;
+      }
+    }
+
+    if (!res || !res.ok) {
+      let msg = lastError ? lastError.message : (res ? `HTTP ${res.status}` : 'No response');
+      try {
+        if (res) {
+          const data = await res.json();
+          if (data && data.error) msg = data.error;
+        }
+      } catch { /* ignore */ }
+      if (!res || res.status === 404) {
+        msg += '. Tip: run "node server.js" (port 3000) to enable local disk saving.';
       }
       throw new Error(`Local disk save failed: ${msg}`);
     }
@@ -483,6 +594,9 @@ class TaskDatabase {
     // Also keep localStorage as a backup
     this.saveTasksLocal(message);
     return { success: true, source: 'local-disk' };
+    } finally {
+      this.isSaving = false;
+    }
   }
 
   // Initialize database
@@ -528,13 +642,38 @@ class TaskDatabase {
             this.localSourceMeta = {
               id: localFolderProject.id,
               label: localFolderProject.label,
-              rootModuleRelative: localFolderProject.rootModuleRelative || 'node.tasks.json',
+              rootModuleRelative: normalizeTaskFilePath(localFolderProject.rootModuleRelative || 'node.tasks.json'),
               fileCount: localFolderProject.fileCount || 0
             };
-            console.log('Loaded', loadedTasks.length, 'tasks from browser-selected local folder project:', projectId);
+            console.info('[TaskDatabase] loadTasks:folder-source', {
+              activeProjectId: projectId,
+              sourceProjectId: localFolderProject.id,
+              rootModuleRelative: this.localSourceMeta.rootModuleRelative,
+              taskCount: loadedTasks.length
+            });
           }
         } catch (localFolderError) {
           console.warn('Could not load browser-selected local folder project:', localFolderError && localFolderError.message ? localFolderError.message : localFolderError);
+        }
+      }
+
+      // 0.5) Local bridge read (ETag-aware) for localhost workflows.
+      if (!loadedTasks) {
+        const bridge = this.getBridgeIntegration();
+        if (bridge && typeof bridge.loadFromBridge === 'function') {
+          try {
+            const bridgeResult = await bridge.loadFromBridge(projectId);
+            if (bridgeResult && bridgeResult.handled && bridgeResult.payload) {
+              loadedTasks = this.applyLoadedPayload(bridgeResult.payload);
+              this.sourceKind = 'local-disk';
+              console.info('[TaskDatabase] loadTasks:bridge-source', {
+                activeProjectId: projectId,
+                taskCount: loadedTasks.length
+              });
+            }
+          } catch (bridgeError) {
+            console.warn('Bridge load failed, continuing with standard sources:', bridgeError && bridgeError.message ? bridgeError.message : bridgeError);
+          }
         }
       }
 
@@ -549,7 +688,7 @@ class TaskDatabase {
 
       // 1) Try to load from localStorage first ONLY on localhost.
       // On GitHub Pages, prefer canonical repo sources and only fall back to localStorage.
-      if (isLocalHost && typeof window !== 'undefined' && window.localStorage) {
+      if (!loadedTasks && isLocalHost && typeof window !== 'undefined' && window.localStorage) {
         try {
           const storageKey = getProjectScopedStorageKey();
           const stored = window.localStorage.getItem(storageKey);
@@ -807,12 +946,23 @@ class TaskDatabase {
         return await this.saveTasksToLocalFolder(message);
       }
 
+      // Projects loaded through the local bridge must save back to disk first.
+      // They should never fall through to direct GitHub writes just because a
+      // GitHub API helper exists in the app shell.
+      if (this.sourceKind === 'local-disk') {
+        return await this.saveTasksLocalDisk(message);
+      }
+
       // Block saving if duplicates exist (prevents corrupting tasks.csv and node.tasks.json)
       // Do this BEFORE choosing GitHub vs local persistence so behavior is consistent.
       const duplicateIds = this.getDuplicateTaskIds(this.tasks);
       if (duplicateIds.length > 0) {
         return { success: false, error: `Duplicate task_id detected: ${duplicateIds.join(', ')}` };
       }
+
+      // Auto-populate all tasks to fill in any missing required defaults before saving.
+      // This ensures tasks loaded from older data without all required fields pass validation.
+      this.tasks = this.tasks.map(task => this.automation.autoPopulateTask(task));
 
       // Validate all tasks before saving
       const validationResults = this.tasks.map(task => this.validator.validate(task, 'task'));
@@ -840,7 +990,19 @@ class TaskDatabase {
         }
 
         // If running locally with the dev server, persist to disk so clearing cache doesn't lose data.
-        if (this.isLocalDevHost()) {
+        const hasLocalApiServer = (() => {
+          try {
+            if (typeof window === 'undefined' || !window.location) return false;
+            const host = String(window.location.hostname || '').toLowerCase();
+            const port = String(window.location.port || '');
+            const isLocalHost = host === 'localhost' || host === '127.0.0.1';
+            return isLocalHost && (port === '3000' || port === '3100');
+          } catch {
+            return false;
+          }
+        })();
+
+        if (hasLocalApiServer) {
           try {
             return await this.saveTasksLocalDisk(message);
           } catch (diskError) {
@@ -1321,6 +1483,33 @@ class TaskDatabase {
     return result;
   }
 
+  /** Find a task by id across top-level tasks and recursive inline subtasks. */
+  findTaskLocation(taskId, tasks = this.tasks, parentTask = null) {
+    const normalizedTaskId = normalizeTaskIdValue(taskId);
+    if (!Number.isFinite(normalizedTaskId) || !Array.isArray(tasks)) return null;
+
+    for (let index = 0; index < tasks.length; index += 1) {
+      const task = tasks[index];
+      if (!task || typeof task !== 'object') continue;
+
+      if (task.task_id === normalizedTaskId) {
+        return {
+          task,
+          parentTask,
+          taskIndex: index,
+          taskList: tasks
+        };
+      }
+
+      if (!Array.isArray(task.subtasks) || task.subtasks.length === 0) continue;
+
+      const nestedMatch = this.findTaskLocation(normalizedTaskId, task.subtasks, task);
+      if (nestedMatch) return nestedMatch;
+    }
+
+    return null;
+  }
+
   // CRUD operations
   /** Create a validated task and append it to the active task list. */
   createTask(taskData, creatorId = null) {
@@ -1337,41 +1526,39 @@ class TaskDatabase {
 
   /** Update an existing task with validated changes while preserving its id. */
   updateTask(taskId, updates) {
-    const id = typeof taskId === 'string' ? parseInt(taskId, 10) : taskId;
-    const taskIndex = this.tasks.findIndex(t => t.task_id === id);
-    if (taskIndex === -1) {
+    const taskLocation = this.findTaskLocation(taskId);
+    if (!taskLocation) {
       return { success: false, error: 'Task not found' };
     }
 
-    const updatedTask = { ...this.tasks[taskIndex], ...updates };
+    const updatedTask = { ...taskLocation.task, ...updates };
     // Never allow task_id to be changed (or coerced to string) through updates
-    updatedTask.task_id = this.tasks[taskIndex].task_id;
+    updatedTask.task_id = taskLocation.task.task_id;
     const validation = this.validator.validate(updatedTask, 'task');
 
     if (!validation.isValid) {
       return { success: false, errors: validation.errors };
     }
 
-    this.tasks[taskIndex] = updatedTask;
+    taskLocation.taskList[taskLocation.taskIndex] = updatedTask;
     return { success: true, task: updatedTask };
   }
 
   /** Delete a task from the active task list by id. */
   deleteTask(taskId) {
-    const id = typeof taskId === 'string' ? parseInt(taskId, 10) : taskId;
-    const taskIndex = this.tasks.findIndex(t => t.task_id === id);
-    if (taskIndex === -1) {
+    const taskLocation = this.findTaskLocation(taskId);
+    if (!taskLocation) {
       return { success: false, error: 'Task not found' };
     }
 
-    const deletedTask = this.tasks.splice(taskIndex, 1)[0];
+    const deletedTask = taskLocation.taskList.splice(taskLocation.taskIndex, 1)[0];
     return { success: true, task: deletedTask };
   }
 
   /** Retrieve a single task by id from the active task list. */
   getTask(taskId) {
-    const id = typeof taskId === 'string' ? parseInt(taskId, 10) : taskId;
-    return this.tasks.find(t => t.task_id === id);
+    const taskLocation = this.findTaskLocation(taskId);
+    return taskLocation ? taskLocation.task : undefined;
   }
 
   /** Filter the current task list by status, priority, category, assignee, or text. */

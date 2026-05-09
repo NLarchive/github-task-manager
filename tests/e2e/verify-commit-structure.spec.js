@@ -77,7 +77,7 @@ test.describe('@live Verify commit subject + payload structure', () => {
     // create a new unique task
     const taskName = 'E2E Commit Verify ' + Math.random().toString(36).slice(2,8);
     await page.locator('button:has-text("Add New Task")').click();
-    await page.waitForSelector('#taskModal', { state: 'visible', timeout: 10000 });
+    await page.waitForSelector('#taskEditModal', { state: 'visible', timeout: 10000 });
     await page.locator('#taskName').fill(taskName); // unique name for searching (non-numeric suffix)
     await page.locator('#taskDescription').fill('Verify commit message and payload structure');
     await page.locator('#taskStartDate').fill('2025-12-20');
@@ -85,7 +85,7 @@ test.describe('@live Verify commit subject + payload structure', () => {
     await page.locator('#taskEstimatedHours').fill('2');
     await page.locator('#taskTags').fill('e2e-test');
     await page.locator('#taskForm button[type="submit"]').click();
-    await page.waitForSelector('#taskModal', { state: 'hidden', timeout: 15000 });
+    await page.waitForSelector('#taskEditModal', { state: 'hidden', timeout: 15000 });
 
     // wait for Worker save success
     await waitForSaveToast(page, 'to GitHub (via Worker)', 20000);

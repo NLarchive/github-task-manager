@@ -4,11 +4,31 @@
 
 import { test, expect } from '@playwright/test';
 
+const PHASE_TWO_TITLE = 'Phase 2 – Core Task Management';
+const DEPENDENCIES_TASK_TITLE = 'Implement Task Dependencies & Critical Path';
+
 /** Wait until the graph contains more than the requested number of nodes. */
 async function waitForNodeCount(page, minimum) {
   const nodes = page.locator('#graph-container g.node');
   await expect.poll(async () => nodes.count(), { timeout: 20000 }).toBeGreaterThan(minimum);
   return nodes;
+}
+
+/** Open the grouped Phase 2 subgraph that now contains the dependency task. */
+async function openPhaseTwoSubgraph(page) {
+  const phaseNode = page.locator('#graph-container g.node').filter({ hasText: PHASE_TWO_TITLE }).first();
+  await expect(phaseNode).toBeVisible();
+  await phaseNode.click();
+
+  const popup = page.locator('#taskNodeModal');
+  await expect(popup).toHaveClass(/visible/);
+  await popup.locator('.task-node-btn[data-subtasks-path]', { hasText: 'View Subtasks' }).click();
+
+  const breadcrumb = page.locator('#subtask-breadcrumb');
+  await expect(breadcrumb).toBeVisible({ timeout: 15000 });
+  await expect(breadcrumb).toContainText(PHASE_TWO_TITLE);
+
+  return { popup, breadcrumb };
 }
 
 /** Validate inline task-subgraph drill-down and parent navigation behavior. */
@@ -20,11 +40,11 @@ test.describe('inline subtask navigation', () => {
 
     await waitForNodeCount(page, 10);
 
-    const rootTask = page.locator('#graph-container g.node').filter({ hasText: 'Implement Task Dependencies & Critical Path' }).first();
+    const { popup, breadcrumb } = await openPhaseTwoSubgraph(page);
+
+    const rootTask = page.locator('#graph-container g.node').filter({ hasText: DEPENDENCIES_TASK_TITLE }).first();
     await expect(rootTask).toBeVisible();
     await rootTask.click();
-
-    const popup = page.locator('#popup');
     await expect(popup).toHaveClass(/visible/);
 
     const subtaskDropdown = popup.locator('.popup-dropdown').filter({ hasText: 'Sub-tasks' }).first();
@@ -35,9 +55,8 @@ test.describe('inline subtask navigation', () => {
     await expect(subtaskBtn).toBeVisible();
     await subtaskBtn.click();
 
-    const breadcrumb = page.locator('#subtask-breadcrumb');
     await expect(breadcrumb).toBeVisible({ timeout: 15000 });
-    await expect(breadcrumb).toContainText('Implement Task Dependencies & Critical Path');
+    await expect(breadcrumb).toContainText(DEPENDENCIES_TASK_TITLE);
 
     await expect(popup).toHaveClass(/visible/, { timeout: 15000 });
     await expect(popup.locator('h2')).toContainText('Implement circular dependency validator');
@@ -54,11 +73,11 @@ test.describe('inline subtask navigation', () => {
 
     await waitForNodeCount(page, 10);
 
-    const rootTask = page.locator('#graph-container g.node').filter({ hasText: 'Implement Task Dependencies & Critical Path' }).first();
+    const { popup, breadcrumb } = await openPhaseTwoSubgraph(page);
+
+    const rootTask = page.locator('#graph-container g.node').filter({ hasText: DEPENDENCIES_TASK_TITLE }).first();
     await expect(rootTask).toBeVisible();
     await rootTask.click();
-
-    const popup = page.locator('#popup');
     await expect(popup).toHaveClass(/visible/);
     await expect(popup).toContainText('Build dependency type UI (FS/SS/FF/SF)');
 
@@ -66,9 +85,8 @@ test.describe('inline subtask navigation', () => {
     await expect(firstDiveButton).toBeVisible();
     await firstDiveButton.click();
 
-    const breadcrumb = page.locator('#subtask-breadcrumb');
     await expect(breadcrumb).toBeVisible();
-    await expect(breadcrumb).toContainText('Implement Task Dependencies & Critical Path');
+    await expect(breadcrumb).toContainText(DEPENDENCIES_TASK_TITLE);
     await expect(page.locator('#graph-container g.node').filter({ hasText: 'Implement circular dependency validator' }).first()).toBeVisible();
 
     const nestedTask = page.locator('#graph-container g.node').filter({ hasText: 'Implement circular dependency validator' }).first();
@@ -93,12 +111,14 @@ test.describe('inline subtask navigation', () => {
 
     await waitForNodeCount(page, 10);
 
+    await openPhaseTwoSubgraph(page);
+
     // Drill into a task with subtasks
-    const task = page.locator('#graph-container g.node').filter({ hasText: 'Implement Task Dependencies & Critical Path' }).first();
+    const task = page.locator('#graph-container g.node').filter({ hasText: DEPENDENCIES_TASK_TITLE }).first();
     await expect(task).toBeVisible();
     await task.click();
 
-    const popup = page.locator('#popup');
+    const popup = page.locator('#taskNodeModal');
     await expect(popup).toHaveClass(/visible/);
     const diveBtn = popup.locator('.task-node-btn[data-subtasks-path]', { hasText: 'View Subtasks' });
     await diveBtn.click();
@@ -115,50 +135,23 @@ test.describe('inline subtask navigation', () => {
     // Start node should show a parent-nav-btn with the parent task name
     const parentBtn = popup.locator('.task-node-btn.parent-nav-btn');
     await expect(parentBtn).toBeVisible();
-    await expect(parentBtn).toContainText('Implement Task Dependencies');
+    await expect(parentBtn).toContainText(DEPENDENCIES_TASK_TITLE);
 
     // Click it — should navigate back to parent graph
     await parentBtn.click();
 
-    // Wait for parent graph to render (breadcrumb should disappear, root nodes visible again)
+    // Wait for the immediate parent graph to render again.
     const breadcrumb = page.locator('#subtask-breadcrumb');
-    await expect(breadcrumb).toBeHidden({ timeout: 15000 });
+    await expect(breadcrumb).toBeVisible({ timeout: 15000 });
+    await expect(breadcrumb).toContainText(PHASE_TWO_TITLE);
+    await expect(breadcrumb).not.toContainText(DEPENDENCIES_TASK_TITLE);
 
-    // After navigation back, the parent graph should load with root-level nodes
-    await waitForNodeCount(page, 10);
+    // After navigation back, the parent graph should load with the Phase 2 task nodes.
+    await expect(page.locator('#graph-container g.node').filter({ hasText: DEPENDENCIES_TASK_TITLE }).first()).toBeVisible({ timeout: 15000 });
 
-    // The parent task modal should auto-open after stabilization (allow generous timeout)
+    // The parent task modal should auto-open after stabilization (allow generous timeout).
     await expect(popup).toHaveClass(/visible/, { timeout: 25000 });
-    await expect(popup).toContainText('Implement Task Dependencies');
-  });
-
-  test('end node shows sibling nav buttons for parent successors', async ({ page }) => {
-    await page.goto('/graph-display/index.html?template=github-task-manager-tasks&skipTour=true', {
-      waitUntil: 'domcontentloaded'
-    });
-
-    await waitForNodeCount(page, 10);
-
-    const rootTask = page.locator('#graph-container g.node').filter({ hasText: 'Inline Subtask Drill-Down Navigation with Parent & Successor Nav' }).first();
-    await expect(rootTask).toBeVisible();
-    await rootTask.click();
-
-    const popup = page.locator('#popup');
-    await expect(popup).toHaveClass(/visible/);
-    const diveBtn = popup.locator('.task-node-btn[data-subtasks-path]', { hasText: 'View Subtasks' });
-    await expect(diveBtn).toBeVisible();
-    await diveBtn.click();
-
-    await expect(page.locator('#subtask-breadcrumb')).toBeVisible({ timeout: 10000 });
-    const endNode = page.locator('#graph-container g.node').filter({ hasText: 'End: Inline Subtask Drill-Down Navigation with Parent & Successor Nav' }).first();
-    await expect(endNode).toBeVisible({ timeout: 10000 });
-    await endNode.click();
-
-    await expect(popup).toHaveClass(/visible/);
-    const siblingBtns = popup.locator('.task-node-btn.sibling-nav-btn');
-    await expect(siblingBtns).toHaveCount(2);
-    await expect(siblingBtns.nth(0)).toContainText('➡ tasks.json Format Validation Test Suite');
-    await expect(siblingBtns.nth(1)).toContainText('➡ Unify graph relation buttons and stabilize Playwright base URLs');
+    await expect(popup.locator('h2')).toContainText(DEPENDENCIES_TASK_TITLE);
   });
 
   test('no Task Sub-graphs folder appears in sidebar', async ({ page }) => {

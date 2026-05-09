@@ -113,7 +113,7 @@ async function createTestTask(page, taskName = 'Test Task ' + Math.random().toSt
   await page.locator('button:has-text("Add New Task")').click();
 
   // Wait for modal
-  await page.waitForSelector('#taskModal', { state: 'visible', timeout: TIMEOUT });
+  await page.waitForSelector('#taskEditModal', { state: 'visible', timeout: TIMEOUT });
 
   // Fill required fields
   await page.locator('#taskName').fill(taskName);
@@ -128,7 +128,7 @@ async function createTestTask(page, taskName = 'Test Task ' + Math.random().toSt
   await page.locator('#taskForm button[type="submit"]').click();
 
   // Wait for modal to close
-  await page.waitForSelector('#taskModal', { state: 'hidden', timeout: 10000 });
+  await page.waitForSelector('#taskEditModal', { state: 'hidden', timeout: 10000 });
 
   return taskName;
 }
@@ -136,11 +136,11 @@ async function createTestTask(page, taskName = 'Test Task ' + Math.random().toSt
 /** Edit the first visible task through the live UI and return the updated name. */
 async function editFirstTask(page, newName = 'Edited Task ' + Math.random().toString(36).slice(2,8)) {
   // Find and click the first Edit button
-  const editButtons = page.locator('button:has-text("Edit")');
+  const editButtons = page.locator('.task-card button:has-text("Edit")');
   await editButtons.first().click();
 
   // Wait for modal
-  await page.waitForSelector('#taskModal', { state: 'visible', timeout: TIMEOUT });
+  await page.waitForSelector('#taskEditModal', { state: 'visible', timeout: TIMEOUT });
 
   // Update task name
   const nameInput = page.locator('#taskName');
@@ -151,7 +151,7 @@ async function editFirstTask(page, newName = 'Edited Task ' + Math.random().toSt
   await page.locator('#taskForm button[type="submit"]').click();
 
   // Wait for modal to close
-  await page.waitForSelector('#taskModal', { state: 'hidden', timeout: 10000 });
+  await page.waitForSelector('#taskEditModal', { state: 'hidden', timeout: 10000 });
 
   return newName;
 }

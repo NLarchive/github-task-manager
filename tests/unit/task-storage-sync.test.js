@@ -101,6 +101,111 @@ describe('TaskDatabase Initialization', () => {
       }
     }
   });
+
+  it('should prefer a browser-selected folder project over localhost localStorage cache', async () => {
+    const previousTemplateConfig = globalThis.TEMPLATE_CONFIG;
+    const previousWindow = globalThis.window;
+    const previousLocalStorage = globalThis.localStorage;
+
+    const storageState = {
+      'taskManagerData:folder-demo': JSON.stringify({
+        lastSaved: '2026-04-24T00:00:00.000Z',
+        json: {
+          project: { name: 'Cached Project' },
+          tasks: [
+            {
+              task_id: 91,
+              task_name: 'From localStorage',
+              status: 'Done',
+              priority: 'Low'
+            }
+          ]
+        }
+      })
+    };
+
+    globalThis.TEMPLATE_CONFIG = {
+      GITHUB: {
+        ACTIVE_PROJECT_ID: 'folder-demo',
+        DEFAULT_PROJECT_ID: 'github-task-manager',
+        TASKS_FILE: 'public/tasksDB/external/github-task-manager/node.tasks.json'
+      }
+    };
+
+    const windowMock = {
+      location: {
+        hostname: 'localhost',
+        search: ''
+      },
+      localStorage: {
+        getItem(key) {
+          return Object.prototype.hasOwnProperty.call(storageState, key) ? storageState[key] : null;
+        },
+        setItem(key, value) {
+          storageState[key] = String(value);
+        },
+        removeItem(key) {
+          delete storageState[key];
+        }
+      },
+      FolderProjectService: {
+        getProjectRecord(projectId) {
+          if (projectId !== 'folder-demo') return null;
+          return {
+            id: 'folder-demo',
+            label: 'Folder Demo',
+            rootModuleRelative: 'node.tasks.json',
+            fileCount: 1,
+            payload: {
+              project: { name: 'Folder Project' },
+              tasks: [
+                {
+                  task_id: 7,
+                  task_name: 'From folder',
+                  status: 'In Progress',
+                  priority: 'High'
+                }
+              ]
+            }
+          };
+        }
+      }
+    };
+
+    globalThis.window = windowMock;
+    globalThis.localStorage = windowMock.localStorage;
+
+    try {
+      const mockApi = new MockGitHubAPI();
+      const db = new TaskDatabase(mockApi);
+
+      const result = await db.loadTasks();
+
+      expect(result.success).toBe(true);
+      expect(db.sourceKind).toBe('folder');
+      expect(db.tasks).toHaveLength(1);
+      expect(db.tasks[0].task_name).toBe('From folder');
+      expect(db.currentProject.name).toBe('Folder Project');
+    } finally {
+      if (typeof previousTemplateConfig === 'undefined') {
+        delete globalThis.TEMPLATE_CONFIG;
+      } else {
+        globalThis.TEMPLATE_CONFIG = previousTemplateConfig;
+      }
+
+      if (typeof previousWindow === 'undefined') {
+        delete globalThis.window;
+      } else {
+        globalThis.window = previousWindow;
+      }
+
+      if (typeof previousLocalStorage === 'undefined') {
+        delete globalThis.localStorage;
+      } else {
+        globalThis.localStorage = previousLocalStorage;
+      }
+    }
+  });
 });
 
 /** Validate create, read, update, and delete operations on tasks within TaskDatabase. */
@@ -168,6 +273,75 @@ describe('Task CRUD Operations', () => {
     const retrieved = db.getTask('1');
     expect(retrieved).toBeTruthy();
     expect(retrieved.task_id).toBe(1);
+  });
+
+  it('should not recurse back into the root task list when tasks do not define subtasks', () => {
+    const mockApi = new MockGitHubAPI();
+    const db = new TaskDatabase(mockApi);
+
+    const firstTask = db.createTask({
+      task_name: 'Task 1',
+      description: 'First task',
+      start_date: '2025-12-10',
+      end_date: '2025-12-15',
+      priority: 'High',
+      status: 'Not Started',
+      estimated_hours: 8,
+      category_name: 'Testing'
+    }).task;
+
+    const secondTask = db.createTask({
+      task_name: 'Task 2',
+      description: 'Second task',
+      start_date: '2025-12-10',
+      end_date: '2025-12-15',
+      priority: 'Medium',
+      status: 'In Progress',
+      estimated_hours: 4,
+      category_name: 'Testing'
+    }).task;
+
+    db.tasks = [firstTask, secondTask];
+
+    const retrieved = db.getTask(secondTask.task_id);
+    expect(retrieved).toBeTruthy();
+    expect(retrieved.task_name).toBe('Task 2');
+  });
+
+  it('should generate a new task_id after nested inline subtasks inside grouped root tasks', () => {
+    const mockApi = new MockGitHubAPI();
+    const db = new TaskDatabase(mockApi);
+
+    db.tasks = [
+      {
+        task_id: 5,
+        subtasks: [
+          { task_id: 1 },
+          { task_id: 2 }
+        ]
+      },
+      {
+        task_id: 6,
+        subtasks: [
+          { task_id: 3 },
+          { task_id: 4 }
+        ]
+      }
+    ];
+
+    const result = db.createTask({
+      task_name: 'Task 7',
+      description: 'Seventh task',
+      start_date: '2025-12-10',
+      end_date: '2025-12-15',
+      priority: 'High',
+      status: 'Not Started',
+      estimated_hours: 8,
+      category_name: 'Testing'
+    });
+
+    expect(result.success).toBeTruthy();
+    expect(result.task.task_id).toBe(7);
   });
 
   it('should update task properties', () => {
@@ -239,6 +413,111 @@ describe('Task CRUD Operations', () => {
     const result = db.deleteTask(1);
     expect(result.success).toBeTruthy();
     expect(db.tasks).toHaveLength(0);
+  });
+
+  it('should get nested inline subtask by ID', () => {
+    const mockApi = new MockGitHubAPI();
+    const db = new TaskDatabase(mockApi);
+
+    const parentTask = db.createTask({
+      task_name: 'Phase Task',
+      description: 'Parent task',
+      start_date: '2025-12-10',
+      end_date: '2025-12-15',
+      priority: 'High',
+      status: 'In Progress',
+      estimated_hours: 8,
+      category_name: 'Testing'
+    }).task;
+
+    const nestedTask = db.createTask({
+      task_name: 'Nested Task',
+      description: 'Inline child task',
+      start_date: '2025-12-10',
+      end_date: '2025-12-12',
+      priority: 'Medium',
+      status: 'Not Started',
+      estimated_hours: 3,
+      category_name: 'Testing'
+    }).task;
+
+    db.tasks = [{ ...parentTask, subtasks: [{ ...nestedTask }] }];
+
+    const retrieved = db.getTask(String(nestedTask.task_id));
+    expect(retrieved).toBeTruthy();
+    expect(retrieved.task_name).toBe('Nested Task');
+  });
+
+  it('should update nested inline subtasks by ID', () => {
+    const mockApi = new MockGitHubAPI();
+    const db = new TaskDatabase(mockApi);
+
+    const parentTask = db.createTask({
+      task_name: 'Phase Task',
+      description: 'Parent task',
+      start_date: '2025-12-10',
+      end_date: '2025-12-15',
+      priority: 'High',
+      status: 'In Progress',
+      estimated_hours: 8,
+      category_name: 'Testing'
+    }).task;
+
+    const nestedTask = db.createTask({
+      task_name: 'Nested Task',
+      description: 'Inline child task',
+      start_date: '2025-12-10',
+      end_date: '2025-12-12',
+      priority: 'Medium',
+      status: 'Not Started',
+      estimated_hours: 3,
+      category_name: 'Testing'
+    }).task;
+
+    db.tasks = [{ ...parentTask, subtasks: [{ ...nestedTask }] }];
+
+    const result = db.updateTask(nestedTask.task_id, {
+      task_name: 'Updated Nested Task',
+      status: 'In Progress'
+    });
+
+    expect(result.success).toBeTruthy();
+    expect(result.task.task_name).toBe('Updated Nested Task');
+    expect(db.tasks[0].subtasks[0].status).toBe('In Progress');
+  });
+
+  it('should delete nested inline subtasks by ID', () => {
+    const mockApi = new MockGitHubAPI();
+    const db = new TaskDatabase(mockApi);
+
+    const parentTask = db.createTask({
+      task_name: 'Phase Task',
+      description: 'Parent task',
+      start_date: '2025-12-10',
+      end_date: '2025-12-15',
+      priority: 'High',
+      status: 'In Progress',
+      estimated_hours: 8,
+      category_name: 'Testing'
+    }).task;
+
+    const nestedTask = db.createTask({
+      task_name: 'Nested Task',
+      description: 'Inline child task',
+      start_date: '2025-12-10',
+      end_date: '2025-12-12',
+      priority: 'Medium',
+      status: 'Not Started',
+      estimated_hours: 3,
+      category_name: 'Testing'
+    }).task;
+
+    db.tasks = [{ ...parentTask, subtasks: [{ ...nestedTask }] }];
+
+    const result = db.deleteTask(String(nestedTask.task_id));
+
+    expect(result.success).toBeTruthy();
+    expect(db.tasks[0].subtasks).toHaveLength(0);
   });
 });
 

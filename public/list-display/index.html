@@ -19,10 +19,12 @@
                 <div id="authStatus" class="auth-status">
                     <span id="repoInfo">Repository: Loading...</span>
                     <span id="workerInfo" class="worker-info">Worker: Not configured</span>
+                    <span id="bridgeStatus" class="worker-info">Bridge: unknown</span>
                     <span id="tasksInfo" class="tasks-info">TasksFile: -</span>
                     <label for="projectSelect" class="project-select-label">Project:</label>
                     <select id="projectSelect" class="project-select" aria-label="Select project"></select>
                     <button type="button" id="folderProjectLoadBtn" class="btn-secondary folder-project-trigger" title="Open a local project folder from your system">📂 Open Local Folder</button>
+                    <button type="button" id="folderProjectNewBtn" class="btn-secondary folder-project-trigger" title="Create a new local project">➕ New Project</button>
                     <div id="accessIndicator" class="auth-indicator locked" onclick="app.toggleAuthIndicator()" title="Click to unlock for editing">
                         🔒 <span>Read-Only</span>
                     </div>
@@ -68,12 +70,17 @@
                     </details>
                     <button type="button" onclick="app.openIssuesSyncModal()" class="btn-secondary" data-testid="sync-issues">🐙 Sync Issues</button>
                     <button type="button" onclick="app.openHistoryModal()" class="btn-secondary" data-testid="open-history">🕘 History</button>
+                    <button type="button" id="copySchemaBtn" onclick="app.copyTaskSchema()" class="btn-secondary" title="Copy node.tasks.json authoring template and instructions">📋 Copy Schema</button>
                     <div class="view-toggle" role="group" aria-label="View mode">
                         <button type="button" id="viewListBtn" onclick="app.setViewMode('list')" class="btn-secondary active" data-testid="view-list">📋 List</button>
                         <button type="button" id="viewTimelineBtn" onclick="app.setViewMode('timeline')" class="btn-secondary" data-testid="view-timeline">📅 Timeline</button>
                         <button type="button" id="viewGraphBtn" onclick="app.setViewMode('graph')" class="btn-secondary" data-testid="view-graph">🕸️ Graph</button>
                     </div>
                     <div class="filter-section">
+                        <select id="taskScopeMode" onchange="app.setTaskScopeMode(this.value)" aria-label="Task scope mode">
+                            <option value="all">All Tasks</option>
+                            <option value="layer">Layer Tasks</option>
+                        </select>
                         <select id="filterStatus" onchange="app.filterTasks()">
                             <option value="all">All Tasks</option>
                             <option value="Not Started">Not Started</option>
@@ -147,11 +154,11 @@
             </div>
         </main>
 
-        <!-- Task Modal -->
-        <div id="taskModal" class="modal">
+        <!-- Task Edit Modal -->
+        <div id="taskEditModal" class="modal">
             <div class="modal-content">
                 <span class="close" onclick="closeModal()">&times;</span>
-                <h2 id="modalTitle">Add New Task</h2>
+            <h2 id="taskEditModalTitle">Add New Task</h2>
                 <div id="validationMessages" class="validation-messages"></div>
                 <form id="taskForm">
                     <input type="hidden" id="taskId" />
@@ -442,11 +449,23 @@
     <script src="../local-folder/js/folder-cache.js"></script>
     <script src="../local-folder/js/local-folder-scanner.js"></script>
     <script src="../local-folder/js/folder-picker-trigger.js"></script>
+    <script src="../task-engine/js/task-schema-clipboard.js"></script>
     <script src="../task-engine/js/task-schema-validator.js"></script>
     <script src="../task-engine/js/task-field-automation.js"></script>
+    <script src="../task-engine/js/bridge/cache-watchdog.js"></script>
+    <script src="../task-engine/js/bridge/task-storage-sync.js"></script>
+    <script src="../task-engine/js/bridge/taskdb-bridge-integration.js"></script>
     <script src="../task-engine/js/task-storage-sync.js"></script>
     <script src="../calendar/js/task-ics-export.js"></script>
     <script src="./js/list-display-controller.js"></script>
+
+    <!-- Standardized Task Node Modal — list-display uses the same modal concept as graph-display -->
+    <div id="taskNodeModal" class="tpp-overlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="taskNodeModalContent">
+        <div class="content tpp-content">
+            <button class="tpp-close" id="taskNodeModalCloseX" aria-label="Close task details">×</button>
+            <div id="taskNodeModalContent"></div>
+        </div>
+    </div>
 </body>
 </html>
 

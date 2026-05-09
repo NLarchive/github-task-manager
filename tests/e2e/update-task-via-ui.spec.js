@@ -45,7 +45,7 @@ async function updateTaskViaUI(page, taskId, taskData) {
   await editButton.click();
 
   // Wait for modal to appear
-  await page.waitForSelector('[id="taskModal"]', { timeout: TIMEOUT });
+  await page.waitForSelector('[id="taskEditModal"]', { timeout: TIMEOUT });
 
   // Update status if provided
   if (taskData.status) {
@@ -115,7 +115,7 @@ async function createTaskViaUI(page, taskData) {
   await page.click('button:has-text("+ Add New Task")');
 
   // Wait for modal to appear
-  await page.waitForSelector('[id="taskModal"]', { timeout: TIMEOUT });
+  await page.waitForSelector('[id="taskEditModal"]', { timeout: TIMEOUT });
 
   // Fill required fields
   if (!taskData.name || !taskData.description || !taskData.status || !taskData.priority ||
@@ -180,7 +180,7 @@ test.describe('Update Tasks Via UI Automation', () => {
     // Verify the persisted values by reopening the edit form.
     const taskCard = page.locator('[data-task-id="8"]').first();
     await taskCard.locator('button:has-text("Edit")').click();
-    await page.waitForSelector('[id="taskModal"]', { timeout: TIMEOUT });
+    await page.waitForSelector('[id="taskEditModal"]', { timeout: TIMEOUT });
     await expect(page.locator('[id="taskStatus"]')).toHaveValue('In Progress');
     await expect(page.locator('[id="taskProgress"]')).toHaveValue('60');
   });

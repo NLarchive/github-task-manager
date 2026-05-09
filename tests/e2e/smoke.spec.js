@@ -88,7 +88,7 @@ test.describe('@smoke app boot + create task', () => {
     const totalBefore = await page.locator('#totalTasks').innerText();
 
     await page.getByRole('button', { name: '+ Add New Task' }).click();
-    await page.locator('#taskModal').waitFor({ state: 'visible', timeout: TIMEOUT });
+    await page.locator('#taskEditModal').waitFor({ state: 'visible', timeout: TIMEOUT });
 
     const name = `Smoke Task ` + Math.random().toString(36).slice(2,8);
     await page.locator('#taskName').fill(name);

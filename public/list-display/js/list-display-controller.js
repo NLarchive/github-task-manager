@@ -47,8 +47,20 @@ class TaskManagerApp {
         this.moduleCache = new Map();
         this.activeModuleData = null;
         this.activeModulePath = '';
+        this.taskScopeMode = 'all';
+        this.activeTaskLayerPath = '';
         this.currentContextFlowSummary = { startTaskKeys: [], endTaskKeys: [], startLabels: [], endLabels: [] };
         this.isModulePanelOpen = false;
+    }
+
+    /** Get the task edit modal using the new descriptive id with a legacy fallback. */
+    getTaskEditModal() {
+        return document.getElementById('taskEditModal') || document.getElementById('taskModal');
+    }
+
+    /** Get the task edit modal title using the new descriptive id with a legacy fallback. */
+    getTaskEditModalTitle() {
+        return document.getElementById('taskEditModalTitle') || document.getElementById('modalTitle');
     }
 
     /** Get graph template id for active project. */
@@ -104,19 +116,78 @@ class TaskManagerApp {
             idleLabel: '📂 Open Local Folder',
             loadingLabel: 'Opening...',
             onProjectLoaded: async (projectRecord) => {
+                console.info('[list-display] folder-picker:onProjectLoaded:start', {
+                    projectId: projectRecord.id,
+                    templateId: projectRecord.templateId,
+                    rootModuleRelative: projectRecord.rootModuleRelative,
+                    discoveredFiles: Array.isArray(projectRecord.discoveredFiles) ? projectRecord.discoveredFiles : []
+                });
+
                 this.registerFolderProjectOption(projectRecord);
 
                 if (projectRecord.id === this.activeProjectId) {
                     await this.loadTasks();
                     this.refreshCategoryOptions();
-                    this.ensureGraphIframeLoaded();
+                    await this.ensureGraphIframeLoaded();
                 } else {
                     await this.setActiveProject(projectRecord.id);
                 }
 
+                const activeMatches = this.activeProjectId === projectRecord.id;
+                const folderSourceActive = Boolean(this.database && this.database.sourceKind === 'folder');
+                if (!activeMatches || !folderSourceActive) {
+                    console.error('[list-display] folder-picker:onProjectLoaded:activation-failed', {
+                        expectedProjectId: projectRecord.id,
+                        activeProjectId: this.activeProjectId,
+                        databaseSourceKind: this.database ? this.database.sourceKind : null,
+                        loadedTaskCount: Array.isArray(this.tasks) ? this.tasks.length : null
+                    });
+                    throw new Error(
+                        `Loaded folder ${projectRecord.folderName || projectRecord.id}, but list view did not switch to that folder project. ` +
+                        'Check console logs from list-display and TaskDatabase for the failing step.'
+                    );
+                }
+
+                console.info('[list-display] folder-picker:onProjectLoaded:success', {
+                    activeProjectId: this.activeProjectId,
+                    databaseSourceKind: this.database ? this.database.sourceKind : null,
+                    loadedTaskCount: Array.isArray(this.tasks) ? this.tasks.length : 0
+                });
+
                 this.showToast(`Opened local folder project: ${projectRecord.label || projectRecord.id}`, 'success');
             }
         });
+
+        // ── New local project button ──────────────────────────────────────────
+        const folderProjectNewBtn = document.getElementById('folderProjectNewBtn');
+        const folderProjectLoadResult = document.getElementById('folderProjectLoadResult');
+        if (folderProjectNewBtn && window.FolderProjectService && typeof window.FolderProjectService.createLocalProject === 'function') {
+            folderProjectNewBtn.addEventListener('click', async () => {
+                const projectName = (window.prompt && window.prompt('Enter a name for the new project:') || '').trim();
+                if (!projectName) return;
+                folderProjectNewBtn.disabled = true;
+                folderProjectNewBtn.textContent = 'Creating…';
+                try {
+                    const result = await window.FolderProjectService.createLocalProject(projectName);
+                    if (!result) { folderProjectNewBtn.textContent = '➕ New Project'; folderProjectNewBtn.disabled = false; return; }
+                    // Reload to show the new project
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('template', result.templateId);
+                    window.location.href = url.toString();
+                } catch (err) {
+                    if (folderProjectLoadResult) {
+                        folderProjectLoadResult.hidden = false;
+                        folderProjectLoadResult.dataset.status = 'error';
+                        folderProjectLoadResult.innerHTML = `Error creating project: ${String(err && err.message || err)}`;
+                    } else {
+                        alert(`Error creating project: ${String(err && err.message || err)}`);
+                    }
+                    folderProjectNewBtn.textContent = '➕ New Project';
+                    folderProjectNewBtn.disabled = false;
+                }
+            });
+        }
+
     }
 
     /** Build graph iframe src. */
@@ -290,6 +361,30 @@ class TaskManagerApp {
                     return;
                 }
 
+                // Open Add Task modal (triggered from graph "Add New Task" button)
+                if (e.data.type === 'openAddTaskModal' && isFromGraphFrame) {
+                    this.showAddTaskModal();
+                    return;
+                }
+
+                // Open Edit Task modal (triggered from graph node popup "Edit Task" button)
+                if (e.data.type === 'openEditTaskModal' && isFromGraphFrame) {
+                    const taskId = e.data.taskId;
+                    if (taskId) {
+                        this.editTask(String(taskId));
+                    }
+                    return;
+                }
+
+                // Task updated directly from graph-display modal — save it
+                if (e.data.type === 'taskUpdatedFromGraph' && isFromGraphFrame) {
+                    const { taskId, taskData } = e.data;
+                    if (taskId && taskData) {
+                        this._applyTaskUpdateFromGraph(taskId, taskData);
+                    }
+                    return;
+                }
+
             } catch (err) {
                 console.warn('Error handling message event', err);
             }
@@ -302,10 +397,26 @@ class TaskManagerApp {
             await this.showTaskManager();
             await this.loadTasks();
             this.refreshCategoryOptions();
+            this.maybeOpenAddTaskFromQuery();
         } else {
             console.error('GitHub configuration missing. Please check TEMPLATE_CONFIG.GITHUB settings.');
             this.showConfigError();
         }
+    }
+
+    /** Open the add-task modal once when requested through the URL. */
+    maybeOpenAddTaskFromQuery() {
+        if (this.getQueryParam('openAddTask') !== '1') return;
+
+        try {
+            const nextUrl = new URL(window.location.href);
+            nextUrl.searchParams.delete('openAddTask');
+            window.history.replaceState({}, '', nextUrl.toString());
+        } catch (_) {
+            // Non-fatal: still open the modal even if URL cleanup fails.
+        }
+
+        this.showAddTaskModal();
     }
 
     /** Load config. */
@@ -413,7 +524,8 @@ class TaskManagerApp {
         // Discover additional local projects via /api/projects (localhost only)
         const isLocalhost = typeof window !== 'undefined' && window.location &&
             (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '::1');
-        if (isLocalhost) {
+        const hasLocalApiServer = isLocalhost && (window.location.port === '3000' || window.location.port === '3100');
+        if (hasLocalApiServer) {
             fetch('/api/projects', { cache: 'no-store' })
                 .then(r => r.ok ? r.json() : null)
                 .then(result => {
@@ -517,11 +629,18 @@ class TaskManagerApp {
 
     /** Normalize module path. */
     normalizeModulePath(value) {
-        return String(value || '')
+        const normalized = String(value || '')
             .trim()
             .replace(/\\/g, '/')
             .replace(/^\.\//, '')
             .replace(/^\/+/, '');
+
+        if (!/\.json$/i.test(normalized)) return normalized;
+
+        const lastSlash = normalized.lastIndexOf('/');
+        return lastSlash >= 0
+            ? `${normalized.slice(0, lastSlash)}/node.tasks.json`
+            : 'node.tasks.json';
     }
 
     /** Normalize module entry. */
@@ -633,6 +752,242 @@ class TaskManagerApp {
         };
     }
 
+    /** Normalize task scope mode. */
+    normalizeTaskScopeMode(mode) {
+        return String(mode || '').trim().toLowerCase() === 'layer' ? 'layer' : 'all';
+    }
+
+    /** Normalize a dotted task path made from array indexes. */
+    normalizeTaskPath(taskPath) {
+        return String(taskPath || '')
+            .split('.')
+            .map(segment => segment.trim())
+            .filter(segment => /^\d+$/.test(segment))
+            .join('.');
+    }
+
+    /** Build a child task path from a parent path and array index. */
+    buildTaskPath(parentPath, index) {
+        const basePath = this.normalizeTaskPath(parentPath);
+        const safeIndex = Number.isInteger(index) && index >= 0 ? String(index) : '';
+        if (!safeIndex) return basePath;
+        return basePath ? `${basePath}.${safeIndex}` : safeIndex;
+    }
+
+    /** Resolve project or module source tasks before list-display transformations. */
+    getContextSourceTasks() {
+        if (this.activeModulePath) {
+            return Array.isArray(this.currentContextTasks) ? this.currentContextTasks : [];
+        }
+        return Array.isArray(this.rootTasks) ? this.rootTasks : [];
+    }
+
+    /** Decorate a task record with list layer metadata. */
+    decorateTaskRecord(task, { taskPath = '', depth = 0, parentTask = null, parentPath = '' } = {}) {
+        return {
+            ...task,
+            __taskPath: this.normalizeTaskPath(taskPath),
+            __taskDepth: Number.isInteger(depth) ? depth : 0,
+            __taskParentPath: this.normalizeTaskPath(parentPath),
+            __taskParentId: parentTask ? (parentTask.task_id ?? parentTask.id ?? null) : null,
+            __taskParentName: parentTask ? String(parentTask.task_name || parentTask.title || parentTask.task_id || parentTask.id || '').trim() : '',
+            __hasInlineSubtasks: Array.isArray(task && task.subtasks) && task.subtasks.some(Boolean)
+        };
+    }
+
+    /** Decorate only the direct tasks in a visible layer. */
+    hydrateTaskLayer(tasks, { parentPath = '', depth = 0, parentTask = null } = {}) {
+        const safeTasks = Array.isArray(tasks) ? tasks : [];
+        return safeTasks.flatMap((task, index) => {
+            if (!task || typeof task !== 'object') return [];
+            return [this.decorateTaskRecord(task, {
+                taskPath: this.buildTaskPath(parentPath, index),
+                depth,
+                parentTask,
+                parentPath
+            })];
+        });
+    }
+
+    /** Flatten nested inline subtasks for the all-tasks list view. */
+    flattenTaskHierarchy(tasks, { parentPath = '', depth = 0, parentTask = null } = {}) {
+        const safeTasks = Array.isArray(tasks) ? tasks : [];
+        return safeTasks.flatMap((task, index) => {
+            if (!task || typeof task !== 'object') return [];
+
+            const taskPath = this.buildTaskPath(parentPath, index);
+            const decoratedTask = this.decorateTaskRecord(task, {
+                taskPath,
+                depth,
+                parentTask,
+                parentPath
+            });
+
+            return [
+                decoratedTask,
+                ...this.flattenTaskHierarchy(task.subtasks, {
+                    parentPath: taskPath,
+                    depth: depth + 1,
+                    parentTask: task
+                })
+            ];
+        });
+    }
+
+    /** Find a task by path within a nested task collection. */
+    getTaskPathLocation(tasks, taskPath) {
+        const normalizedPath = this.normalizeTaskPath(taskPath);
+        if (!normalizedPath) return null;
+
+        const segments = normalizedPath.split('.').map(segment => parseInt(segment, 10));
+        let currentTasks = Array.isArray(tasks) ? tasks : [];
+        let parentTask = null;
+        let parentPath = '';
+
+        for (let depth = 0; depth < segments.length; depth += 1) {
+            const taskIndex = segments[depth];
+            if (!Number.isInteger(taskIndex) || taskIndex < 0 || taskIndex >= currentTasks.length) return null;
+
+            const task = currentTasks[taskIndex];
+            if (!task || typeof task !== 'object') return null;
+
+            const currentPath = this.buildTaskPath(parentPath, taskIndex);
+            if (depth === segments.length - 1) {
+                return {
+                    task,
+                    taskPath: currentPath,
+                    depth,
+                    parentTask,
+                    parentPath
+                };
+            }
+
+            parentTask = task;
+            parentPath = currentPath;
+            currentTasks = Array.isArray(task.subtasks) ? task.subtasks : [];
+        }
+
+        return null;
+    }
+
+    /** Resolve a decorated task by path in the current project or module context. */
+    getTaskRecordByPath(taskPath) {
+        const location = this.getTaskPathLocation(this.getContextSourceTasks(), taskPath);
+        if (!location) return null;
+
+        return this.decorateTaskRecord(location.task, {
+            taskPath: location.taskPath,
+            depth: location.depth,
+            parentTask: location.parentTask,
+            parentPath: location.parentPath
+        });
+    }
+
+    /** Resolve the active inline layer, resetting stale paths after project changes. */
+    getActiveTaskLayerLocation() {
+        const normalizedPath = this.normalizeTaskPath(this.activeTaskLayerPath);
+        if (!normalizedPath) return null;
+
+        const location = this.getTaskPathLocation(this.getContextSourceTasks(), normalizedPath);
+        if (!location || !Array.isArray(location.task.subtasks) || !location.task.subtasks.some(Boolean)) {
+            this.activeTaskLayerPath = '';
+            return null;
+        }
+
+        this.activeTaskLayerPath = normalizedPath;
+        return location;
+    }
+
+    /** Build breadcrumbs for the active inline task layer. */
+    getActiveTaskLayerTrail() {
+        const normalizedPath = this.normalizeTaskPath(this.activeTaskLayerPath);
+        if (!normalizedPath) return [];
+
+        const segments = normalizedPath.split('.');
+        const trail = [];
+        for (let index = 0; index < segments.length; index += 1) {
+            const partialPath = segments.slice(0, index + 1).join('.');
+            const taskRecord = this.getTaskRecordByPath(partialPath);
+            if (taskRecord) trail.push(taskRecord);
+        }
+
+        return trail;
+    }
+
+    /** Get tasks for the current layer view. */
+    getLayerTasks() {
+        const activeLayer = this.getActiveTaskLayerLocation();
+        if (!activeLayer) {
+            return this.hydrateTaskLayer(this.getContextSourceTasks());
+        }
+
+        return this.hydrateTaskLayer(activeLayer.task.subtasks, {
+            parentPath: activeLayer.taskPath,
+            depth: activeLayer.depth + 1,
+            parentTask: activeLayer.task
+        });
+    }
+
+    /** Get every task in the current project or module context. */
+    getAllContextTasks() {
+        return this.flattenTaskHierarchy(this.getContextSourceTasks());
+    }
+
+    /** Set the current task scope mode. */
+    setTaskScopeMode(mode) {
+        const normalizedMode = this.normalizeTaskScopeMode(mode);
+        if (this.taskScopeMode === normalizedMode) return;
+        this.taskScopeMode = normalizedMode;
+        const scopeSelect = document.getElementById('taskScopeMode');
+        if (scopeSelect) scopeSelect.value = this.taskScopeMode;
+        this.filterTasks();
+    }
+
+    /** Navigate into a specific inline task layer. */
+    openTaskLayer(taskPath) {
+        let normalizedPath = '';
+        try {
+            normalizedPath = this.normalizeTaskPath(decodeURIComponent(String(taskPath || '')));
+        } catch {
+            normalizedPath = this.normalizeTaskPath(taskPath);
+        }
+
+        const location = this.getTaskPathLocation(this.getContextSourceTasks(), normalizedPath);
+        if (!location || !Array.isArray(location.task.subtasks) || !location.task.subtasks.some(Boolean)) return;
+
+        this.activeTaskLayerPath = normalizedPath;
+        this.taskScopeMode = 'layer';
+        const scopeSelect = document.getElementById('taskScopeMode');
+        if (scopeSelect) scopeSelect.value = this.taskScopeMode;
+        this.closeTaskNodeModal();
+        this.filterTasks();
+    }
+
+    /** Move one inline layer upward. */
+    navigateToParentTaskLayer() {
+        const normalizedPath = this.normalizeTaskPath(this.activeTaskLayerPath);
+        if (!normalizedPath) return;
+
+        const segments = normalizedPath.split('.');
+        segments.pop();
+        this.activeTaskLayerPath = segments.join('.');
+        this.taskScopeMode = 'layer';
+        const scopeSelect = document.getElementById('taskScopeMode');
+        if (scopeSelect) scopeSelect.value = this.taskScopeMode;
+        this.closeTaskNodeModal();
+        this.filterTasks();
+    }
+
+    /** Reset the inline task layer to the current root context. */
+    clearTaskLayer() {
+        this.activeTaskLayerPath = '';
+        this.taskScopeMode = 'layer';
+        const scopeSelect = document.getElementById('taskScopeMode');
+        if (scopeSelect) scopeSelect.value = this.taskScopeMode;
+        this.closeTaskNodeModal();
+        this.filterTasks();
+    }
+
     /** Apply project theme. */
     applyProjectTheme() {
         if (typeof document === 'undefined' || !document.body) return;
@@ -660,13 +1015,15 @@ class TaskManagerApp {
 
         const templateType = String((this.database && this.database.templateType) || '').trim();
         const isTemplateLedger = templateType === 'project_task_template' || templateType === 'submodule_task_template';
-        const isFolderProject = !!(this.database && this.database.sourceKind === 'folder');
+        const sourceKind = String((this.database && this.database.sourceKind) || '');
+        const isLocalEditable = this.isLocalHost() || sourceKind === 'folder' || sourceKind === 'local-disk';
+        const shouldDisable = isTemplateLedger && !isLocalEditable;
 
-        addTaskButton.disabled = isTemplateLedger || isFolderProject;
-        addTaskButton.classList.toggle('disabled', isTemplateLedger || isFolderProject);
-        addTaskButton.title = isFolderProject
-            ? 'Browser-opened local folders are read-only in list mode.'
-            : (isTemplateLedger ? 'Template-backed project ledgers are read-only in list mode.' : '');
+        addTaskButton.disabled = shouldDisable;
+        addTaskButton.classList.toggle('disabled', shouldDisable);
+        addTaskButton.title = shouldDisable
+            ? 'Template-backed project ledgers are read-only in hosted mode.'
+            : '';
     }
 
     /** Sync project context from database. */
@@ -701,6 +1058,9 @@ class TaskManagerApp {
 
         this.currentContextTasks = [...this.rootTasks];
         this.currentContextFlowSummary = this.buildTaskFlowSummary(this.rootTasks);
+        if (this.activeTaskLayerPath && !this.getTaskPathLocation(this.currentContextTasks, this.activeTaskLayerPath)) {
+            this.activeTaskLayerPath = '';
+        }
         this.applyProjectTheme();
         this.updateTaskAuthoringAvailability();
         this.renderProjectNavigation();
@@ -718,10 +1078,9 @@ class TaskManagerApp {
 
     /** Get context base tasks. */
     getContextBaseTasks() {
-        if (this.activeModulePath) {
-            return Array.isArray(this.currentContextTasks) ? this.currentContextTasks : [];
-        }
-        return Array.isArray(this.rootTasks) ? this.rootTasks : [];
+        return this.taskScopeMode === 'layer'
+            ? this.getLayerTasks()
+            : this.getAllContextTasks();
     }
 
     /** Filter task collection. */
@@ -783,8 +1142,12 @@ class TaskManagerApp {
     /** Check whether task editing. */
     supportsTaskEditing(task) {
         const rawId = task && (task.task_id ?? task.id);
-        if (typeof rawId === 'number' && Number.isFinite(rawId)) return true;
-        return typeof rawId === 'string' && /^\d+$/.test(rawId.trim());
+        const normalizedId = typeof rawId === 'number' && Number.isFinite(rawId)
+            ? String(rawId)
+            : (typeof rawId === 'string' && /^\d+$/.test(rawId.trim()) ? rawId.trim() : '');
+        if (!normalizedId) return false;
+        if (!this.database || typeof this.database.getTask !== 'function') return true;
+        return Boolean(this.database.getTask(normalizedId));
     }
 
     /** Format display date. */
@@ -933,6 +1296,7 @@ class TaskManagerApp {
         if (!normalizedPath) {
             this.activeModulePath = '';
             this.activeModuleData = null;
+            this.activeTaskLayerPath = '';
             this.currentContextTasks = [...this.rootTasks];
             this.currentContextFlowSummary = this.buildTaskFlowSummary(this.currentContextTasks);
             this.renderProjectNavigation();
@@ -957,6 +1321,7 @@ class TaskManagerApp {
 
         this.activeModulePath = normalizedPath;
         this.activeModuleData = moduleData;
+    this.activeTaskLayerPath = '';
         this.currentContextTasks = this.buildModuleContextTasks(moduleEntry, moduleData, normalizedPath);
         this.currentContextFlowSummary = this.buildTaskFlowSummary(this.currentContextTasks);
         this.renderProjectNavigation();
@@ -1038,7 +1403,11 @@ class TaskManagerApp {
         const contextBadges = [];
         const contextSections = [];
         const pathLabels = [];
-        const flowSummary = this.currentContextFlowSummary || this.buildTaskFlowSummary(this.getContextBaseTasks());
+        const visibleTasks = this.getContextBaseTasks();
+        const layerTasks = this.getLayerTasks();
+        const allTasks = this.getAllContextTasks();
+        const activeLayerTrail = this.getActiveTaskLayerTrail();
+        const flowSummary = this.buildTaskFlowSummary(visibleTasks);
 
         const renderStaticChips = (items, extraClass = '') => {
             const safeItems = Array.isArray(items) ? items.filter(Boolean) : [];
@@ -1054,6 +1423,25 @@ class TaskManagerApp {
                 }
                 return `<button type="button" class="project-context-chip relation-chip ${kind}" onclick="app.openModuleRelation('${encodeURIComponent(String(item))}')">${this.escapeHtml(String(item))}</button>`;
             }).join('');
+        };
+
+        const renderTaskLayerButtons = () => {
+            const buttons = [
+                `<button type="button" class="project-context-chip relation-chip" onclick="app.clearTaskLayer()">Root Layer</button>`
+            ];
+
+            activeLayerTrail.forEach((layerTask, index) => {
+                const layerClass = index === activeLayerTrail.length - 1 ? 'output' : 'input';
+                buttons.push(
+                    `<button type="button" class="project-context-chip relation-chip ${layerClass}" onclick="app.openTaskLayer('${encodeURIComponent(layerTask.__taskPath || '')}')">${this.escapeHtml(String(layerTask.task_name || layerTask.title || layerTask.task_id || layerTask.id || 'Layer'))}</button>`
+                );
+            });
+
+            if (activeLayerTrail.length > 0) {
+                buttons.push(`<button type="button" class="project-context-chip relation-chip output" onclick="app.navigateToParentTaskLayer()">Up One Layer</button>`);
+            }
+
+            return buttons.join('');
         };
 
         const pushContextSection = (label, html, sectionClass = '') => {
@@ -1081,13 +1469,18 @@ class TaskManagerApp {
 
             if (moduleEntry && moduleEntry.department) contextBadges.push(moduleEntry.department);
             if (moduleEntry && moduleEntry.type) contextBadges.push(moduleEntry.type);
-            contextBadges.push(`${this.getContextBaseTasks().length} tasks`);
+            contextBadges.push(`${layerTasks.length} layer tasks`);
+            if (allTasks.length !== layerTasks.length) contextBadges.push(`${allTasks.length} total tasks`);
+            contextBadges.push(this.taskScopeMode === 'layer' ? 'Viewing current layer' : 'Viewing all tasks');
 
             const relativeModuleDir = this.normalizeModulePath((moduleEntry && moduleEntry.modulePath) || this.activeModulePath.replace(/\/[^\/]*$/, ''));
             if (relativeModuleDir) pathLabels.push(...relativeModuleDir.split('/').filter(Boolean));
 
             const pipelineInputs = Array.isArray(modulePipeline.input_from) ? modulePipeline.input_from.filter(Boolean) : [];
             const pipelineOutputs = Array.isArray(modulePipeline.output_to) ? modulePipeline.output_to.filter(Boolean) : [];
+            if (allTasks.length > layerTasks.length || activeLayerTrail.length > 0) {
+                pushContextSection('Task Layers', renderTaskLayerButtons(), 'relation-group');
+            }
             pushContextSection('Starts With', renderStaticChips(flowSummary.startLabels, 'flow-start'));
             pushContextSection('Finishes With', renderStaticChips(flowSummary.endLabels, 'flow-end'));
             pushContextSection('Inputs', renderRelationChips(pipelineInputs, 'input'), 'relation-group');
@@ -1096,7 +1489,7 @@ class TaskManagerApp {
                 <div class="project-context-path">${renderStaticChips(pathLabels, 'path-chip')}</div>
                 <div class="project-context-badges">${renderStaticChips(contextBadges, 'meta-chip')}</div>
                 <div class="project-context-grid">${contextSections.join('')}</div>
-                <div class="project-context-note">Template-backed sublists are read-only in list mode. Use the graph or root ledger for deeper planning context.</div>
+                <div class="project-context-note">Switch between the current inline layer and the flattened task ledger without losing module context.</div>
             `;
         } else {
             eyebrowEl.textContent = 'Project Taskflow';
@@ -1104,7 +1497,12 @@ class TaskManagerApp {
             descriptionEl.textContent = projectDescription || 'Select a task card or browse the module tree to walk the project from root flow to submodule flow.';
 
             contextBadges.push(`${this.navigationModules.length} modules`);
-            contextBadges.push(`${this.rootTasks.length} tasks`);
+            contextBadges.push(`${layerTasks.length} layer tasks`);
+            if (allTasks.length !== layerTasks.length) contextBadges.push(`${allTasks.length} total tasks`);
+            contextBadges.push(this.taskScopeMode === 'layer' ? 'Viewing current layer' : 'Viewing all tasks');
+            if (allTasks.length > layerTasks.length || activeLayerTrail.length > 0) {
+                pushContextSection('Task Layers', renderTaskLayerButtons(), 'relation-group');
+            }
             pushContextSection('Project Starts', renderStaticChips(flowSummary.startLabels, 'flow-start'));
             pushContextSection('Project Finishes', renderStaticChips(flowSummary.endLabels, 'flow-end'));
             flowEl.innerHTML = `
@@ -1851,7 +2249,8 @@ class TaskManagerApp {
             }
             // If save succeeded but nothing was actually committed (e.g., content identical), warn user
             if (result.committed === false) {
-                this.showToast('No changes were committed (content appears identical).', 'warning');
+                const warningMessage = String(result.note || 'No changes were committed (content appears identical).');
+                this.showToast(warningMessage, 'warning');
                 // Still refresh history if open, but avoid showing extra success toast below
                 const historyModal = document.getElementById('historyModal');
                 if (historyModal && historyModal.style.display === 'block') {
@@ -1874,6 +2273,15 @@ class TaskManagerApp {
                 this.showToast(`Tasks saved successfully ${source}`, 'success');
             }
 
+            // Notify the embedded graph iframe to reload with fresh data.
+            try {
+                const graphFrame = document.getElementById('graphFrame');
+                if (graphFrame && graphFrame.contentWindow) {
+                    const templateId = this.activeProjectId ? `${this.activeProjectId}-tasks` : null;
+                    graphFrame.contentWindow.postMessage({ type: 'tasksUpdated', templateId }, '*');
+                }
+            } catch (_) { /* non-fatal */ }
+
             // If history modal is open, refresh it.
             const historyModal = document.getElementById('historyModal');
             if (historyModal && historyModal.style.display === 'block') {
@@ -1885,6 +2293,23 @@ class TaskManagerApp {
             throw error;
         } finally {
             this.hideLoading();
+        }
+    }
+
+    /** Copy the reusable node.tasks.json authoring template to the clipboard. */
+    async copyTaskSchema() {
+        try {
+            if (!window.TaskSchemaClipboard || typeof window.TaskSchemaClipboard.copyToClipboard !== 'function') {
+                throw new Error('Task schema clipboard helper is not available');
+            }
+
+            await window.TaskSchemaClipboard.copyToClipboard({
+                scope: 'list-display',
+                activeProjectId: this.activeProjectId || ''
+            });
+            this.showToast('node.tasks.json template copied to clipboard', 'success');
+        } catch (err) {
+            this.showToast('Copy Schema failed: ' + err.message, 'error');
         }
     }
 
@@ -2087,7 +2512,7 @@ class TaskManagerApp {
         this.renderProjectNavigation();
 
         const contextTasks = this.getContextBaseTasks();
-        const flowSummary = this.currentContextFlowSummary || this.buildTaskFlowSummary(contextTasks);
+        const flowSummary = this.buildTaskFlowSummary(contextTasks);
         const startTaskKeys = new Set(Array.isArray(flowSummary.startTaskKeys) ? flowSummary.startTaskKeys : []);
         const endTaskKeys = new Set(Array.isArray(flowSummary.endTaskKeys) ? flowSummary.endTaskKeys : []);
 
@@ -2143,6 +2568,8 @@ class TaskManagerApp {
             const statusSlug = displayStatus.toLowerCase().replace(/\s+/g, '-');
             const statusClass = displayStatus ? `status-${statusSlug}${statusSlug === 'done' ? ' status-completed' : ''}` : '';
             const taskKey = this.getTaskKey(task);
+            const taskDepth = Number.isInteger(task.__taskDepth) ? task.__taskDepth : 0;
+            const taskParentName = String(task.__taskParentName || '').trim();
             const taskReference = this.supportsTaskEditing(task) ? String(task.task_id ?? task.id).trim() : '';
             const modulePath = this.normalizeModulePath(task.__modulePath || this.resolveTaskModulePath(task) || '');
             const showModuleAction = modulePath && modulePath !== this.activeModulePath;
@@ -2150,6 +2577,7 @@ class TaskManagerApp {
             const cardAction = `app.openTaskDetail(${index})`;
             const taskDataAttribute = taskReference ? ` data-task-id="${this.escapeHtml(taskReference)}"` : '';
             const cardAttributes = cardAction ? `${taskDataAttribute} role="button" tabindex="0" onclick="${cardAction}"` : taskDataAttribute;
+            const taskStyle = taskDepth > 0 ? ` style="--task-depth:${Math.min(taskDepth, 6)};"` : '';
             const createdDate = this.formatDisplayDate(task.created_date || task.createdAt || '');
             const dueDate = this.formatDisplayDate(task.end_date || task.due_date || '');
             const dependencyCount = Array.isArray(task.dependencies) ? task.dependencies.length : 0;
@@ -2166,6 +2594,7 @@ class TaskManagerApp {
             if (task.estimated_hours) infoBits.push(`<span>⏱️ ${task.estimated_hours}h</span>`);
             if (dependencyCount > 0) infoBits.push(`<span>🔗 ${dependencyCount} dependencies</span>`);
             if (subtaskCount > 0) infoBits.push(`<span>🪜 ${subtaskCount} subtasks</span>`);
+            if (taskParentName) infoBits.push(`<span>↳ ${this.escapeHtml(taskParentName)}</span>`);
             if (linkedIssue) infoBits.push(`<span>🐙 <a href="${linkedIssue.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">#${linkedIssue.number}</a></span>`);
             if (createdDate) infoBits.push(`<span>🕐 ${createdDate}</span>`);
 
@@ -2186,13 +2615,14 @@ class TaskManagerApp {
                 : '';
 
             return `
-            <div class="task-card ${statusClass}${taskReference ? '' : ' readonly'}"${cardAttributes}>
+            <div class="task-card ${statusClass}${taskReference ? '' : ' readonly'}" data-layer-depth="${taskDepth}"${taskStyle}${cardAttributes}>
                 <div class="task-header">
                     <div>
                         <h3 class="task-title">${this.escapeHtml(task.task_name || task.title)}</h3>
                         <div class="task-meta">
                             <span class="badge badge-status-${displayStatus.replace(/ /g, '-').toLowerCase()}">${displayStatus.replace(/-/g, ' ')}</span>
                             <span class="badge badge-priority-${task.priority || 'medium'}">${task.priority || 'medium'}</span>
+                            ${taskDepth > 0 ? `<span class="badge badge-layer-depth">Layer ${taskDepth + 1}</span>` : ''}
                             ${startTaskKeys.has(taskKey) ? '<span class="badge badge-flow-start">Start</span>' : ''}
                             ${endTaskKeys.has(taskKey) ? '<span class="badge badge-flow-end">Finish</span>' : ''}
                             ${task.is_critical_path ? '<span class="badge" style="background: rgba(220, 53, 69, 0.2); color: var(--danger-color);">Critical Path</span>' : ''}
@@ -2735,13 +3165,14 @@ class TaskManagerApp {
 
     /** Show add task modal. */
     _showAddTaskModal() {
-        const modal = document.getElementById('taskModal');
+        const modal = this.getTaskEditModal();
         if (!modal) {
             console.error('Modal element not found!');
             return;
         }
         this.setTaskModalReadOnly(false);
-        document.getElementById('modalTitle').textContent = 'Add New Task';
+        const modalTitle = this.getTaskEditModalTitle();
+        if (modalTitle) modalTitle.textContent = 'Add New Task';
         document.getElementById('taskForm').reset();
         document.getElementById('taskId').value = '';
         this.refreshCategoryOptions({ preserveValue: false });
@@ -2770,19 +3201,227 @@ class TaskManagerApp {
     openTaskDetail(taskIndex) {
         const task = this.filteredTasks[taskIndex];
         if (!task) return;
-        if (this.supportsTaskEditing(task)) {
-            this.editTask(String(task.task_id ?? task.id).trim());
-        } else {
-            this._openReadOnlyTask(task);
+        this._showTaskPreviewPopup(task);
+    }
+
+    /** Get the shared task node modal element for list-display. */
+    getTaskNodeModal() {
+        return document.getElementById('taskNodeModal') || document.getElementById('task-preview-popup');
+    }
+
+    /** Get the shared task node modal content element. */
+    getTaskNodeModalContent() {
+        return document.getElementById('taskNodeModalContent');
+    }
+
+    /** Close the shared task node modal. */
+    closeTaskNodeModal() {
+        const popup = this.getTaskNodeModal();
+        if (!popup) return;
+        popup.style.display = 'none';
+        popup.classList.remove('tpp-visible', 'visible');
+    }
+
+    /** Apply graph-style state classes and priority colors to task node buttons. */
+    applyTaskNodeButtonStyles(container) {
+        if (!container) return;
+
+        const priorityColors = {
+            Critical: '#b42318',
+            High: '#c86b1f',
+            Medium: '#1d5fa7',
+            Low: '#4d8f4b'
+        };
+
+        container.querySelectorAll('.task-node-btn[data-priority]').forEach((button) => {
+            const priority = String(button.getAttribute('data-priority') || '').trim();
+            const status = String(button.getAttribute('data-status') || '').trim();
+            const color = priorityColors[priority] || '';
+
+            if (color) {
+                button.style.backgroundColor = color;
+                button.style.borderColor = color;
+                button.style.color = '#fff';
+            }
+
+            button.classList.remove('task-node-status-done', 'task-node-status-in-progress');
+            if (status === 'done' || status === 'completed') button.classList.add('task-node-status-done');
+            if (status === 'in-progress') button.classList.add('task-node-status-in-progress');
+        });
+    }
+
+    /**
+     * Show a graph-style preview popup for a task.
+    * Clicking "Edit Task" inside the popup proceeds to the taskEditModal.
+     */
+    _showTaskPreviewPopup(task) {
+        const popup = this.getTaskNodeModal();
+        const content = this.getTaskNodeModalContent();
+        if (!popup || !content) {
+            // Fallback if popup element is absent
+            if (this.supportsTaskEditing(task)) this.editTask(String(task.task_id ?? task.id).trim());
+            else this._openReadOnlyTask(task);
+            return;
         }
+
+        const esc = (s) => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+        const resolvedTask = task && task.__taskPath
+            ? (this.getTaskRecordByPath(task.__taskPath) || task)
+            : task;
+        const taskPath = this.normalizeTaskPath(resolvedTask.__taskPath || '');
+        const taskDepth = Number.isInteger(resolvedTask.__taskDepth) ? resolvedTask.__taskDepth : 0;
+        const allContextTasks = this.getAllContextTasks();
+        const taskAliases = new Set([
+            this.getTaskKey(resolvedTask),
+            this.getTaskCode(resolvedTask),
+            String(resolvedTask.task_id ?? resolvedTask.id ?? '').trim()
+        ].filter(Boolean));
+        const taskLookupByAlias = new Map();
+
+        allContextTasks.forEach((candidate) => {
+            [
+                this.getTaskKey(candidate),
+                this.getTaskCode(candidate),
+                String(candidate.task_id ?? candidate.id ?? '').trim()
+            ].filter(Boolean).forEach((alias) => {
+                if (!taskLookupByAlias.has(alias)) taskLookupByAlias.set(alias, candidate);
+            });
+        });
+
+        const renderTaskButton = (relatedTask) => {
+            if (!relatedTask) return '';
+            const relatedPath = this.normalizeTaskPath(relatedTask.__taskPath || '');
+            if (!relatedPath) return '';
+            const relatedPriority = String(relatedTask.priority || 'Medium').trim() || 'Medium';
+            const relatedStatus = String(relatedTask.status || 'Not Started').toLowerCase().replace(/\s+/g, '-');
+            const relatedHours = Number(relatedTask.estimated_hours || relatedTask.estimatedHours) || 0;
+            const relatedLabel = esc(relatedTask.task_name || relatedTask.title || relatedTask.task_id || relatedTask.id || 'Task');
+            return `<button type="button" class="task-node-btn" data-task-path="${relatedPath}" data-priority="${esc(relatedPriority)}" data-status="${esc(relatedStatus)}"><span class="tn-name">${relatedLabel}</span>${relatedHours ? `<span class="tn-hours">${relatedHours}h</span>` : ''}</button>`;
+        };
+
+        const predecessorTasks = Array.from(new Map(
+            this.getTaskPredecessorKeys(resolvedTask)
+                .map(alias => taskLookupByAlias.get(alias))
+                .filter(Boolean)
+                .map(relatedTask => [relatedTask.__taskPath || String(relatedTask.task_id ?? relatedTask.id ?? ''), relatedTask])
+        ).values());
+
+        const successorTasks = allContextTasks.filter((candidate) => {
+            if ((candidate.__taskPath || '') === taskPath) return false;
+            return this.getTaskPredecessorKeys(candidate).some(alias => taskAliases.has(alias));
+        });
+
+        const childTasks = this.hydrateTaskLayer(resolvedTask.subtasks, {
+            parentPath: taskPath,
+            depth: taskDepth + 1,
+            parentTask: resolvedTask
+        });
+
+        const parentTask = resolvedTask.__taskParentPath
+            ? this.getTaskRecordByPath(resolvedTask.__taskParentPath)
+            : null;
+        const statusRaw = String(resolvedTask.status || 'Not Started');
+        const prioritySlug = String(resolvedTask.priority || 'Medium').toLowerCase();
+        const tags = Array.isArray(resolvedTask.tags) ? resolvedTask.tags.filter(Boolean) : [];
+        const acceptanceCriteria = Array.isArray(resolvedTask.acceptance_criteria) ? resolvedTask.acceptance_criteria.filter(Boolean) : [];
+        const modalActions = [];
+        const metaBits = [];
+
+        if (resolvedTask.estimated_hours) metaBits.push(`⏱ ${resolvedTask.estimated_hours}h est.`);
+        if (resolvedTask.actual_hours) metaBits.push(`⏱ ${resolvedTask.actual_hours}h actual`);
+        if (resolvedTask.start_date) metaBits.push(`📅 ${resolvedTask.start_date}`);
+        if (resolvedTask.end_date) metaBits.push(`→ ${resolvedTask.end_date}`);
+        if (typeof resolvedTask.progress_percentage === 'number' && resolvedTask.progress_percentage > 0) metaBits.push(`${resolvedTask.progress_percentage}%`);
+        if (resolvedTask.category_name) metaBits.push(`🏷 ${esc(resolvedTask.category_name)}`);
+        if (taskDepth > 0) metaBits.push(`Layer ${taskDepth + 1}`);
+        if (resolvedTask.__taskParentName) metaBits.push(`↳ ${esc(resolvedTask.__taskParentName)}`);
+
+        if (childTasks.length > 0 && taskPath) {
+            modalActions.push(`<button type="button" class="task-node-btn task-node-nav-btn" data-layer-path="${taskPath}"><span class="tn-name">📂 View Subtasks</span></button>`);
+        }
+        if (resolvedTask.__taskParentPath) {
+            modalActions.push(`<button type="button" class="task-node-btn task-node-nav-btn parent-nav-btn" data-layer-path="${resolvedTask.__taskParentPath}"><span class="tn-name">↩ Parent Layer</span></button>`);
+        } else if (this.activeTaskLayerPath) {
+            modalActions.push(`<button type="button" class="task-node-btn task-node-nav-btn parent-nav-btn" data-layer-action="up"><span class="tn-name">↩ Up One Layer</span></button>`);
+        }
+        if (this.supportsTaskEditing(resolvedTask)) {
+            modalActions.push(`<button type="button" class="task-node-btn task-node-nav-btn" data-popup-action="edit" data-edit-task-id="${esc(String(resolvedTask.task_id ?? resolvedTask.id).trim())}"><span class="tn-name">✏️ Edit Task</span></button>`);
+        }
+
+        content.innerHTML = `
+            <div class="tpp-badge-row">
+                <span class="tpp-badge priority-${prioritySlug}">${esc(resolvedTask.priority || 'Medium')}</span>
+                <span class="tpp-badge status-badge">${esc(statusRaw)}</span>
+                ${resolvedTask.is_critical_path ? '<span class="tpp-badge critical-path">⚠ Critical Path</span>' : ''}
+            </div>
+            <h2 class="tpp-title">${esc(resolvedTask.task_name || resolvedTask.title || 'Task')}</h2>
+            <div class="tpp-meta">${metaBits.map(bit => `<span>${bit}</span>`).join('')}</div>
+            ${resolvedTask.description ? `<div class="tpp-description">${esc(resolvedTask.description)}</div>` : ''}
+            ${modalActions.length > 0 ? `<div class="popup-action-row">${modalActions.join('')}</div>` : ''}
+            <div class="tpp-details">
+                ${parentTask ? `<div class="tpp-section-title">Parent Task</div><div class="task-node-list">${renderTaskButton(parentTask)}</div>` : ''}
+                ${predecessorTasks.length > 0 ? `<div class="tpp-section-title">Depends On</div><div class="task-node-list">${predecessorTasks.map(relatedTask => renderTaskButton(relatedTask)).join('')}</div>` : ''}
+                ${successorTasks.length > 0 ? `<div class="tpp-section-title">Leads To</div><div class="task-node-list">${successorTasks.map(relatedTask => renderTaskButton(relatedTask)).join('')}</div>` : ''}
+                ${childTasks.length > 0 ? `<div class="tpp-section-title">Child Tasks</div><div class="task-node-list">${childTasks.map(relatedTask => renderTaskButton(relatedTask)).join('')}</div>` : ''}
+                ${acceptanceCriteria.length > 0 ? `<div class="tpp-section-title">Acceptance Criteria</div><ul>${acceptanceCriteria.map(item => `<li>${esc(item)}</li>`).join('')}</ul>` : ''}
+                ${tags.length > 0 ? `<div class="tpp-section-title">Tags</div><div class="tpp-tag-list">${tags.map(tag => `<span class="tpp-tag">${esc(tag)}</span>`).join('')}</div>` : ''}
+            </div>
+        `;
+
+        this.applyTaskNodeButtonStyles(content);
+
+        content.querySelectorAll('.task-node-btn[data-task-path]').forEach((button) => {
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                const nextTask = this.getTaskRecordByPath(button.getAttribute('data-task-path'));
+                if (nextTask) this._showTaskPreviewPopup(nextTask);
+            });
+        });
+
+        content.querySelectorAll('.task-node-btn[data-layer-path]').forEach((button) => {
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                this.openTaskLayer(button.getAttribute('data-layer-path') || '');
+            });
+        });
+
+        content.querySelectorAll('.task-node-btn[data-layer-action="up"]').forEach((button) => {
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                this.navigateToParentTaskLayer();
+            });
+        });
+
+        content.querySelectorAll('.task-node-btn[data-popup-action="edit"]').forEach((button) => {
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                const editTaskId = button.getAttribute('data-edit-task-id');
+                if (!editTaskId) return;
+                this.closeTaskNodeModal();
+                this.editTask(editTaskId);
+            });
+        });
+
+        const closeButton = document.getElementById('taskNodeModalCloseX');
+        if (closeButton) closeButton.onclick = () => this.closeTaskNodeModal();
+        popup.onclick = (event) => { if (event.target === popup) this.closeTaskNodeModal(); };
+
+        popup.style.display = 'flex';
+        requestAnimationFrame(() => popup.classList.add('tpp-visible', 'visible'));
     }
 
     /** Open read only task. */
     _openReadOnlyTask(task) {
-        const modal = document.getElementById('taskModal');
+        const modal = this.getTaskEditModal();
         if (!modal) return;
         this.setTaskModalReadOnly(false);
-        document.getElementById('modalTitle').textContent = 'Task Details';
+        const modalTitle = this.getTaskEditModalTitle();
+        if (modalTitle) modalTitle.textContent = 'Task Details';
         this.refreshCategoryOptions({ preserveValue: false });
         this.populateFormWithTask(task);
         this.setTaskModalReadOnly(true);
@@ -2842,7 +3481,8 @@ class TaskManagerApp {
         const target = String(predecessorId ?? '');
         const idx = this.filteredTasks.findIndex(t => String(t.task_id ?? t.id ?? '') === target);
         if (idx < 0) return;
-        document.getElementById('taskModal').style.display = 'none';
+        const modal = this.getTaskEditModal();
+        if (modal) modal.style.display = 'none';
         setTimeout(() => this.openTaskDetail(idx), 120);
     }
 
@@ -2854,14 +3494,15 @@ class TaskManagerApp {
             return;
         }
 
-        const modal = document.getElementById('taskModal');
+        const modal = this.getTaskEditModal();
         if (!modal) {
             console.error('Modal element not found!');
             return;
         }
 
         this.setTaskModalReadOnly(false);
-        document.getElementById('modalTitle').textContent = 'Edit Task';
+        const modalTitle = this.getTaskEditModalTitle();
+        if (modalTitle) modalTitle.textContent = 'Edit Task';
         this.refreshCategoryOptions({ preserveValue: false });
         this.populateFormWithTask(task);
         modal.style.display = 'block';
@@ -2874,9 +3515,38 @@ class TaskManagerApp {
         }, 100);
     }
 
+    /**
+     * Apply a task update received via postMessage from the graph-display modal.
+     * Merges the changed fields into the in-memory database and saves.
+     */
+    async _applyTaskUpdateFromGraph(taskId, taskData) {
+        const strId = String(taskId);
+        const task = this.database.getTask(strId);
+        if (!task) {
+            console.warn('_applyTaskUpdateFromGraph: task not found', taskId);
+            return;
+        }
+        const cleanFields = {};
+        if (taskData.task_name !== undefined) cleanFields.task_name = taskData.task_name;
+        if (taskData.description !== undefined) cleanFields.description = taskData.description;
+        if (taskData.status !== undefined) cleanFields.status = taskData.status;
+        if (taskData.priority !== undefined) cleanFields.priority = taskData.priority;
+        if (taskData.start_date !== undefined) cleanFields.start_date = taskData.start_date;
+        if (taskData.end_date !== undefined) cleanFields.end_date = taskData.end_date;
+        if (taskData.estimated_hours !== undefined) cleanFields.estimated_hours = taskData.estimated_hours;
+        if (taskData.progress_percentage !== undefined) cleanFields.progress_percentage = taskData.progress_percentage;
+        if (taskData.category_name !== undefined) cleanFields.category_name = taskData.category_name;
+        try {
+            await this.database.updateTask(strId, cleanFields);
+            this.loadTasks && await this.loadTasks();
+        } catch (err) {
+            console.error('_applyTaskUpdateFromGraph save failed', err);
+        }
+    }
+
     /** Set task modal read only. */
     setTaskModalReadOnly(readOnly = false) {
-        const modal = document.getElementById('taskModal');
+        const modal = this.getTaskEditModal();
         const form = document.getElementById('taskForm');
         if (!modal || !form) return;
 
@@ -2978,7 +3648,7 @@ class TaskManagerApp {
 
     /** Close modal. */
     closeModal() {
-        const modal = document.getElementById('taskModal');
+        const modal = this.getTaskEditModal();
         if (modal) {
             modal.style.display = 'none';
         }
@@ -3504,10 +4174,29 @@ class TaskManagerApp {
         // Filter changes
         document.getElementById('filterStatus').addEventListener('change', () => this.filterTasks());
         document.getElementById('filterPriority').addEventListener('change', () => this.filterTasks());
+        const taskScopeMode = document.getElementById('taskScopeMode');
+        if (taskScopeMode) {
+            taskScopeMode.value = this.taskScopeMode;
+            taskScopeMode.addEventListener('change', (event) => this.setTaskScopeMode(event.target.value));
+        }
+
+        window.addEventListener('tasks-externally-updated', () => {
+            this.syncProjectContextFromDatabase();
+            this.filterTasks();
+            this.showToast('Tasks refreshed from local files', 'info');
+        });
+
+        window.addEventListener('bridge-status-changed', (event) => {
+            const online = Boolean(event && event.detail && event.detail.online);
+            const el = document.getElementById('bridgeStatus');
+            if (!el) return;
+            el.textContent = online ? 'Bridge: connected' : 'Bridge: offline (run node server.js)';
+            el.style.color = online ? '#15803d' : '#b45309';
+        });
 
         // Modal close
         window.onclick = (event) => {
-            const modal = document.getElementById('taskModal');
+            const modal = this.getTaskEditModal();
             if (event.target === modal) {
                 this.closeModal();
             }

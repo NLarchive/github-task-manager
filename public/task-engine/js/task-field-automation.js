@@ -22,6 +22,31 @@ class TemplateAutomation {
     this.nextTaskId = 1;
   }
 
+  /**
+   * Collect numeric task ids across top-level tasks and recursive inline subtasks.
+   *
+   * @param {object[]} [tasks=[]]
+   * @param {number[]} [collectedIds=[]]
+   * @returns {number[]}
+   */
+  collectTaskIds(tasks = [], collectedIds = []) {
+    if (!Array.isArray(tasks)) return collectedIds;
+
+    tasks.forEach((task) => {
+      if (!task || typeof task !== 'object') return;
+
+      if (Number.isFinite(task.task_id)) {
+        collectedIds.push(task.task_id);
+      }
+
+      if (Array.isArray(task.subtasks) && task.subtasks.length > 0) {
+        this.collectTaskIds(task.subtasks, collectedIds);
+      }
+    });
+
+    return collectedIds;
+  }
+
   // Generate next available task ID
   /**
    * Generate the next available numeric task id for a task collection.
@@ -34,9 +59,8 @@ class TemplateAutomation {
       return null;
     }
 
-    const existingIds = existingTasks
-      .map(task => task.task_id)
-      .filter(id => id && typeof id === 'number')
+    const existingIds = this.collectTaskIds(existingTasks)
+      .filter(id => Number.isFinite(id) && id > 0)
       .sort((a, b) => a - b);
 
     // Find the first gap or use next number
@@ -87,6 +111,10 @@ class TemplateAutomation {
     // Auto-set due_date to end_date if not provided (v3)
     if (!populated.due_date) {
       populated.due_date = populated.end_date;
+    }
+    // Auto-set category_name if missing or empty
+    if (!populated.category_name) {
+      populated.category_name = (this.config.ENUMS && Array.isArray(this.config.ENUMS.TASK_CATEGORY) && this.config.ENUMS.TASK_CATEGORY[0]) || 'General';
     }
 
     // Auto-set creation metadata

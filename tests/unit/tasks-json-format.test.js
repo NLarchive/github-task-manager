@@ -322,9 +322,11 @@ describe('node.tasks.json format validation', () => {
       const nodesWithInlinePath = tpl.nodes.filter(n => String(n.subtasksPath || '').startsWith('__inline_task_id__:'));
       expect(nodesWithInlinePath.length).toBeGreaterThan(0);
 
-      // Verify the inline subgraph actually builds from source data
+      // Verify the inline subgraph actually builds from source data.
+      // Use tpl.sourceData (the normalized data stored in the template) because inline
+      // paths use the normalized task_ids, not the original ones from the JSON.
       const firstInlineNode = nodesWithInlinePath[0];
-      const subTpl = mod.buildInlineTaskSubgraphTemplatePublic(entry, data, firstInlineNode.subtasksPath);
+      const subTpl = mod.buildInlineTaskSubgraphTemplatePublic(entry, tpl.sourceData || data, firstInlineNode.subtasksPath);
       expect(subTpl).toBeTruthy();
       expect(subTpl.nodes.length).toBeGreaterThan(2); // start + end + at least 1 task
     }
