@@ -89,6 +89,165 @@ function safeJoin(root, requestPath) {
 }
 
 /**
+ * Scan a folder structure and extract relations to build code.graph.json
+ * @param {string} folderPath
+ * @param {number} maxDepth
+ * @returns {object}
+ */
+function scanFolderToGraph(folderPath, maxDepth = 5) {
+  const nodes = {};
+  const edges = {};
+  let edgeCounter = 0;
+
+  function generateId(type, name) {
+    return `${type}_${name.replace(/[^a-z0-9]/gi, '_')}`.toLowerCase();
+  }
+
+  function scanFolder(currentPath, parentId, depth) {
+    if (depth > maxDepth) return;
+
+    try {
+      const entries = fs.readdirSync(currentPath, { withFileTypes: true });
+
+      for (const entry of entries) {
+        // Skip excluded directories
+        if (entry.isDirectory() && ['node_modules', '.git', '.next', 'dist', 'build', '.venv', '.env'].includes(entry.name)) {
+          continue;
+        }
+
+        const fullPath = path.join(currentPath, entry.name);
+        const nodeId = generateId(entry.isDirectory() ? 'layer' : 'file', entry.name);
+
+        if (entry.isDirectory()) {
+          // Create layer node for subfolder
+          const layerNode = {
+            id: nodeId,
+            type: 'layer',
+            label: entry.name,
+            path: fullPath,
+            parent: parentId,
+            description: '',
+            inputs: [],
+            outputs: [],
+            children: [],
+            edgeIds: [],
+            meta: { lifecycle: 'discovered', nodeCount: 0, taskCount: 0 }
+          };
+          nodes[nodeId] = layerNode;
+
+          // Create edge from parent to this layer
+          if (parentId) {
+            const edgeId = `edge_${edgeCounter++}`;
+            edges[edgeId] = {
+              id: edgeId,
+              source: parentId,
+              target: nodeId,
+              type: 'contains',
+              direction: 'forward'
+            };
+          }
+
+          // Try to read README
+          const readmePath = path.join(fullPath, 'README.md');
+          if (fs.existsSync(readmePath)) {
+            try {
+              const content = fs.readFileSync(readmePath, 'utf8');
+              const match = content.match(/^[^\n]+\n(.*?)(?:\n#|\n\n|$)/s);
+              layerNode.description = match ? match[1].trim() : content.substring(0, 200);
+            } catch {}
+          }
+
+          // Try to read tasks
+          const tasksPath = path.join(fullPath, 'node.tasks.json');
+          if (fs.existsSync(tasksPath)) {
+            try {
+              const tasksData = JSON.parse(fs.readFileSync(tasksPath, 'utf8'));
+              if (tasksData.tasks) {
+                layerNode.meta.taskCount = tasksData.tasks.length;
+                layerNode.meta.hasTasks = true;
+              }
+            } catch {}
+          }
+
+          // Recursively scan subfolder
+          scanFolder(fullPath, nodeId, depth + 1);
+        } else {
+          // Create file node
+          const ext = path.extname(entry.name).toLowerCase();
+          let fileType = 'file';
+          if (ext === '.js' || ext === '.ts') fileType = 'code';
+          if (ext === '.json') fileType = 'config';
+          if (ext === '.md') fileType = 'documentation';
+          if (ext === '.csv') fileType = 'data';
+
+          const fileNode = {
+            id: nodeId,
+            type: fileType,
+            label: entry.name,
+            path: fullPath,
+            parent: parentId,
+            description: '',
+            inputs: [],
+            outputs: [],
+            dependencies: [],
+            exports: [],
+            edgeIds: [],
+            meta: { lifecycle: 'discovered' }
+          };
+          nodes[nodeId] = fileNode;
+
+          // Create edge from layer to file
+          if (parentId) {
+            const edgeId = `edge_${edgeCounter++}`;
+            edges[edgeId] = {
+              id: edgeId,
+              source: parentId,
+              target: nodeId,
+              type: 'contains',
+              direction: 'forward'
+            };
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`Error scanning folder ${currentPath}:`, error.message);
+    }
+  }
+
+  // Create root layer node
+  const rootId = generateId('layer', path.basename(folderPath) || 'root');
+  nodes[rootId] = {
+    id: rootId,
+    type: 'layer',
+    label: path.basename(folderPath) || 'root',
+    path: folderPath,
+    parent: null,
+    description: '',
+    inputs: [],
+    outputs: [],
+    children: [],
+    edgeIds: [],
+    meta: { lifecycle: 'discovered', nodeCount: 0, taskCount: 0 }
+  };
+
+  // Start scanning
+  scanFolder(folderPath, rootId, 0);
+
+  return {
+    rootId,
+    nodes,
+    edges,
+    metadata: {
+      scanDate: new Date().toISOString(),
+      rootPath: folderPath,
+      nodeCount: Object.keys(nodes).length,
+      edgeCount: Object.keys(edges).length,
+      warnings: []
+    }
+  };
+}
+
+/**
  * Map a file path extension to the HTTP content type used by static serving.
  *
  * @param {string} filePath
@@ -122,6 +281,53 @@ function sendJson(res, status, payload) {
     'Cache-Control': 'no-store'
   });
   res.end(body);
+}
+
+const ALLOWED_API_ORIGINS = new Set([
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:3100',
+  'http://127.0.0.1:3100',
+  'http://localhost:5500',
+  'http://127.0.0.1:5500',
+  'https://nlarchive.github.io'
+]);
+
+/**
+ * Apply CORS headers for API endpoints using a strict allowlist.
+ * Requests without Origin (same-origin or CLI) are allowed.
+ *
+ * @param {import('http').IncomingMessage} req
+ * @param {import('http').ServerResponse} res
+ * @returns {boolean}
+ */
+function applyApiCors(req, res) {
+  const origin = req.headers.origin;
+  if (!origin) return true;
+  if (!ALLOWED_API_ORIGINS.has(origin)) return false;
+
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, POST, PATCH, DELETE, HEAD, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, If-None-Match');
+  res.setHeader('Access-Control-Expose-Headers', 'ETag');
+  res.setHeader('Vary', 'Origin');
+  return true;
+}
+
+/**
+ * Return ETag for a project's canonical node.tasks.json file.
+ *
+ * @param {string} projectDir
+ * @returns {string}
+ */
+function getProjectETag(projectDir) {
+  try {
+    const targetFile = path.join(projectDir, 'node.tasks.json');
+    const stats = fs.statSync(targetFile);
+    return `"${Math.floor(stats.mtimeMs)}"`;
+  } catch {
+    return '"0"';
+  }
 }
 
 /**
@@ -217,6 +423,55 @@ const TASK_FILE_CANDIDATES = ['node.tasks.json', 'TODO_project_task.json'];
 /** Directories skipped while scanning project modules and derived artifacts. */
 const DISCOVERY_IGNORED_DIRS = new Set(['history', 'state', 'tour', 'node_modules', '.git']);
 
+/** Directories skipped while scanning the broader repository tree for project-index.html. */
+const PROJECT_TREE_IGNORED_DIRS = new Set([
+  ...DISCOVERY_IGNORED_DIRS,
+  'playwright-report',
+  'test-results',
+  '.wrangler'
+]);
+
+/** Text preview cap for file-content responses. */
+const TEXT_PREVIEW_MAX_BYTES = 160000;
+
+/** Extensions that are safe to preview as text without further inspection. */
+const TEXT_PREVIEW_EXTENSIONS = new Set([
+  '.agent',
+  '.bat',
+  '.cjs',
+  '.cmd',
+  '.css',
+  '.csv',
+  '.env',
+  '.gitignore',
+  '.html',
+  '.instructions',
+  '.java',
+  '.js',
+  '.json',
+  '.jsonl',
+  '.jsx',
+  '.less',
+  '.log',
+  '.md',
+  '.mjs',
+  '.ps1',
+  '.prompt',
+  '.py',
+  '.scss',
+  '.sh',
+  '.skill',
+  '.sql',
+  '.svg',
+  '.toml',
+  '.ts',
+  '.tsx',
+  '.txt',
+  '.xml',
+  '.yaml',
+  '.yml'
+]);
+
 /**
  * Determine whether a filename is a supported TaskDB source file.
  *
@@ -282,6 +537,207 @@ function discoverProjectTaskFiles(projectDir) {
 
   walk(projectDir);
   return Array.from(new Set(discovered.filter(Boolean))).sort((a, b) => a.localeCompare(b));
+}
+
+/**
+ * Get a lowercase file extension for project tree summaries.
+ *
+ * @param {string} fileName
+ * @returns {string}
+ */
+function getProjectFileExtension(fileName) {
+  return String(path.extname(String(fileName || '')) || '').toLowerCase();
+}
+
+/**
+ * Determine whether a repository directory should be skipped from project tree scans.
+ *
+ * @param {import('fs').Dirent} entry
+ * @returns {boolean}
+ */
+function shouldSkipProjectTreeEntry(entry) {
+  return Boolean(entry && entry.isDirectory && entry.isDirectory() && PROJECT_TREE_IGNORED_DIRS.has(entry.name));
+}
+
+/**
+ * Recursively count descendant files/directories for a repository folder snapshot.
+ *
+ * @param {string} dirPath
+ * @returns {{directFileCount: number, directDirectoryCount: number, descendantFileCount: number, descendantDirectoryCount: number, totalFileCount: number, totalDirectoryCount: number, totalNodeCount: number}}
+ */
+function countProjectTreeStats(dirPath) {
+  const entries = readDirectoryEntries(dirPath);
+  let directFileCount = 0;
+  let directDirectoryCount = 0;
+  let descendantFileCount = 0;
+  let descendantDirectoryCount = 0;
+
+  for (const entry of entries) {
+    if (!entry) continue;
+    if (entry.isDirectory()) {
+      if (shouldSkipProjectTreeEntry(entry)) continue;
+      directDirectoryCount += 1;
+      const childStats = countProjectTreeStats(path.join(dirPath, entry.name));
+      descendantDirectoryCount += 1 + childStats.descendantDirectoryCount;
+      descendantFileCount += childStats.directFileCount + childStats.descendantFileCount;
+      continue;
+    }
+    if (entry.isFile()) directFileCount += 1;
+  }
+
+  const totalFileCount = directFileCount + descendantFileCount;
+  const totalDirectoryCount = directDirectoryCount + descendantDirectoryCount;
+  return {
+    directFileCount,
+    directDirectoryCount,
+    descendantFileCount,
+    descendantDirectoryCount,
+    totalFileCount,
+    totalDirectoryCount,
+    totalNodeCount: totalFileCount + totalDirectoryCount
+  };
+}
+
+/**
+ * Build a file node summary for the project explorer.
+ *
+ * @param {string} rootDir
+ * @param {string} filePath
+ * @returns {object}
+ */
+function buildProjectFileSummary(rootDir, filePath) {
+  const stat = fs.statSync(filePath);
+  const relativePath = normalizeRelativePath(path.relative(rootDir, filePath));
+  const extension = getProjectFileExtension(filePath);
+  return {
+    kind: 'file',
+    name: path.basename(filePath),
+    relativePath,
+    extension,
+    sizeBytes: stat.size,
+    totalNodeCount: 1,
+    contentType: contentTypeFor(filePath)
+  };
+}
+
+/**
+ * Build a folder node summary for the project explorer.
+ *
+ * @param {string} rootDir
+ * @param {string} dirPath
+ * @returns {object}
+ */
+function buildProjectDirectorySummary(rootDir, dirPath) {
+  const stats = countProjectTreeStats(dirPath);
+  const relativePath = normalizeRelativePath(path.relative(rootDir, dirPath));
+  return {
+    kind: 'directory',
+    name: relativePath ? path.basename(dirPath) : path.basename(rootDir),
+    relativePath,
+    directFileCount: stats.directFileCount,
+    directDirectoryCount: stats.directDirectoryCount,
+    descendantFileCount: stats.descendantFileCount,
+    descendantDirectoryCount: stats.descendantDirectoryCount,
+    totalFileCount: stats.totalFileCount,
+    totalDirectoryCount: stats.totalDirectoryCount,
+    totalNodeCount: stats.totalNodeCount
+  };
+}
+
+/**
+ * Build a one-level directory snapshot with child metadata and descendant counts.
+ *
+ * @param {string} rootDir
+ * @param {string} relativePath
+ * @returns {{directory: object, breadcrumbs: { name: string, relativePath: string }[]}}
+ */
+function buildProjectTreeSnapshot(rootDir, relativePath = '') {
+  const normalizedRelativePath = normalizeRelativePath(relativePath);
+  const targetDir = normalizedRelativePath ? safeJoin(rootDir, normalizedRelativePath) : rootDir;
+  if (!targetDir || !fs.existsSync(targetDir) || !fs.statSync(targetDir).isDirectory()) {
+    throw new Error('Directory snapshot target is invalid.');
+  }
+
+  const children = readDirectoryEntries(targetDir)
+    .filter((entry) => entry && (entry.isDirectory() || entry.isFile()))
+    .filter((entry) => !shouldSkipProjectTreeEntry(entry))
+    .sort((left, right) => {
+      const leftRank = left.isDirectory() ? 0 : 1;
+      const rightRank = right.isDirectory() ? 0 : 1;
+      if (leftRank !== rightRank) return leftRank - rightRank;
+      return left.name.localeCompare(right.name);
+    })
+    .map((entry) => {
+      const entryPath = path.join(targetDir, entry.name);
+      return entry.isDirectory()
+        ? buildProjectDirectorySummary(rootDir, entryPath)
+        : buildProjectFileSummary(rootDir, entryPath);
+    });
+
+  const breadcrumbs = [{ name: path.basename(rootDir), relativePath: '' }];
+  if (normalizedRelativePath) {
+    const parts = normalizedRelativePath.split('/');
+    parts.forEach((part, index) => {
+      breadcrumbs.push({
+        name: part,
+        relativePath: parts.slice(0, index + 1).join('/')
+      });
+    });
+  }
+
+  return {
+    directory: {
+      ...buildProjectDirectorySummary(rootDir, targetDir),
+      children
+    },
+    breadcrumbs
+  };
+}
+
+/**
+ * Determine whether a file buffer should be treated as text for preview.
+ *
+ * @param {string} filePath
+ * @param {Buffer} buffer
+ * @returns {boolean}
+ */
+function isTextPreviewFile(filePath, buffer) {
+  const extension = getProjectFileExtension(filePath);
+  if (TEXT_PREVIEW_EXTENSIONS.has(extension)) return true;
+  const sample = buffer.subarray(0, Math.min(buffer.length, 1024));
+  for (const byte of sample) {
+    if (byte === 0) return false;
+  }
+  return true;
+}
+
+/**
+ * Read a safe text preview payload for a repository file.
+ *
+ * @param {string} rootDir
+ * @param {string} relativePath
+ * @returns {object}
+ */
+function buildProjectFilePreview(rootDir, relativePath) {
+  const normalizedRelativePath = normalizeRelativePath(relativePath);
+  const filePath = normalizedRelativePath ? safeJoin(rootDir, normalizedRelativePath) : null;
+  if (!filePath || !fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+    throw new Error('File preview target is invalid.');
+  }
+
+  const stat = fs.statSync(filePath);
+  const buffer = fs.readFileSync(filePath);
+  const isText = isTextPreviewFile(filePath, buffer);
+  const previewContent = isText
+    ? buffer.toString('utf8', 0, TEXT_PREVIEW_MAX_BYTES)
+    : `[Binary preview unavailable for ${path.basename(filePath)}]`;
+
+  return {
+    ...buildProjectFileSummary(rootDir, filePath),
+    isText,
+    truncated: isText && buffer.length > TEXT_PREVIEW_MAX_BYTES,
+    content: previewContent
+  };
 }
 
 /**
@@ -651,10 +1107,24 @@ function sanitizeProjectId(value) {
 function maybeBootstrapTasksDb(tasksDbDir, fallbackDir) {
   try {
     ensureDir(tasksDbDir);
+    const registrySrc = path.join(fallbackDir, 'registry.json');
+    const registryDst = path.join(tasksDbDir, 'registry.json');
+    if (!fs.existsSync(registryDst) && fs.existsSync(registrySrc)) {
+      fs.copyFileSync(registrySrc, registryDst);
+    }
+
     // Prefer bootstrapping the default project folder (multi-project layout)
     const defaultProject = 'github-task-manager';
-    const fallbackProjectDir = path.join(fallbackDir, defaultProject);
-    const targetProjectDir = path.join(tasksDbDir, defaultProject);
+    const preferredProjectLayouts = [
+      {
+        srcDir: path.join(fallbackDir, 'external', defaultProject),
+        dstDir: path.join(tasksDbDir, 'external', defaultProject)
+      },
+      {
+        srcDir: path.join(fallbackDir, defaultProject),
+        dstDir: path.join(tasksDbDir, defaultProject)
+      }
+    ];
 
     const bootstrapPair = (srcDir, dstDir) => {
       ensureDir(dstDir);
@@ -666,8 +1136,9 @@ function maybeBootstrapTasksDb(tasksDbDir, fallbackDir) {
       if (!fs.existsSync(csvDst) && fs.existsSync(csvSrc)) fs.copyFileSync(csvSrc, csvDst);
     };
 
-    if (fs.existsSync(fallbackProjectDir)) {
-      bootstrapPair(fallbackProjectDir, targetProjectDir);
+    for (const layout of preferredProjectLayouts) {
+      if (!fs.existsSync(layout.srcDir)) continue;
+      bootstrapPair(layout.srcDir, layout.dstDir);
       return;
     }
 
@@ -762,10 +1233,10 @@ function writeStateFiles(tasksDbDir, fullData) {
 /**
  * Create the local HTTP server used by development, tests, and file-backed saves.
  *
- * @param {{ publicDir: string, tasksDbDir: string, graphDir: string }} options
+ * @param {{ publicDir: string, tasksDbDir: string, graphDir: string, repoRoot?: string }} options
  * @returns {import('http').Server}
  */
-function createServer({ publicDir, tasksDbDir, graphDir }) {
+function createServer({ publicDir, tasksDbDir, graphDir, repoRoot }) {
   const fallbackTasksDbDir = path.join(publicDir, 'tasksDB');
   maybeBootstrapTasksDb(tasksDbDir, fallbackTasksDbDir);
 
@@ -811,11 +1282,51 @@ function createServer({ publicDir, tasksDbDir, graphDir }) {
 
   // graph-display is published alongside index.html under /public.
   const effectiveGraphDir = graphDir || path.join(publicDir, 'graph-display');
+  const effectiveRepoRoot = repoRoot ? path.resolve(repoRoot) : path.resolve(publicDir, '..');
+
+  function resolveProjectExplorerTarget(rootKey, relativePath = '') {
+    const normalizedRootKey = String(rootKey || 'repo').trim().toLowerCase();
+    const baseDir = {
+      repo: effectiveRepoRoot,
+      public: path.resolve(publicDir),
+      tasksdb: path.resolve(tasksDbDir),
+      graph: path.resolve(effectiveGraphDir)
+    }[normalizedRootKey];
+
+    if (!baseDir) {
+      return { error: 'Unsupported project root. Use repo, public, tasksdb, or graph.' };
+    }
+
+    const normalizedRelativePath = normalizeRelativePath(relativePath);
+    const targetPath = normalizedRelativePath ? safeJoin(baseDir, normalizedRelativePath) : baseDir;
+    if (!targetPath) {
+      return { error: 'Invalid project path.' };
+    }
+
+    return {
+      rootKey: normalizedRootKey,
+      baseDir,
+      normalizedRelativePath,
+      targetPath
+    };
+  }
 
   const server = http.createServer(async (req, res) => {
     try {
       const url = new URL(req.url, `http://${req.headers.host}`);
       const pathname = url.pathname;
+
+      if (pathname.startsWith('/api/')) {
+        const corsAllowed = applyApiCors(req, res);
+        if (!corsAllowed) {
+          return sendJson(res, 403, { ok: false, error: 'Forbidden origin' });
+        }
+
+        if (req.method === 'OPTIONS') {
+          res.writeHead(204, { 'Access-Control-Max-Age': '86400' });
+          return res.end();
+        }
+      }
 
       if (pathname === '/api/health') {
         return sendJson(res, 200, { ok: true });
@@ -862,6 +1373,47 @@ function createServer({ publicDir, tasksDbDir, graphDir }) {
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
         res.end(raw);
         return;
+      }
+
+      // GET /api/project-tree?root=repo&path=relative/path — browse one directory level at a time.
+      if (pathname === '/api/project-tree' && req.method === 'GET') {
+        const target = resolveProjectExplorerTarget(url.searchParams.get('root'), url.searchParams.get('path') || '');
+        if (target.error) {
+          return sendJson(res, 400, { ok: false, error: target.error });
+        }
+        if (!fs.existsSync(target.targetPath) || !fs.statSync(target.targetPath).isDirectory()) {
+          return sendJson(res, 404, { ok: false, error: 'Directory not found' });
+        }
+
+        const snapshot = buildProjectTreeSnapshot(target.baseDir, target.normalizedRelativePath);
+        return sendJson(res, 200, {
+          ok: true,
+          root: target.rootKey,
+          directory: snapshot.directory,
+          breadcrumbs: snapshot.breadcrumbs
+        });
+      }
+
+      // GET /api/file-content?root=repo&path=relative/path — preview a text file inside an allowed root.
+      if (pathname === '/api/file-content' && req.method === 'GET') {
+        const rawPath = url.searchParams.get('path') || '';
+        if (!rawPath) {
+          return sendJson(res, 400, { ok: false, error: 'path parameter is required' });
+        }
+
+        const target = resolveProjectExplorerTarget(url.searchParams.get('root'), rawPath);
+        if (target.error) {
+          return sendJson(res, 400, { ok: false, error: target.error });
+        }
+        if (!fs.existsSync(target.targetPath) || !fs.statSync(target.targetPath).isFile()) {
+          return sendJson(res, 404, { ok: false, error: 'File not found' });
+        }
+
+        return sendJson(res, 200, {
+          ok: true,
+          root: target.rootKey,
+          file: buildProjectFilePreview(target.baseDir, target.normalizedRelativePath)
+        });
       }
 
       // GET /api/scan-path?path=relative/or/absolute — scan a folder for node.tasks.json files
@@ -937,20 +1489,174 @@ function createServer({ publicDir, tasksDbDir, graphDir }) {
         });
       }
 
+      // POST /api/create-project — create a new local project with a starter node.tasks.json
+      if (pathname === '/api/create-project' && req.method === 'POST') {
+        const body = await readBody(req);
+        let requestBody;
+        try { requestBody = JSON.parse(body || '{}'); } catch { return sendJson(res, 400, { ok: false, error: 'Invalid JSON body' }); }
+        const rawName = String(requestBody.projectName || '').trim();
+        if (!rawName) return sendJson(res, 400, { ok: false, error: 'projectName is required' });
+        const projectId = rawName.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-|-$/g, '') || null;
+        if (!projectId) return sendJson(res, 400, { ok: false, error: 'Invalid project name' });
+        // Always create under local/
+        const projectRelDir = path.join('local', projectId);
+        const projectDir = path.join(tasksDbDir, projectRelDir);
+        if (fs.existsSync(projectDir)) {
+          return sendJson(res, 409, { ok: false, error: `Project "${projectId}" already exists` });
+        }
+        const starterPayload = {
+          project: { name: rawName, description: '', start_date: new Date().toISOString().slice(0, 10), status: 'Not Started' },
+          categories: [{ name: 'General', parent_category_name: null }],
+          workers: [],
+          tasks: [
+            { task_id: 1, task_name: 'Project Setup', description: 'Initial project setup', priority: 'High', status: 'Not Started', estimated_hours: 4, dependencies: [], subtasks: [] }
+          ]
+        };
+        ensureDir(projectDir);
+        writeProjectPayload(projectDir, starterPayload);
+        fs.writeFileSync(path.join(projectDir, 'tasks.csv'), generatePersistedCSV(starterPayload.tasks), 'utf8');
+        writeStateFiles(projectDir, starterPayload);
+        return sendJson(res, 201, { ok: true, projectId, templateId: `${projectId}-tasks`, scope: 'local', path: `local/${projectId}` });
+      }
+
+      // POST /api/scanner/scan — scan a folder structure and extract relations to build code.graph.json
+      if (pathname === '/api/scanner/scan' && req.method === 'POST') {
+        const body = await readBody(req);
+        let requestBody;
+        try { requestBody = JSON.parse(body || '{}'); } catch { return sendJson(res, 400, { ok: false, error: 'Invalid JSON body' }); }
+        
+        const rawFolderPath = String(requestBody.folderPath || './').trim();
+        const maxDepth = Math.min(parseInt(requestBody.maxDepth || 5), 10);
+        
+        // Resolve path safely
+        let resolvedPath = path.resolve(rawFolderPath);
+        
+        // Ensure path is within allowed directories
+        const allowedRoots = [publicDir, tasksDbDir, path.dirname(publicDir)];
+        const isAllowed = allowedRoots.some(root => resolvedPath.startsWith(path.resolve(root)));
+        
+        if (!isAllowed) {
+          return sendJson(res, 403, { ok: false, error: 'Path not allowed' });
+        }
+        
+        if (!fs.existsSync(resolvedPath)) {
+          return sendJson(res, 404, { ok: false, error: 'Folder not found' });
+        }
+        
+        try {
+          const graph = scanFolderToGraph(resolvedPath, maxDepth);
+          return sendJson(res, 200, graph);
+        } catch (error) {
+          return sendJson(res, 500, { ok: false, error: error.message });
+        }
+      }
+
+      // PATCH /api/task — update a single task by task_id
+      if (pathname === '/api/task' && req.method === 'PATCH') {
+        applyApiCors(req, res);
+        const projectId = sanitizeProjectId(url.searchParams.get('project'));
+        const taskIdParam = parseInt(url.searchParams.get('task_id'), 10);
+        if (!projectId || !Number.isFinite(taskIdParam)) {
+          return sendJson(res, 400, { ok: false, error: 'Missing project or task_id query param' });
+        }
+        const effectiveDir = resolveProjectDir(projectId);
+        const body = await readBody(req);
+        let updates;
+        try { updates = JSON.parse(body || '{}'); } catch { return sendJson(res, 400, { ok: false, error: 'Invalid JSON body' }); }
+        const tasksFilePath = path.join(effectiveDir, 'node.tasks.json');
+        const current = readJsonFile(tasksFilePath);
+        if (!current || !Array.isArray(current.tasks)) {
+          return sendJson(res, 404, { ok: false, error: 'Project not found' });
+        }
+        const idx = current.tasks.findIndex(t => t && t.task_id === taskIdParam);
+        if (idx === -1) return sendJson(res, 404, { ok: false, error: `Task ${taskIdParam} not found` });
+        // Prevent overwriting the task_id itself
+        const { task_id: _ignored, ...safeUpdates } = updates;
+        current.tasks[idx] = { ...current.tasks[idx], ...safeUpdates };
+        ensureDir(effectiveDir);
+        writeProjectPayload(effectiveDir, current);
+        const tasksCsvPath = path.join(effectiveDir, 'tasks.csv');
+        fs.writeFileSync(tasksCsvPath, generatePersistedCSV(current.tasks), 'utf8');
+        writeStateFiles(effectiveDir, current);
+        return sendJson(res, 200, { ok: true, task: current.tasks[idx] });
+      }
+
+      // POST /api/create-mcp — mark a list of task IDs as critical path
+      if (pathname === '/api/create-mcp' && req.method === 'POST') {
+        applyApiCors(req, res);
+        const body = await readBody(req);
+        let payload;
+        try { payload = JSON.parse(body || '{}'); } catch { return sendJson(res, 400, { ok: false, error: 'Invalid JSON body' }); }
+        const projectId = sanitizeProjectId(payload.project || url.searchParams.get('project') || '');
+        const rawIds = Array.isArray(payload.taskIds) ? payload.taskIds : [];
+        const numericIds = rawIds.map(Number).filter(Number.isFinite);
+        if (!projectId) return sendJson(res, 400, { ok: false, error: 'Missing project' });
+        if (numericIds.length === 0) return sendJson(res, 400, { ok: false, error: 'taskIds must be a non-empty array of numbers' });
+        const effectiveDir = resolveProjectDir(projectId);
+        const tasksFilePath = path.join(effectiveDir, 'node.tasks.json');
+        const current = readJsonFile(tasksFilePath);
+        if (!current || !Array.isArray(current.tasks)) {
+          return sendJson(res, 404, { ok: false, error: 'Project not found' });
+        }
+        const idSet = new Set(numericIds);
+        const notFound = [...idSet].filter(id => !current.tasks.some(t => t && t.task_id === id));
+        if (notFound.length > 0) return sendJson(res, 400, { ok: false, error: `Task IDs not found: ${notFound.join(', ')}` });
+        let changed = 0;
+        current.tasks = current.tasks.map(task => {
+          if (!task || !idSet.has(task.task_id)) return task;
+          if (!task.is_critical_path) { changed++; return { ...task, is_critical_path: true }; }
+          return task;
+        });
+        ensureDir(effectiveDir);
+        writeProjectPayload(effectiveDir, current);
+        const tasksCsvPath = path.join(effectiveDir, 'tasks.csv');
+        fs.writeFileSync(tasksCsvPath, generatePersistedCSV(current.tasks), 'utf8');
+        writeStateFiles(effectiveDir, current);
+        return sendJson(res, 200, { ok: true, updated: changed, taskIds: numericIds });
+      }
+
+      // OPTIONS preflight for task mutation endpoints
+      if ((pathname === '/api/task' || pathname === '/api/create-mcp') && req.method === 'OPTIONS') {
+        applyApiCors(req, res);
+        res.writeHead(204, { 'Allow': 'OPTIONS, PATCH, POST' });
+        res.end();
+        return;
+      }
+
       if (pathname === '/api/tasks') {
         const projectId = sanitizeProjectId(url.searchParams.get('project'));
         const effectiveTasksDbDir = resolveProjectDir(projectId);
-        const tasksJsonPath = path.join(effectiveTasksDbDir, 'node.tasks.json');
         const tasksCsvPath = path.join(effectiveTasksDbDir, 'tasks.csv');
+        const etag = getProjectETag(effectiveTasksDbDir);
+
+        if (req.method === 'HEAD') {
+          res.writeHead(200, {
+            'ETag': etag,
+            'Cache-Control': 'no-cache'
+          });
+          res.end();
+          return;
+        }
 
         if (req.method === 'GET') {
+          const incomingEtag = req.headers['if-none-match'];
+          if (incomingEtag && incomingEtag === etag) {
+            res.writeHead(304, {
+              'ETag': etag,
+              'Cache-Control': 'no-cache'
+            });
+            res.end();
+            return;
+          }
+
           const synchronized = buildProjectPayload(effectiveTasksDbDir);
           if (!synchronized || !synchronized.payload) {
             return sendJson(res, 404, { ok: false, error: 'node.tasks.json not found' });
           }
           res.writeHead(200, {
             'Content-Type': 'application/json; charset=utf-8',
-            'Cache-Control': 'no-store'
+            'Cache-Control': 'no-cache',
+            'ETag': etag
           });
           res.end(JSON.stringify(synchronized.payload, null, 2));
           return;
@@ -974,10 +1680,17 @@ function createServer({ publicDir, tasksDbDir, graphDir }) {
           fs.writeFileSync(tasksCsvPath, generatePersistedCSV(fullData.tasks), 'utf8');
           writeStateFiles(effectiveTasksDbDir, fullData);
 
-          return sendJson(res, 200, { ok: true, tasks: fullData.tasks.length });
+          const nextEtag = getProjectETag(effectiveTasksDbDir);
+          res.writeHead(200, {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Cache-Control': 'no-store',
+            'ETag': nextEtag
+          });
+          res.end(JSON.stringify({ ok: true, tasks: fullData.tasks.length }, null, 2));
+          return;
         }
 
-        res.writeHead(405, { 'Allow': 'GET, PUT' });
+        res.writeHead(405, { 'Allow': 'HEAD, GET, PUT' });
         res.end();
         return;
       }
@@ -1080,6 +1793,14 @@ if (require.main === module) {
   const tasksDbDir = process.env.TASKS_DB_DIR
     ? path.resolve(process.env.TASKS_DB_DIR)
     : path.join(publicDir, 'tasksDB');
+
+  if (process.env.RESET_TASKS_DB_ON_START === '1') {
+    try {
+      fs.rmSync(tasksDbDir, { recursive: true, force: true });
+    } catch {
+      // Best-effort reset for isolated test runs.
+    }
+  }
 
   const port = Number(process.env.PORT || 3000);
   const server = createServer({ publicDir, tasksDbDir, graphDir });

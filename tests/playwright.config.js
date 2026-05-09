@@ -105,7 +105,8 @@ export default defineConfig({
         env: {
           PORT: String(Number(process.env.PW_PORT || 3100)),
           // Prevent E2E from mutating repo data under /public/tasksDB
-          TASKS_DB_DIR: 'test-results/tasksDB-e2e'
+          TASKS_DB_DIR: 'test-results/tasksDB-e2e',
+          RESET_TASKS_DB_ON_START: '1'
         },
       },
   

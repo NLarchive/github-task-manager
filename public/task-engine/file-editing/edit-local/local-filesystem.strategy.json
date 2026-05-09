@@ -1,0 +1,38 @@
+{
+  "id": "edit-local-filesystem",
+  "scope": "local",
+  "priority": 1,
+  "writeTargets": [
+    "File System Access API directory handle",
+    "Local dev server /api/tasks",
+    "Downloaded replacement copy"
+  ],
+  "preconditions": [
+    "Project scope is local or folder",
+    "Active module path resolves to node.tasks.json",
+    "Updated payload validates before write"
+  ],
+  "steps": [
+    "Write back to original node.tasks.json via cached directory handle when available",
+    "If direct file write is unavailable, generate a replacement JSON copy for user save/replace",
+    "Always keep synchronized localStorage backup",
+    "Show explicit warning when save requires manual file replacement"
+  ],
+  "fallbacks": [
+    {
+      "name": "save-copy",
+      "trigger": "No write permission or browser lacks FS write access",
+      "action": "Use showSaveFilePicker or download blob to save replacement node.tasks.json"
+    },
+    {
+      "name": "local-cache-only",
+      "trigger": "Copy export also unavailable",
+      "action": "Persist only to browser localStorage and mark as not committed"
+    }
+  ],
+  "successSignals": [
+    "Returned source is fs-access or local-disk",
+    "Or source is save-copy with clear replacement note",
+    "UI displays exact persistence mode"
+  ]
+}

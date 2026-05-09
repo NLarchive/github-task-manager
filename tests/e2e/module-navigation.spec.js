@@ -71,12 +71,9 @@ test.describe('module navigation sync', () => {
     await expect(crmCard.getByRole('button', { name: 'View Sublist' })).toBeVisible();
 
     await crmCard.locator('.task-title').click();
-    await expect(page.locator('#taskModal')).toBeVisible();
-    await expect(page.locator('#modalTitle')).toHaveText('Task Details');
-    await expect(page.locator('#taskName')).toHaveValue(/crm app scaffold/);
-    await expect(page.locator('#taskName')).toBeDisabled();
-    await expect(page.locator('#taskForm button[type="submit"]')).toBeDisabled();
-    await page.locator('#taskModal .form-actions .btn-secondary').click();
+    await expect(page.locator('#taskNodeModal')).toBeVisible();
+    await expect(page.locator('#taskNodeModalContent .tpp-title')).toHaveText(/crm app scaffold/);
+    await page.locator('#taskNodeModalCloseX').click();
 
     await crmCard.getByRole('button', { name: 'View Sublist' }).click();
 

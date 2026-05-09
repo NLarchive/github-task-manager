@@ -281,6 +281,9 @@ const TEMPLATE_CONFIG = {
     // Set this to your deployed worker URL, e.g., 'https://task-manager-api.YOUR-SUBDOMAIN.workers.dev'
     // When set, all writes go through the worker which validates ACCESS_PASSWORD and restricts paths
     WORKER_URL: (typeof GH_WORKER_URL !== 'undefined' ? GH_WORKER_URL : ''),
+    // Optional local bridge base URL used by the cache/watchdog integration.
+    // Defaults to the current localhost origin (or http://localhost:3000).
+    LOCAL_BRIDGE_URL: (typeof GH_LOCAL_BRIDGE_URL !== 'undefined' ? GH_LOCAL_BRIDGE_URL : ''),
     // Multi-project TasksDB
     // NOTE: Different projects may live in different repositories and may use different roots.
     // - github-task-manager repo: public/tasksDB/<scope>/<projectId>/...
@@ -316,19 +319,35 @@ const TEMPLATE_CONFIG = {
       const safeId = id.replace(/[^a-zA-Z0-9_-]/g, '') || this.DEFAULT_PROJECT_ID || 'github-task-manager';
       const projects = Array.isArray(this.PROJECTS) ? this.PROJECTS : [];
       const match = projects.find(p => p && p.id === safeId) || null;
+      const isLocalRuntime = (() => {
+        try {
+          const host = String(
+            (typeof window !== 'undefined' && window.location && window.location.hostname)
+              || (typeof globalThis !== 'undefined' && globalThis.location && globalThis.location.hostname)
+              || ''
+          );
+          return host === 'localhost' || host === '127.0.0.1';
+        } catch {
+          return false;
+        }
+      })();
 
       return {
         id: safeId,
-        scope: (match && match.scope) ? String(match.scope) : 'external',
+        scope: (match && match.scope) ? String(match.scope) : (isLocalRuntime && safeId !== String(this.DEFAULT_PROJECT_ID || '') ? 'local' : 'external'),
         owner: (match && match.owner) ? String(match.owner) : String(this.OWNER || ''),
         repo: (match && match.repo) ? String(match.repo) : String(this.REPO || ''),
         branch: (match && match.branch) ? String(match.branch) : String(this.BRANCH || 'main'),
-        tasksRoot: (match && match.tasksRoot) ? String(match.tasksRoot) : String(this.TASKS_ROOT || 'public/tasksDB')
+        tasksRoot: (match && match.tasksRoot) ? String(match.tasksRoot) : String(this.TASKS_ROOT || 'public/tasksDB'),
+        tasksFile: (match && match.tasksFile) ? String(match.tasksFile) : ''
       };
     },
 
     getTasksFile(projectId) {
       const cfg = this.getProjectConfig(projectId);
+      if (cfg.tasksFile) {
+        return cfg.tasksFile;
+      }
       const root = String(cfg.tasksRoot || this.TASKS_ROOT || 'public/tasksDB').replace(/\/+$/g, '');
       const scope = cfg.scope || 'external';
       return `${root}/${scope}/${cfg.id}/node.tasks.json`;

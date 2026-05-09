@@ -1,0 +1,33 @@
+{
+  "id": "edit-cloud-github-worker",
+  "scope": "cloud",
+  "priority": 1,
+  "writeTargets": [
+    "GitHub REST API",
+    "Cloudflare Worker /api/tasks"
+  ],
+  "preconditions": [
+    "Project scope is external",
+    "Authentication token or worker password is available",
+    "Payload validates against TaskDB schema"
+  ],
+  "steps": [
+    "Load latest node.tasks.json for active project",
+    "Apply task mutations in-memory",
+    "Validate task ids and schema before write",
+    "Persist via worker when configured, otherwise direct GitHub API",
+    "Append task history events if backend supports history writes"
+  ],
+  "fallbacks": [
+    {
+      "name": "local-cache-only",
+      "trigger": "Remote write unavailable",
+      "action": "Persist updated payload to browser localStorage and warn user"
+    }
+  ],
+  "successSignals": [
+    "Backend acknowledged commit",
+    "Returned source is worker or github",
+    "History refresh succeeds when open"
+  ]
+}

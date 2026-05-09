@@ -46,6 +46,27 @@ function httpRequest({ port, method, path: reqPath, body, headers = {} }) {
 
 /** Validate the /api/tasks REST endpoints for task persistence and derived state file generation. */
 describe('Server API - /api/tasks', () => {
+  it('should bootstrap the default external project into an empty writable tasks DB', () => {
+    const repoRoot = path.join(__dirname, '..', '..');
+    const publicDir = path.join(repoRoot, 'public');
+    const tasksDbDir = path.join(repoRoot, 'test-results', 'unit', 'tasksDB-server-api-bootstrap');
+
+    fs.rmSync(tasksDbDir, { recursive: true, force: true });
+    fs.mkdirSync(tasksDbDir, { recursive: true });
+
+    createServer({ publicDir, tasksDbDir });
+
+    const bootstrappedProjectPath = path.join(tasksDbDir, 'external', 'github-task-manager', 'node.tasks.json');
+    const bootstrappedRegistryPath = path.join(tasksDbDir, 'registry.json');
+
+    expect(fs.existsSync(bootstrappedProjectPath)).toBeTruthy();
+    expect(fs.existsSync(bootstrappedRegistryPath)).toBeTruthy();
+
+    const bootstrappedPayload = JSON.parse(fs.readFileSync(bootstrappedProjectPath, 'utf8'));
+    expect(Array.isArray(bootstrappedPayload.tasks)).toBeTruthy();
+    expect(bootstrappedPayload.tasks.length).toBeGreaterThan(0);
+  });
+
   it('should persist node.tasks.json + tasks.csv and generate state files', async () => {
     const repoRoot = path.join(__dirname, '..', '..');
     const publicDir = path.join(repoRoot, 'public');
@@ -363,6 +384,65 @@ describe('Server API - /api/tasks', () => {
       expect(syncedTasksIndex.tasks.length).toBe(2);
       expect(syncedRootTasks.tasks.length).toBe(2);
       expect(syncedRootTasks.navigation.modules[0].path).toBe('apps/PRIVATE/1-STRATEGY/crm/node.tasks.json');
+    } finally {
+      await new Promise((resolve) => server.close(resolve));
+    }
+  });
+
+  it('should expose repo project tree snapshots and safe file previews', async () => {
+    const fixtureRoot = path.join(__dirname, '..', '..', 'test-results', 'unit', 'project-tree-server');
+    const publicDir = path.join(fixtureRoot, 'public');
+    const graphDir = path.join(publicDir, 'graph-display');
+    const tasksDbDir = path.join(publicDir, 'tasksDB');
+
+    fs.rmSync(fixtureRoot, { recursive: true, force: true });
+    fs.mkdirSync(path.join(fixtureRoot, 'src', 'nested'), { recursive: true });
+    fs.mkdirSync(path.join(fixtureRoot, 'docs'), { recursive: true });
+    fs.mkdirSync(path.join(fixtureRoot, 'node_modules', 'ignored'), { recursive: true });
+    fs.mkdirSync(graphDir, { recursive: true });
+    fs.mkdirSync(tasksDbDir, { recursive: true });
+
+    fs.writeFileSync(path.join(publicDir, 'index.html'), '<!doctype html><title>fixture</title>', 'utf8');
+    fs.writeFileSync(path.join(graphDir, 'index.html'), '<!doctype html><title>graph</title>', 'utf8');
+    fs.writeFileSync(path.join(fixtureRoot, 'README.md'), 'Project tree fixture', 'utf8');
+    fs.writeFileSync(path.join(fixtureRoot, 'docs', 'notes.md'), '# Notes\nhello explorer', 'utf8');
+    fs.writeFileSync(path.join(fixtureRoot, 'src', 'nested', 'app.js'), 'console.log("fixture");', 'utf8');
+    fs.writeFileSync(path.join(fixtureRoot, 'node_modules', 'ignored', 'ignore.js'), 'module.exports = true;', 'utf8');
+
+    const server = createServer({ publicDir, tasksDbDir, graphDir, repoRoot: fixtureRoot });
+    await new Promise((resolve) => server.listen(0, resolve));
+    const port = server.address().port;
+
+    try {
+      const treeRes = await httpRequest({ port, method: 'GET', path: '/api/project-tree?root=repo' });
+      expect(treeRes.status).toBe(200);
+      const treePayload = JSON.parse(treeRes.body);
+      const childPaths = treePayload.directory.children.map((entry) => entry.relativePath);
+      expect(childPaths).toContain('README.md');
+      expect(childPaths).toContain('docs');
+      expect(childPaths).toContain('public');
+      expect(childPaths).toContain('src');
+      expect(childPaths).not.toContain('node_modules');
+
+      const srcDirectory = treePayload.directory.children.find((entry) => entry.relativePath === 'src');
+      expect(srcDirectory.kind).toBe('directory');
+      expect(srcDirectory.totalNodeCount >= 2).toBe(true);
+
+      const nestedRes = await httpRequest({ port, method: 'GET', path: '/api/project-tree?root=repo&path=src' });
+      expect(nestedRes.status).toBe(200);
+      const nestedPayload = JSON.parse(nestedRes.body);
+      expect(nestedPayload.directory.relativePath).toBe('src');
+      expect(nestedPayload.directory.children[0].relativePath).toBe('src/nested');
+
+      const fileRes = await httpRequest({ port, method: 'GET', path: '/api/file-content?root=repo&path=docs/notes.md' });
+      expect(fileRes.status).toBe(200);
+      const filePayload = JSON.parse(fileRes.body);
+      expect(filePayload.file.relativePath).toBe('docs/notes.md');
+      expect(filePayload.file.isText).toBe(true);
+      expect(filePayload.file.content).toContain('hello explorer');
+
+      const invalidRes = await httpRequest({ port, method: 'GET', path: '/api/file-content?root=repo&path=../package.json' });
+      expect(invalidRes.status).toBe(400);
     } finally {
       await new Promise((resolve) => server.close(resolve));
     }

@@ -6,6 +6,11 @@
  */
 
 (function (globalScope) {
+    function logPrefix(trigger, action) {
+        const triggerId = trigger && trigger.id ? `#${trigger.id}` : '[unknown-trigger]';
+        return `[FolderProjectUI] ${triggerId} ${action}`;
+    }
+
     function resolveElement(target) {
         if (!target) return null;
         if (typeof target === 'string') return globalScope.document ? globalScope.document.getElementById(target) : null;
@@ -36,27 +41,55 @@
         const loadingLabel = String(options.loadingLabel || 'Opening folder picker...').trim();
 
         const handleClick = async () => {
+            console.info(logPrefix(trigger, 'start'), {
+                idleLabel,
+                loadingLabel,
+                hasResultElement: Boolean(result)
+            });
             trigger.disabled = true;
             trigger.textContent = loadingLabel;
-            setResultState(result, 'Opening system folder picker...', 'info');
+            setResultState(result, 'Opening folder picker. The app will index paths and read only node.tasks.json files.', 'info');
 
             try {
                 const projectRecord = await service.pickAndRegisterProject();
                 if (!projectRecord) {
-                    setResultState(result, 'Folder selection canceled.', 'info');
+                    const cancelMessage = typeof options.cancelMessage === 'function'
+                        ? options.cancelMessage()
+                        : 'No folder was loaded. If you selected a folder and this still appears, use Chrome/Edge and check console logs starting with [FolderProjectService].';
+                    console.info(logPrefix(trigger, 'cancelled'));
+                    setResultState(result, cancelMessage, 'error');
+                    if (typeof options.onCancel === 'function') {
+                        options.onCancel();
+                    }
                     return;
                 }
 
+                console.info(logPrefix(trigger, 'project-picked'), {
+                    projectId: projectRecord.id,
+                    templateId: projectRecord.templateId,
+                    rootModuleRelative: projectRecord.rootModuleRelative,
+                    fileCount: projectRecord.fileCount || 0,
+                    discoveredFiles: Array.isArray(projectRecord.discoveredFiles) ? projectRecord.discoveredFiles : []
+                });
+
                 if (typeof options.onProjectLoaded === 'function') {
-                    await options.onProjectLoaded(projectRecord);
+                    const activationResult = await options.onProjectLoaded(projectRecord);
+                    if (activationResult === false) {
+                        throw new Error(`Folder project ${projectRecord.id} was parsed but the UI did not activate it.`);
+                    }
                 }
 
                 const successMessage = typeof options.successMessage === 'function'
                     ? options.successMessage(projectRecord)
-                    : `Loaded <strong>${projectRecord.label || projectRecord.id}</strong> (${projectRecord.fileCount || 0} task file${projectRecord.fileCount === 1 ? '' : 's'})`;
+                    : `Loaded <strong>${projectRecord.label || projectRecord.id}</strong> (${projectRecord.fileCount || 0} node.tasks.json file${projectRecord.fileCount === 1 ? '' : 's'}, ${projectRecord.indexedPathCount || 0} indexed path${projectRecord.indexedPathCount === 1 ? '' : 's'})`;
+                console.info(logPrefix(trigger, 'success'), {
+                    projectId: projectRecord.id,
+                    successMessage
+                });
                 setResultState(result, successMessage, 'success');
             } catch (error) {
                 const message = error && error.message ? error.message : String(error);
+                console.error(logPrefix(trigger, 'error'), error);
                 setResultState(result, `Error: ${message}`, 'error');
                 if (typeof options.onError === 'function') {
                     options.onError(error);

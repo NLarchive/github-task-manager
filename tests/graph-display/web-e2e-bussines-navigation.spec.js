@@ -47,7 +47,7 @@ test.describe('web-e2e-bussines graph navigation', () => {
     await expect(crmRootTask).toBeVisible();
     await crmRootTask.click();
 
-    const popup = page.locator('#popup');
+    const popup = page.locator('#taskNodeModal');
     await expect(popup).toHaveClass(/visible/);
     const subtaskButton = popup.locator('.task-node-btn.task-node-nav-btn[data-subtasks-path]', { hasText: 'View Subtasks' });
     await expect(subtaskButton).toBeVisible();

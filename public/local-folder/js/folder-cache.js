@@ -15,6 +15,7 @@
  *     id, label, folderName,
  *     rootModuleRelative,
  *     discoveredFiles,     // string[]
+ *     folderIndex,         // { directories: string[], files: string[] }
  *     fileHashes,          // Record<relativePath, hash>
  *     moduleDataByPath,    // Record<relativePath, JSON>
  *     payload,             // full root-module payload
@@ -130,6 +131,7 @@
             folderName:         projectRecord.folderName || '',
             rootModuleRelative: projectRecord.rootModuleRelative || '',
             discoveredFiles:    projectRecord.discoveredFiles || [],
+            folderIndex:        projectRecord.folderIndex || { directories: [], files: [] },
             fileHashes:         hashes,
             moduleDataByPath:   projectRecord.moduleDataByPath || {},
             payload:            projectRecord.payload || null,
@@ -251,6 +253,8 @@
                 label:       r.label || r.id,
                 folderName:  r.folderName || '',
                 fileCount:   (r.discoveredFiles || []).length,
+                indexedPathCount: ((r.folderIndex && Array.isArray(r.folderIndex.directories) ? r.folderIndex.directories.length : 0) +
+                    (r.folderIndex && Array.isArray(r.folderIndex.files) ? r.folderIndex.files.length : 0)),
                 cachedAt:    r.cachedAt || '',
                 hasHandle:   !!(r.directoryHandle),
                 version:     r.version || ''
