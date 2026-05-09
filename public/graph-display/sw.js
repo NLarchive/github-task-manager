@@ -5,7 +5,7 @@
  * graph view remains available with faster repeat loads and offline support.
  */
 
-const CACHE_NAME = 'career-graph-template-v1.1.0';
+const CACHE_NAME = 'graph-template-v1.4.0';
 
 /** Static graph assets that should be warmed into the service worker cache. */
 const ASSET_PATHS = [
@@ -27,11 +27,18 @@ const ASSET_PATHS = [
   './js/main-graph.js',
   './js/cv-generator.js',
   './js/graph-data.js',
+
   './js/utils.js',
   './js/walkthrough.js',
   './js/shared/link-types.js',
+  './js/shared/graph-design-contract.js',
+  './js/shared/graph-metric-utils.js',
+  './js/shared/project-graph-utils.js',
+  './js/shared/graph-template-storage.js',
   './js/shared/tours.js',
   './js/d3.v7.min.js',
+  './schema/graph-ui-config.schema.json',
+  './schema/graph-template.schema.json',
   '../tasksDB/_examples/career/tour.json',
   '../tasksDB/_examples/task-management/tour.json',
   '../tasksDB/external/first-graph/tour/graph-tour.json',

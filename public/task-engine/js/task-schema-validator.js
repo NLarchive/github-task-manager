@@ -467,7 +467,7 @@ class TemplateValidator {
             errors.push(`Task subtask ${i + 1}: must be an object`);
             return;
           }
-          if (!sub.name) errors.push(`Task subtask ${i + 1}: missing name`);
+          if (!sub.name && !sub.task_name) errors.push(`Task subtask ${i + 1}: missing name`);
           const taskStatusEnum = this.config.ENUMS && this.config.ENUMS.TASK_STATUS;
           if (sub.status && taskStatusEnum && !taskStatusEnum.includes(sub.status)) {
             errors.push(`Task subtask ${i + 1}: invalid status "${sub.status}"`);

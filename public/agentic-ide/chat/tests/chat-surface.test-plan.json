@@ -1,0 +1,22 @@
+{
+  "name": "chat-surface-test-plan",
+  "version": 1,
+  "scope": "public/agentic-ide/chat",
+  "checks": [
+    "page loads and renders topbar and config sections",
+    "clean defaults: no forced history, no forced system prompt",
+    "prompt/agent/tool/test/profile selectors are populated",
+    "input copy works",
+    "message output supports edit",
+    "self-test execution generates structured testResults",
+    "log export and test export produce JSON artifacts"
+  ],
+  "artifactTargets": {
+    "browserExport": [
+      "chat-history.json",
+      "chat-logs.json",
+      "chat-test-results.json"
+    ],
+    "bridgeArtifactPath": "agentic-ide/chat/tests/results"
+  }
+}

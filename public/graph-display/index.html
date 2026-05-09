@@ -44,15 +44,44 @@
         @media (max-width: 1200px) {
             .cv-profile-header { flex-direction: column; }
         }
+        /* ── Graph task edit modal ── */
+        .graph-task-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .graph-task-modal[hidden] { display: none !important; }
+        .graph-task-modal-content { background: var(--color-popup-bg, #fff); border: 1px solid rgba(0,0,0,0.12); border-radius: 10px; padding: 24px 28px; max-width: 540px; width: 94vw; max-height: 90vh; overflow-y: auto; position: relative; color: var(--color-text, #333); box-shadow: var(--popup-shadow, 0 6px 25px rgba(0,0,0,0.15)); }
+        .graph-task-modal-close { position: absolute; top: 10px; right: 14px; background: none; border: none; font-size: 22px; cursor: pointer; color: #888; line-height: 1; padding: 2px 6px; min-height: 0; min-width: 0; }
+        .graph-task-modal-content h2 { margin: 0 0 18px; font-size: 1.1rem; padding-right: 28px; border-bottom: 1px solid rgba(128,128,128,0.2); padding-bottom: 10px; }
+        .gt-form-group { margin-bottom: 12px; }
+        .gt-form-group label { display: block; margin-bottom: 4px; font-size: 0.82rem; color: #555; }
+        .gt-form-group input, .gt-form-group textarea, .gt-form-group select { width: 100%; background: #fff; border: 1px solid rgba(0,0,0,0.2); border-radius: 4px; color: var(--color-text, #333); padding: 7px 9px; font-size: 0.9rem; box-sizing: border-box; font-family: var(--font-family, inherit); }
+        .gt-form-group input:focus, .gt-form-group textarea:focus, .gt-form-group select:focus { outline: 2px solid var(--layer1-base, #4e79a7); border-color: var(--layer1-base, #4e79a7); }
+        .gt-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .gt-form-group input[type=checkbox] { width: auto; margin-right: 6px; min-height: 0; min-width: 0; }
+        .gt-form-actions { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+        .gt-btn-primary { background: var(--layer1-base, #4e79a7); color: #fff; border: none; border-radius: 5px; padding: 8px 18px; cursor: pointer; font-size: 0.9rem; min-height: 0; min-width: 0; }
+        .gt-btn-primary:hover { filter: brightness(1.1); }
+        .gt-btn-secondary { background: #f5f5f5; color: var(--color-text, #333); border: 1px solid rgba(0,0,0,0.15); border-radius: 5px; padding: 8px 16px; cursor: pointer; font-size: 0.9rem; min-height: 0; min-width: 0; }
+        .gt-btn-secondary:hover { background: #ebebeb; }
+        .gt-feedback { padding: 8px 12px; border-radius: 4px; margin-top: 10px; font-size: 0.85rem; }
+        .gt-feedback.success { background: rgba(0,160,60,0.08); border: 1px solid rgba(0,160,60,0.4); color: #0a6; }
+        .gt-feedback.error { background: rgba(220,50,50,0.08); border: 1px solid rgba(220,50,50,0.4); color: #c22; }
+        /* Popup action row — matches graph popup task-node-btn nav-btn style */
+        .popup-action-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+        .popup-edit-btn, .popup-copy-ctx-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; font-size: 0.82rem; border-radius: 10px; cursor: pointer; font-family: inherit; transition: background 0.15s, filter 0.15s; min-height: 0; min-width: 0; }
+        .popup-edit-btn { background: var(--color-accent, #4a90d9); border: 1px solid var(--color-accent, #4a90d9); color: #fff; }
+        .popup-edit-btn:hover { filter: brightness(1.12); }
+        .popup-copy-ctx-btn { background: rgba(78,121,167,0.12); border: 1px solid rgba(78,121,167,0.32); color: var(--layer1-base, #4e79a7); }
+        .popup-copy-ctx-btn:hover { background: rgba(78,121,167,0.24); }
     </style>
     
     <!-- All responsive and modal styles are now managed in modular CSS files for maintainability and consistency. -->
     
     <!-- D3 Library -->
     <script src="js/d3.v7.min.js"></script>
+    <!-- Optional host integrations. The core graph UI still works without these; remove or replace them when embedding graph-display into another project. -->
     <script src="../local-folder/js/folder-cache.js"></script>
     <script src="../local-folder/js/local-folder-scanner.js"></script>
     <script src="../local-folder/js/folder-picker-trigger.js"></script>
+    <script src="../task-engine/js/task-schema-clipboard.js"></script>
     <!-- Calendar ICS export utility (non-module, loads before app) -->
     <script src="../calendar/js/task-ics-export.js"></script>
     <!-- Utilities (Optional but Recommended) -->
@@ -101,6 +130,7 @@
             <label for="folder-path-load">Open local project folder</label>
             <div class="folder-path-row">
                 <button id="folder-path-load" type="button" title="Open system folder picker">📂 Browse Folder</button>
+                <button id="folderProjectNewBtn" type="button" title="Create a new local project">➕ New Project</button>
             </div>
             <div id="folder-path-result" class="folder-path-result" hidden></div>
         </div>
@@ -111,6 +141,7 @@
         <button id="classic-cv-button" class="control-button" role="menuitem" aria-label="View classic CV format">📄 Get My CV</button>
         <button id="focus-core" class="control-button" role="menuitem" aria-label="Focus on core expertise">⭐ Explore My Expertise</button>
         <button id="graph-guide-button" class="control-button" role="menuitem" aria-label="View graph types guide">📚 Graph Guide</button>
+
         <button id="legend-button-inside" class="control-button" role="menuitem" aria-label="Show legend details">📖 View Legend</button>
         <details class="calendar-ctrl-details" id="calendarCtrlDetails">
             <summary class="control-button" id="calendar-download-button" role="menuitem" aria-label="Download calendar as ICS">📅 Download Calendar ▾</summary>
@@ -121,20 +152,96 @@
                 <button type="button" class="calendar-ctrl-item" data-scope="workers">👥 Per-Worker Calendars</button>
             </div>
         </details>
+        <button id="addTaskBtn" class="control-button" role="menuitem" aria-label="Add new task to this project">➕ Add New Task</button>
+        <button id="copy-schema-button" class="control-button" role="menuitem" aria-label="Copy node.tasks.json authoring template and instructions">📋 Copy Schema</button>
         <button id="reset-view" class="control-button" role="menuitem" aria-label="Reset view">🎯 Reset View</button>
         <button id="exitGraphViewBtn" class="control-button" role="menuitem" aria-label="Close graph view">← Close Graph</button>
         </nav>
     </aside>
 
-    <!-- Node Details Popup (Section) -->
-    <section id="popup" aria-live="polite" aria-atomic="true">
+    <!-- Task Node Modal -->
+    <section id="taskNodeModal" aria-live="polite" aria-atomic="true">
         <div class="content">
             <button class="close-button" role="button" aria-label="Close popup" title="Close popup">×</button> <!-- Changed to button for better a11y -->
-            <div id="popup-content">
+            <div id="taskNodeModalContent">
                 <!-- Detail content injected by JS -->
             </div>
         </div>
     </section>
+
+    <!-- Task Edit Modal (opened via ✏️ Edit button inside popup) -->
+    <div id="graph-task-modal" class="graph-task-modal" role="dialog" aria-modal="true" aria-labelledby="graph-task-modal-title" hidden>
+        <div class="graph-task-modal-content">
+            <button class="graph-task-modal-close" aria-label="Close edit modal" title="Close">×</button>
+            <h2 id="graph-task-modal-title">✏️ Edit Task</h2>
+            <form id="graph-task-form">
+                <input type="hidden" id="gt-task-id" />
+                <div class="gt-form-group">
+                    <label for="gt-task-name">Task Name *</label>
+                    <input type="text" id="gt-task-name" required />
+                </div>
+                <div class="gt-form-group">
+                    <label for="gt-description">Description</label>
+                    <textarea id="gt-description" rows="3"></textarea>
+                </div>
+                <div class="gt-form-row">
+                    <div class="gt-form-group">
+                        <label for="gt-status">Status *</label>
+                        <select id="gt-status">
+                            <option value="Not Started">Not Started</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="On Hold">On Hold</option>
+                            <option value="Blocked">Blocked</option>
+                            <option value="Done">Done</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Pending Review">Pending Review</option>
+                        </select>
+                    </div>
+                    <div class="gt-form-group">
+                        <label for="gt-priority">Priority *</label>
+                        <select id="gt-priority">
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                            <option value="Critical">Critical</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="gt-form-row">
+                    <div class="gt-form-group">
+                        <label for="gt-start-date">Start Date</label>
+                        <input type="date" id="gt-start-date" />
+                    </div>
+                    <div class="gt-form-group">
+                        <label for="gt-end-date">End Date</label>
+                        <input type="date" id="gt-end-date" />
+                    </div>
+                </div>
+                <div class="gt-form-row">
+                    <div class="gt-form-group">
+                        <label for="gt-est-hours">Estimated Hours</label>
+                        <input type="number" id="gt-est-hours" min="0" step="0.5" />
+                    </div>
+                    <div class="gt-form-group">
+                        <label for="gt-progress">Progress %</label>
+                        <input type="number" id="gt-progress" min="0" max="100" />
+                    </div>
+                </div>
+                <div class="gt-form-group">
+                    <label for="gt-tags">Tags (comma-separated)</label>
+                    <input type="text" id="gt-tags" />
+                </div>
+                <div class="gt-form-group">
+                    <label><input type="checkbox" id="gt-critical-path" /> Critical Path Task</label>
+                </div>
+                <div id="gt-save-feedback" class="gt-feedback" hidden></div>
+                <div class="gt-form-actions">
+                    <button type="submit" class="gt-btn-primary">💾 Save Changes</button>
+                    <button type="button" class="gt-btn-secondary graph-task-modal-cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Legend Popup (Section) -->
     <section id="legend-popup" aria-live="polite" aria-atomic="true">
@@ -205,5 +312,78 @@
         <h2>What to customize</h2>
         <p>For real projects, update <strong>tasksDB/&lt;scope&gt;/&lt;project&gt;/node.tasks.json</strong> and optional <strong>graphTemplate</strong> data, then publish it through <code>tasksDB/registry.json</code>.</p>
     </footer>
+
+    <!-- Task Edit Modal (shown directly on graph-display, no iframe postMessage needed) -->
+    <div id="graph-task-edit-modal" class="gtm-backdrop" hidden aria-modal="true" role="dialog" aria-labelledby="gtm-title">
+      <div class="gtm-card">
+        <div class="gtm-head">
+          <h3 id="gtm-title">Edit Task</h3>
+          <button id="gtm-close" class="gtm-close" aria-label="Close">×</button>
+        </div>
+        <div class="gtm-body">
+          <input type="hidden" id="gtm-task-id">
+          <div class="gtm-row"><label for="gtm-name">Task Name</label><input id="gtm-name" type="text" class="gtm-input"></div>
+          <div class="gtm-row"><label for="gtm-desc">Description</label><textarea id="gtm-desc" class="gtm-input gtm-ta" rows="3"></textarea></div>
+          <div class="gtm-grid">
+            <div class="gtm-row">
+              <label for="gtm-status">Status</label>
+              <select id="gtm-status" class="gtm-input">
+                <option>Not Started</option><option>In Progress</option><option>Done</option><option>Blocked</option><option>Cancelled</option>
+              </select>
+            </div>
+            <div class="gtm-row">
+              <label for="gtm-priority">Priority</label>
+              <select id="gtm-priority" class="gtm-input">
+                <option>Low</option><option>Medium</option><option>High</option><option>Critical</option>
+              </select>
+            </div>
+            <div class="gtm-row">
+              <label for="gtm-start">Start Date</label>
+              <input id="gtm-start" type="date" class="gtm-input">
+            </div>
+            <div class="gtm-row">
+              <label for="gtm-end">End Date</label>
+              <input id="gtm-end" type="date" class="gtm-input">
+            </div>
+            <div class="gtm-row">
+              <label for="gtm-hours">Estimated Hours</label>
+              <input id="gtm-hours" type="number" min="0" class="gtm-input">
+            </div>
+            <div class="gtm-row">
+              <label for="gtm-progress">Progress (%)</label>
+              <input id="gtm-progress" type="number" min="0" max="100" class="gtm-input">
+            </div>
+          </div>
+          <div class="gtm-row"><label for="gtm-category">Category</label><input id="gtm-category" type="text" class="gtm-input"></div>
+        </div>
+        <div class="gtm-foot">
+          <button id="gtm-cancel" class="gtm-btn">Cancel</button>
+          <button id="gtm-save" class="gtm-btn gtm-btn-accent">Save Task</button>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      /* Graph Task Edit Modal */
+      .gtm-backdrop { position:fixed;inset:0;z-index:400;background:rgba(15,23,42,0.55);display:flex;align-items:center;justify-content:center;padding:20px; }
+      .gtm-backdrop[hidden] { display:none!important; }
+      .gtm-card { background:#fff;border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,0.22);width:520px;max-width:100%;max-height:90vh;overflow-y:auto;font-family:'Segoe UI Variable','Segoe UI',system-ui,sans-serif; }
+      .gtm-head { display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid rgba(15,23,42,0.10); }
+      .gtm-head h3 { font-size:15px;font-weight:600;color:#1f2937;margin:0; }
+      .gtm-close { border:none;background:none;font-size:20px;line-height:1;cursor:pointer;color:#94a3b8;padding:2px 8px;border-radius:6px; }
+      .gtm-close:hover { color:#1f2937;background:rgba(0,0,0,0.06); }
+      .gtm-body { padding:14px 20px; }
+      .gtm-grid { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px; }
+      .gtm-row { display:flex;flex-direction:column;gap:4px;margin-bottom:10px; }
+      .gtm-row label { font-size:10.5px;font-weight:600;color:#5b6472;text-transform:uppercase;letter-spacing:.04em; }
+      .gtm-input { width:100%;border:1px solid rgba(148,163,184,0.4);border-radius:8px;padding:7px 10px;font:inherit;font-size:13px;color:#1f2937;background:#fff; }
+      .gtm-input:focus { outline:none;border-color:#0f766e;box-shadow:0 0 0 3px rgba(15,118,110,0.14); }
+      .gtm-ta { min-height:68px;resize:vertical; }
+      .gtm-foot { display:flex;justify-content:flex-end;gap:8px;padding:10px 20px 16px;border-top:1px solid rgba(15,23,42,0.08); }
+      .gtm-btn { padding:7px 18px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid rgba(148,163,184,0.32);background:#f8fafc;color:#1f2937;font-family:inherit; }
+      .gtm-btn-accent { background:#0f766e;color:#fff;border-color:transparent; }
+      .gtm-btn-accent:hover { background:#115e59; }
+      .gtm-btn:hover:not(.gtm-btn-accent) { background:#f1f5f9; }
+    </style>
 </body>
 </html>

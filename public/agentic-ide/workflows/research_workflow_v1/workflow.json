@@ -1,0 +1,62 @@
+{
+  "id": "research_workflow",
+  "type": "workflow",
+  "version": 1,
+  "label": "research_workflow",
+  "path": "workflows/research_workflow_v1",
+  "description": "Top-level research pipeline: search, synthesize, validate, and render a report",
+  "lifecycle": "draft",
+  "success_threshold": 0.8,
+  "entry": "search_agent",
+  "state_schema": "state.js",
+  "inputs": [
+    {
+      "name": "topic",
+      "type": "string",
+      "description": "Research topic or query string"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "report",
+      "type": "string",
+      "description": "Rendered HTML report"
+    }
+  ],
+  "nodes": [
+    {
+      "ref": "components/agents/search_agent_v1"
+    },
+    {
+      "ref": "components/agents/data_processor_v1"
+    },
+    {
+      "ref": "components/subgraphs/format_info_v1"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "search_agent",
+      "to": "data_processor",
+      "mapping": "answer → raw",
+      "type": "data-flow"
+    },
+    {
+      "id": "e2",
+      "from": "data_processor",
+      "to": "format_tool",
+      "mapping": "html → html",
+      "type": "data-flow"
+    }
+  ],
+  "files": [
+    "workflow.json",
+    "state.js",
+    "state.py",
+    "tests/e2e.json"
+  ],
+  "tests": [
+    "tests/e2e.json"
+  ]
+}

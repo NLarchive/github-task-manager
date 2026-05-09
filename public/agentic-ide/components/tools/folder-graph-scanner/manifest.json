@@ -1,0 +1,48 @@
+{
+  "$schema": "../../../schema/manifest.schema.json",
+  "id": "folder_graph_scanner",
+  "type": "tool",
+  "version": 1,
+  "label": "Folder Graph Scanner",
+  "path": "components/tools/folder-graph-scanner",
+  "description": "Scans a folder structure and extracts nodes, edges, warnings, and scan metadata for a generated folder graph.",
+  "entry": {
+    "file": "main.js",
+    "symbol": "FolderGraphScanner",
+    "format": "module",
+    "exports": ["FolderGraphScanner", "scanFolderToGraph"]
+  },
+  "api": {
+    "contract": "schema.json",
+    "inputs_ref": "schema.json#/inputs",
+    "outputs_ref": "schema.json#/outputs",
+    "surface": "scan(folderPath, options)"
+  },
+  "files": [
+    {
+      "path": "main.js",
+      "role": "entry"
+    },
+    {
+      "path": "schema.json",
+      "role": "contract"
+    },
+    {
+      "path": "ui/main.js",
+      "role": "ui-companion"
+    }
+  ],
+  "tests": [],
+  "relations": [
+    {
+      "kind": "file",
+      "path": "components/tools/folder-graph-scanner/ui/main.js",
+      "role": "companion-ui"
+    },
+    {
+      "kind": "registry",
+      "path": "registry.json",
+      "role": "graph-source"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "name": "research_benchmark live benchmark tests",
+  "type": "benchmark",
+  "target": "research_benchmark",
+  "cases": [
+    {
+      "name": "Persists a real benchmark record for the research workflow",
+      "input": {
+        "topic": "LangGraph multi-agent patterns",
+        "benchmark_name": "research_benchmark",
+        "run_label": "live-research-benchmark",
+        "started_at": "2026-04-27T00:00:00.000Z"
+      },
+      "expect": {
+        "benchmark_record": {
+          "type": "object"
+        },
+        "output_path": {
+          "contains": "workflows/benchmarks/outputs/"
+        }
+      }
+    }
+  ]
+}

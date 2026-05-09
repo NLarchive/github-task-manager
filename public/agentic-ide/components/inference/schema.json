@@ -1,0 +1,97 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://github-task-manager.local/agentic-ide/inference/schema.json",
+	"title": "Agentic IDE Inference Contract",
+	"type": "object",
+	"required": ["request", "response"],
+	"additionalProperties": false,
+	"properties": {
+		"request": {
+			"type": "object",
+			"required": [
+				"engineId",
+				"messages",
+				"prompt",
+				"temperature",
+				"top_p",
+				"top_k",
+				"max_tokens",
+				"repeat_penalty",
+				"response_format",
+				"stop",
+				"stream"
+			],
+			"additionalProperties": false,
+			"properties": {
+				"engineId": { "type": "string", "minLength": 1 },
+				"model": { "type": "string" },
+				"messages": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"required": ["role", "content"],
+						"additionalProperties": false,
+						"properties": {
+							"role": {
+								"type": "string",
+								"enum": ["system", "user", "assistant"]
+							},
+							"content": { "type": "string" }
+						}
+					}
+				},
+				"prompt": { "type": "string" },
+				"temperature": { "type": "number", "minimum": 0, "maximum": 2 },
+				"top_p": { "type": "number", "minimum": 0, "maximum": 1 },
+				"top_k": { "type": "integer", "minimum": 1 },
+				"max_tokens": { "type": "integer", "minimum": 1 },
+				"repeat_penalty": { "type": "number", "minimum": 0 },
+				"response_format": {
+					"type": "string",
+					"enum": ["text", "markdown", "json"]
+				},
+				"rag_enabled": { "type": "boolean" },
+				"rag_k": { "type": "integer", "minimum": 1 },
+				"stop": {
+					"type": "array",
+					"items": { "type": "string" },
+					"maxItems": 8
+				},
+				"stream": { "type": "boolean", "const": false }
+			}
+		},
+		"response": {
+			"type": "object",
+			"required": ["ok"],
+			"additionalProperties": true,
+			"properties": {
+				"ok": { "type": "boolean" },
+				"text": { "type": "string" },
+				"content": { "type": "string" },
+				"_inference": {
+					"type": "object",
+					"required": ["engineId"],
+					"additionalProperties": true,
+					"properties": {
+						"engineId": { "type": "string", "minLength": 1 },
+						"request": {
+							"type": "object",
+							"additionalProperties": true,
+							"properties": {
+								"max_tokens": { "type": "integer", "minimum": 1 },
+								"temperature": { "type": "number", "minimum": 0, "maximum": 2 },
+								"top_p": { "type": "number", "minimum": 0, "maximum": 1 },
+								"top_k": { "type": "integer", "minimum": 1 },
+								"repeat_penalty": { "type": "number", "minimum": 0 },
+								"response_format": {
+									"type": "string",
+									"enum": ["text", "markdown", "json"]
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

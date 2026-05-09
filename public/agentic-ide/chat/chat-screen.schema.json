@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.agentic-ide/chat-screen.schema.json",
+  "title": "Agentic IDE Chat Screen State",
+  "type": "object",
+  "required": ["generatedAt", "config", "historyCount", "logs", "testResults"],
+  "properties": {
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "modelId": { "type": ["string", "null"] },
+    "historyCount": { "type": "integer", "minimum": 0 },
+    "config": {
+      "type": "object",
+      "required": [
+        "endpoint",
+        "backend",
+        "temperature",
+        "top_p",
+        "top_k",
+        "max_tokens",
+        "include_history",
+        "history_window",
+        "prompt_profile_id",
+        "agent_profile_id",
+        "tool_profile_id",
+        "test_profile_id",
+        "parameter_profile_id"
+      ],
+      "properties": {
+        "endpoint": { "type": "string" },
+        "backend": { "type": "string", "enum": ["llama_cpp"] },
+        "temperature": { "type": "number", "minimum": 0, "maximum": 2 },
+        "top_p": { "type": "number", "minimum": 0, "maximum": 1 },
+        "top_k": { "type": "integer", "minimum": 0, "maximum": 200 },
+        "max_tokens": { "type": "integer", "minimum": 1 },
+        "response_format": { "type": "string" },
+        "include_history": { "type": "boolean" },
+        "history_window": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "include_runtime": { "type": "boolean" },
+        "rag_enabled": { "type": "boolean" },
+        "rag_k": { "type": "integer", "minimum": 1, "maximum": 50 },
+        "prompt_profile_id": { "type": "string" },
+        "agent_profile_id": { "type": "string" },
+        "tool_profile_id": { "type": "string" },
+        "test_profile_id": { "type": "string" },
+        "parameter_profile_id": { "type": "string" },
+        "system_prompt_override": { "type": "string" },
+        "edit_resets": { "type": "boolean" },
+        "auto_scroll": { "type": "boolean" },
+        "memory_eval_name": { "type": "string" },
+        "memory_keypoints": { "type": "string" },
+        "memory_deductions": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "logs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "ts", "level", "event", "details"],
+        "properties": {
+          "id": { "type": "string" },
+          "ts": { "type": "string", "format": "date-time" },
+          "level": { "type": "string", "enum": ["info", "error", "warn"] },
+          "event": { "type": "string" },
+          "details": { "type": "object" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "testResults": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "ts", "name", "passed"],
+        "properties": {
+          "id": { "type": "string" },
+          "ts": { "type": "string", "format": "date-time" },
+          "name": { "type": "string" },
+          "passed": { "type": "boolean" },
+          "details": { "type": "object" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

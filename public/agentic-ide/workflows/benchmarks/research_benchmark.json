@@ -1,0 +1,8 @@
+{
+  "id": "research_benchmark_manifest",
+  "type": "benchmark",
+  "label": "research_benchmark_manifest",
+  "workflow_ref": "workflows/benchmarks/research_benchmark_v1",
+  "outputs_path": "workflows/benchmarks/outputs",
+  "description": "Manifest for the live research benchmark workflow and its persisted outputs."
+}

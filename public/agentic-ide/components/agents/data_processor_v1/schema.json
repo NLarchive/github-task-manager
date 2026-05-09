@@ -1,0 +1,42 @@
+{
+  "id": "data_processor",
+  "type": "agent",
+  "version": 1,
+  "label": "data_processor",
+  "path": "components/agents/data_processor_v1",
+  "description": "Turns upstream research notes into concise HTML blocks that downstream tools can validate and render",
+  "lifecycle": "draft",
+  "success_threshold": 0.8,
+  "model_ref": "gemma_model",
+  "memory_type": "none",
+  "planning": "none",
+  "inputs": [
+    {
+      "name": "raw",
+      "type": "string",
+      "required": true,
+      "description": "Raw upstream notes"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "html",
+      "type": "string",
+      "description": "Normalized HTML payload"
+    }
+  ],
+  "errors": [
+    {
+      "code": "PARSE_ERROR",
+      "description": "Input could not be transformed"
+    }
+  ],
+  "files": [
+    "schema.json",
+    "prompt.md",
+    "tests/behavior.json"
+  ],
+  "tests": [
+    "tests/behavior.json"
+  ]
+}

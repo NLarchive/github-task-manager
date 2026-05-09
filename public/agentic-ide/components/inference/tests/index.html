@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Inference Test Dashboard</title>
+	<style>
+		:root {
+			--bg: #f3efe7;
+			--paper: #fffdf8;
+			--ink: #201a15;
+			--muted: #6d5b4b;
+			--line: #ddcfbf;
+			--accent: #1f6f5f;
+			--accent-soft: #d8eee9;
+			--bad: #9e2a2b;
+			--bad-soft: #fbe4e5;
+			--ok: #2f7a3e;
+			--ok-soft: #e4f4e8;
+			--radius: 16px;
+			--shadow: 0 10px 24px rgba(45, 31, 13, 0.08);
+		}
+
+		* { box-sizing: border-box; }
+
+		body {
+			margin: 0;
+			min-height: 100vh;
+			font-family: "Space Grotesk", "Segoe UI", sans-serif;
+			color: var(--ink);
+			background:
+				radial-gradient(circle at 85% 15%, #f9d8a6 0%, transparent 35%),
+				radial-gradient(circle at 12% 88%, #b8e0d8 0%, transparent 42%),
+				var(--bg);
+			padding: 26px;
+		}
+
+		.wrap {
+			max-width: 1240px;
+			margin: 0 auto;
+			display: grid;
+			gap: 16px;
+		}
+
+		.hero {
+			background: linear-gradient(135deg, #fff7eb 0%, #fffdf9 55%, #edf7f4 100%);
+			border: 1px solid var(--line);
+			border-radius: 20px;
+			box-shadow: var(--shadow);
+			padding: 22px;
+		}
+
+		.hero h1 {
+			margin: 0;
+			font-family: "IBM Plex Serif", Georgia, serif;
+			font-size: clamp(1.5rem, 3vw, 2.1rem);
+			letter-spacing: 0.02em;
+		}
+
+		.hero p {
+			margin: 8px 0 0;
+			color: var(--muted);
+			max-width: 88ch;
+			line-height: 1.45;
+		}
+
+		.grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+			gap: 12px;
+		}
+
+		.card {
+			background: var(--paper);
+			border: 1px solid var(--line);
+			border-radius: var(--radius);
+			box-shadow: var(--shadow);
+			padding: 14px 14px 12px;
+			overflow: hidden;
+		}
+
+		.card h2 {
+			margin: 0 0 10px;
+			font-size: 1rem;
+			letter-spacing: 0.03em;
+			text-transform: uppercase;
+			color: #5e4a39;
+		}
+
+		.kpi {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 10px;
+		}
+
+		.kpi .item {
+			border-radius: 12px;
+			padding: 10px;
+			border: 1px solid var(--line);
+			background: #fff;
+		}
+
+		.item .label {
+			font-size: 0.78rem;
+			color: var(--muted);
+			text-transform: uppercase;
+			letter-spacing: 0.02em;
+		}
+
+		.item .value {
+			margin-top: 4px;
+			font-size: 1.03rem;
+			font-weight: 700;
+		}
+
+		.ok { color: var(--ok); }
+		.bad { color: var(--bad); }
+
+		.links {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			margin-top: 10px;
+		}
+
+		.links a {
+			font-size: 0.85rem;
+			text-decoration: none;
+			color: #0d4f42;
+			border: 1px solid #b9dcd3;
+			background: #edf8f5;
+			border-radius: 999px;
+			padding: 5px 10px;
+		}
+
+		.table-wrap {
+			overflow: auto;
+			border: 1px solid var(--line);
+			border-radius: 12px;
+			background: #fff;
+		}
+
+		table {
+			border-collapse: collapse;
+			width: 100%;
+			font-size: 0.86rem;
+			min-width: 720px;
+		}
+
+		th, td {
+			border-bottom: 1px solid #ebdfd1;
+			padding: 8px 10px;
+			text-align: left;
+			vertical-align: top;
+			white-space: nowrap;
+		}
+
+		th {
+			font-size: 0.76rem;
+			letter-spacing: 0.03em;
+			text-transform: uppercase;
+			color: #735d48;
+			background: #fbf4ea;
+			position: sticky;
+			top: 0;
+			z-index: 1;
+		}
+
+		td.pass {
+			background: var(--ok-soft);
+			color: #1f6131;
+			font-weight: 600;
+		}
+
+		td.fail {
+			background: var(--bad-soft);
+			color: #7e1d1f;
+			font-weight: 600;
+		}
+
+		.muted {
+			color: var(--muted);
+			font-size: 0.85rem;
+		}
+
+		.error {
+			color: #7f1f21;
+			background: var(--bad-soft);
+			border: 1px solid #efb9bc;
+			padding: 10px;
+			border-radius: 10px;
+		}
+	</style>
+</head>
+<body>
+	<main class="wrap">
+		<section class="hero">
+			<h1>Inference Text + Coding Benchmark Dashboard</h1>
+			<p>Blind test view for current engines. The active list is generated from latest text and coding reports and used by the inference manager for runtime pruning.</p>
+			<p class="muted" id="generatedAt">Loading latest reports...</p>
+		</section>
+
+		<section class="grid" id="summaryCards"></section>
+
+		<section class="card">
+			<h2>Active vs Removed Engines</h2>
+			<div class="table-wrap"><table id="engineDecisionTable"></table></div>
+		</section>
+
+		<section class="card">
+			<h2>Per-Case Leaderboard (Combined CSV)</h2>
+			<div class="table-wrap"><table id="caseLeaderboardTable"></table></div>
+		</section>
+
+		<section class="grid">
+			<article class="card">
+				<h2>Text Suite Summary</h2>
+				<div class="table-wrap"><table id="textSummaryTable"></table></div>
+			</article>
+			<article class="card">
+				<h2>Coding Suite Summary</h2>
+				<div class="table-wrap"><table id="codingSummaryTable"></table></div>
+			</article>
+		</section>
+	</main>
+
+	<script>
+		const RESULTS = './results';
+
+		async function fetchJson(url) {
+			const res = await fetch(url, { cache: 'no-store' });
+			if (!res.ok) throw new Error(`Failed ${url}: ${res.status}`);
+			return res.json();
+		}
+
+		async function fetchText(url) {
+			const res = await fetch(url, { cache: 'no-store' });
+			if (!res.ok) throw new Error(`Failed ${url}: ${res.status}`);
+			return res.text();
+		}
+
+		function parseCsv(text) {
+			const rows = [];
+			let row = [];
+			let cell = '';
+			let inQuotes = false;
+
+			for (let i = 0; i < text.length; i += 1) {
+				const ch = text[i];
+				const next = text[i + 1];
+
+				if (inQuotes && ch === '"' && next === '"') {
+					cell += '"';
+					i += 1;
+					continue;
+				}
+				if (ch === '"') {
+					inQuotes = !inQuotes;
+					continue;
+				}
+				if (!inQuotes && ch === ',') {
+					row.push(cell);
+					cell = '';
+					continue;
+				}
+				if (!inQuotes && (ch === '\n' || ch === '\r')) {
+					if (ch === '\r' && next === '\n') i += 1;
+					row.push(cell);
+					if (row.length > 1 || row[0] !== '') rows.push(row);
+					row = [];
+					cell = '';
+					continue;
+				}
+				cell += ch;
+			}
+
+			if (cell.length || row.length) {
+				row.push(cell);
+				rows.push(row);
+			}
+			if (!rows.length) return [];
+
+			const headers = rows[0];
+			return rows.slice(1).map((values) => {
+				const obj = {};
+				headers.forEach((h, index) => {
+					obj[h] = values[index] ?? '';
+				});
+				return obj;
+			});
+		}
+
+		function createTable(tableEl, rows, columns, passColumn) {
+			if (!rows.length) {
+				tableEl.innerHTML = '<thead><tr><th>Info</th></tr></thead><tbody><tr><td>No data</td></tr></tbody>';
+				return;
+			}
+			const thead = `<thead><tr>${columns.map((col) => `<th>${col.label}</th>`).join('')}</tr></thead>`;
+			const tbody = rows.map((row) => {
+				const cells = columns.map((col) => {
+					const value = row[col.key] ?? '';
+					const klass = passColumn && col.key === passColumn
+						? (String(value).toLowerCase() === 'true' || String(value) === '1' ? 'pass' : 'fail')
+						: '';
+					return `<td class="${klass}">${String(value)}</td>`;
+				}).join('');
+				return `<tr>${cells}</tr>`;
+			}).join('');
+			tableEl.innerHTML = `${thead}<tbody>${tbody}</tbody>`;
+		}
+
+		function renderCards(textReport, codingReport, selection) {
+			const cards = [
+				{
+					title: 'Text Winner',
+					items: [
+						{ label: 'Engine', value: textReport?.winner?.engineId || 'none' },
+						{ label: 'Accuracy', value: textReport?.winner?.accuracy ?? 'n/a' },
+					],
+					links: [
+						`${RESULTS}/llm_unit_parseable_validation_v1-latest-summary.csv`,
+						`${RESULTS}/llm_unit_parseable_validation_v1-latest-case-leaderboard.csv`,
+						`${RESULTS}/llm_unit_parseable_validation_v1-latest-report.json`,
+					],
+				},
+				{
+					title: 'Coding Winner',
+					items: [
+						{ label: 'Engine', value: codingReport?.winner?.engineId || 'none' },
+						{ label: 'Accuracy', value: codingReport?.winner?.accuracy ?? 'n/a' },
+					],
+					links: [
+						`${RESULTS}/llm_js_coding_execution_v1-latest-summary.csv`,
+						`${RESULTS}/llm_js_coding_execution_v1-latest-case-leaderboard.csv`,
+						`${RESULTS}/llm_js_coding_execution_v1-latest-report.json`,
+					],
+				},
+				{
+					title: 'Engine Pruning',
+					items: [
+						{ label: 'Active', value: (selection?.activeEngines || []).length, className: 'ok' },
+						{ label: 'Removed', value: (selection?.removedEngines || []).length, className: 'bad' },
+					],
+					links: [
+						`${RESULTS}/active-engines.json`,
+						`${RESULTS}/combined-case-leaderboard-latest.csv`,
+					],
+				},
+			];
+
+			const host = document.getElementById('summaryCards');
+			host.innerHTML = cards.map((card) => `
+				<article class="card">
+					<h2>${card.title}</h2>
+					<div class="kpi">
+						${card.items.map((item) => `<div class="item"><div class="label">${item.label}</div><div class="value ${item.className || ''}">${item.value}</div></div>`).join('')}
+					</div>
+					<div class="links">
+						${card.links.map((link) => `<a href="${link}" target="_blank" rel="noopener">${link.split('/').pop()}</a>`).join('')}
+					</div>
+				</article>`).join('');
+		}
+
+		async function main() {
+			try {
+				const [textReport, codingReport, selection, caseCsv] = await Promise.all([
+					fetchJson(`${RESULTS}/llm_unit_parseable_validation_v1-latest-report.json`),
+					fetchJson(`${RESULTS}/llm_js_coding_execution_v1-latest-report.json`),
+					fetchJson(`${RESULTS}/active-engines.json`),
+					fetchText(`${RESULTS}/combined-case-leaderboard-latest.csv`),
+				]);
+
+				const generated = selection.generatedAt || codingReport.timestamp || textReport.timestamp;
+				document.getElementById('generatedAt').textContent = `Generated at ${generated}`;
+
+				renderCards(textReport, codingReport, selection);
+
+				createTable(
+					document.getElementById('engineDecisionTable'),
+					[
+						...(selection.activeEngines || []).map((engineId) => ({ engineId, decision: 'active', reason: 'Passed text + coding benchmarks' })),
+						...((selection.removedEngines || []).map((entry) => ({
+							engineId: entry.engineId,
+							decision: 'removed',
+							reason: `text=${entry.textStatus} (${entry.textAccuracy}), coding=${entry.codingStatus} (${entry.codingAccuracy})`,
+						}))),
+					],
+					[
+						{ key: 'engineId', label: 'engineId' },
+						{ key: 'decision', label: 'decision' },
+						{ key: 'reason', label: 'reason' },
+					]
+				);
+
+				createTable(
+					document.getElementById('caseLeaderboardTable'),
+					parseCsv(caseCsv),
+					[
+						{ key: 'suite', label: 'suite' },
+						{ key: 'caseId', label: 'caseId' },
+						{ key: 'rank', label: 'rank' },
+						{ key: 'engineId', label: 'engineId' },
+						{ key: 'passed', label: 'passed' },
+						{ key: 'primaryMs', label: 'primaryMs' },
+						{ key: 'secondaryMetricName', label: 'secondaryMetricName' },
+						{ key: 'secondaryMetric', label: 'secondaryMetric' },
+						{ key: 'error', label: 'error' },
+					],
+					'passed'
+				);
+
+				createTable(
+					document.getElementById('textSummaryTable'),
+					textReport.engineSummary || [],
+					[
+						{ key: 'engineId', label: 'engineId' },
+						{ key: 'status', label: 'status' },
+						{ key: 'casesCompleted', label: 'executed' },
+						{ key: 'casesSkipped', label: 'skipped' },
+						{ key: 'accuracy', label: 'accuracy' },
+						{ key: 'passed', label: 'passed' },
+						{ key: 'failed', label: 'failed' },
+						{ key: 'avgElapsedMs', label: 'avgElapsedMs' },
+						{ key: 'avgOutputWords', label: 'avgOutputWords' },
+						{ key: 'avgQualityScore', label: 'avgQualityScore' },
+						{ key: 'offTopicCount', label: 'offTopicCount' },
+					]
+				);
+
+				createTable(
+					document.getElementById('codingSummaryTable'),
+					codingReport.engineSummary || [],
+					[
+						{ key: 'engineId', label: 'engineId' },
+						{ key: 'status', label: 'status' },
+						{ key: 'casesCompleted', label: 'executed' },
+						{ key: 'casesSkipped', label: 'skipped' },
+						{ key: 'accuracy', label: 'accuracy' },
+						{ key: 'passed', label: 'passed' },
+						{ key: 'failed', label: 'failed' },
+						{ key: 'avgGenerationMs', label: 'avgGenerationMs' },
+						{ key: 'avgExecutionMs', label: 'avgExecutionMs' },
+					]
+				);
+			} catch (error) {
+				document.getElementById('summaryCards').innerHTML = `<div class="error">${error.message}</div>`;
+			}
+		}
+
+		main();
+	</script>
+</body>
+</html>

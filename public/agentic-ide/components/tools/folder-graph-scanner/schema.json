@@ -1,0 +1,63 @@
+{
+  "id": "folder_graph_scanner",
+  "type": "tool",
+  "version": 1,
+  "label": "Folder Graph Scanner",
+  "path": "components/tools/folder-graph-scanner",
+  "description": "Scans a folder structure and extracts node/edge relations to build a code.graph.json. Maps hierarchy to layer nodes, extracts task nodes from node.tasks.json, and analyzes import chains for data-flow edges.",
+  "lifecycle": "draft",
+  "success_threshold": 0.8,
+  "impl": "main.js",
+  "inputs": [
+    {
+      "name": "folderPath",
+      "type": "string",
+      "required": true,
+      "description": "Absolute path to the folder to scan"
+    },
+    {
+      "name": "options",
+      "type": "object",
+      "required": false,
+      "description": "Scanner config overrides (maxDepth, includePatterns, excludePatterns)"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "nodes",
+      "type": "object",
+      "description": "Discovered node map keyed by id"
+    },
+    {
+      "name": "edges",
+      "type": "object",
+      "description": "Discovered edge map keyed by id"
+    },
+    {
+      "name": "warnings",
+      "type": "array",
+      "description": "Non-fatal scan warnings"
+    },
+    {
+      "name": "metadata",
+      "type": "object",
+      "description": "Scan stats: nodeCount, edgeCount, scanDate, rootPath"
+    }
+  ],
+  "errors": [
+    {
+      "code": "SCAN_IO_ERROR",
+      "description": "Folder could not be read"
+    },
+    {
+      "code": "MAX_DEPTH_EXCEEDED",
+      "description": "Scan depth limit reached"
+    }
+  ],
+  "files": [
+    "schema.json",
+    "main.js",
+    "ui/main.js"
+  ],
+  "tests": []
+}

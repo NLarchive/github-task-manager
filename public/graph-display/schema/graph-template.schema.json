@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./graph-template.schema.json",
+  "title": "Graph Template",
+  "description": "Direct template payload for the reusable graph-display runtime and Graph Composer.",
+  "type": "object",
+  "required": ["id", "name", "nodes", "links", "details"],
+  "properties": {
+    "id": { "type": "string" },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "nodes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/graphNode" }
+    },
+    "links": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/graphLink" }
+    },
+    "details": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/nodeDetails" }
+    },
+    "meta": { "$ref": "#/$defs/templateMeta" },
+    "configOverrides": { "$ref": "./graph-ui-config.schema.json" },
+    "savedAt": { "type": "string" },
+    "source": { "type": "string" }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "priorityLevel": {
+      "type": "string",
+      "enum": ["Critical", "High", "Medium", "Low"]
+    },
+    "graphNode": {
+      "type": "object",
+      "required": ["id", "label"],
+      "properties": {
+        "id": { "type": "string" },
+        "label": { "type": "string" },
+        "type": { "type": "string" },
+        "layer": { "type": "number" },
+        "parentId": { "type": ["string", "null"] },
+        "templateType": { "type": "string" },
+        "priority": { "$ref": "#/$defs/priorityLevel" },
+        "status": { "type": "string" },
+        "estimatedHours": { "type": "number" },
+        "task_id": { "type": "number" },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "graphLink": {
+      "type": "object",
+      "required": ["source", "target", "type"],
+      "properties": {
+        "source": {
+          "oneOf": [
+            { "type": "string" },
+            { "$ref": "#/$defs/graphNode" }
+          ]
+        },
+        "target": {
+          "oneOf": [
+            { "type": "string" },
+            { "$ref": "#/$defs/graphNode" }
+          ]
+        },
+        "type": { "type": "string" },
+        "weight": { "type": "number" }
+      },
+      "additionalProperties": true
+    },
+    "nodeDetails": {
+      "type": "object",
+      "required": ["title"],
+      "properties": {
+        "title": { "type": "string" },
+        "items": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "photoUrl": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "templateMeta": {
+      "type": "object",
+      "properties": {
+        "profileNodeId": { "type": "string" },
+        "coreNodeId": { "type": "string" },
+        "legendMode": { "type": "string" },
+        "walkthroughSteps": {
+          "type": "array",
+          "items": { "type": "object", "additionalProperties": true }
+        },
+        "walkthroughStepsPath": { "type": "string" },
+        "modules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["label", "path"],
+            "properties": {
+              "label": { "type": "string" },
+              "path": { "type": "string" },
+              "projectId": { "type": "string" },
+              "taskIds": {
+                "type": "array",
+                "items": { "type": "number" }
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "menuLabels": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "showProfileButton": { "type": "boolean" },
+        "showCoreButton": { "type": "boolean" },
+        "showCvButton": { "type": "boolean" },
+        "walkthroughEnabled": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    }
+  }
+}

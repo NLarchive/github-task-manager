@@ -1,0 +1,42 @@
+{
+  "name": "web_search_tool unit tests",
+  "type": "unit",
+  "target": "web_search_tool",
+  "cases": [
+    {
+      "name": "Returns mocked results for valid query",
+      "mock_fetch": {
+        "ok": true,
+        "status": 200,
+        "json": {
+          "results": [
+            {
+              "title": "LangGraph docs",
+              "url": "https://example.com/langgraph",
+              "snippet": "LangGraph multi-agent patterns"
+            }
+          ]
+        }
+      },
+      "input": {
+        "query": "LangGraph",
+        "top_k": 1
+      },
+      "expect": {
+        "results": {
+          "type": "list",
+          "max_length": 1
+        }
+      }
+    },
+    {
+      "name": "Returns empty list for blank query",
+      "input": {
+        "query": ""
+      },
+      "expect": {
+        "results": []
+      }
+    }
+  ]
+}

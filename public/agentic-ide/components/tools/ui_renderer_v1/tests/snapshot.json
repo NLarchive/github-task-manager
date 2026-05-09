@@ -1,0 +1,32 @@
+{
+  "name": "ui_renderer snapshot tests",
+  "type": "snapshot",
+  "target": "ui_renderer",
+  "cases": [
+    {
+      "name": "Renders structured content into HTML",
+      "input": {
+        "doc": {
+          "title": "Guide",
+          "headings": [
+            "Intro"
+          ],
+          "paragraphs": [
+            "LangGraph helps coordinate multi-agent workflows."
+          ],
+          "links": [
+            {
+              "href": "https://example.com",
+              "text": "Docs"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "html": {
+          "contains": "<h2>Guide</h2>"
+        }
+      }
+    }
+  ]
+}

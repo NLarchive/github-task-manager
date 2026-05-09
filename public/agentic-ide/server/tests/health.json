@@ -1,0 +1,34 @@
+{
+  "name": "agentic_ide_bridge_server health checks",
+  "type": "health",
+  "target": "agentic_ide_bridge_server",
+  "cases": [
+    {
+      "name": "Registry endpoint responds when the bridge server is running",
+      "input": {
+        "endpoint": "GET /api/registry"
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "name": "Model endpoint responds when the bridge server is running",
+      "input": {
+        "endpoint": "GET /api/model"
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "name": "Inference endpoint responds when bridge and llama runtime are both online",
+      "input": {
+        "endpoint": "POST /api/llm/complete"
+      },
+      "expect": {
+        "status": 200
+      }
+    }
+  ]
+}

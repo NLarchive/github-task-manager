@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic Graph Designer</title>
+  <meta name="description" content="Visual IDE for designing agentic workflow graphs — compose typed component nodes, wire data-flow edges, and export to graph-display templates.">
+  <link rel="stylesheet" href="ui/style.css">
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="hdr-brand">
+      <span class="eyebrow">Agentic IDE</span>
+      <h1>Graph Designer</h1>
+    </div>
+    <div class="hdr-actions">
+      <button class="btn btn-sm mobile-only" id="btn-mobile-library">Library</button>
+      <button class="btn btn-sm mobile-only" id="btn-mobile-inspector">Inspector</button>
+      <button class="btn btn-sm" id="btn-new">New Graph</button>
+      <button class="btn btn-sm" id="btn-import">Import JSON</button>
+      <button class="btn btn-sm" id="btn-export">Export JSON</button>
+      <button class="btn btn-sm btn-accent" id="btn-export-gd">→ Graph Display</button>
+      <button class="btn btn-sm" id="btn-chat">💬 Chat</button>
+    </div>
+  </header>
+
+  <div class="ide-shell">
+    <aside id="sidebar">
+      <div class="panel-hdr">
+        <span>Components</span>
+        <div class="panel-hdr-actions">
+          <button class="btn btn-icon btn-sm mobile-only" id="btn-sidebar-close" title="Close library">×</button>
+          <button class="btn btn-icon btn-sm" id="btn-add-here" title="Add node in current scope">+</button>
+        </div>
+      </div>
+      <div id="sidebar-tabs">
+        <button class="stab active" data-stab="library" title="All registered components">Library</button>
+        <button class="stab" data-stab="graph" title="Current graph structure">Graph</button>
+      </div>
+      <div id="tree"></div>
+    </aside>
+    <div class="splitter splitter-v" id="sidebar-splitter" role="separator" aria-orientation="vertical" aria-label="Resize library"></div>
+
+    <div class="center-col">
+      <div id="canvas-toolbar">
+        <div id="crumbs"></div>
+        <div class="runtime-controls">
+          <label class="runtime-label" for="global-model-select">Model</label>
+          <select id="global-model-select">
+            <option value="">Loading models…</option>
+          </select>
+          <span id="bridge-status-badge" class="status-badge is-pending">Bridge unknown</span>
+        </div>
+        <div class="canvas-actions">
+          <button class="btn btn-sm btn-icon" id="btn-zoom-out" title="Zoom out">−</button>
+          <button class="btn btn-sm btn-icon" id="btn-zoom-in" title="Zoom in">+</button>
+          <button class="btn btn-sm" id="btn-center" title="Center all nodes in canvas">⊡ Fit</button>
+          <button class="btn btn-sm" id="btn-edge">+ Edge</button>
+          <button class="btn btn-sm btn-accent" id="btn-node">+ Node</button>
+        </div>
+      </div>
+      <div id="canvas-area"><svg id="g"></svg></div>
+      <div class="splitter splitter-h" id="bottom-splitter" role="separator" aria-orientation="horizontal" aria-label="Resize bottom panel"></div>
+      <div id="bottom-panel">
+        <div id="bottom-tabs">
+          <button class="btab active" data-tab="json">JSON</button>
+          <button class="btab" data-tab="code">Code</button>
+          <button class="btab" data-tab="edge">Edge</button>
+          <button class="btab" data-tab="meta">Meta</button>
+          <button class="btab" data-tab="tasks">Tasks</button>
+          <button class="btab" data-tab="tests">Tests</button>
+          <button class="btab" data-tab="issues">Issues</button>
+        </div>
+        <div id="bottom-content"><span style="color:var(--sub)">Select a node to inspect its definition.</span></div>
+      </div>
+    </div>
+
+    <div class="splitter splitter-v" id="inspector-splitter" role="separator" aria-orientation="vertical" aria-label="Resize inspector"></div>
+
+    <aside id="right-panel">
+      <div class="panel-hdr">
+        <span>Inspector</span>
+        <div class="panel-hdr-actions">
+          <button class="btn btn-icon btn-sm mobile-only" id="btn-inspector-close" title="Close inspector">×</button>
+        </div>
+      </div>
+      <div id="inspector"><p class="placeholder">Select a node or edge<br>to inspect and edit</p></div>
+    </aside>
+  </div>
+
+  <div id="mobile-scrim" hidden></div>
+
+  <!-- Node modal -->
+  <div class="modal-back" id="node-modal" hidden>
+    <div class="modal-card">
+      <h3 id="nm-title">Add Component</h3>
+      <div class="fgrid">
+        <div class="fl full"><label>Component type</label>
+          <select id="nm-type">
+            <option value="workflow">workflow</option><option value="agent">agent</option>
+            <option value="tool">tool</option><option value="model">model</option>
+            <option value="prompt">prompt</option><option value="skill">skill</option>
+            <option value="subgraph">subgraph</option><option value="task">task</option>
+            <option value="test">test</option><option value="benchmark">benchmark</option>
+          </select>
+        </div>
+        <div class="fl"><label>ID / name</label><input id="nm-id" placeholder="my_tool_v1"></div>
+        <div class="fl"><label>Version</label><input id="nm-ver" type="number" value="1" min="1"></div>
+        <div class="fl full"><label>Label</label><input id="nm-label" placeholder="Human-readable label"></div>
+        <div class="fl full"><label>Description</label><input id="nm-desc" placeholder="What does this component do?"></div>
+        <div class="fl"><label>Inputs (name:type, …)</label><input id="nm-inputs" placeholder="query:string, top_k:int"></div>
+        <div class="fl"><label>Outputs (name:type, …)</label><input id="nm-outputs" placeholder="result:object"></div>
+      </div>
+      <div class="type-meta-section" id="nm-extra-wrap">
+        <h4 id="nm-extra-title">Type-specific fields</h4>
+        <div class="fgrid" id="nm-extra"></div>
+      </div>
+      <div class="mfooter">
+        <button class="btn" id="nm-cancel">Cancel</button>
+        <button class="btn btn-accent" id="nm-confirm">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edge modal -->
+  <div class="modal-back" id="edge-modal" hidden>
+    <div class="modal-card">
+      <h3>Add Edge</h3>
+      <div class="fgrid">
+        <div class="fl"><label>From node</label><select id="em-from"></select></div>
+        <div class="fl"><label>To node</label><select id="em-to"></select></div>
+        <div class="fl full"><label>Field mapping (from → to)</label><input id="em-map" placeholder="results → search_context"></div>
+        <div class="fl"><label>Transform (optional)</label><input id="em-tf" placeholder="rank_results_v1"></div>
+        <div class="fl"><label>Condition (optional)</label><input id="em-cond" placeholder="len(results) &gt; 0"></div>
+        <div class="fl"><label>Edge type</label>
+          <select id="em-etype">
+            <option value="data-flow">data-flow</option>
+            <option value="control-flow">control-flow</option>
+            <option value="error">error</option>
+            <option value="event">event</option>
+          </select>
+        </div>
+      </div>
+      <div class="mfooter">
+        <button class="btn" id="em-cancel">Cancel</button>
+        <button class="btn btn-accent" id="em-confirm">Add Edge</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import modal -->
+  <div class="modal-back" id="import-modal" hidden>
+    <div class="modal-card">
+      <h3>Import JSON</h3>
+      <div class="fl" style="margin-bottom:12px;">
+        <label>Paste graph JSON (exported from this tool or graph-display node.tasks.json format)</label>
+        <textarea id="import-ta" style="min-height:200px;font-size:11px;" placeholder='{"nodes":{...},"edges":{...}}'></textarea>
+      </div>
+      <div class="mfooter">
+        <button class="btn" id="im-cancel">Cancel</button>
+        <button class="btn btn-accent" id="im-confirm">Import</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Schema preview modal -->
+  <div class="modal-back" id="schema-preview-modal" hidden>
+    <div class="modal-card sp-card">
+      <div class="sp-hdr">
+        <strong id="sp-title">Preview</strong>
+        <button class="btn btn-icon btn-sm" id="sp-close">✕</button>
+      </div>
+      <pre id="sp-content" class="sp-pre"></pre>
+      <div class="mfooter">
+        <button class="btn btn-sm" id="sp-copy">📋 Copy</button>
+        <button class="btn btn-sm btn-accent" id="sp-save">💾 Save via Bridge</button>
+        <button class="btn btn-sm" id="sp-download">⬇ Download</button>
+        <button class="btn btn-sm" id="sp-close2">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat modal -->
+  <div class="modal-back" id="chat-modal" hidden>
+    <div class="modal-card" style="width:min(700px,96vw);max-height:90vh;display:flex;flex-direction:column;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <h3 style="margin:0;">Chat with Local LLM</h3>
+        <button class="btn btn-icon btn-sm" id="chat-close-top" title="Close">×</button>
+      </div>
+      <details style="margin-bottom:8px;">
+        <summary style="cursor:pointer;font-size:12px;color:var(--sub,#888);">Configure</summary>
+        <div class="fgrid" style="margin-top:8px;">
+          <div class="fl"><label>Preset</label><select id="chat-preset"></select></div>
+          <div class="fl full"><label>System prompt</label><textarea id="chat-system-prompt" rows="2" style="min-height:44px;resize:vertical;"></textarea></div>
+          <div class="fl"><label><input type="checkbox" id="chat-include-history"> Include history</label></div>
+          <div class="fl"><label><input type="checkbox" id="chat-include-runtime"> Include runtime data</label></div>
+          <div class="fl full"><label>Context components</label><select id="chat-context-nodes" multiple style="min-height:60px;"></select></div>
+          <div class="fl full"><label>Target component</label><select id="chat-target"></select></div>
+          <div class="fl full"><label>Save reply to</label><input id="chat-save-file" value="chat-output.md"></div>
+        </div>
+      </details>
+      <div id="chat-thread" style="flex:1;overflow-y:auto;min-height:180px;max-height:340px;border:1px solid var(--border,#e0e0e0);border-radius:4px;padding:8px;margin-bottom:8px;font-size:13px;"></div>
+      <textarea id="chat-input" style="min-height:72px;resize:vertical;margin-bottom:8px;" placeholder="Type a message… (Enter to send, Shift+Enter for newline)"></textarea>
+      <div class="mfooter" style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn btn-sm" id="chat-run-tests">▶ Tests</button>
+        <button class="btn btn-sm" id="chat-save-reply">💾 Save</button>
+        <button class="btn btn-sm" id="chat-clear">Clear</button>
+        <span style="flex:1;"></span>
+        <button class="btn" id="chat-close">Close</button>
+        <button class="btn btn-sm btn-accent" id="chat-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Agentic workflow IDE with graph canvas, file tree, code viewer, and node inspector</h2>
+
+<script type="module" src="js/main.js"></script>
+
+<!-- Legacy inline fallback removed — logic is now in js/main.js -->
+<!-- ORIGINAL INLINE SCRIPT BELOW (kept for reference, disabled) -->
+<script type="_disabled_module">
+// ─── COMPONENT TYPE REGISTRY ──────────────────────────────────────────────
+const CT = {
+  workflow:  {fill:'#E6F1FB',stroke:'#378ADD',text:'#0C447C',text2:'#185FA5',icon:'⬡',badge:'b-workflow',dot:'#378ADD',composite:true},
+  agent:     {fill:'#EEEDFE',stroke:'#7F77DD',text:'#3C3489',text2:'#534AB7',icon:'◎',badge:'b-agent',   dot:'#7F77DD'},
+  subgraph:  {fill:'#FAEEDA',stroke:'#BA7517',text:'#633806',text2:'#854F0B',icon:'◈',badge:'b-sub',     dot:'#BA7517',composite:true},
+  tool:      {fill:'#E1F5EE',stroke:'#1D9E75',text:'#085041',text2:'#0F6E56',icon:'◻',badge:'b-tool',    dot:'#1D9E75'},
+  model:     {fill:'#FBEAF0',stroke:'#D4537E',text:'#72243E',text2:'#993556',icon:'◆',badge:'b-model',   dot:'#D4537E'},
+  prompt:    {fill:'#F0FAF7',stroke:'#0F766E',text:'#134E4A',text2:'#0F6E56',icon:'✎',badge:'b-prompt',  dot:'#0F766E'},
+  skill:     {fill:'#F0FDF4',stroke:'#15803D',text:'#14532D',text2:'#166534',icon:'★',badge:'b-skill',   dot:'#15803D'},
+  task:      {fill:'#F3F0FE',stroke:'#7C3AED',text:'#3B0764',text2:'#6D28D9',icon:'◷',badge:'b-task',    dot:'#7C3AED'},
+  test:      {fill:'#FEF3C7',stroke:'#92400E',text:'#451A03',text2:'#78350F',icon:'✓',badge:'b-test',    dot:'#92400E'},
+  benchmark: {fill:'#E0E7FF',stroke:'#1E40AF',text:'#1E3A5F',text2:'#1E40AF',icon:'⊕',badge:'b-bench',  dot:'#1E40AF'}
+};
+
+const TYPE_META = {
+  model:    [{f:'provider',l:'Provider',ph:'openai'},{f:'model_name',l:'Model name',ph:'gpt-4'},{f:'temperature',l:'Temperature',ph:'0.2'},{f:'max_tokens',l:'Max tokens',ph:'4096'},{f:'capabilities',l:'Capabilities',ph:'chat, tools'}],
+  prompt:   [{f:'template',l:'Template file',ph:'prompts/my_v1.md'},{f:'variables',l:'Variables',ph:'text, context'},{f:'model_ref',l:'Model ref',ph:'gpt-4-default'},{f:'format',l:'Output format',ph:'json | text'}],
+  tool:     [{f:'impl',l:'Implementation',ph:'tools/my_tool/main.py'},{f:'api_endpoint',l:'API endpoint',ph:'https://...'},{f:'auth',l:'Auth type',ph:'bearer | api_key | none'}],
+  skill:    [{f:'domain',l:'Domain',ph:'reasoning | retrieval'},{f:'capability',l:'Capability level',ph:'basic | advanced'}],
+  agent:    [{f:'model_ref',l:'Model ref',ph:'gpt-4-default'},{f:'memory',l:'Memory type',ph:'buffer | summary | vector'},{f:'planning',l:'Planning type',ph:'react | plan-act | none'},{f:'tool_refs',l:'Tool refs',ph:'web_search,code_exec'}],
+  workflow: [{f:'entry',l:'Entry node',ph:'start_node_id'},{f:'state_schema',l:'State schema',ph:'state.py | state.ts'}],
+  subgraph: [{f:'entry',l:'Entry node',ph:'start_node_id'}],
+  task:     [{f:'agent_ref',l:'Agent ref',ph:'my_agent_v1'},{f:'success',l:'Success criteria',ph:'output != null'}],
+  test:     [{f:'target',l:'Tests component',ph:'my_tool_v1'},{f:'test_type',l:'Test type',ph:'unit | smoke | contract'},{f:'assertions',l:'Assertions',ph:'output_not_empty'}],
+  benchmark:[{f:'metrics',l:'Metrics',ph:'latency_p50, accuracy'},{f:'baseline',l:'Baseline',ph:'200ms, 0.85'}]
+};
+
+const DEF_FILES = {
+  workflow: ['workflow.yaml','state.py','tests/happy_path.yaml'],
+  agent:    ['component.yaml','prompt.md','tests/behavior.yaml'],
+  subgraph: ['graph.yaml','state.py','component.yaml'],
+  tool:     ['main.py','schema.json','component.yaml','tests/unit.yaml'],
+  model:    ['component.yaml','Dockerfile','.env.example'],
+  prompt:   ['prompt.md','component.yaml'],
+  skill:    ['component.yaml','main.py'],
+  task:     ['task.yaml'],
+  test:     ['test.yaml','fixtures.yaml'],
+  benchmark:['benchmark.yaml','metrics.json']
+};
+
+const CODE_TPL = {
+  tool:  n=>`# ${n.id}  (${n.path}/main.py)\ndef run(${(n.inputs||[]).map(i=>i.n+': '+i.t).join(', ')}):\n    # TODO: implement\n    pass`,
+  agent: n=>`# ${n.id}  (${n.path}/component.yaml)\nid: "${n.id}"\ntype: agent\nmodel_ref: "${n.meta?.model_ref||''}"\nmemory_type: "${n.meta?.memory||'buffer'}"`,
+  model: n=>`# ${n.id}  (${n.path}/component.yaml)\nid: "${n.id}"\ntype: model\nprovider: "${n.meta?.provider||''}"\nmodel_name: "${n.meta?.model_name||''}"`,
+  prompt:n=>`You are a helpful assistant.\n# Variables: ${n.meta?.variables||''}\n\n{{context}}\n\nTask: {{input}}\n\nRespond concisely.`
+};
+
+// ─── INITIAL DEMO DATA ────────────────────────────────────────────────────
+const INIT_NODES = {
+  root:           {id:'root',type:'workflow',label:'research_workflow',path:'workflows/research_workflow_v1',desc:'Top-level research pipeline',version:1,inputs:[{n:'topic',t:'string'}],outputs:[{n:'report',t:'string'}],files:['workflow.yaml','state.py','tests/e2e.yaml'],tests:['tests/e2e.yaml'],children:['search_agent','data_processor','format_tool'],edgeIds:['e1','e2','e3'],meta:{entry:'search_agent',state_schema:'state.py'},parent:null,x:195,y:22,w:145,h:38},
+  search_agent:   {id:'search_agent',type:'agent',label:'search_agent',path:'components/agents/search_agent_v1',desc:'LLM agent that plans and executes web searches',version:1,inputs:[{n:'query',t:'string'}],outputs:[{n:'answer',t:'string'}],files:['component.yaml','prompt.md','tests/smoke.yaml'],tests:['tests/smoke.yaml'],children:['web_search_tool','result_ranker'],edgeIds:['e4'],meta:{model_ref:'gpt-4-default',memory:'buffer',planning:'react'},parent:'root',x:55,y:118,w:130,h:50},
+  data_processor: {id:'data_processor',type:'agent',label:'data_processor',path:'components/agents/data_processor_v1',desc:'Processes and structures raw data',version:1,inputs:[{n:'raw',t:'object'}],outputs:[{n:'result',t:'object'}],files:['component.yaml','prompt.md'],tests:['tests/behavior.yaml'],children:[],edgeIds:[],meta:{model_ref:'gpt-4-default',memory:'none',planning:'none'},parent:'root',x:255,y:118,w:130,h:50},
+  format_tool:    {id:'format_tool',type:'subgraph',label:'format_info',path:'components/subgraphs/format_info_v1',desc:'Parse → render → error-handle pipeline',version:1,inputs:[{n:'raw',t:'object'}],outputs:[{n:'formatted',t:'object'}],files:['graph.yaml','state.py'],tests:['tests/snapshot.yaml'],children:['html_parser','ui_renderer'],edgeIds:['e5'],meta:{entry:'html_parser'},parent:'root',x:155,y:230,w:130,h:50},
+  web_search_tool:{id:'web_search_tool',type:'tool',label:'web_search_tool',path:'components/tools/web_search_v1',desc:'Calls search API, returns results list',version:1,inputs:[{n:'query',t:'string'},{n:'top_k',t:'int'}],outputs:[{n:'results',t:'list'}],files:['main.py','schema.json','component.yaml','tests/unit.yaml'],tests:['tests/unit.yaml'],children:[],edgeIds:[],meta:{impl:'main.py',api_endpoint:'https://api.search.io/v1',auth:'api_key'},parent:'search_agent',x:25,y:100,w:120,h:50},
+  result_ranker:  {id:'result_ranker',type:'tool',label:'result_ranker',path:'components/tools/result_ranker_v1',desc:'Ranks and filters search results by score',version:1,inputs:[{n:'results',t:'list'}],outputs:[{n:'ranked',t:'list'}],files:['main.py','component.yaml'],tests:['tests/unit.yaml'],children:[],edgeIds:[],meta:{impl:'main.py'},parent:'search_agent',x:170,y:100,w:120,h:50},
+  html_parser:    {id:'html_parser',type:'tool',label:'html_parser',path:'components/tools/html_parser_v1',desc:'Parses HTML to structured document object',version:1,inputs:[{n:'html',t:'string'}],outputs:[{n:'doc',t:'object'}],files:['main.js','component.yaml'],tests:['tests/unit.yaml'],children:[],edgeIds:[],meta:{impl:'main.js'},parent:'format_tool',x:18,y:95,w:120,h:50},
+  ui_renderer:    {id:'ui_renderer',type:'tool',label:'ui_renderer',path:'components/tools/ui_renderer_v1',desc:'Renders parsed doc to HTML string',version:1,inputs:[{n:'doc',t:'object'}],outputs:[{n:'rendered',t:'string'}],files:['main.js','template.html','component.yaml'],tests:['tests/snapshot.yaml'],children:[],edgeIds:[],meta:{impl:'main.js'},parent:'format_tool',x:165,y:95,w:120,h:50},
+  gemma_model:     {id:'gemma_model',type:'model',label:'gpt-4-default',path:'components/models/gpt4_default_v1',desc:'GPT-4 via OpenAI API with conservative defaults',version:1,inputs:[{n:'messages',t:'list[Message]'}],outputs:[{n:'response',t:'AssistantMessage'}],files:['component.yaml','Dockerfile','.env.example'],tests:['tests/latency.yaml'],children:[],edgeIds:[],meta:{provider:'openai',model_name:'gpt-4',temperature:'0.2',max_tokens:'4096',capabilities:'chat, tools'},parent:null,x:415,y:28,w:130,h:50}
+};
+const INIT_EDGES = {
+  e1:{id:'e1',from:'root',to:'search_agent',mapping:'topic → query',transform:'',condition:'',type:'data-flow'},
+  e2:{id:'e2',from:'root',to:'data_processor',mapping:'topic → raw',transform:'',condition:'',type:'data-flow'},
+  e3:{id:'e3',from:'search_agent',to:'format_tool',mapping:'answer → raw',transform:'rank_filter_v1',condition:'len(answer)>0',type:'data-flow'},
+  e4:{id:'e4',from:'web_search_tool',to:'result_ranker',mapping:'results → results',transform:'',condition:'',type:'data-flow'},
+  e5:{id:'e5',from:'html_parser',to:'ui_renderer',mapping:'doc → doc',transform:'',condition:'',type:'data-flow'}
+};
+
+// ─── STATE ────────────────────────────────────────────────────────────────
+const STORE_KEY = 'agentic-graph-v1';
+const S = {
+  nodes:   JSON.parse(JSON.stringify(INIT_NODES)),
+  edges:   JSON.parse(JSON.stringify(INIT_EDGES)),
+  scope:   'root', crumbs: ['root'],
+  sel:     null,   selType: null, selFile: null,
+  btab:    'yaml', editNodeId: null
+};
+
+// ─── PERSISTENCE ──────────────────────────────────────────────────────────
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    if (saved.nodes && typeof saved.nodes === 'object') S.nodes = saved.nodes;
+    if (saved.edges && typeof saved.edges === 'object') S.edges = saved.edges;
+  } catch {}
+}
+function saveState() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({nodes:S.nodes, edges:S.edges})); } catch {}
+}
+function clearState() {
+  S.nodes = JSON.parse(JSON.stringify(INIT_NODES));
+  S.edges = JSON.parse(JSON.stringify(INIT_EDGES));
+  S.scope='root'; S.crumbs=['root']; S.sel=null; S.selType=null;
+  localStorage.removeItem(STORE_KEY); renderAll(); toast('Graph reset to demo data');
+}
+
+// ─── UTILITIES ────────────────────────────────────────────────────────────
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const ct  = t => CT[t] || CT.tool;
+const uid = p => `${p}_${Date.now().toString(36)}`;
+const childrenOf  = scope => Object.values(S.nodes).filter(n => n.parent === scope);
+const edgesInScope = scope => {
+  const ids = new Set(childrenOf(scope).map(n => n.id));
+  return Object.values(S.edges).filter(e => ids.has(e.from) || ids.has(e.to));
+};
+function parsePorts(str) {
+  return (str||'').split(',').map(s => {
+    const [n,t] = (s.trim()||'input:string').split(':');
+    return {n:(n||'').trim(), t:(t||'string').trim()};
+  }).filter(p => p.n);
+}
+function toast(msg, dur=2200) {
+  const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), dur);
+}
+
+// ─── RENDER: SIDEBAR ──────────────────────────────────────────────────────
+function renderSidebar() {
+  const tree = document.getElementById('tree');
+  const order = ['workflow','subgraph','agent','tool','model','prompt','skill','task','test','benchmark'];
+  const icons = {workflow:'⬡',subgraph:'◈',agent:'◎',tool:'◻',model:'◆',prompt:'✎',skill:'★',task:'◷',test:'✓',benchmark:'⊕'};
+  let html='';
+  order.forEach(type => {
+    const nodes = Object.values(S.nodes).filter(n => n.type===type);
+    if (!nodes.length) return;
+    html += `<div class="ti ti-grp"><span style="opacity:.65;margin-right:4px">${icons[type]}</span>${type}s</div>`;
+    nodes.forEach(n => {
+      const c = ct(n.type);
+      const sel = S.sel===n.id && S.selType==='node';
+      html += `<div class="ti${sel?' is-sel':''}" data-nid="${esc(n.id)}" title="${esc(n.desc)}">
+        <span class="dot" style="background:${c.dot}"></span>${esc(n.label)}</div>`;
+      if (sel && n.files) {
+        n.files.forEach(f => {
+          const fsel = S.selFile===f && S.sel===n.id;
+          html += `<div class="ti${fsel?' is-sel':''}" data-fid="${esc(n.id)}::${esc(f)}" style="padding-left:26px" title="${esc(n.path+'/'+f)}">
+            <span class="dot dot-file"></span>${esc(f)}</div>`;
+        });
+      }
+    });
+  });
+  tree.innerHTML = html;
+  tree.querySelectorAll('[data-nid]').forEach(el =>
+    el.addEventListener('click', () => selectNode(el.dataset.nid)));
+  tree.querySelectorAll('[data-fid]').forEach(el => {
+    const [nid,f] = el.dataset.fid.split('::');
+    el.addEventListener('click', () => openFile(nid,f));
+  });
+}
+
+// ─── RENDER: CANVAS ───────────────────────────────────────────────────────
+let _drag = null;
+function renderCanvas() {
+  const svg = document.getElementById('g');
+  svg.innerHTML='';
+  const defs = mkSvg('defs');
+  defs.innerHTML = `
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M1,1 L7,3 L1,5" stroke="#B4B2A9" stroke-width="1.2" fill="none"/>
+    </marker>
+    <marker id="arr-sel" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M1,1 L7,3 L1,5" stroke="#534AB7" stroke-width="1.2" fill="none"/>
+    </marker>`;
+  svg.appendChild(defs);
+
+  const nodes = childrenOf(S.scope);
+  const edges  = edgesInScope(S.scope);
+
+  // Edges
+  edges.forEach(e => {
+    const fn=S.nodes[e.from], tn=S.nodes[e.to]; if(!fn||!tn) return;
+    const isSel = S.sel===e.id;
+    const x1=fn.x+(fn.w||130)/2, y1=fn.y+(fn.h||50);
+    const x2=tn.x+(tn.w||130)/2, y2=tn.y;
+    const my=(y1+y2)/2;
+    const path=mkSvg('path');
+    path.setAttribute('d',`M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}`);
+    path.setAttribute('stroke',isSel?'#534AB7':'#B4B2A9');
+    path.setAttribute('stroke-width',isSel?'2':'1.2');
+    path.setAttribute('fill','none');
+    path.setAttribute('marker-end',isSel?'url(#arr-sel)':'url(#arr)');
+    path.style.cursor='pointer';
+    path.addEventListener('click', ev => { ev.stopPropagation(); selectEdge(e.id); });
+    svg.appendChild(path);
+    if (e.mapping) {
+      const txt=mkSvg('text');
+      txt.setAttribute('x',(x1+x2)/2+4); txt.setAttribute('y',my-4);
+      txt.setAttribute('font-size','9'); txt.setAttribute('fill','#888780');
+      txt.setAttribute('font-family','var(--mono)'); txt.textContent=e.mapping;
+      svg.appendChild(txt);
+    }
+  });
+
+  // Nodes
+  nodes.forEach(n => {
+    const c = ct(n.type);
+    const isSel = S.sel===n.id && S.selType==='node';
+    const isComp = c.composite && n.children?.length>0;
+    const NW=n.w||130, NH=n.h||50;
+    const g=mkSvg('g'); g.setAttribute('transform',`translate(${n.x},${n.y})`);
+    g.dataset.nid=n.id; g.style.cursor='pointer';
+    const rect=mkSvg('rect');
+    rect.setAttribute('width',NW); rect.setAttribute('height',NH); rect.setAttribute('rx','8');
+    rect.setAttribute('fill',c.fill); rect.setAttribute('stroke',isSel?'#534AB7':c.stroke);
+    rect.setAttribute('stroke-width',isSel?'2':'1.2');
+    if (isComp) rect.setAttribute('stroke-dasharray','5,3');
+    g.appendChild(rect);
+    svgTxt(g,n.label,NW/2,14,10,c.text,'500','middle');
+    svgTxt(g,n.type,NW/2,24,9,c.text2,'400','middle');
+    if (n.inputs?.[0]) {
+      const p=mkSvg('rect'); p.setAttribute('x','4'); p.setAttribute('y','32');
+      p.setAttribute('width',NW/2-7); p.setAttribute('height','13'); p.setAttribute('rx','3');
+      p.setAttribute('fill','rgba(255,255,255,0.42)'); p.setAttribute('stroke',c.stroke); p.setAttribute('stroke-width','0.5');
+      g.appendChild(p); svgTxt(g,n.inputs.map(i=>i.n).slice(0,3).join(','),NW/4,41,8,c.text,'400','middle');
+    }
+    if (n.outputs?.[0]) {
+      const p=mkSvg('rect'); p.setAttribute('x',NW/2+3); p.setAttribute('y','32');
+      p.setAttribute('width',NW/2-7); p.setAttribute('height','13'); p.setAttribute('rx','3');
+      p.setAttribute('fill','rgba(255,255,255,0.42)'); p.setAttribute('stroke',c.stroke); p.setAttribute('stroke-width','0.5');
+      g.appendChild(p); svgTxt(g,n.outputs.map(o=>o.n).slice(0,3).join(','),NW*3/4,41,8,c.text,'400','middle');
+    }
+    if (isComp) svgTxt(g,c.icon,NW-6,11,11,c.text2,'400','end');
+    g.addEventListener('mousedown', ev => {
+      ev.stopPropagation();
+      const pt=svgPt(ev);
+      _drag={nid:n.id, ox:n.x, oy:n.y, sx:pt.x, sy:pt.y, moved:false};
+    });
+    g.addEventListener('click', ev => { ev.stopPropagation(); if(!_drag?.moved) selectNode(n.id); });
+    g.addEventListener('dblclick', ev => { ev.stopPropagation(); if(isComp) drillIn(n.id); });
+    svg.appendChild(g);
+  });
+  svg.addEventListener('click', () => { S.sel=null; S.selType=null; renderInspector(); renderCanvas(); renderSidebar(); });
+  renderCrumbs();
+}
+
+function mkSvg(tag) { return document.createElementNS('http://www.w3.org/2000/svg',tag); }
+function svgTxt(p,text,x,y,sz,fill,w,anchor) {
+  const t=mkSvg('text'); t.setAttribute('x',x); t.setAttribute('y',y); t.setAttribute('font-size',sz);
+  t.setAttribute('fill',fill); t.setAttribute('font-weight',w); t.setAttribute('text-anchor',anchor);
+  t.setAttribute('font-family','var(--sans)'); t.textContent=String(text||'').slice(0,22); p.appendChild(t);
+}
+function svgPt(e) {
+  const svg=document.getElementById('g'); const pt=svg.createSVGPoint();
+  pt.x=e.clientX; pt.y=e.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+document.addEventListener('mousemove', e => {
+  if (!_drag) return;
+  const pt=svgPt(e); const n=S.nodes[_drag.nid]; if(!n) return;
+  const dx=pt.x-_drag.sx, dy=pt.y-_drag.sy;
+  if (Math.abs(dx)>2||Math.abs(dy)>2) _drag.moved=true;
+  n.x=Math.max(0,_drag.ox+dx); n.y=Math.max(0,_drag.oy+dy);
+  renderCanvas();
+});
+document.addEventListener('mouseup', () => { if(_drag){ saveState(); _drag=null; } });
+
+// ─── RENDER: CRUMBS ───────────────────────────────────────────────────────
+function renderCrumbs() {
+  const el=document.getElementById('crumbs');
+  el.innerHTML=S.crumbs.map((id,i) => {
+    const n=S.nodes[id]; const label=n?n.label:id;
+    if (i<S.crumbs.length-1) return `<span class="crumb" data-idx="${i}">${esc(label)}</span><span class="crumb-sep">/</span>`;
+    return `<span class="crumb-cur">${esc(label)}</span>`;
+  }).join('');
+  el.querySelectorAll('.crumb').forEach(el => el.addEventListener('click', () => {
+    const idx=parseInt(el.dataset.idx); S.crumbs.splice(idx+1);
+    S.scope=S.crumbs[S.crumbs.length-1]; S.sel=null; renderAll();
+  }));
+}
+
+// ─── RENDER: INSPECTOR ────────────────────────────────────────────────────
+function renderInspector() {
+  const el=document.getElementById('inspector');
+  if (!S.sel) { el.innerHTML='<p class="placeholder">Select a node or edge<br>to inspect and edit</p>'; return; }
+  if (S.selType==='node') renderNodeInspector(S.nodes[S.sel]);
+  else if (S.selType==='edge') renderEdgeInspector(S.edges[S.sel]);
+  else if (S.selType==='file') renderFileInspector(S.sel, S.selFile);
+}
+
+function renderNodeInspector(n) {
+  if (!n) return;
+  const el=document.getElementById('inspector');
+  const c=ct(n.type); const isComp=c.composite&&n.children?.length>0;
+  const meta=TYPE_META[n.type]||[];
+  let html=`
+    <div class="ifield"><div class="ilabel">id</div><input class="insp-input" data-f="id" value="${esc(n.id)}"></div>
+    <div class="ifield"><div class="ilabel">type</div><span class="badge ${c.badge}">${n.type}</span></div>
+    <div class="ifield"><div class="ilabel">label</div><input class="insp-input" data-f="label" value="${esc(n.label)}"></div>
+    <div class="ifield"><div class="ilabel">description</div><textarea class="insp-input insp-ta" data-f="desc">${esc(n.desc)}</textarea></div>
+    <div class="ifield"><div class="ilabel">path</div><input class="insp-input" data-f="path" value="${esc(n.path)}"></div>`;
+  if (meta.length) {
+    html+=`<div class="insp-section">Type fields</div>`;
+    meta.forEach(({f,l})=>{
+      html+=`<div class="ifield"><div class="ilabel">${esc(l)}</div><input class="insp-input" data-f="meta.${f}" value="${esc(n.meta?.[f]||'')}"></div>`;
+    });
+  }
+  html+=`<div class="insp-section">Inputs / Outputs</div>`;
+  (n.inputs||[]).forEach((inp,i)=>{
+    html+=`<div class="io-edit-row">
+      <input class="insp-input" style="font-family:var(--mono);font-size:11px" data-port="in-${i}-n" value="${esc(inp.n)}">
+      <input class="insp-input" style="font-family:var(--mono);font-size:11px;color:var(--muted)" data-port="in-${i}-t" value="${esc(inp.t)}">
+      <button class="btn btn-icon btn-sm btn-danger" data-rm-port="in-${i}">×</button></div>`;
+  });
+  html+=`<button class="btn btn-sm" data-add-port="in" style="margin-bottom:4px">+ input</button>`;
+  (n.outputs||[]).forEach((out,i)=>{
+    html+=`<div class="io-edit-row">
+      <input class="insp-input" style="font-family:var(--mono);font-size:11px" data-port="out-${i}-n" value="${esc(out.n)}">
+      <input class="insp-input" style="font-family:var(--mono);font-size:11px;color:var(--muted)" data-port="out-${i}-t" value="${esc(out.t)}">
+      <button class="btn btn-icon btn-sm btn-danger" data-rm-port="out-${i}">×</button></div>`;
+  });
+  html+=`<button class="btn btn-sm" data-add-port="out">+ output</button>`;
+  html+=`<div class="insp-section">Files</div>`;
+  (n.files||[]).forEach(f=>{ html+=`<div class="flink" data-open-file="${esc(n.id)}::${esc(f)}">${esc(f)}</div>`; });
+  if (n.tests?.length) {
+    html+=`<div class="insp-section">Tests</div>`;
+    n.tests.forEach(t=>{ html+=`<div class="edge-pill">${esc(t)}</div>`; });
+  }
+  html+=`<div class="iactions">
+    <button class="btn btn-sm btn-accent" data-save-node>💾 Save</button>
+    ${isComp?`<button class="btn btn-sm" data-drill-in="${esc(n.id)}">open ⬡</button>`:''}
+    <button class="btn btn-sm" data-edit-modal="${esc(n.id)}">Edit…</button>
+    <button class="btn btn-sm btn-danger" data-delete-node="${esc(n.id)}">Delete</button>
+  </div>`;
+  el.innerHTML=html;
+  el.querySelector('[data-save-node]')?.addEventListener('click', ()=>saveInspector(n.id));
+  el.querySelector(`[data-drill-in="${n.id}"]`)?.addEventListener('click', ()=>drillIn(n.id));
+  el.querySelector(`[data-edit-modal="${n.id}"]`)?.addEventListener('click', ()=>openNodeModal(n.id));
+  el.querySelector(`[data-delete-node="${n.id}"]`)?.addEventListener('click', ()=>deleteNode(n.id));
+  el.querySelectorAll('[data-rm-port]').forEach(btn=>btn.addEventListener('click', ()=>{
+    const [dir,idx]=btn.dataset.rmPort.split('-');
+    const list=dir==='in'?n.inputs:n.outputs; list.splice(parseInt(idx),1);
+    saveState(); renderInspector(); renderCanvas();
+  }));
+  el.querySelectorAll('[data-add-port]').forEach(btn=>btn.addEventListener('click', ()=>{
+    const list=btn.dataset.addPort==='in'?n.inputs:n.outputs;
+    list.push({n:'param',t:'string'}); saveState(); renderInspector(); renderCanvas();
+  }));
+  el.querySelectorAll('[data-open-file]').forEach(link=>link.addEventListener('click', ()=>{
+    const [nid,f]=link.dataset.openFile.split('::'); openFile(nid,f);
+  }));
+}
+
+function renderEdgeInspector(e) {
+  if (!e) return;
+  const el=document.getElementById('inspector');
+  const fn=S.nodes[e.from], tn=S.nodes[e.to];
+  el.innerHTML=`
+    <div class="ifield"><div class="ilabel">edge id</div><div class="ivalue-mono">${esc(e.id)}</div></div>
+    <div class="ifield"><div class="ilabel">from</div><div class="flink" data-sel-node="${esc(e.from)}">${fn?esc(fn.label):esc(e.from)}</div></div>
+    <div class="ifield"><div class="ilabel">to</div><div class="flink" data-sel-node="${esc(e.to)}">${tn?esc(tn.label):esc(e.to)}</div></div>
+    <div class="ifield"><div class="ilabel">mapping</div><input class="insp-input" data-ef="mapping" value="${esc(e.mapping)}"></div>
+    <div class="ifield"><div class="ilabel">transform</div><input class="insp-input" data-ef="transform" value="${esc(e.transform)}"></div>
+    <div class="ifield"><div class="ilabel">condition</div><input class="insp-input" data-ef="condition" value="${esc(e.condition)}"></div>
+    <div class="ifield"><div class="ilabel">edge type</div><div class="edge-pill">${esc(e.type||'data-flow')}</div></div>
+    <div class="iactions">
+      <button class="btn btn-sm btn-accent" data-save-edge>💾 Save</button>
+      <button class="btn btn-sm btn-danger" data-del-edge="${esc(e.id)}">Delete</button>
+    </div>`;
+  el.querySelector('[data-save-edge]')?.addEventListener('click', ()=>{
+    e.mapping=el.querySelector('[data-ef="mapping"]').value;
+    e.transform=el.querySelector('[data-ef="transform"]').value;
+    e.condition=el.querySelector('[data-ef="condition"]').value;
+    saveState(); toast('Edge saved'); renderCanvas();
+  });
+  el.querySelector(`[data-del-edge="${e.id}"]`)?.addEventListener('click', ()=>deleteEdge(e.id));
+  el.querySelectorAll('[data-sel-node]').forEach(link=>link.addEventListener('click', ()=>selectNode(link.dataset.selNode)));
+}
+
+function renderFileInspector(nodeId, file) {
+  const el=document.getElementById('inspector'); const n=S.nodes[nodeId]; if(!n) return;
+  const c=ct(n.type);
+  el.innerHTML=`
+    <div class="ifield"><div class="ilabel">file</div><div class="ivalue-mono">${esc(file)}</div></div>
+    <div class="ifield"><div class="ilabel">component</div><div class="flink" data-sel-node="${esc(nodeId)}">${esc(n.label)}</div></div>
+    <div class="ifield"><div class="ilabel">type</div><span class="badge ${c.badge}">${n.type}</span></div>
+    <div class="ifield"><div class="ilabel">full path</div><div class="ivalue-mono">${esc(n.path+'/'+file)}</div></div>
+    <div class="iactions"><button class="btn btn-sm" data-sel-node="${esc(nodeId)}">← component</button></div>`;
+  el.querySelectorAll('[data-sel-node]').forEach(link=>link.addEventListener('click', ()=>selectNode(link.dataset.selNode)));
+}
+
+function saveInspector(nodeId) {
+  const n=S.nodes[nodeId]; if(!n) return;
+  const el=document.getElementById('inspector');
+  el.querySelectorAll('[data-f]').forEach(inp=>{
+    const key=inp.dataset.f;
+    if (key.startsWith('meta.')) { if(!n.meta)n.meta={}; n.meta[key.slice(5)]=inp.value; }
+    else n[key]=inp.value;
+  });
+  el.querySelectorAll('[data-port]').forEach(inp=>{
+    const [dir,idx,sub]=inp.dataset.port.split('-');
+    const list=dir==='in'?n.inputs:n.outputs; if(list[idx]) list[idx][sub]=inp.value;
+  });
+  saveState(); toast('Component saved'); renderAll();
+}
+
+// ─── RENDER: BOTTOM PANEL ─────────────────────────────────────────────────
+function renderBottom() {
+  const content=document.getElementById('bottom-content');
+  if (!S.sel) { content.innerHTML='<span style="color:var(--sub)">Select a node to inspect its definition.</span>'; return; }
+  if ((S.btab==='yaml'||S.btab==='meta') && S.selType==='node') {
+    renderYaml(S.nodes[S.sel]);
+  } else if (S.btab==='code') {
+    const nid = S.selType==='file' ? S.sel : S.sel;
+    const n = S.nodes[nid]; if(n) renderCode(n, S.selFile);
+  } else if (S.btab==='edge' && S.selType==='edge') {
+    renderEdgeYaml(S.edges[S.sel]);
+  } else {
+    content.innerHTML='<span style="color:var(--sub)">Select a node or edge for this tab.</span>';
+  }
+}
+function renderYaml(n) {
+  const lines=[`id: "${n.id}"`,`type: "${n.type}"`,`version: ${n.version||1}`,`path: "${n.path}"`,
+    `description: "${(n.desc||'').replace(/"/g,'\\"')}"`,
+    `inputs:`,...(n.inputs||[]).map(i=>`  - {name: "${i.n}", type: "${i.t}"}`),
+    `outputs:`,...(n.outputs||[]).map(o=>`  - {name: "${o.n}", type: "${o.t}"}`),
+    `files:`,...(n.files||[]).map(f=>`  - "${f}"`),
+    `tests:`,...(n.tests||[]).map(t=>`  - "${t}"`)];
+  if (n.meta&&Object.keys(n.meta).length) {
+    lines.push('meta:'); Object.entries(n.meta).forEach(([k,v])=>lines.push(`  ${k}: "${v}"`));
+  }
+  showLines(lines, 'yaml');
+}
+function renderCode(n, file) {
+  const tmpl=CODE_TPL[n.type];
+  const text=tmpl?tmpl(n):`# ${n.id}\n# path: ${n.path}/${file||'component.yaml'}\n# No code template for type: ${n.type}`;
+  showLines(text.split('\n'), 'py');
+}
+function renderEdgeYaml(e) {
+  showLines([`id: "${e.id}"`,`from: "${e.from}"`,`to: "${e.to}"`,
+    `mapping: "${e.mapping||''}"`,`transform: "${e.transform||''}"`,
+    `condition: "${e.condition||''}"`,`type: "${e.type||'data-flow'}"`], 'yaml');
+}
+function showLines(lines, lang) {
+  const content=document.getElementById('bottom-content');
+  const hdr=S.sel?`<div style="color:var(--sub);font-size:10px;margin-bottom:5px">${esc(S.sel)}${S.selFile?' / '+esc(S.selFile):''}</div>`:'';
+  content.innerHTML=hdr+lines.map((l,i)=>{
+    let h=esc(l);
+    if(lang==='yaml') { h=h.replace(/^(\s*)([a-z_]+:)/g,'$1<span class="key">$2</span>'); h=h.replace(/"([^"]*)"/g,'"<span class="st">$1</span>"'); }
+    else { h=h.replace(/(def |class |import |from |return |pass)/g,'<span class="kw">$1</span>'); h=h.replace(/"([^"]*)"/g,'"<span class="st">$1</span>"'); h=h.replace(/#.*/g,'<span class="cm">$&</span>'); }
+    return `<div class="code-line"><span class="ln">${i+1}</span><span>${h||'&nbsp;'}</span></div>`;
+  }).join('');
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────
+function selectNode(id) {
+  S.sel=id; S.selType='node'; S.selFile=null; renderAll(); renderInspector(); renderBottom();
+}
+function selectEdge(id) {
+  S.sel=id; S.selType='edge'; S.selFile=null;
+  document.querySelectorAll('.btab').forEach(t=>t.classList.toggle('active',t.dataset.tab==='edge'));
+  S.btab='edge';
+  renderSidebar(); renderCanvas(); renderEdgeInspector(S.edges[id]); renderEdgeYaml(S.edges[id]);
+}
+function openFile(nodeId, file) {
+  S.sel=nodeId; S.selType='file'; S.selFile=file;
+  document.querySelectorAll('.btab').forEach(t=>t.classList.toggle('active',t.dataset.tab==='code'));
+  S.btab='code';
+  renderSidebar(); renderCanvas(); renderFileInspector(nodeId,file); renderCode(S.nodes[nodeId],file);
+}
+function drillIn(id) { S.crumbs.push(id); S.scope=id; S.sel=null; renderAll(); }
+function renderAll() { renderSidebar(); renderCanvas(); renderInspector(); renderBottom(); }
+
+// ─── CRUD ─────────────────────────────────────────────────────────────────
+function deleteNode(id) {
+  if (!confirm(`Delete "${id}"?`)) return;
+  const n=S.nodes[id];
+  if (n?.parent) { const p=S.nodes[n.parent]; if(p) p.children=(p.children||[]).filter(c=>c!==id); }
+  Object.keys(S.edges).forEach(eid=>{ if(S.edges[eid].from===id||S.edges[eid].to===id) delete S.edges[eid]; });
+  delete S.nodes[id]; S.sel=null; S.selType=null;
+  saveState(); renderAll(); toast(`Deleted ${id}`);
+}
+function deleteEdge(id) {
+  delete S.edges[id]; S.sel=null; S.selType=null; saveState(); renderAll(); toast('Edge deleted');
+}
+
+// ─── NODE MODAL ───────────────────────────────────────────────────────────
+function openNodeModal(editId=null) {
+  S.editNodeId=editId;
+  const n=editId?S.nodes[editId]:null;
+  document.getElementById('nm-title').textContent=editId?'Edit Component':'Add Component';
+  document.getElementById('nm-type').value=n?.type||'tool';
+  document.getElementById('nm-id').value=n?.id||'';
+  document.getElementById('nm-ver').value=n?.version||1;
+  document.getElementById('nm-label').value=n?.label||'';
+  document.getElementById('nm-desc').value=n?.desc||'';
+  document.getElementById('nm-inputs').value=n?(n.inputs||[]).map(i=>i.n+':'+i.t).join(', '):'';
+  document.getElementById('nm-outputs').value=n?(n.outputs||[]).map(o=>o.n+':'+o.t).join(', '):'';
+  document.getElementById('nm-confirm').textContent=editId?'Save':'Create';
+  updateNodeModalExtra(); document.getElementById('node-modal').hidden=false;
+}
+function updateNodeModalExtra() {
+  const type=document.getElementById('nm-type').value;
+  const meta=TYPE_META[type]||[]; const editNode=S.editNodeId?S.nodes[S.editNodeId]:null;
+  const wrap=document.getElementById('nm-extra-wrap'); const grid=document.getElementById('nm-extra');
+  if (!meta.length) { wrap.hidden=true; return; }
+  wrap.hidden=false; document.getElementById('nm-extra-title').textContent=`${type} fields`;
+  grid.innerHTML=meta.map(({f,l,ph})=>`<div class="fl"><label>${esc(l)}</label>
+    <input id="nmx-${f}" placeholder="${esc(ph||'')}" value="${esc(editNode?.meta?.[f]||'')}"></div>`).join('');
+}
+document.getElementById('nm-type').addEventListener('change', updateNodeModalExtra);
+document.getElementById('nm-cancel').addEventListener('click', ()=>{ document.getElementById('node-modal').hidden=true; });
+document.getElementById('nm-confirm').addEventListener('click', ()=>{
+  const type=document.getElementById('nm-type').value;
+  const rawId=document.getElementById('nm-id').value.trim(); const id=(rawId||uid(type)).replace(/\s+/g,'_');
+  const meta={}; (TYPE_META[type]||[]).forEach(({f})=>{ const el=document.getElementById(`nmx-${f}`); if(el) meta[f]=el.value; });
+  const cx=40+Math.random()*240, cy=80+Math.random()*160;
+  const prev=S.editNodeId?S.nodes[S.editNodeId]:null;
+  const node={id,type,label:document.getElementById('nm-label').value.trim()||id,
+    path:`components/${type}s/${id}`,desc:document.getElementById('nm-desc').value.trim(),
+    version:parseInt(document.getElementById('nm-ver').value)||1,
+    inputs:parsePorts(document.getElementById('nm-inputs').value),
+    outputs:parsePorts(document.getElementById('nm-outputs').value),
+    files:DEF_FILES[type]||['component.yaml'],tests:[DEF_FILES[type]?.find(f=>f.includes('test'))||'tests/unit.yaml'],
+    children:prev?.children||[], edgeIds:prev?.edgeIds||[], meta,
+    parent:prev?.parent||S.scope, x:prev?.x||cx, y:prev?.y||cy, w:130, h:50};
+  if (S.editNodeId && S.editNodeId!==id) {
+    const par=S.nodes[node.parent];
+    if(par) par.children=par.children.map(c=>c===S.editNodeId?id:c);
+    delete S.nodes[S.editNodeId];
+  }
+  S.nodes[id]=node;
+  if (!S.editNodeId) { const par=S.nodes[S.scope]; if(par&&!par.children.includes(id)) par.children.push(id); }
+  S.sel=id; S.selType='node'; S.editNodeId=null;
+  saveState(); document.getElementById('node-modal').hidden=true; renderAll(); renderInspector(); toast((prev?'Updated':'Created')+` "${id}"`);
+});
+
+// ─── EDGE MODAL ───────────────────────────────────────────────────────────
+function openEdgeModal() {
+  const ch=childrenOf(S.scope);
+  ['em-from','em-to'].forEach(sid=>{
+    document.getElementById(sid).innerHTML=ch.map(n=>`<option value="${esc(n.id)}">${esc(n.label)}</option>`).join('');
+  });
+  document.getElementById('em-map').value=''; document.getElementById('em-tf').value=''; document.getElementById('em-cond').value='';
+  document.getElementById('edge-modal').hidden=false;
+}
+document.getElementById('em-cancel').addEventListener('click', ()=>{ document.getElementById('edge-modal').hidden=true; });
+document.getElementById('em-confirm').addEventListener('click', ()=>{
+  const id='e_'+Date.now().toString(36);
+  S.edges[id]={id, from:document.getElementById('em-from').value, to:document.getElementById('em-to').value,
+    mapping:document.getElementById('em-map').value, transform:document.getElementById('em-tf').value,
+    condition:document.getElementById('em-cond').value, type:document.getElementById('em-etype').value};
+  saveState(); document.getElementById('edge-modal').hidden=true; renderAll(); toast('Edge added');
+});
+
+// ─── IMPORT / EXPORT ──────────────────────────────────────────────────────
+document.getElementById('btn-export').addEventListener('click', ()=>{
+  downloadJSON(JSON.stringify({nodes:S.nodes,edges:S.edges},null,2), 'agentic-graph.json');
+  toast('Exported as JSON');
+});
+document.getElementById('btn-export-gd').addEventListener('click', ()=>{
+  const tasks=Object.values(S.nodes).map((n,i)=>({
+    task_id: i+1, task_name:n.label||n.id, description:n.desc||'', status:'Not Started',
+    priority:'Medium', category_name:n.type,
+    start_date:new Date().toISOString().slice(0,10),
+    end_date:new Date(Date.now()+7*86400000).toISOString().slice(0,10),
+    estimated_hours:8, tags:[n.type], dependencies:[], assigned_workers:[], parent_task_id:null
+  }));
+  const payload={project:{name:'Agentic Workflow',start_date:new Date().toISOString().slice(0,10),end_date:new Date(Date.now()+90*86400000).toISOString().slice(0,10),status:'In Progress'},tasks};
+  downloadJSON(JSON.stringify(payload,null,2), 'node.tasks.json');
+  toast('Exported as graph-display template');
+});
+document.getElementById('btn-import').addEventListener('click', ()=>{
+  document.getElementById('import-ta').value=''; document.getElementById('import-modal').hidden=false;
+});
+document.getElementById('im-cancel').addEventListener('click', ()=>{ document.getElementById('import-modal').hidden=true; });
+document.getElementById('im-confirm').addEventListener('click', ()=>{
+  try {
+    const parsed=JSON.parse(document.getElementById('import-ta').value);
+    if (parsed.nodes && typeof parsed.nodes==='object') {
+      S.nodes=parsed.nodes; S.edges=parsed.edges||{};
+      S.scope='root'; S.crumbs=['root']; S.sel=null;
+      saveState(); renderAll(); toast('Graph imported');
+    } else toast('Invalid JSON — expected {nodes,edges}');
+  } catch { toast('JSON parse error'); }
+  document.getElementById('import-modal').hidden=true;
+});
+document.getElementById('btn-new').addEventListener('click', ()=>{
+  if (confirm('Reset to demo graph? Unsaved changes will be lost.')) clearState();
+});
+function downloadJSON(json, filename) {
+  const a=document.createElement('a'); a.href='data:application/json;charset=utf-8,'+encodeURIComponent(json);
+  a.download=filename; a.click();
+}
+
+// ─── BUTTON WIRING ────────────────────────────────────────────────────────
+document.getElementById('btn-node').addEventListener('click', ()=>openNodeModal());
+document.getElementById('btn-add-here').addEventListener('click', ()=>openNodeModal());
+document.getElementById('btn-edge').addEventListener('click', openEdgeModal);
+document.querySelectorAll('.btab').forEach(t=>t.addEventListener('click', ()=>{
+  S.btab=t.dataset.tab; document.querySelectorAll('.btab').forEach(x=>x.classList.toggle('active',x===t)); renderBottom();
+}));
+['node-modal','edge-modal','import-modal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click', e=>{ if(e.target.id===id) e.target.hidden=true; });
+});
+
+// ─── INIT ─────────────────────────────────────────────────────────────────
+loadState();
+renderAll();
+</script>
+
+</body>
+</html>

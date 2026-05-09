@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Graph Composer</title>
+  <meta name="description" content="Compose, save, and preview metric-driven graph templates for graph-display.">
+  <link rel="stylesheet" href="css/graph-composer.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Graph Composer</p>
+        <h1>Compose metric-driven graph templates</h1>
+        <p>Create and edit nodes, map custom sizing and coloring variables, and save multiple graph templates that measure different things such as hours, content size, substructure size, categories, or your own authored metrics.</p>
+      </div>
+      <div class="hero-links">
+        <a class="hero-link is-accent" href="../graph-display/index.html">Open Graph Viewer</a>
+        <a class="hero-link" href="../graph-display/schema/graph-template.schema.json" target="_blank" rel="noopener">Graph Template Schema</a>
+        <a class="hero-link" href="../graph-display/schema/graph-ui-config.schema.json" target="_blank" rel="noopener">UI Config Schema</a>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar card stack">
+        <section>
+          <h2>Template Library</h2>
+          <p>Saved templates live in browser storage and can be previewed in the existing graph viewer.</p>
+          <div class="top-actions">
+            <button id="new-template-btn" class="action-button">New Blank</button>
+            <button id="load-example-btn" class="action-button">Load Example</button>
+          </div>
+        </section>
+
+        <section>
+          <div id="saved-templates" class="library-list"></div>
+        </section>
+
+        <section>
+          <h3>Measurement Presets</h3>
+          <p>Use a preset as a starting point, then edit every variable below.</p>
+          <div id="measurement-presets" class="preset-grid"></div>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <section class="card stack">
+          <div>
+            <h2>Template Identity</h2>
+            <p id="template-stats">0 nodes</p>
+          </div>
+          <form id="template-form" class="form-grid">
+            <label class="field">
+              <span>Template Id</span>
+              <input id="template-id" data-template-path="id" type="text">
+            </label>
+            <label class="field">
+              <span>Template Name</span>
+              <input id="template-name" data-template-path="name" type="text">
+            </label>
+            <label class="field field-wide">
+              <span>Description</span>
+              <textarea id="template-description" data-template-path="description"></textarea>
+            </label>
+            <label class="field">
+              <span>Profile Node</span>
+              <select id="meta-profile-node" data-template-path="meta.profileNodeId"></select>
+            </label>
+            <label class="field">
+              <span>Core Node</span>
+              <select id="meta-core-node" data-template-path="meta.coreNodeId"></select>
+            </label>
+            <label class="field">
+              <span>Legend Mode</span>
+              <select id="meta-legend-mode" data-template-path="meta.legendMode">
+                <option value="custom">custom</option>
+                <option value="career">career</option>
+                <option value="task-management">task-management</option>
+              </select>
+            </label>
+            <label class="field-toggle">
+              <span>Show Profile Button</span>
+              <input id="meta-show-profile" data-template-path="meta.showProfileButton" type="checkbox">
+            </label>
+            <label class="field-toggle">
+              <span>Show Core Button</span>
+              <input id="meta-show-core" data-template-path="meta.showCoreButton" type="checkbox">
+            </label>
+            <label class="field-toggle">
+              <span>Show CV Button</span>
+              <input id="meta-show-cv" data-template-path="meta.showCvButton" type="checkbox">
+            </label>
+            <label class="field-toggle">
+              <span>Walkthrough Enabled</span>
+              <input id="meta-walkthrough" data-template-path="meta.walkthroughEnabled" type="checkbox">
+            </label>
+            <label class="field field-wide">
+              <span>Extra Meta JSON</span>
+              <textarea id="meta-extra-json"></textarea>
+            </label>
+          </form>
+
+          <div class="status-bar">
+            <span id="status-message" data-tone="info">Ready.</span>
+            <div class="row-actions">
+              <button id="save-template-btn" class="action-button is-accent">Save Template</button>
+              <button id="preview-template-btn" class="action-button">Save + Preview</button>
+              <button id="export-template-btn" class="action-button">Export JSON</button>
+              <button id="delete-template-btn" class="action-button is-danger">Delete Saved</button>
+              <a id="preview-link" class="hero-link" href="../graph-display/index.html" target="_blank" rel="noopener">Preview Link</a>
+            </div>
+          </div>
+        </section>
+
+        <section class="card stack">
+          <div>
+            <h2>Visual Variables</h2>
+            <p>All documented graph configuration variables are editable here, including custom metric-based sizing and coloring.</p>
+          </div>
+          <div id="config-editor" class="config-grid"></div>
+        </section>
+
+        <section class="section-grid">
+          <section class="card stack">
+            <div>
+              <h2>Nodes</h2>
+              <p>Create nodes, assign layers, and author custom metrics for the size/color mappings.</p>
+            </div>
+            <div class="row-actions">
+              <button id="add-node-btn" class="action-button">Add Node</button>
+              <button id="duplicate-node-btn" class="action-button">Duplicate Node</button>
+              <button id="remove-node-btn" class="action-button is-danger">Remove Node</button>
+            </div>
+            <div id="node-list" class="entity-list"></div>
+          </section>
+
+          <section class="card stack">
+            <div>
+              <h2>Node Editor</h2>
+              <p>The metrics JSON can hold whatever measurements you want to track, then the config above chooses which fields drive size and color.</p>
+            </div>
+            <form id="node-editor" class="form-grid">
+              <label class="field">
+                <span>Node Id</span>
+                <input id="node-id" type="text">
+              </label>
+              <label class="field">
+                <span>Label</span>
+                <input id="node-label" type="text">
+              </label>
+              <label class="field">
+                <span>Type</span>
+                <select id="node-type">
+                  <option value="parent">parent</option>
+                  <option value="child">child</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Layer</span>
+                <input id="node-layer" type="number" step="1">
+              </label>
+              <label class="field">
+                <span>Parent Id</span>
+                <select id="node-parent-id"></select>
+              </label>
+              <label class="field">
+                <span>Template Type</span>
+                <input id="node-template-type" type="text">
+              </label>
+              <label class="field">
+                <span>Priority</span>
+                <select id="node-priority">
+                  <option value="Critical">Critical</option>
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Status</span>
+                <select id="node-status">
+                  <option value="Not Started">Not Started</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Done">Done</option>
+                  <option value="Blocked">Blocked</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Estimated Hours</span>
+                <input id="node-estimated-hours" type="number" step="any">
+              </label>
+              <label class="field field-wide">
+                <span>Metrics JSON</span>
+                <textarea id="node-metrics-json"></textarea>
+              </label>
+              <label class="field field-wide">
+                <span>Extra Node JSON</span>
+                <textarea id="node-extra-json"></textarea>
+              </label>
+            </form>
+          </section>
+        </section>
+
+        <section class="dual-grid">
+          <section class="card stack">
+            <div>
+              <h2>Details</h2>
+              <p>These values become the popup content when the node is opened in graph-display.</p>
+            </div>
+            <form id="detail-editor" class="form-grid">
+              <label class="field">
+                <span>Detail Title</span>
+                <input id="detail-title" type="text">
+              </label>
+              <label class="field">
+                <span>Photo URL</span>
+                <input id="detail-photo-url" type="text">
+              </label>
+              <label class="field field-wide">
+                <span>Detail Items</span>
+                <textarea id="detail-items"></textarea>
+              </label>
+            </form>
+          </section>
+
+          <section class="card stack">
+            <div>
+              <h2>Links</h2>
+              <p>Create relationships between nodes. Link type controls force grouping and legend labels in the viewer.</p>
+            </div>
+            <div class="row-actions">
+              <button id="add-link-btn" class="action-button">Add Link</button>
+              <button id="remove-link-btn" class="action-button is-danger">Remove Link</button>
+            </div>
+            <div id="link-list" class="entity-list"></div>
+            <form id="link-editor" class="form-grid">
+              <label class="field">
+                <span>Source</span>
+                <select id="link-source"></select>
+              </label>
+              <label class="field">
+                <span>Target</span>
+                <select id="link-target"></select>
+              </label>
+              <label class="field">
+                <span>Type</span>
+                <select id="link-type"></select>
+              </label>
+              <label class="field">
+                <span>Weight</span>
+                <input id="link-weight" type="number" step="any">
+              </label>
+              <label class="field field-wide">
+                <span>Extra Link JSON</span>
+                <textarea id="link-extra-json"></textarea>
+              </label>
+            </form>
+          </section>
+        </section>
+
+        <section class="panel-grid">
+          <section class="card stack">
+            <div>
+              <h2>Validation</h2>
+              <p>The composer validates the direct template plus config overrides against the same contract the graph viewer uses.</p>
+            </div>
+            <div id="validation-panel"></div>
+          </section>
+
+          <section class="card stack">
+            <div>
+              <h2>JSON Snapshot</h2>
+              <p>Use this as a direct template file or save it into your own template pipeline.</p>
+            </div>
+            <pre id="json-preview" class="code-panel"></pre>
+          </section>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="js/composer-app.js"></script>
+</body>
+</html>

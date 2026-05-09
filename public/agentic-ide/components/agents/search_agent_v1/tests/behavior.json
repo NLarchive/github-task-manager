@@ -1,0 +1,39 @@
+{
+  "name": "search_agent behavior tests",
+  "type": "behavior",
+  "target": "search_agent",
+  "cases": [
+    {
+      "name": "Search agent synthesizes a LangGraph answer",
+      "mock_fetch": {
+        "ok": true,
+        "status": 200,
+        "json": {
+          "results": [
+            {
+              "title": "LangGraph multi-agent patterns",
+              "url": "https://example.com/langgraph",
+              "snippet": "LangGraph coordinates agent state, tools, and branching workflows."
+            },
+            {
+              "title": "LangGraph runtime",
+              "url": "https://example.com/langgraph/runtime",
+              "snippet": "Reusable graphs for orchestrating multi-agent systems."
+            }
+          ]
+        }
+      },
+      "mock_llm": {
+        "text": "LangGraph uses graph-based orchestration so multiple agents and tools can coordinate around shared state."
+      },
+      "input": {
+        "query": "LangGraph multi-agent patterns"
+      },
+      "expect": {
+        "answer": {
+          "contains": "LangGraph"
+        }
+      }
+    }
+  ]
+}

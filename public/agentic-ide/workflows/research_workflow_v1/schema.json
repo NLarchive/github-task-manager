@@ -1,0 +1,14 @@
+{
+  "id": "research_workflow",
+  "version": 1,
+  "description": "Port contract for top-level research workflow cell.",
+  "inputs": [
+    { "name": "topic", "type": "string", "required": true }
+  ],
+  "outputs": [
+    { "name": "report", "type": "string" }
+  ],
+  "errors": [
+    { "code": "WORKFLOW_STAGE_FAILED", "description": "At least one workflow node failed" }
+  ]
+}

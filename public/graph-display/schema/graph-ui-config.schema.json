@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./graph-ui-config.schema.json",
+  "title": "Graph UI Config",
+  "description": "Config overrides supported by the reusable graph-display runtime.",
+  "type": "object",
+  "properties": {
+    "colorMode": {
+      "type": "string",
+      "enum": ["layer", "priority", "metric"]
+    },
+    "sizeMode": {
+      "type": "string",
+      "enum": ["fixed", "hours", "metric"]
+    },
+    "nodeSizes": {
+      "type": "object",
+      "properties": {
+        "main": { "type": "number", "minimum": 1 },
+        "sub": { "type": "number", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "priorityColorsHex": {
+      "type": "object",
+      "properties": {
+        "Critical": { "$ref": "#/$defs/hexColor" },
+        "High": { "$ref": "#/$defs/hexColor" },
+        "Medium": { "$ref": "#/$defs/hexColor" },
+        "Low": { "$ref": "#/$defs/hexColor" }
+      },
+      "additionalProperties": { "$ref": "#/$defs/hexColor" }
+    },
+    "taskSizing": {
+      "type": "object",
+      "properties": {
+        "minHours": { "type": "number", "minimum": 0 },
+        "maxHours": { "type": "number", "minimum": 0 },
+        "minRadius": { "type": "number", "minimum": 1 },
+        "maxRadius": { "type": "number", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "metricSizing": {
+      "type": "object",
+      "properties": {
+        "field": { "type": "string" },
+        "label": { "type": "string" },
+        "minValue": { "type": "number" },
+        "maxValue": { "type": "number" },
+        "minRadius": { "type": "number", "minimum": 1 },
+        "maxRadius": { "type": "number", "minimum": 1 },
+        "scale": { "type": "string", "enum": ["linear", "sqrt"] }
+      },
+      "additionalProperties": false
+    },
+    "forces": {
+      "type": "object",
+      "properties": {
+        "linkDistance": { "type": "number", "minimum": 1 },
+        "linkDistanceSubcategory": { "type": "number", "minimum": 1 },
+        "linkDistanceLayer": { "type": "number", "minimum": 1 },
+        "charge": { "type": "number" },
+        "chargeMobileMultiplier": { "type": "number", "minimum": 0 },
+        "collidePadding": { "type": "number", "minimum": 0 },
+        "layerStrengthY": { "type": "number", "minimum": 0 },
+        "layoutStrengthX": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "animation": {
+      "type": "object",
+      "properties": {
+        "duration": { "type": "number", "minimum": 0 },
+        "focusDelay": { "type": "number", "minimum": 0 },
+        "focusScale": { "type": "number", "minimum": 0 },
+        "highlightDuration": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "layout": {
+      "type": "object",
+      "properties": {
+        "horizontalPadding": { "type": "number", "minimum": 0 },
+        "verticalPadding": { "type": "number", "minimum": 0 },
+        "boundaryPadding": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "tooltip": {
+      "type": "object",
+      "properties": {
+        "offsetX": { "type": "number" },
+        "offsetY": { "type": "number" },
+        "fadeInDuration": { "type": "number", "minimum": 0 },
+        "fadeOutDuration": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "popup": {
+      "type": "object",
+      "properties": {
+        "closeDelay": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "simulation": {
+      "type": "object",
+      "properties": {
+        "alphaThreshold": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "mobileBreakpoint": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "baseLayerColorsHex": {
+      "type": "object",
+      "properties": {
+        "0": { "$ref": "#/$defs/hexColor" },
+        "1": { "$ref": "#/$defs/hexColor" },
+        "2": { "$ref": "#/$defs/hexColor" },
+        "3": { "$ref": "#/$defs/hexColor" },
+        "4": { "$ref": "#/$defs/hexColor" }
+      },
+      "additionalProperties": { "$ref": "#/$defs/hexColor" }
+    },
+    "fallbackColorHex": { "$ref": "#/$defs/hexColor" },
+    "metricColoring": {
+      "type": "object",
+      "properties": {
+        "field": { "type": "string" },
+        "label": { "type": "string" },
+        "fallbackKey": { "type": "string" },
+        "palette": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/hexColor" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "toneGeneration": {
+      "type": "object",
+      "properties": {
+        "step": { "type": "number", "minimum": 0 },
+        "direction": { "type": "string", "enum": ["brighter", "darker"] }
+      },
+      "additionalProperties": false
+    },
+    "textColorsHex": {
+      "type": "object",
+      "properties": {
+        "light": { "$ref": "#/$defs/hexColor" },
+        "dark": { "$ref": "#/$defs/hexColor" }
+      },
+      "additionalProperties": false
+    },
+    "maxColorVariants": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "showStatusVisuals": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "hexColor": {
+      "type": "string",
+      "pattern": "^#[0-9a-fA-F]{6}$"
+    }
+  }
+}

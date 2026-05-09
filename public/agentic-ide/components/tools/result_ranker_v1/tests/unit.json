@@ -1,0 +1,41 @@
+{
+  "name": "result_ranker unit tests",
+  "type": "unit",
+  "target": "result_ranker",
+  "cases": [
+    {
+      "name": "Ranks non-error results by heuristic score",
+      "input": {
+        "results": [
+          {
+            "title": "Short",
+            "url": "",
+            "snippet": "Tiny"
+          },
+          {
+            "title": "Detailed LangGraph guide",
+            "url": "https://example.com/guide",
+            "snippet": "A long and detailed explanation of LangGraph agent orchestration patterns."
+          },
+          {
+            "error": "timeout"
+          }
+        ]
+      },
+      "expect": {
+        "ranked": [
+          {
+            "title": "Detailed LangGraph guide",
+            "url": "https://example.com/guide",
+            "snippet": "A long and detailed explanation of LangGraph agent orchestration patterns."
+          },
+          {
+            "title": "Short",
+            "url": "",
+            "snippet": "Tiny"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "id": "research_benchmark_runner",
+  "type": "tool",
+  "version": 1,
+  "label": "research_benchmark_runner",
+  "path": "components/tools/research_benchmark_runner_v1",
+  "description": "Runs the research_workflow through the live bridge to collect real inference latency and output data.",
+  "lifecycle": "draft",
+  "success_threshold": 1,
+  "impl": "main.js",
+  "inputs": [
+    {
+      "name": "topic",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "benchmark_name",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "run_label",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "started_at",
+      "type": "string",
+      "required": true
+    }
+  ],
+  "outputs": [
+    {
+      "name": "report",
+      "type": "string"
+    },
+    {
+      "name": "benchmark_meta",
+      "type": "object"
+    }
+  ],
+  "errors": [
+    {
+      "code": "BENCHMARK_RUN_FAILED",
+      "description": "Research workflow execution failed"
+    }
+  ],
+  "files": [
+    "schema.json",
+    "main.js"
+  ],
+  "tests": []
+}

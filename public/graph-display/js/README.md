@@ -16,6 +16,9 @@ It renders project task graphs, enables navigation between modules, and drives t
 | `cv-generator.js` | CV popup builder from graph node data |
 | `template-loader.js` | Fetches and normalizes template JSON files via `registry.json` |
 | `shared/link-types.js` | Canonical link-type constants and display labels |
+| `shared/graph-design-contract.js` | Canonical graph UI config/input schema and reusable integration contract |
+| `shared/graph-metric-utils.js` | Resolves metric-based node sizes and categorical colors |
+| `shared/graph-template-storage.js` | Browser-local template persistence used by Graph Composer and graph-display |
 | `shared/tours.js` | Tour step definitions keyed by template ID |
 
 ---
@@ -27,17 +30,21 @@ Defined in `main-graph.js`.
 ### Construction
 
 ```js
-const graph = new CurriculumGraph({
-    container,     // DOM element (the #graph-container div)
-    data,          // { nodes: Node[], links: Link[] }
-    details,       // { [nodeId]: { title, items[] } }
-    nodeMap,       // Map<nodeId, Node>
-    config,        // Config object (forces, animation, sizes…)
-    template,      // Full template object from graph-data.js
-    legendMode,    // 'task-management' | 'career'
-    isMobile       // boolean
-});
+const graph = new CurriculumGraph(
+        'graph-container',
+        { nodes, links },
+        details,
+        configOverrides,
+        {
+                template,
+                profileNodeId: template.meta?.profileNodeId,
+                coreNodeId: template.meta?.coreNodeId,
+                legendMode: template.meta?.legendMode
+        }
+);
 ```
+
+The runtime config and input schema are centralized in `shared/graph-design-contract.js` and are also exposed at runtime as `window.GraphDisplayContract`.
 
 ### Key Methods
 
@@ -156,3 +163,15 @@ Defined in `shared/link-types.js` and used by `graph-data.js`:
 | `DEVELOPS` | Skill development link |
 | `CREATES` | Impact link |
 | `LEADS_TO` | Outcome link |
+
+## Portable Contract
+
+For another project, the first file to inspect is `shared/graph-design-contract.js`.
+
+It defines:
+
+- the accepted `configOverrides` keys and defaults
+- the direct-template shape expected by `CurriculumGraph`
+- the TaskDB task/subtask/module authoring model
+- relation semantics for edges, subgraphs, and critical-path metadata
+- which globals are optional host features instead of graph-core requirements

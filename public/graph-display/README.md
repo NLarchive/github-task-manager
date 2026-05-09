@@ -1,110 +1,249 @@
-# Graph Display (Interactive Career Graph Template)
+# Graph Display
 
-This folder is a **template** for an interactive, graph-based CV/portfolio.
-It ships with **sample data** (no personal info) and a modular CSS setup.
+`public/graph-display/` is a reusable D3 graph UI. It can render:
 
-## Quick start
+- direct graph templates with `nodes[]`, `links[]`, and `details{}`
+- TaskDB-backed project graphs derived from `node.tasks.json`
+- inline subgraphs from `subtasks[]`
+- module/subproject graphs from `navigation.modules[]`
 
-### Option A: run with a simple Node static server (recommended)
+The folder still ships with sample career/task data, but the graph runtime is now documented as a portable component instead of only a repo-local template.
+
+## Single Contract
+
+The canonical integration surface lives in `js/shared/graph-design-contract.js`.
+
+It exports:
+
+- `GRAPH_UI_DEFAULTS`: the full runtime default config used by `main-graph.js`
+- `GRAPH_UI_CONFIG_SCHEMA`: every supported design/config override key
+- `GRAPH_COMPONENT_INPUT_SCHEMA`: the expected shapes for templates, nodes, links, details, TaskDB tasks, inline subtasks, and module navigation
+- `GRAPH_RELATION_GUIDE`: the supported edge/relation semantics
+- `GRAPH_SEMANTICS_GUIDE`: sizing, coloring, critical-path, and subgraph rules
+- `GRAPH_HOST_FEATURES`: what is core to the graph UI vs what is optional host integration
+- `GRAPH_COMPONENT_EXAMPLES`: copy/paste-ready example payloads
+- `createGraphUiConfig()`, `validateGraphUiConfig()`, `validateGraphTemplateInput()`, `validateGraphComponentInputs()`
+
+At runtime the same contract is exposed on `window.GraphDisplayContract` for host apps and DevTools inspection.
+
+Machine-readable schema snapshots now live in:
+
+- `schema/graph-ui-config.schema.json`
+- `schema/graph-template.schema.json`
+
+The browser editor for these payloads lives in:
+
+- `../graph-composer/index.html`
+
+Companion graph pages now live in:
+
+- `project-index.html`: browse a repo or browser-picked folder as a graph of directories and files
+- `guide-index.html`: interactive explanation of nodes, sizes, colors, relations, subgraphs, schemas, and critical-path fields
+
+## Core vs Optional
+
+Core graph UI files:
+
+- `css/styles-new.css`
+- `js/d3.v7.min.js`
+- `js/utils.js`
+- `js/main-graph.js`
+- `js/graph-data.js`
+- `js/cv-generator.js`
+- `js/walkthrough.js`
+- `js/shared/link-types.js`
+- `js/shared/tours.js`
+- `js/shared/graph-design-contract.js`
+- `js/shared/graph-metric-utils.js`
+- `js/shared/graph-template-storage.js`
+
+Optional host integrations:
+
+- `../local-folder/js/*`: local-folder discovery and write-back
+- `../task-engine/js/task-schema-clipboard.js`: Copy Schema action
+- `../calendar/js/task-ics-export.js`: ICS export
+
+If you copy this folder into another project, the core graph still works without those host integrations. Remove or replace the optional script tags in `index.html` if your host does not provide them.
+
+## Quick Start
+
+### Option A: static server
+
 From the repo root:
 
 ```bash
-npx http-server "./graph-display" -p 8080
+npx http-server "./public" -p 8080
 ```
 
 Open:
-- http://localhost:8080/index.html
 
-> Why a server? The app uses ES modules (`type="module"`) and most browsers block them from `file://`.
+- `http://localhost:8080/graph-display/index.html`
+- `http://localhost:8080/graph-display/project-index.html`
+- `http://localhost:8080/graph-display/guide-index.html`
 
-### Option B: run with PHP’s built-in server
-If you have PHP installed:
+### Option B: local dev server
 
 ```bash
-php -S localhost:8080 -t graph-display
+node server.js
 ```
 
-## Customize your content
+This is the easiest option when you also want local TaskDB APIs and folder/project integrations.
 
-### 1) Choose a template (Career vs Task Management)
-The menu now includes a **Graph template** selector.
+`project-index.html` uses the new `/api/project-tree` and `/api/file-content` endpoints when the local server is available. Without the server it can still fall back to the browser folder picker.
 
-You can also deep-link via query param:
+## Plug Into Another Project
 
-- Career: `index.php?template=career`
-- Task management: `index.php?template=task-management`
+1. Copy `public/graph-display/` into your host project.
+2. Serve `index.html` through any static server. Do not use `file://` because the app uses ES modules.
+3. Choose one input strategy:
+   - direct template object: `{ id, name, nodes, links, details, meta, configOverrides }`
+   - TaskDB source: `node.tasks.json` + registry entry or custom loader path
+4. Put visual/runtime overrides in `template.configOverrides`.
+5. Remove or replace optional host scripts in `index.html` if you do not need local-folder, clipboard-template, or calendar-export features.
+6. Inspect `window.GraphDisplayContract` or import `js/shared/graph-design-contract.js` to wire a host-specific editor, schema form, or template generator.
 
-### 2) Edit the graph templates
-File: js/graph-data.js
+## What To Author
 
-This file now contains **multiple templates**:
-- `Career (Template)` (the original CV graph)
-- `Task Management (Project)` (dependency-layered tasks)
+### Nodes
 
-To add your own, follow the pattern in `TEMPLATE_REGISTRY` and export via `getAvailableTemplates()` / `loadTemplate()`.
+Direct template nodes should always provide:
 
-- `cypherExportData.rawNodes`: the nodes that appear in the Career graph.
-  - `labels: ['Domain']` → parent nodes (big nodes)
-  - `labels: ['Subcategory']` → child nodes (small nodes)
-  - `properties.layer` controls vertical layer placement (0..4)
-  - `properties.parent` on children ties them to a parent for styling and layout.
+- `id`
+- `label`
 
-- `cypherExportData.rawRelationships`: how nodes connect.
-  - `HAS_FOUNDATION`, `HAS_SUBCATEGORY`, `DEVELOPS`, `CREATES`, `LEADS_TO`
-  - These relationship types drive link styling and the legend.
+Useful optional node fields:
 
-- `graphDetailsData`: what appears in the node popup and the Classic CV view.
-  - Each entry is keyed by node `id`.
-  - `title` is the header shown in popups/CV.
-  - `items` is an array of strings (HTML is allowed).
-  - `profile.photoUrl` is optional (used for the menu button image + CV header photo).
+- `type`: `parent` or `child`
+- `layer`: vertical band index
+- `parentId`: clustering parent
+- `templateType`: semantic role such as `task`, `project-start`, `project-end`
+- `priority`: `Critical | High | Medium | Low`
+- `estimatedHours`: used by hours-based node sizing
+- `status`: used by status visuals
 
-Task Management template notes:
-- **Layering is computed from dependencies**: tasks with no dependencies → Layer 1, tasks depending on Layer 1 → Layer 2, etc.
-- **Node color = priority** (Critical/High/Medium/Low)
-- **Node size = estimated hours**
+### Node Sizes
 
-### 3) Adjust Classic CV sections
-File: js/cv-generator.js
+There are two supported size modes:
 
-The `defaultCvConfig.sections` array controls which groups appear in the “Classic CV” popup.
+- `fixed`: use `nodeSizes.main` and `nodeSizes.sub`
+- `hours`: use `taskSizing.minHours`, `taskSizing.maxHours`, `taskSizing.minRadius`, `taskSizing.maxRadius` together with each task node's `estimatedHours`
 
-Common edits:
-- Change section titles
-- Point a section at a different parent node (`parentNodeId`) or categories (`categoryNodeIds`)
-- Change sorting:
-  - `alpha`
-  - `chrono-reverse` (expects years in titles like `(2023-Present)`)
+### Node Colors
 
-### 4) Update the profile image
-- Current placeholder: images/team/profile-placeholder.svg
-- Replace it with your own image and update:
-  - js/graph-data.js → `graphDetailsData.profile.photoUrl`
+There are two supported color modes:
 
-## PWA / Offline caching
+- `layer`: color by `layer` using `baseLayerColorsHex` and `toneGeneration`
+- `priority`: color by task priority using `priorityColorsHex`
+
+Text contrast is derived from `textColorsHex` and the computed node fill color.
+
+### Edges / Relations
+
+The graph runtime understands these relation families:
+
+| Relation | Typical Use | Author In |
+|---|---|---|
+| `HAS_FOUNDATION` | profile/foundation structure | direct template `rawRelationships[]` |
+| `HAS_SUBCATEGORY` | parent-to-child in the same layer | direct template `rawRelationships[]` |
+| `DEVELOPS` | capability growth | direct template `rawRelationships[]` |
+| `CREATES` | impact/output creation | direct template `rawRelationships[]` |
+| `LEADS_TO` | outcome progression | direct template `rawRelationships[]` |
+| `HAS_TASK` | synthetic start-to-task edge | derived automatically |
+| `DEPENDS_FS/SS/FF/SF/ON` | task scheduling dependencies | `tasks[].dependencies[]` |
+
+The shared guide for relation semantics and force behavior lives in `js/shared/graph-design-contract.js`.
+
+### Subgraphs and Subcomponents
+
+There are three distinct nesting patterns:
+
+- `subtasks[]`: inline popup-driven subgraphs nested inside a task
+- `parent_task_id`: child tasks that remain full graph nodes
+- `navigation.modules[]`: sidebar-driven module or subproject navigation
+
+Use them intentionally:
+
+- choose `subtasks[]` when the work belongs entirely inside one parent task context
+- choose `parent_task_id` when the child task needs its own lifecycle, dependencies, or graph-level navigation
+- choose `navigation.modules[]` when the subgraph should load as a separate module/project view
+
+### Critical Path
+
+Critical path is modeled as node metadata, not as a special edge type.
+
+Use:
+
+- `is_critical_path: true` on TaskDB tasks
+
+The graph keeps that flag in the normalized node/task source so hosts can layer custom filtering, legends, exports, or styling on top.
+
+## Example Direct Template
+
+```js
+const template = {
+  id: 'release-roadmap',
+  name: 'Release Roadmap',
+  nodes: [
+    { id: 'project-start', label: 'Start', type: 'parent', layer: 0, templateType: 'project-start' },
+    { id: 'task-1', label: 'Plan Release', type: 'parent', layer: 1, templateType: 'task', priority: 'High', estimatedHours: 6 },
+    { id: 'task-2', label: 'Ship Release', type: 'parent', layer: 2, templateType: 'task', priority: 'Critical', estimatedHours: 14 }
+  ],
+  links: [
+    { source: 'project-start', target: 'task-1', type: 'HAS_TASK' },
+    { source: 'task-1', target: 'task-2', type: 'DEPENDS_FS' }
+  ],
+  details: {
+    'task-1': { title: 'Plan Release', items: ['Define scope and smoke tests.'] },
+    'task-2': { title: 'Ship Release', items: ['Deploy, verify metrics, and handoff.'] }
+  },
+  meta: {
+    profileNodeId: 'project-start',
+    coreNodeId: 'task-2',
+    legendMode: 'task-management'
+  },
+  configOverrides: {
+    colorMode: 'priority',
+    sizeMode: 'hours'
+  }
+};
+```
+
+## TaskDB Authoring Rules
+
+When using `node.tasks.json`:
+
+- `dependencies[]` authors the real predecessor graph
+- reverse dependencies are derived automatically into downstream navigation/context
+- `parent_task_id` creates full child graph nodes
+- `subtasks[]` creates inline subgraphs
+- `navigation.modules[]` exposes separate module graphs in the sidebar
+- `is_critical_path` marks critical-path work
+
+## Files Worth Editing
+
+- `js/shared/graph-design-contract.js`: graph UI config schema and integration contract
+- `js/main-graph.js`: rendering, interactions, and runtime behavior
+- `js/graph-data.js`: template loading and TaskDB normalization
+- `js/project-index.js`: project explorer graph for folders/files and file previews
+- `js/guide-index.js`: interactive graph guide and contract demo
+- `js/shared/project-graph-utils.js`: shared color, sizing, and formatting helpers for the new companion pages
+- `js/shared/link-types.js`: link-type helpers and force grouping
+- `js/shared/tours.js`: generated walkthrough steps and JSON step loading
+- `css/components/*`: visual styling
+
+- `index.html`: HTML shell and optional host script wiring
+
+## PWA / Offline Caching
 
 Files:
-- manifest.json
-- sw.js
 
-Notes:
-- The service worker pre-caches key assets for offline use.
-- After changing cached assets, bump `CACHE_NAME` in sw.js to force an update.
-- During development, a service worker can “stick” old assets; hard-refresh or unregister in DevTools if needed.
+- `manifest.json`
+- `sw.js`
 
-### Troubleshooting
+If you change core graph runtime assets, bump `CACHE_NAME` in `sw.js` so the service worker refreshes cached files.
 
-- If the embedded graph (iframe) fails to load in the Task Manager UI, check your server path. The Task Manager tries several candidate paths (including `/graph-display/index.html` and `/public/graph-display/index.html`). If you serve the site from the project root, use `/public/` variants or run the server from the `public` folder.
-- The service worker previously attempted to cache an `index.php` file which doesn't exist in this template; that noisy 404 was removed from `sw.js`.
-- For debugging network 404s, open DevTools Network tab and look for the full candidate URLs (the task manager will now log tried candidates in the console).
+## Troubleshooting
 
-## Folder layout
-
-- index.php: HTML shell (works like static HTML too)
-- css/: modular stylesheet entrypoints
-- css/components/: component styles
-- js/main-graph.js: D3 rendering + interactions
-- js/graph-data.js: sample dataset + node popup content
-- js/cv-generator.js: Classic CV popup renderer
-- js/walkthrough.js: guided tour overlay
-- images/: icons and optional profile image
+- If the graph is embedded in another app, confirm the host serves `/graph-display/index.html` or `/public/graph-display/index.html` consistently.
+- If optional features are missing, verify the related host global described in `GRAPH_HOST_FEATURES` is present.
+- If colors or sizing do not apply as expected, validate the payload with `validateGraphUiConfig()` or inspect `window.GraphDisplayContract` in DevTools.

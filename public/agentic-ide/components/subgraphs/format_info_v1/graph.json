@@ -1,0 +1,48 @@
+{
+  "id": "format_tool",
+  "type": "subgraph",
+  "version": 1,
+  "label": "format_info",
+  "path": "components/subgraphs/format_info_v1",
+  "description": "Parse and re-render HTML so downstream reports are structured and inspectable",
+  "lifecycle": "draft",
+  "success_threshold": 0.8,
+  "entry": "html_parser",
+  "inputs": [
+    {
+      "name": "html",
+      "type": "string"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "formatted",
+      "type": "string"
+    }
+  ],
+  "nodes": [
+    {
+      "ref": "components/tools/html_parser_v1"
+    },
+    {
+      "ref": "components/tools/ui_renderer_v1"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e5",
+      "from": "html_parser",
+      "to": "ui_renderer",
+      "mapping": "doc → doc",
+      "type": "data-flow"
+    }
+  ],
+  "files": [
+    "graph.json",
+    "state.js",
+    "tests/snapshot.json"
+  ],
+  "tests": [
+    "tests/snapshot.json"
+  ]
+}

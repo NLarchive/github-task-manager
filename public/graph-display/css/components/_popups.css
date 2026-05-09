@@ -6,6 +6,7 @@
  * ══════════════════════════════════════════════════════════════════════════════ */
 
 /* Popup containers (overlay) */
+#taskNodeModal,
 #popup,
 #legend-popup {
     position: fixed;
@@ -33,6 +34,7 @@
     -webkit-overflow-scrolling: touch;
 }
 
+#taskNodeModal.visible,
 #popup.visible,
 #legend-popup.visible {
     display: flex;
@@ -40,6 +42,7 @@
 }
 
 /* Popup content boxes */
+#taskNodeModal .content,
 #popup .content,
 #legend-popup .content {
     background: var(--color-popup-bg);
@@ -74,6 +77,7 @@
     opacity: 0;
 }
 
+#taskNodeModal.visible .content,
 #popup.visible .content,
 #legend-popup.visible .content {
     transform: scale(1) translateY(0);
@@ -81,6 +85,7 @@
 }
 
 /* Popup titles */
+#taskNodeModal .content h2,
 #popup .content h2,
 #legend-popup .content h2 {
     margin: 0 0 var(--spacing-lg) 0;
@@ -101,6 +106,7 @@
     gap: 5px;
     padding: 6px 0;
 }
+#taskNodeModal .content .task-node-btn,
 #popup .content .task-node-btn {
     display: inline-flex;
     align-items: center;
@@ -117,12 +123,24 @@
     font-family: inherit;
 }
 
+#taskNodeModal .content .task-node-btn[data-node-id]:hover,
+#taskNodeModal .content .task-node-btn[data-node-id]:focus-visible,
+#taskNodeModal .content .task-node-btn[data-subtasks-path]:hover,
+#taskNodeModal .content .task-node-btn[data-subtasks-path]:focus-visible,
+#taskNodeModal .content .task-node-btn[data-parent-node-id]:hover,
+#taskNodeModal .content .task-node-btn[data-parent-node-id]:focus-visible,
+#taskNodeModal .content .task-node-btn[data-popup-action]:hover,
+#taskNodeModal .content .task-node-btn[data-popup-action]:focus-visible,
+#taskNodeModal .content .task-node-btn[data-nav-depth]:hover,
+#taskNodeModal .content .task-node-btn[data-nav-depth]:focus-visible,
 #popup .content .task-node-btn[data-node-id]:hover,
 #popup .content .task-node-btn[data-node-id]:focus-visible,
 #popup .content .task-node-btn[data-subtasks-path]:hover,
 #popup .content .task-node-btn[data-subtasks-path]:focus-visible,
 #popup .content .task-node-btn[data-parent-node-id]:hover,
 #popup .content .task-node-btn[data-parent-node-id]:focus-visible,
+#popup .content .task-node-btn[data-popup-action]:hover,
+#popup .content .task-node-btn[data-popup-action]:focus-visible,
 #popup .content .task-node-btn[data-nav-depth]:hover,
 #popup .content .task-node-btn[data-nav-depth]:focus-visible {
     background: rgba(78, 121, 167, 0.26);
@@ -132,11 +150,20 @@
 }
 
 /* Buttons without a navigable relation show default cursor */
-#popup .content .task-node-btn:not([data-node-id]):not([data-subtasks-path]):not([data-parent-node-id]):not([data-nav-depth]) {
+#taskNodeModal .content .task-node-btn:not([data-node-id]):not([data-subtasks-path]):not([data-parent-node-id]):not([data-popup-action]):not([data-nav-depth]),
+#popup .content .task-node-btn:not([data-node-id]):not([data-subtasks-path]):not([data-parent-node-id]):not([data-popup-action]):not([data-nav-depth]) {
     cursor: default;
 }
 
+.popup-action-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
 /* Name span: truncate long names */
+#taskNodeModal .content .task-node-btn .tn-name,
 #popup .content .task-node-btn .tn-name {
     max-width: 200px;
     overflow: hidden;
@@ -145,6 +172,7 @@
 }
 
 /* Hours badge */
+#taskNodeModal .content .task-node-btn .tn-hours,
 #popup .content .task-node-btn .tn-hours {
     font-size: 0.7rem;
     font-weight: 700;
@@ -157,15 +185,18 @@
 }
 
 /* Status-aware modifiers */
+#taskNodeModal .content .task-node-btn.task-node-status-done,
 #popup .content .task-node-btn.task-node-status-done {
     opacity: 0.4;
     filter: grayscale(0.7);
     text-decoration: line-through;
 }
+#taskNodeModal .content .task-node-btn.task-node-status-in-progress,
 #popup .content .task-node-btn.task-node-status-in-progress {
     animation: btn-pulse 2s infinite ease-in-out;
 }
 
+#taskNodeModal .content .task-node-btn.task-node-nav-btn,
 #popup .content .task-node-btn.task-node-nav-btn {
     margin-top: var(--spacing-md, 12px);
     padding: 8px 16px;
@@ -174,23 +205,29 @@
     color: #fff;
 }
 
+#taskNodeModal .content .task-node-btn.task-node-nav-btn .tn-name,
 #popup .content .task-node-btn.task-node-nav-btn .tn-name {
     max-width: none;
     white-space: normal;
 }
 
+#taskNodeModal .content .task-node-btn.task-node-nav-btn:hover,
+#taskNodeModal .content .task-node-btn.task-node-nav-btn:focus-visible,
 #popup .content .task-node-btn.task-node-nav-btn:hover,
 #popup .content .task-node-btn.task-node-nav-btn:focus-visible {
     background: var(--color-accent-hover, #357abd);
     border-color: var(--color-accent-hover, #357abd);
 }
 
+#taskNodeModal .content .task-node-btn.parent-nav-btn,
 #popup .content .task-node-btn.parent-nav-btn {
     background: #3a3a4a;
     border: 1px solid rgba(255, 255, 255, 0.15);
     color: #e8e8f0;
 }
 
+#taskNodeModal .content .task-node-btn.parent-nav-btn:hover,
+#taskNodeModal .content .task-node-btn.parent-nav-btn:focus-visible,
 #popup .content .task-node-btn.parent-nav-btn:hover,
 #popup .content .task-node-btn.parent-nav-btn:focus-visible {
     background: #4a4a5e;
@@ -378,6 +415,7 @@ img.profile-photo.border-layer-0-variant-0 {
 /* Mobile optimizations */
 @media (max-width: 768px) {
     /* Modal content: popup and legend */
+    #taskNodeModal .content,
     #popup .content,
     #legend-popup .content {
         width: 98vw;
@@ -394,6 +432,7 @@ img.profile-photo.border-layer-0-variant-0 {
         overflow-y: auto;
         overflow-x: hidden;
     }
+    #taskNodeModal .content h2,
     #popup .content h2,
     #legend-popup .content h2 {
         font-size: var(--font-size-lg);
@@ -405,11 +444,13 @@ img.profile-photo.border-layer-0-variant-0 {
         max-width: 95vw;
         padding: var(--spacing-md);
     }
+    #taskNodeModal,
     #popup,
     #legend-popup {
         align-items: flex-start;
         justify-content: center;
     }
+    #taskNodeModal .content,
     #popup .content,
     #legend-popup .content {
         width: 98vw;
@@ -427,6 +468,7 @@ img.profile-photo.border-layer-0-variant-0 {
         overflow-x: hidden;
         box-shadow: var(--shadow-lg);
     }
+    #taskNodeModal .content h2,
     #popup .content h2,
     #legend-popup .content h2 {
         font-size: var(--font-size-lg);
@@ -445,11 +487,13 @@ img.profile-photo.border-layer-0-variant-0 {
 }
 
 @media (max-width: 480px) {
+    #taskNodeModal.visible,
     #popup.visible,
     #legend-popup.visible {
         align-items: flex-start;
     }
 
+    #taskNodeModal .content,
     #popup .content,
     #legend-popup .content {
         width: 100%;

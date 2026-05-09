@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agentic-ide/manifest.schema.json",
+  "title": "Agentic IDE Unit Manifest",
+  "type": "object",
+  "required": ["id", "type", "version", "label", "path", "description", "entry", "api"],
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "id": { "type": "string", "minLength": 1 },
+    "type": {
+      "type": "string",
+      "enum": ["tool", "agent", "subgraph", "workflow", "model"]
+    },
+    "version": {
+      "oneOf": [
+        { "type": "integer", "minimum": 1 },
+        { "type": "number", "minimum": 1 },
+        { "type": "string", "minLength": 1 }
+      ]
+    },
+    "label": { "type": "string", "minLength": 1 },
+    "path": { "type": "string", "minLength": 1 },
+    "description": { "type": "string", "minLength": 1 },
+    "entry": {
+      "type": "object",
+      "required": ["file"],
+      "properties": {
+        "file": { "type": "string", "minLength": 1 },
+        "symbol": { "type": "string" },
+        "format": { "type": "string" },
+        "exports": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": true
+    },
+    "api": {
+      "type": "object",
+      "required": ["contract"],
+      "properties": {
+        "contract": { "type": "string", "minLength": 1 },
+        "inputs_ref": { "type": "string" },
+        "outputs_ref": { "type": "string" },
+        "surface": { "type": "string" },
+        "endpoints": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": true
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "role"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "role": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": true
+      }
+    },
+    "tests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["file"],
+        "properties": {
+          "file": { "type": "string", "minLength": 1 },
+          "kind": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "path"],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["unit", "file", "registry"]
+          },
+          "path": { "type": "string", "minLength": 1 },
+          "role": { "type": "string" },
+          "description": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

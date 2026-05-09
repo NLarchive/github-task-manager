@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic IDE Chat Lab</title>
+  <meta name="description" content="Standalone chat lab with configurable prompts, agents, tools, tests, memory evaluation, and structured telemetry outputs.">
+  <link rel="stylesheet" href="./css/chat-lab.css">
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <h1>Chat Lab</h1>
+      <div class="topbar-status">
+        <span id="bridge-dot" class="dot"></span>
+        <span id="bridge-status">Bridge unknown</span>
+      </div>
+      <select id="model-select" aria-label="Model selector"></select>
+      <button id="btn-toggle-config" type="button">Config</button>
+      <button id="btn-export-chat" type="button">Export Chat</button>
+      <button id="btn-new-chat" type="button">New Chat</button>
+    </header>
+
+    <div class="body">
+      <aside id="config-panel" class="config-panel">
+        <section class="cfg-section">
+          <h2>1. Model and Backend</h2>
+          <label>LLM endpoint
+            <input id="cfg-endpoint" type="text" value="http://127.0.0.1:3131">
+          </label>
+          <label>Backend
+            <select id="cfg-backend">
+              <option value="llama_cpp">llama.cpp</option>
+            </select>
+          </label>
+        </section>
+
+        <section class="cfg-section">
+          <h2>2. Generation and Sampling</h2>
+          <label>Temperature <span id="v-temperature">0.20</span>
+            <input id="cfg-temperature" type="range" min="0" max="2" step="0.05" value="0.2">
+          </label>
+          <label>Top-P <span id="v-top-p">0.95</span>
+            <input id="cfg-top-p" type="range" min="0" max="1" step="0.01" value="0.95">
+          </label>
+          <label>Top-K <span id="v-top-k">40</span>
+            <input id="cfg-top-k" type="range" min="0" max="200" step="1" value="40">
+          </label>
+          <label>Max tokens
+            <input id="cfg-max-tokens" type="number" min="64" max="32768" step="64" value="1024">
+          </label>
+        </section>
+
+        <section class="cfg-section">
+          <h2>3. Prompt and Behavior</h2>
+          <label>Prompt database
+            <select id="cfg-prompt-profile"></select>
+          </label>
+          <label>Prompt override
+            <textarea id="cfg-system-prompt" rows="4" placeholder="Optional system prompt override"></textarea>
+          </label>
+          <label>Response format
+            <select id="cfg-response-format">
+              <option value="text">text</option>
+              <option value="markdown">markdown</option>
+              <option value="json">json</option>
+            </select>
+          </label>
+        </section>
+
+        <section class="cfg-section">
+          <h2>4. Memory and History</h2>
+          <label><input id="cfg-include-history" type="checkbox"> Include prior chat history</label>
+          <label>History window
+            <input id="cfg-history-window" type="number" min="1" max="40" value="8">
+          </label>
+          <label><input id="cfg-include-runtime" type="checkbox"> Include runtime context from component registry</label>
+        </section>
+
+        <section class="cfg-section">
+          <h2>5. Files and RAG</h2>
+          <label><input id="cfg-rag-enabled" type="checkbox"> Enable RAG mode</label>
+          <label>Top-K retrieved chunks
+            <input id="cfg-rag-k" type="number" min="1" max="20" value="5">
+          </label>
+          <label>Attached files
+            <input id="cfg-file-input" type="file" multiple>
+          </label>
+          <div id="file-list" class="help">No files attached</div>
+        </section>
+
+        <section class="cfg-section">
+          <h2>6. Tools and Workflows</h2>
+          <label>Agent database
+            <select id="cfg-agent-profile"></select>
+          </label>
+          <label>Tool database
+            <select id="cfg-tool-profile"></select>
+          </label>
+          <label>Test database
+            <select id="cfg-test-profile"></select>
+          </label>
+          <label>Parameter profile
+            <select id="cfg-parameter-profile"></select>
+          </label>
+        </section>
+
+        <section class="cfg-section">
+          <h2>7. Notebook Logic and Editing</h2>
+          <label><input id="cfg-edit-resets" type="checkbox" checked> Editing a message resets later assistant messages</label>
+          <label><input id="cfg-auto-scroll" type="checkbox" checked> Auto-scroll to latest response</label>
+        </section>
+
+        <section class="cfg-section">
+          <h2>8. Memory Evaluation</h2>
+          <label>Memory evaluation name
+            <input id="cfg-memory-eval-name" type="text" placeholder="baseline-memory-eval">
+          </label>
+          <label>Key points under evaluation
+            <textarea id="cfg-memory-keypoints" rows="3" placeholder="facts to retain, constraints, entities"></textarea>
+          </label>
+          <label>Deductions and checks
+            <textarea id="cfg-memory-deductions" rows="3" placeholder="deductions, consistency checks"></textarea>
+          </label>
+          <div class="action-row">
+            <button id="btn-run-chat-self-tests" type="button">Run Chat Self-Tests</button>
+            <button id="btn-export-test-results" type="button">Export Test Results</button>
+            <button id="btn-export-logs" type="button">Export Logs</button>
+            <button id="btn-save-artifacts" type="button">Save Artifacts to Bridge</button>
+          </div>
+        </section>
+      </aside>
+
+      <main class="chat-main">
+        <div id="thread" class="thread"></div>
+
+        <div class="composer">
+          <label for="chat-input">Prompt</label>
+          <textarea id="chat-input" rows="3" placeholder="Clean inference starts with only this prompt unless you enable options."></textarea>
+          <div class="action-row">
+            <button id="btn-copy-input" type="button">Copy Input</button>
+            <button id="btn-send" type="button">Send</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <script type="module" src="./js/chat-app.js"></script>
+</body>
+</html>

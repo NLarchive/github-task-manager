@@ -1,0 +1,46 @@
+{
+  "$schema": "../../../schema/manifest.schema.json",
+  "id": "ui_renderer",
+  "type": "tool",
+  "version": 1,
+  "label": "ui_renderer",
+  "path": "components/tools/ui_renderer_v1",
+  "description": "Renders a structured document object as presentable HTML.",
+  "entry": {
+    "file": "main.js",
+    "symbol": "run",
+    "format": "module",
+    "exports": ["run"]
+  },
+  "api": {
+    "contract": "schema.json",
+    "inputs_ref": "schema.json#/inputs",
+    "outputs_ref": "schema.json#/outputs",
+    "surface": "run(doc)"
+  },
+  "files": [
+    {
+      "path": "main.js",
+      "role": "entry"
+    },
+    {
+      "path": "schema.json",
+      "role": "contract"
+    },
+    {
+      "path": "template.html",
+      "role": "template"
+    },
+    {
+      "path": "tests/snapshot.json",
+      "role": "test"
+    }
+  ],
+  "tests": [
+    {
+      "kind": "snapshot",
+      "file": "tests/snapshot.json"
+    }
+  ],
+  "relations": []
+}

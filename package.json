@@ -5,10 +5,13 @@
   "main": "public/list-display/js/list-display-controller.js",
   "scripts": {
     "start": "node server.js",
+    "start:agentic-ide:bridge": "node public/agentic-ide/server/main.js",
+    "start:agentic-ide:stack": "pwsh -ExecutionPolicy Bypass -File tools/scripts/start-agentic-ide-stack.ps1",
     "start:static": "npx serve public -l 3000",
     "test": "node tests/run-tests.js",
     "test:validate": "node tests/unit/validate-schema.js",
     "validate:tasks": "node tools/scripts/validate-tasks-schema.js --all",
+    "validate:agentic-cells": "node tools/scripts/validate-agentic-cells.js --write-registry",
     "validate:commits": "node tools/scripts/validate-commit-format.js --max 300",
     "test:watch": "node tests/run-tests.js --watch",
     "test:playwright": "playwright test --config=tests/playwright.config.js",
@@ -23,6 +26,12 @@
     "test:e2e:smoke": "cross-env PW_FAST=1 playwright test tests/e2e/smoke.spec.js --config=tests/playwright.config.js",
     "test:e2e:full": "cross-env PW_FULL=1 playwright test --config=tests/playwright.config.js",
     "test:e2e:live": "cross-env PLAYWRIGHT_RUN_LIVE=1 PLAYWRIGHT_BASE_URL=https://nlarchive.github.io/github-task-manager/ PW_FAST=1 playwright test --config=tests/playwright.config.js --grep @live",
+    "test:inference:hello-world": "node tools/ai/inference/tests/hello-world-conformance.js",
+    "test:inference:chat-ui": "npx playwright test --config=tests/agentic-ide/playwright.config.js tests/agentic-ide/inference-chat-hello-world.spec.js",
+    "test:inference:validation-suite": "node public/agentic-ide/components/inference/tests/text/run-validation-suite.js",
+    "test:inference:coding-suite": "node public/agentic-ide/components/inference/tests/coding/run-coding-suite.js",
+    "test:inference:select-best": "node public/agentic-ide/components/inference/tests/select-best.js",
+    "test:inference:benchmark": "node -e \"const path=require('path'); const {runInferenceBenchmark,writeBenchmarkReport}=require('./public/agentic-ide/components/inference/tests/benchmark'); (async()=>{const report=await runInferenceBenchmark({}); const out=path.join(process.cwd(),'outputs','local-runs','inference-engine-report.json'); writeBenchmarkReport(report,out); console.log('Output: '+out);})().catch(err=>{console.error(err&&err.message?err.message:String(err)); process.exit(1);});\"",
     "tasks:archive-root": "node tools/scripts/archive-root-tasks.js",
     "tasks:generate-state": "node tools/scripts/generate-state-files.js",
     "tasks:regenerate-csv": "node tools/scripts/regenerate-tasks-csv.js github-task-manager",
@@ -61,6 +70,7 @@
     "serve": "^14.2.0"
   },
   "dependencies": {
+    "@duck4i/llama": "^0.3.0",
     "github-task-manager": "file:"
   }
 }

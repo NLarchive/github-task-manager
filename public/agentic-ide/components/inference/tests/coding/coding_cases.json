@@ -1,0 +1,255 @@
+{
+  "suite_id": "llm_js_coding_execution_v1",
+  "description": "Sequential JavaScript code-generation benchmark using deterministic execution-based checks inspired by Agentic IDE tool components.",
+  "model": {
+    "name": "gemma-local",
+    "provider": "llama_cpp_server",
+    "model_alias": "unsloth/gemma-4-26B-A4B-it",
+    "model_path": "D:/AI/storage/live-models/gemma4-26b-a4b-q4kxl/gemma-4-26B-A4B-it-UD-Q4_K_XL.gguf",
+    "binary_path": "D:/AI/runtime/llama-b8920-win-cuda12.4/llama-server.exe"
+  },
+  "input_schema": {
+    "system_prompt": "Return only valid JavaScript source code. Do not include markdown fences, prose, or explanations.",
+    "max_tokens": 512,
+    "temperature": 0
+  },
+  "cases": [
+    {
+      "id": "code_q1",
+      "title": "Normalize benchmark topic",
+      "source_component": "components/tools/research_benchmark_runner_v1/main.js",
+      "function_name": "normalizeTopic",
+      "prompt": "Implement a function normalizeTopic(topic) that returns the trimmed topic string. If topic is null, undefined, empty, or only whitespace, return 'LangGraph multi-agent patterns'.",
+      "tests": [
+        {
+          "args": ["  LangGraph orchestration  "],
+          "expect": { "type": "deepEqual", "value": "LangGraph orchestration" }
+        },
+        {
+          "args": ["   "],
+          "expect": { "type": "deepEqual", "value": "LangGraph multi-agent patterns" }
+        },
+        {
+          "args": [null],
+          "expect": { "type": "deepEqual", "value": "LangGraph multi-agent patterns" }
+        }
+      ]
+    },
+    {
+      "id": "code_q2",
+      "title": "Slugify benchmark label",
+      "source_component": "components/tools/benchmark_result_writer_v1/main.js",
+      "function_name": "slugify",
+      "prompt": "Implement a function slugify(value) that lowercases the input, replaces any run of non-alphanumeric characters with a single '-', trims leading and trailing '-', and returns 'benchmark' if the result is empty.",
+      "tests": [
+        {
+          "args": [" Research Benchmark v1 "],
+          "expect": { "type": "deepEqual", "value": "research-benchmark-v1" }
+        },
+        {
+          "args": ["***"],
+          "expect": { "type": "deepEqual", "value": "benchmark" }
+        },
+        {
+          "args": ["Folder_Graph.Scanner"],
+          "expect": { "type": "deepEqual", "value": "folder-graph-scanner" }
+        }
+      ]
+    },
+    {
+      "id": "code_q3",
+      "title": "Clamp numeric score",
+      "source_component": "components/tools/benchmark_result_writer_v1/main.js",
+      "function_name": "clamp",
+      "prompt": "Implement a function clamp(value, min = 0, max = 100) that converts value to a number and returns it clamped between min and max.",
+      "tests": [
+        {
+          "args": [120],
+          "expect": { "type": "deepEqual", "value": 100 }
+        },
+        {
+          "args": [-4, 0, 10],
+          "expect": { "type": "deepEqual", "value": 0 }
+        },
+        {
+          "args": ["4.5", 1, 5],
+          "expect": { "type": "deepEqual", "value": 4.5 }
+        }
+      ]
+    },
+    {
+      "id": "code_q4",
+      "title": "Detect file node type",
+      "source_component": "components/tools/folder-graph-scanner/main.js",
+      "function_name": "detectFileType",
+      "prompt": "Implement a function detectFileType(filePath) that mirrors this behavior: if the lowercase basename includes 'readme', return 'documentation'; if the lowercase basename includes 'task' or 'json', return 'data'; if the lowercase extension is '.js' or '.ts', return 'code'; if the extension is '.json', return 'config'; if the extension is '.md', return 'documentation'; if the extension is '.csv', return 'data'; otherwise return 'file'.",
+      "tests": [
+        {
+          "args": ["docs/README.md"],
+          "expect": { "type": "deepEqual", "value": "documentation" }
+        },
+        {
+          "args": ["project/node.tasks.json"],
+          "expect": { "type": "deepEqual", "value": "data" }
+        },
+        {
+          "args": ["src/main.ts"],
+          "expect": { "type": "deepEqual", "value": "code" }
+        },
+        {
+          "args": ["config/schema.json"],
+          "expect": { "type": "deepEqual", "value": "data" }
+        }
+      ]
+    },
+    {
+      "id": "code_q5",
+      "title": "Score a search result",
+      "source_component": "components/tools/result_ranker_v1/main.js",
+      "function_name": "scoreResult",
+      "prompt": "Implement a function scoreResult(item) that computes a relevance score exactly as follows: snippet richness contributes up to 0.4 based on snippet length / 200 capped at 1; having a url contributes 0.3; title quality contributes up to 0.3 based on title length / 60 capped at 1. Treat missing fields as empty strings.",
+      "tests": [
+        {
+          "args": [{ "title": "123456789012345678901234567890123456789012345678901234567890", "url": "https://example.com", "snippet": "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890" }],
+          "expect": { "type": "approx", "value": 0.94, "tolerance": 0.000001 }
+        },
+        {
+          "args": [{ "title": "Guide", "snippet": "Short text" }],
+          "expect": { "type": "approx", "value": 0.045, "tolerance": 0.000001 }
+        }
+      ]
+    },
+    {
+      "id": "code_q6",
+      "title": "Rank search results",
+      "source_component": "components/tools/result_ranker_v1/main.js",
+      "function_name": "rankResults",
+      "prompt": "Implement a function rankResults(results) that returns [] for non-arrays or empty arrays, filters out entries with an error field, scores each remaining item with the same heuristic from the scoreResult problem, sorts descending by score, and returns the original objects without any internal score property.",
+      "tests": [
+        {
+          "args": [[
+            { "title": "Short", "url": "", "snippet": "Tiny" },
+            { "title": "Detailed LangGraph guide", "url": "https://example.com/guide", "snippet": "A long and detailed explanation of LangGraph agent orchestration patterns." },
+            { "error": "timeout" }
+          ]],
+          "expect": {
+            "type": "deepEqual",
+            "value": [
+              { "title": "Detailed LangGraph guide", "url": "https://example.com/guide", "snippet": "A long and detailed explanation of LangGraph agent orchestration patterns." },
+              { "title": "Short", "url": "", "snippet": "Tiny" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "code_q7",
+      "title": "Parse HTML document",
+      "source_component": "components/tools/html_parser_v1/main.js",
+      "function_name": "parseHtmlDoc",
+      "prompt": "Implement a function parseHtmlDoc(html = '') that returns { title, headings, paragraphs, links }. Strip tags inside captured text, trim values, collect up to 10 headings from h1-h6, up to 20 non-empty paragraphs from p tags, and up to 30 links from anchor tags as { href, text }. If html is falsy, return empty fields and arrays.",
+      "tests": [
+        {
+          "args": ["<html><head><title>Test Page</title></head><body><h1>Overview</h1><p>Hello <strong>world</strong></p><a href='https://example.com'>Docs</a></body></html>"],
+          "expect": {
+            "type": "deepEqual",
+            "value": {
+              "title": "Test Page",
+              "headings": ["Overview"],
+              "paragraphs": ["Hello world"],
+              "links": [{ "href": "https://example.com", "text": "Docs" }]
+            }
+          }
+        },
+        {
+          "args": [""],
+          "expect": {
+            "type": "deepEqual",
+            "value": { "title": "", "headings": [], "paragraphs": [], "links": [] }
+          }
+        }
+      ]
+    },
+    {
+      "id": "code_q8",
+      "title": "Render document HTML",
+      "source_component": "components/tools/ui_renderer_v1/main.js",
+      "function_name": "renderDocHtml",
+      "prompt": "Implement a function renderDocHtml(doc) that returns '<p>No data to display.</p>' for falsy input. Otherwise render a string with an h2 title, an optional Sections list for up to 5 headings, up to 5 paragraphs, and an optional References list for up to 5 links. Escape &, <, and > in all interpolated text exactly like HTML escaping.",
+      "tests": [
+        {
+          "args": [{
+            "title": "A&B <Test>",
+            "headings": ["Intro"],
+            "paragraphs": ["First <paragraph>"],
+            "links": [{ "href": "https://example.com?a=1&b=2", "text": "Docs > Guide" }]
+          }],
+          "expect": {
+            "type": "deepEqual",
+            "value": "<h2>A&amp;B &lt;Test&gt;</h2>\n<h3>Sections</h3><ul>\n  <li>Intro</li>\n</ul>\n<p>First &lt;paragraph&gt;</p>\n<h3>References</h3><ul>\n  <li><a href=\"https://example.com?a=1&amp;b=2\" target=\"_blank\" rel=\"noopener noreferrer\">Docs &gt; Guide</a></li>\n</ul>"
+          }
+        },
+        {
+          "args": [null],
+          "expect": { "type": "deepEqual", "value": "<p>No data to display.</p>" }
+        }
+      ]
+    },
+    {
+      "id": "code_q9",
+      "title": "Build search URL",
+      "source_component": "components/tools/web_search_v1/main.js",
+      "function_name": "buildSearchUrl",
+      "prompt": "Implement a function buildSearchUrl(apiBase, query, topK = 5) that returns `${apiBase}/search?${params}` where params encode q=query and limit=topK using URLSearchParams-compatible encoding.",
+      "tests": [
+        {
+          "args": ["https://api.search.io/v1", "LangGraph agents", 3],
+          "expect": { "type": "deepEqual", "value": "https://api.search.io/v1/search?q=LangGraph+agents&limit=3" }
+        },
+        {
+          "args": ["https://example.test/api", "a+b & c/d"],
+          "expect": { "type": "deepEqual", "value": "https://example.test/api/search?q=a%2Bb+%26+c%2Fd&limit=5" }
+        }
+      ]
+    },
+    {
+      "id": "code_q10",
+      "title": "Summarize step durations",
+      "source_component": "components/tools/benchmark_result_writer_v1/main.js",
+      "function_name": "summarizeStepDurations",
+      "prompt": "Implement a function summarizeStepDurations(steps) that groups step objects by nodeId and returns an array sorted by totalDurationMs descending then nodeId ascending. For each node include { nodeId, callCount, totalDurationMs, maxDurationMs, failureCount, status }. status should be 'fail' if any grouped step has status 'fail', otherwise 'pass'. Ignore entries without a nodeId.",
+      "tests": [
+        {
+          "args": [[
+            { "nodeId": "b", "durationMs": 10, "status": "pass" },
+            { "nodeId": "a", "durationMs": 30, "status": "pass" },
+            { "nodeId": "b", "durationMs": 15, "status": "fail" },
+            { "nodeId": "a", "durationMs": 5, "status": "pass" },
+            { "durationMs": 99, "status": "fail" }
+          ]],
+          "expect": {
+            "type": "deepEqual",
+            "value": [
+              { "nodeId": "a", "callCount": 2, "totalDurationMs": 35, "maxDurationMs": 30, "failureCount": 0, "status": "pass" },
+              { "nodeId": "b", "callCount": 2, "totalDurationMs": 25, "maxDurationMs": 15, "failureCount": 1, "status": "fail" }
+            ]
+          }
+        },
+        {
+          "args": [[
+            { "nodeId": "z", "durationMs": 1, "status": "pass" },
+            { "nodeId": "z", "durationMs": 9, "status": "fail" },
+            { "nodeId": "y", "durationMs": 5, "status": "pass" }
+          ]],
+          "expect": {
+            "type": "deepEqual",
+            "value": [
+              { "nodeId": "z", "callCount": 2, "totalDurationMs": 10, "maxDurationMs": 9, "failureCount": 1, "status": "fail" },
+              { "nodeId": "y", "callCount": 1, "totalDurationMs": 5, "maxDurationMs": 5, "failureCount": 0, "status": "pass" }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

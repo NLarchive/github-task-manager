@@ -1,0 +1,68 @@
+{
+  "$schema": "../schema/manifest.schema.json",
+  "id": "agentic_ide_bridge_server",
+  "type": "tool",
+  "version": 1,
+  "label": "Agentic IDE Bridge Server",
+  "path": "server",
+  "description": "Structured root launch surface for the Agentic IDE bridge server and local inference runtime.",
+  "entry": {
+    "file": "main.js",
+    "format": "module",
+    "exports": [
+      "bridge-server-process"
+    ]
+  },
+  "api": {
+    "contract": "schema.json",
+    "inputs_ref": "schema.json#/inputs",
+    "outputs_ref": "schema.json#/outputs",
+    "surface": "GET /api/registry, GET|PUT /api/file, POST /api/runtime/run, POST /api/runtime/test, POST /api/llm/complete"
+  },
+  "files": [
+    {
+      "path": "main.js",
+      "role": "entry"
+    },
+    {
+      "path": "schema.json",
+      "role": "contract"
+    },
+    {
+      "path": "tests/health.json",
+      "role": "test"
+    },
+    {
+      "path": "README.md",
+      "role": "doc"
+    }
+  ],
+  "tests": [
+    {
+      "kind": "health",
+      "file": "tests/health.json"
+    }
+  ],
+  "relations": [
+    {
+      "kind": "file",
+      "path": "js/bridge-server.js",
+      "role": "implementation"
+    },
+    {
+      "kind": "file",
+      "path": "js/bridge-workspace.js",
+      "role": "workspace-discovery"
+    },
+    {
+      "kind": "file",
+      "path": "components/inference/main.js",
+      "role": "inference-runtime"
+    },
+    {
+      "kind": "registry",
+      "path": "registry.json",
+      "role": "workspace-output"
+    }
+  ]
+}

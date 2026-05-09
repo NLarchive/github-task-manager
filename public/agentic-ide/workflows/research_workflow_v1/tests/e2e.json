@@ -1,0 +1,39 @@
+{
+  "name": "research_workflow e2e tests",
+  "type": "e2e",
+  "target": "research_workflow",
+  "cases": [
+    {
+      "name": "Workflow produces an HTML report for a topic",
+      "mock_fetch": {
+        "ok": true,
+        "status": 200,
+        "json": {
+          "results": [
+            {
+              "title": "LangGraph multi-agent patterns",
+              "url": "https://example.com/langgraph",
+              "snippet": "LangGraph coordinates agent state, tools, and branching workflows."
+            }
+          ]
+        }
+      },
+      "mock_llm_sequence": [
+        {
+          "text": "LangGraph helps compose tools and agents into explicit multi-agent workflows."
+        },
+        {
+          "text": "<html><head><title>LangGraph Report</title></head><body><h2>LangGraph</h2><p>LangGraph helps compose tools and agents into explicit multi-agent workflows.</p></body></html>"
+        }
+      ],
+      "input": {
+        "topic": "LangGraph multi-agent patterns"
+      },
+      "expect": {
+        "report": {
+          "contains": "LangGraph"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agentic-ide/unit-case.schema.json",
+  "title": "Agentic IDE Test Case Contract",
+  "type": "object",
+  "required": ["name", "type", "target", "cases"],
+  "properties": {
+    "name": { "type": "string", "minLength": 1 },
+    "type": { "type": "string", "enum": ["unit", "behavior", "snapshot", "health", "e2e", "live"] },
+    "target": { "type": "string", "minLength": 1 },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "input"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "input": { "type": "object" },
+          "expect": { "type": "object" },
+          "expectedOutput": { "type": "object" },
+          "assertSchema": { "type": "boolean" },
+          "assertOutputType": { "type": "string" },
+          "mock_llm": { "type": "object" },
+          "mock_llm_sequence": { "type": "array" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

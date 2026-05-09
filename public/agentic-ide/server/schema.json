@@ -1,0 +1,43 @@
+{
+  "id": "agentic_ide_bridge_server",
+  "type": "tool",
+  "version": 1,
+  "label": "agentic-ide-bridge-server",
+  "path": "server",
+  "description": "Root launch surface for the Agentic IDE bridge server that exposes registry, file IO, runtime execution, runtime tests, and local inference proxy endpoints.",
+  "inputs": [
+    {
+      "name": "bridge_request",
+      "type": "http-request",
+      "required": true,
+      "description": "Incoming HTTP request for registry, runtime, file, or inference endpoints."
+    }
+  ],
+  "outputs": [
+    {
+      "name": "bridge_response",
+      "type": "http-response",
+      "description": "HTTP response containing registry data, file content, runtime output, or inference results."
+    }
+  ],
+  "errors": [
+    {
+      "code": "BRIDGE_OFFLINE",
+      "description": "Bridge server process is not running or did not bind its port."
+    },
+    {
+      "code": "LLM_UNAVAILABLE",
+      "description": "The bridge is online but the configured llama.cpp endpoint is unavailable."
+    }
+  ],
+  "files": [
+    "main.js",
+    "manifest.json",
+    "schema.json",
+    "tests/health.json",
+    "README.md"
+  ],
+  "tests": [
+    "tests/health.json"
+  ]
+}

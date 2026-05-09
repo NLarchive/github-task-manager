@@ -1,0 +1,148 @@
+{
+  "project": {
+    "name": "Agentic IDE Chat Lab",
+    "description": "Modular standalone chat surface with configurable prompt/agent/tool/test databases, memory evaluation, and structured telemetry for dashboard parsing.",
+    "start_date": "2026-04-30",
+    "end_date": null,
+    "status": "In Progress",
+    "budget": 0
+  },
+  "categories": [
+    { "name": "UI", "parent_category_name": null },
+    { "name": "Runtime", "parent_category_name": null },
+    { "name": "Telemetry", "parent_category_name": null },
+    { "name": "Testing", "parent_category_name": null }
+  ],
+  "workers": [
+    {
+      "name": "AI Copilot",
+      "email": "ai@example.com",
+      "worker_id": "ai-copilot",
+      "role": "AI Copilot",
+      "skills": ["HTML", "CSS", "JavaScript", "Playwright", "Testing"],
+      "hourly_rate": 0
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": 1,
+      "task_name": "chat/ folder container",
+      "description": "Container node for modular chat assets. Links html, css, js, tests, schema, and result artifacts.",
+      "priority": "High",
+      "complexity": "Medium",
+      "status": "In Progress",
+      "progress_percentage": 85,
+      "category_name": "UI",
+      "tags": ["folder-node", "container"],
+      "parent_task_id": null,
+      "dependencies": []
+    },
+    {
+      "task_id": 2,
+      "task_name": "index.html shell",
+      "description": "Standalone chat shell page with 8 configuration sections, including Memory Evaluation and clean-baseline inference defaults.",
+      "priority": "High",
+      "complexity": "Medium",
+      "status": "Done",
+      "progress_percentage": 100,
+      "category_name": "UI",
+      "tags": ["file-node", "html"],
+      "parent_task_id": 1,
+      "dependencies": [{ "predecessor_task_id": 1, "dependency_type": "FS" }]
+    },
+    {
+      "task_id": 3,
+      "task_name": "css/chat-lab.css",
+      "description": "Dedicated styles for chat layout, thread cards, config panel, and responsive behavior.",
+      "priority": "Medium",
+      "complexity": "Low",
+      "status": "Done",
+      "progress_percentage": 100,
+      "category_name": "UI",
+      "tags": ["file-node", "css"],
+      "parent_task_id": 1,
+      "dependencies": [{ "predecessor_task_id": 2, "dependency_type": "FS" }]
+    },
+    {
+      "task_id": 4,
+      "task_name": "js modularization",
+      "description": "Split logic into descriptive modules: chat-app.js, chat-state.js, chat-api.js, chat-render.js, chat-telemetry.js, chat-tests.js.",
+      "priority": "High",
+      "complexity": "High",
+      "status": "Done",
+      "progress_percentage": 100,
+      "category_name": "Runtime",
+      "tags": ["file-node", "js", "modular"],
+      "parent_task_id": 1,
+      "dependencies": [{ "predecessor_task_id": 2, "dependency_type": "FS" }]
+    },
+    {
+      "task_id": 5,
+      "task_name": "chat-catalog database",
+      "description": "Structured prompt/agent/tool/test/parameter profile database at js/chat-catalog.json.",
+      "priority": "High",
+      "complexity": "Low",
+      "status": "Done",
+      "progress_percentage": 100,
+      "category_name": "Runtime",
+      "tags": ["file-node", "json", "catalog"],
+      "parent_task_id": 4,
+      "dependencies": [{ "predecessor_task_id": 4, "dependency_type": "FS" }]
+    },
+    {
+      "task_id": 6,
+      "task_name": "chat-screen.schema.json",
+      "description": "Schema for config, logs, and test result structures to ensure parseable dashboard-ready artifacts.",
+      "priority": "High",
+      "complexity": "Medium",
+      "status": "Done",
+      "progress_percentage": 100,
+      "category_name": "Telemetry",
+      "tags": ["file-node", "schema", "validation"],
+      "parent_task_id": 1,
+      "dependencies": [{ "predecessor_task_id": 4, "dependency_type": "FS" }]
+    },
+    {
+      "task_id": 7,
+      "task_name": "Structured logs and test outputs",
+      "description": "Capture JSON logs and self-test results in browser state and export/save artifacts for external dashboard parsing.",
+      "priority": "Critical",
+      "complexity": "Medium",
+      "status": "Done",
+      "progress_percentage": 100,
+      "category_name": "Telemetry",
+      "tags": ["logging", "test-results", "dashboard"],
+      "parent_task_id": 4,
+      "dependencies": [
+        { "predecessor_task_id": 4, "dependency_type": "FS" },
+        { "predecessor_task_id": 6, "dependency_type": "FS" }
+      ]
+    },
+    {
+      "task_id": 8,
+      "task_name": "chat/tests test plan",
+      "description": "Create chat surface test plan and artifact target spec for deterministic test execution and parsing.",
+      "priority": "Medium",
+      "complexity": "Low",
+      "status": "Done",
+      "progress_percentage": 100,
+      "category_name": "Testing",
+      "tags": ["file-node", "test-plan"],
+      "parent_task_id": 1,
+      "dependencies": [{ "predecessor_task_id": 7, "dependency_type": "FS" }]
+    },
+    {
+      "task_id": 9,
+      "task_name": "Playwright chat surface spec",
+      "description": "Add and run Playwright coverage for chat shell load, clean defaults, and self-test/export surface actions.",
+      "priority": "High",
+      "complexity": "Medium",
+      "status": "In Progress",
+      "progress_percentage": 80,
+      "category_name": "Testing",
+      "tags": ["playwright", "e2e"],
+      "parent_task_id": null,
+      "dependencies": [{ "predecessor_task_id": 8, "dependency_type": "FS" }]
+    }
+  ]
+}

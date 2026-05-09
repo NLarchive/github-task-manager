@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Display Guide</title>
+    <meta name="description" content="Interactive guide for the graph-display contract, including nodes, sizes, colors, relations, subgraphs, and critical-path metadata.">
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+    <link rel="alternate icon" href="images/favicon.png" type="image/png">
+    <link rel="stylesheet" href="css/guide-index.css">
+    <script src="js/d3.v7.min.js"></script>
+    <script type="module" src="js/guide-index.js"></script>
+</head>
+<body>
+    <header class="page-header">
+        <div>
+            <p class="eyebrow">Graph Display Companion</p>
+            <h1>Graph Guide Page</h1>
+            <p>Use this page as the fast handoff for the graph-display component. It explains what each graph feature means, shows a live demo, and points directly to the contract and schema files that another project should integrate against.</p>
+        </div>
+        <nav class="header-actions" aria-label="Guide page navigation">
+            <a href="./index.html">Main Graph</a>
+            <a href="./project-index.html">Project Explorer</a>
+            <a href="../graph-composer/index.html">Graph Composer</a>
+        </nav>
+    </header>
+
+    <main class="page-shell">
+        <section class="hero-panel">
+            <p>The guide is wired to the same contract used by the runtime. The explanatory cards, example graph, and JSON preview all come from the current graph design surface rather than a separate document that can drift over time.</p>
+        </section>
+
+        <section class="guide-grid">
+            <aside class="panel">
+                <h2>Features</h2>
+                <div id="feature-selector" class="feature-selector"></div>
+                <div id="feature-copy" class="feature-copy"></div>
+                <div class="schema-links">
+                    <a href="./schema/graph-ui-config.schema.json">UI Config Schema</a>
+                    <a href="./schema/graph-template.schema.json">Template Schema</a>
+                </div>
+            </aside>
+
+            <section class="panel demo-panel">
+                <h2 id="feature-title">Nodes</h2>
+                <p id="feature-description"></p>
+                <div id="guide-graph" class="guide-graph" aria-label="Graph feature demo"></div>
+                <div id="guide-legend" class="guide-legend"></div>
+            </section>
+
+            <aside class="panel">
+                <h2>Contract Snapshot</h2>
+                <div id="contract-summary" class="contract-summary"></div>
+                <pre id="guide-json-preview" class="json-preview"></pre>
+            </aside>
+        </section>
+    </main>
+</body>
+</html>

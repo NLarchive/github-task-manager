@@ -1,0 +1,351 @@
+{
+  "version": 1,
+  "generated_at": "2026-05-07T17:35:35.325Z",
+  "component_schema": "schema/component.schema.json",
+  "unit_case_schema": "schema/unit-case.schema.json",
+  "manifest_schema": "schema/manifest.schema.json",
+  "components": {
+    "tools": [
+      "benchmark_result_writer",
+      "chat-quality-inspector",
+      "folder_graph_scanner",
+      "html_parser",
+      "research_benchmark_runner",
+      "result_ranker",
+      "ui_renderer",
+      "web_search_tool"
+    ],
+    "agents": [
+      "data_processor",
+      "search_agent"
+    ],
+    "models": [
+      "gemma_model",
+      "qwen_model"
+    ],
+    "subgraphs": [
+      "format_tool"
+    ],
+    "workflows": [
+      "research_benchmark",
+      "research_workflow"
+    ]
+  },
+  "units": [
+    {
+      "id": "chat-quality-inspector",
+      "type": "tool",
+      "path": "components/agents/chat-quality-inspector",
+      "definition": "schema.json",
+      "manifest": null,
+      "entry": "main.js",
+      "contract": "schema.json",
+      "tests": [
+        "test.js"
+      ],
+      "relations": 0,
+      "schema": "schema.json",
+      "lifecycle": "draft",
+      "version": 1
+    },
+    {
+      "id": "data_processor",
+      "type": "agent",
+      "path": "components/agents/data_processor_v1",
+      "definition": "schema.json",
+      "manifest": null,
+      "entry": "schema.json",
+      "contract": "schema.json",
+      "tests": [
+        "tests/behavior.json"
+      ],
+      "relations": 0,
+      "schema": "schema.json",
+      "lifecycle": "draft",
+      "version": 1
+    },
+    {
+      "id": "search_agent",
+      "type": "agent",
+      "path": "components/agents/search_agent_v1",
+      "definition": "schema.json",
+      "manifest": null,
+      "entry": "schema.json",
+      "contract": "schema.json",
+      "tests": [
+        "tests/behavior.json"
+      ],
+      "relations": 0,
+      "schema": "schema.json",
+      "lifecycle": "draft",
+      "version": 1
+    },
+    {
+      "id": "gemma_model",
+      "type": "model",
+      "path": "components/models/gemma/gemma4-26b-a4b-q4kxl",
+      "definition": "schema.json",
+      "manifest": null,
+      "entry": "schema.json",
+      "contract": "schema.json",
+      "tests": [
+        "tests/health.json"
+      ],
+      "relations": 0,
+      "schema": "schema.json",
+      "lifecycle": "draft",
+      "version": 1
+    },
+    {
+      "id": "qwen_model",
+      "type": "model",
+      "path": "components/models/qwen/qwen3.6-35b-a3b-q4kxl",
+      "definition": "schema.json",
+      "manifest": null,
+      "entry": "schema.json",
+      "contract": "schema.json",
+      "tests": [
+        "tests/health.json"
+      ],
+      "relations": 0,
+      "schema": "schema.json",
+      "lifecycle": "draft",
+      "version": 1
+    },
+    {
+      "id": "format_tool",
+      "type": "subgraph",
+      "path": "components/subgraphs/format_info_v1",
+      "definition": "graph.json",
+      "manifest": null,
+      "entry": "graph.json",
+      "contract": "schema.json",
+      "tests": [
+        "tests/snapshot.json"
+      ],
+      "relations": 0,
+      "schema": "schema.json",
+      "lifecycle": "draft",
+      "version": 1
+    },
+    {
+      "id": "format_tool",
+      "type": "subgraph",
+      "path": "components/subgraphs/format_info_v1",
+      "definition": "schema.json",
+      "manifest": null,
+      "entry": "schema.json",
+      "contract": "schema.json",
+      "tests": [],
+      "relations": 0,
+      "schema": "schema.json",
+      "lifecycle": "draft",
+      "version": 1
+    },
+    {
+      "id": "benchmark_result_writer",
+      "type": "tool",
+      "path": "components/tools/benchmark_result_writer_v1",
+      "definition": "schema.json",
+      "manifest": null,
+      "entry": "main.js",
+      "contract": "schema.json",
+      "tests": [
+        "tests/unit.json"
+      ],
+      "relations": 0,
+      "schema": "schema.json",
+      "lifecycle": "draft",
+      "version": 1
+    },
+    {
+      "id": "folder_graph_scanner",
+      "type": "tool",
+      "path": "components/tools/folder-graph-scanner",
+      "definition": "schema.json",
+      "manifest": "manifest.json",
+      "entry": "main.js",
+      "contract": "schema.json",
+      "tests": [],
+      "relations": 2,
+      "schema": "schema.json",
+      "lifecycle": "draft",
+      "version": 1
+    },
+    {
+      "id": "html_parser",
+      "type": "tool",
+      "path": "components/tools/html_parser_v1",
+      "definition": "schema.json",
+      "manifest": "manifest.json",
+      "entry": "main.js",
+      "contract": "schema.json",
+      "tests": [
+        "tests/unit.json"
+      ],
+      "relations": 0,
+      "schema": "schema.json",
+      "lifecycle": "draft",
+      "version": 1
+    },
+    {
+      "id": "research_benchmark_runner",
+      "type": "tool",
+      "path": "components/tools/research_benchmark_runner_v1",
+      "definition": "schema.json",
+      "manifest": null,
+      "entry": "main.js",
+      "contract": "schema.json",
+      "tests": [],
+      "relations": 0,
+      "schema": "schema.json",
+      "lifecycle": "draft",
+      "version": 1
+    },
+    {
+      "id": "result_ranker",
+      "type": "tool",
+      "path": "components/tools/result_ranker_v1",
+      "definition": "schema.json",
+      "manifest": null,
+      "entry": "main.js",
+      "contract": "schema.json",
+      "tests": [
+        "tests/unit.json"
+      ],
+      "relations": 0,
+      "schema": "schema.json",
+      "lifecycle": "draft",
+      "version": 1
+    },
+    {
+      "id": "ui_renderer",
+      "type": "tool",
+      "path": "components/tools/ui_renderer_v1",
+      "definition": "schema.json",
+      "manifest": "manifest.json",
+      "entry": "main.js",
+      "contract": "schema.json",
+      "tests": [
+        "tests/snapshot.json"
+      ],
+      "relations": 0,
+      "schema": "schema.json",
+      "lifecycle": "draft",
+      "version": 1
+    },
+    {
+      "id": "web_search_tool",
+      "type": "tool",
+      "path": "components/tools/web_search_v1",
+      "definition": "schema.json",
+      "manifest": null,
+      "entry": "main.js",
+      "contract": "schema.json",
+      "tests": [
+        "tests/unit.json"
+      ],
+      "relations": 0,
+      "schema": "schema.json",
+      "lifecycle": "draft",
+      "version": 1
+    },
+    {
+      "id": "research_benchmark",
+      "type": "workflow",
+      "path": "workflows/benchmarks/research_benchmark_v1",
+      "definition": "schema.json",
+      "manifest": null,
+      "entry": "schema.json",
+      "contract": "schema.json",
+      "tests": [],
+      "relations": 0,
+      "schema": "schema.json",
+      "lifecycle": "draft",
+      "version": 1
+    },
+    {
+      "id": "research_benchmark",
+      "type": "workflow",
+      "path": "workflows/benchmarks/research_benchmark_v1",
+      "definition": "workflow.json",
+      "manifest": null,
+      "entry": "workflow.json",
+      "contract": "schema.json",
+      "tests": [
+        "tests/live.json"
+      ],
+      "relations": 0,
+      "schema": "schema.json",
+      "lifecycle": "draft",
+      "version": 1
+    },
+    {
+      "id": "research_workflow",
+      "type": "workflow",
+      "path": "workflows/research_workflow_v1",
+      "definition": "schema.json",
+      "manifest": "manifest.json",
+      "entry": "workflow.json",
+      "contract": "schema.json",
+      "tests": [],
+      "relations": 4,
+      "schema": "schema.json",
+      "lifecycle": "draft",
+      "version": 1
+    },
+    {
+      "id": "research_workflow",
+      "type": "workflow",
+      "path": "workflows/research_workflow_v1",
+      "definition": "workflow.json",
+      "manifest": "manifest.json",
+      "entry": "workflow.json",
+      "contract": "schema.json",
+      "tests": [
+        "tests/e2e.json"
+      ],
+      "relations": 4,
+      "schema": "schema.json",
+      "lifecycle": "draft",
+      "version": 1
+    }
+  ],
+  "edges": [
+    {
+      "scope": "research_workflow",
+      "from": "search_agent",
+      "to": "data_processor",
+      "type": "data-flow",
+      "mapping": "answer → raw"
+    },
+    {
+      "scope": "research_workflow",
+      "from": "data_processor",
+      "to": "format_tool",
+      "type": "data-flow",
+      "mapping": "html → html"
+    },
+    {
+      "scope": "research_benchmark",
+      "from": "research_benchmark_runner",
+      "to": "benchmark_result_writer",
+      "type": "data-flow",
+      "mapping": "report → report"
+    },
+    {
+      "scope": "research_benchmark",
+      "from": "research_benchmark_runner",
+      "to": "benchmark_result_writer",
+      "type": "data-flow",
+      "mapping": "benchmark_meta → benchmark_meta"
+    },
+    {
+      "scope": "format_tool",
+      "from": "html_parser",
+      "to": "ui_renderer",
+      "type": "data-flow",
+      "mapping": "doc → doc"
+    }
+  ]
+}

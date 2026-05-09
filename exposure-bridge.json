@@ -21,7 +21,7 @@
         "public/tasksDB/_examples/task-management/data.json",
         "public/tasksDB/_examples/task-management/tour.json",
         "public/tasksDB/_templates/starter_project_template.json",
-        "public/tasksDB/_templates/starter_project_template_v2.json",
+
         "public/tasksDB/external/ai-career-roadmap/node.tasks.json",
         "public/tasksDB/external/ai-career-roadmap/tour/graph-tour.json",
         "public/tasksDB/external/extract-project-spec/structure.json",
@@ -86,10 +86,6 @@
     },
     {
       "file": "public/tasksDB/_templates/starter_project_template.json",
-      "kind": "data-template"
-    },
-    {
-      "file": "public/tasksDB/_templates/starter_project_template_v2.json",
       "kind": "data-template"
     }
   ],

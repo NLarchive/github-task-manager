@@ -1,0 +1,55 @@
+{
+  "id": "search_agent",
+  "type": "agent",
+  "version": 1,
+  "label": "search_agent",
+  "path": "components/agents/search_agent_v1",
+  "description": "LLM agent that plans and executes web searches using ReAct strategy",
+  "lifecycle": "draft",
+  "success_threshold": 0.8,
+  "model_ref": "gemma_model",
+  "memory_type": "buffer",
+  "planning": "react",
+  "tool_refs": [
+    "web_search_tool",
+    "result_ranker"
+  ],
+  "inputs": [
+    {
+      "name": "query",
+      "type": "string",
+      "required": true,
+      "description": "User query"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "answer",
+      "type": "string",
+      "description": "Final answer text"
+    },
+    {
+      "name": "citations",
+      "type": "array",
+      "description": "Optional source references"
+    }
+  ],
+  "errors": [
+    {
+      "code": "AGENT_TIMEOUT",
+      "description": "Agent reasoning exceeded timeout"
+    },
+    {
+      "code": "AGENT_TOOL_FAILURE",
+      "description": "Upstream tool returned an error"
+    }
+  ],
+  "files": [
+    "schema.json",
+    "prompt.md",
+    "tests/behavior.json"
+  ],
+  "tests": [
+    "tests/behavior.json"
+  ]
+}

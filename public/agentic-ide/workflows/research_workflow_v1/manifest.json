@@ -1,0 +1,70 @@
+{
+  "$schema": "../../schema/manifest.schema.json",
+  "id": "research_workflow",
+  "type": "workflow",
+  "version": 1,
+  "label": "research_workflow",
+  "path": "workflows/research_workflow_v1",
+  "description": "Top-level research pipeline: search, synthesize, validate, and render a report.",
+  "entry": {
+    "file": "workflow.json",
+    "symbol": "research_workflow",
+    "format": "workflow"
+  },
+  "api": {
+    "contract": "schema.json",
+    "inputs_ref": "schema.json#/inputs",
+    "outputs_ref": "schema.json#/outputs",
+    "surface": "search_agent -> data_processor -> format_tool"
+  },
+  "files": [
+    {
+      "path": "workflow.json",
+      "role": "entry"
+    },
+    {
+      "path": "schema.json",
+      "role": "contract"
+    },
+    {
+      "path": "state.js",
+      "role": "state"
+    },
+    {
+      "path": "state.py",
+      "role": "parity-state"
+    },
+    {
+      "path": "tests/e2e.json",
+      "role": "test"
+    }
+  ],
+  "tests": [
+    {
+      "kind": "e2e",
+      "file": "tests/e2e.json"
+    }
+  ],
+  "relations": [
+    {
+      "kind": "unit",
+      "path": "components/agents/search_agent_v1",
+      "role": "workflow-node"
+    },
+    {
+      "kind": "unit",
+      "path": "components/agents/data_processor_v1",
+      "role": "workflow-node"
+    },
+    {
+      "kind": "unit",
+      "path": "components/subgraphs/format_info_v1",
+      "role": "workflow-node"
+    },
+    {
+      "kind": "registry",
+      "path": "registry.json",
+      "role": "published-workflow"
+    }
+  ]
+}

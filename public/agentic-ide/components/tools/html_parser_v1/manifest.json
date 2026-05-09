@@ -1,0 +1,42 @@
+{
+  "$schema": "../../../schema/manifest.schema.json",
+  "id": "html_parser",
+  "type": "tool",
+  "version": 1,
+  "label": "html_parser",
+  "path": "components/tools/html_parser_v1",
+  "description": "Parses HTML into a structured document object.",
+  "entry": {
+    "file": "main.js",
+    "symbol": "run",
+    "format": "module",
+    "exports": ["run"]
+  },
+  "api": {
+    "contract": "schema.json",
+    "inputs_ref": "schema.json#/inputs",
+    "outputs_ref": "schema.json#/outputs",
+    "surface": "run(html)"
+  },
+  "files": [
+    {
+      "path": "main.js",
+      "role": "entry"
+    },
+    {
+      "path": "schema.json",
+      "role": "contract"
+    },
+    {
+      "path": "tests/unit.json",
+      "role": "test"
+    }
+  ],
+  "tests": [
+    {
+      "kind": "unit",
+      "file": "tests/unit.json"
+    }
+  ],
+  "relations": []
+}

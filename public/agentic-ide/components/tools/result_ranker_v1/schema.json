@@ -1,0 +1,40 @@
+{
+  "id": "result_ranker",
+  "type": "tool",
+  "version": 1,
+  "label": "result_ranker",
+  "path": "components/tools/result_ranker_v1",
+  "description": "Ranks and filters search results by heuristic relevance score",
+  "lifecycle": "draft",
+  "success_threshold": 0.8,
+  "impl": "main.js",
+  "inputs": [
+    {
+      "name": "results",
+      "type": "array",
+      "required": true,
+      "description": "Raw search result rows"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "ranked",
+      "type": "array",
+      "description": "Ranked result rows"
+    }
+  ],
+  "errors": [
+    {
+      "code": "RANKER_EMPTY_INPUT",
+      "description": "No results provided for ranking"
+    }
+  ],
+  "files": [
+    "schema.json",
+    "main.js",
+    "tests/unit.json"
+  ],
+  "tests": [
+    "tests/unit.json"
+  ]
+}

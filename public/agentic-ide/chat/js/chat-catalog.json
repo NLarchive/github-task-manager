@@ -1,0 +1,44 @@
+{
+  "prompts": [
+    {
+      "id": "clean-base",
+      "name": "Clean Base",
+      "prompt": "",
+      "description": "No system prefill. Clean inference baseline."
+    },
+    {
+      "id": "component-debug",
+      "name": "Component Debug",
+      "prompt": "Debug the selected component. Return root-cause, minimal fix, and test case.",
+      "description": "Focused debugging profile"
+    },
+    {
+      "id": "workflow-benchmark",
+      "name": "Workflow Benchmark",
+      "prompt": "Analyze workflow performance and suggest next optimization in ranked order.",
+      "description": "Benchmark optimization profile"
+    }
+  ],
+  "agents": [
+    { "id": "none", "name": "None", "goal": "No agent strategy" },
+    { "id": "search-agent-v1", "name": "Search Agent", "goal": "Find relevant data, summarize signal" },
+    { "id": "debug-agent-v1", "name": "Debug Agent", "goal": "Trace failure and produce patch plan" }
+  ],
+  "tools": [
+    { "id": "none", "name": "None" },
+    { "id": "web-search-v1", "name": "Web Search", "capability": "external_search" },
+    { "id": "file-read-v1", "name": "File Read", "capability": "local_file_read" },
+    { "id": "runtime-test-v1", "name": "Runtime Test", "capability": "execute_component_tests" }
+  ],
+  "tests": [
+    { "id": "none", "name": "None" },
+    { "id": "memory-retention-v1", "name": "Memory Retention" },
+    { "id": "deduction-consistency-v1", "name": "Deduction Consistency" },
+    { "id": "instruction-following-v1", "name": "Instruction Following" }
+  ],
+  "parameterProfiles": [
+    { "id": "balanced", "name": "Balanced", "temperature": 0.2, "top_p": 0.95, "top_k": 40, "max_tokens": 1024 },
+    { "id": "creative", "name": "Creative", "temperature": 0.9, "top_p": 0.97, "top_k": 80, "max_tokens": 1400 },
+    { "id": "strict", "name": "Strict", "temperature": 0.0, "top_p": 0.9, "top_k": 20, "max_tokens": 900 }
+  ]
+}

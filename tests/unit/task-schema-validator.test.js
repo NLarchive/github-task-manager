@@ -373,6 +373,12 @@ describe('v3 Task Field Validation', () => {
     expect(result.errors.filter(e => e.includes('subtask')).length).toBe(0);
   });
 
+  it('should validate subtasks using task_name field', () => {
+    const task = { ...baseTask, subtasks: [{ task_name: 'Sub A', status: 'Not Started', estimated_hours: 2 }] };
+    const result = validator.validateTask(task);
+    expect(result.errors.filter(e => e.includes('subtask') && e.includes('name')).length).toBe(0);
+  });
+
   it('should reject subtask missing name', () => {
     const task = { ...baseTask, subtasks: [{ status: 'Not Started' }] };
     const result = validator.validateTask(task);

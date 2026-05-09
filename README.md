@@ -76,17 +76,22 @@ npm test
 
 #### Running Locally
 ```bash
-# Option 1: Open directly in browser
-open public/index.html
-
-# Option 2: Serve with Python
-python -m http.server 8000
-
-# Option 3: Serve with Node (if installed)
-npx http-server
+# From the repository root
+cd github-task-manager
+npm install
+npm start
 ```
 
-Visit `http://localhost:8000/` in your browser.
+Then open the app in your browser at:
+
+- `http://localhost:3000/` for the main Task Manager UI
+- `http://localhost:3000/graph-display/` for the graph visualization UI
+
+> Important: To persist edits to local disk, run the local development server with `npm start`.
+> Static preview servers such as `python -m http.server` or `npx serve public` are fine for read-only preview,
+> but they cannot save task edits to disk without the Node API server.
+>
+> See `api/README.md` for the local API contract and `cli/README.md` for supported development commands.
 
 ## How to Use 📖
 

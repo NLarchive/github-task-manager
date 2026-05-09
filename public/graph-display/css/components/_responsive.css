@@ -107,12 +107,14 @@ a {
     }
     
     /* Popup adjustments */
+    #taskNodeModal .content,
     #popup .content,
     #legend-popup .content {
         padding: var(--spacing-md);
         padding-top: calc(var(--spacing-md) + 32px);
     }
     
+    #taskNodeModal .content h2,
     #popup .content h2,
     #legend-popup .content h2 {
         font-size: var(--font-size-lg);
@@ -170,6 +172,7 @@ a {
         font-size: 16px;
     }
     
+    #taskNodeModal .content,
     #popup .content,
     #legend-popup .content {
         max-width: 700px;
@@ -210,6 +213,7 @@ a {
 @media (max-height: 500px) and (orientation: landscape) {
     /* Reduce vertical spacing */
     .walkthrough-tooltip,
+    #taskNodeModal .content,
     #popup .content,
     #legend-popup .content {
         max-height: 95vh;
@@ -280,6 +284,7 @@ a {
     }
     
     /* Show all content */
+    #taskNodeModal,
     #popup,
     #legend-popup {
         position: static !important;
@@ -287,6 +292,7 @@ a {
         background: white !important;
     }
     
+    #taskNodeModal .content,
     #popup .content,
     #legend-popup .content {
         box-shadow: none !important;

@@ -1,17 +1,74 @@
 # Project Specification: web-github-task-manager
-Generated: 2026-04-23 16:36
+Generated: 2026-05-07 11:43
 <!-- To update this file, run: python D:\tool\extract_project_spec\app.py --root D:\web\web-github-task-manager -->
 
 ## Folder structure
 
 .github
 .github\workflows
+api
+cli
 public
+public\agentic-ide
+public\agentic-ide\chat
+public\agentic-ide\chat\css
+public\agentic-ide\chat\js
+public\agentic-ide\chat\tests
+public\agentic-ide\components
+public\agentic-ide\components\agents
+public\agentic-ide\components\agents\chat-quality-inspector
+public\agentic-ide\components\agents\data_processor_v1
+public\agentic-ide\components\agents\data_processor_v1\tests
+public\agentic-ide\components\agents\search_agent_v1
+public\agentic-ide\components\agents\search_agent_v1\tests
+public\agentic-ide\components\inference
+public\agentic-ide\components\inference\engines
+public\agentic-ide\components\inference\engines\duck4i-llama
+public\agentic-ide\components\inference\engines\hyllama
+public\agentic-ide\components\inference\engines\llama-server-openai
+public\agentic-ide\components\inference\engines\llama3pure
+public\agentic-ide\components\inference\engines\llmjs
+public\agentic-ide\components\inference\engines\node-llama-cpp
+public\agentic-ide\components\inference\engines\webllm
+public\agentic-ide\components\inference\tests
+public\agentic-ide\components\inference\tests\coding
+public\agentic-ide\components\inference\tests\text
+public\agentic-ide\components\runtime
+public\agentic-ide\components\subgraphs
+public\agentic-ide\components\subgraphs\format_info_v1
+public\agentic-ide\components\subgraphs\format_info_v1\tests
+public\agentic-ide\components\tools
+public\agentic-ide\components\tools\benchmark_result_writer_v1
+public\agentic-ide\components\tools\benchmark_result_writer_v1\tests
+public\agentic-ide\components\tools\folder-graph-scanner
+public\agentic-ide\components\tools\folder-graph-scanner\ui
+public\agentic-ide\components\tools\html_parser_v1
+public\agentic-ide\components\tools\html_parser_v1\tests
+public\agentic-ide\components\tools\research_benchmark_runner_v1
+public\agentic-ide\components\tools\result_ranker_v1
+public\agentic-ide\components\tools\result_ranker_v1\tests
+public\agentic-ide\components\tools\ui_renderer_v1
+public\agentic-ide\components\tools\ui_renderer_v1\tests
+public\agentic-ide\components\tools\web_search_v1
+public\agentic-ide\components\tools\web_search_v1\tests
+public\agentic-ide\js
+public\agentic-ide\schema
+public\agentic-ide\tests
+public\agentic-ide\ui
+public\agentic-ide\workflows
+public\agentic-ide\workflows\benchmarks
+public\agentic-ide\workflows\benchmarks\research_benchmark_v1
+public\agentic-ide\workflows\benchmarks\research_benchmark_v1\tests
+public\agentic-ide\workflows\research_workflow_v1
+public\agentic-ide\workflows\research_workflow_v1\tests
 public\api
 public\calendar
 public\calendar\js
 public\calendar\snippets
 public\config
+public\graph-composer
+public\graph-composer\css
+public\graph-composer\js
 public\graph-display
 public\graph-display\css
 public\graph-display\css\components
@@ -19,6 +76,7 @@ public\graph-display\images
 public\graph-display\images\team
 public\graph-display\js
 public\graph-display\js\shared
+public\graph-display\schema
 public\health
 public\health\css
 public\health\js
@@ -27,8 +85,18 @@ public\list-display\css
 public\list-display\js
 public\local-folder
 public\local-folder\js
+public\local-folder\task-bridge-modules
+public\local-folder\task-bridge-modules\taskbridge
+public\local-folder\task-bridge-modules\taskbridge\public
+public\local-folder\task-bridge-modules\taskbridge\public\task-engine
+public\local-folder\task-bridge-modules\taskbridge\public\task-engine\js
+public\local-folder\task-bridge-modules\taskbridge\server
 public\task-engine
+public\task-engine\file-editing
+public\task-engine\file-editing\edit-cloud
+public\task-engine\file-editing\edit-local
 public\task-engine\js
+public\task-engine\js\bridge
 public\tasksDB
 public\tasksDB\_examples
 public\tasksDB\_examples\career
@@ -51,14 +119,130 @@ tools\calendar
 tools\cloudflare-worker
 tools\docs
 tools\scripts
+tools\task-bridge
+tools\task-bridge\server
 .github\workflows\deploy.yml
 .github\workflows\validate-taskdb.yml
 .gitignore
 AGENTS.md
+api\README.md
+cli\README.md
 CONTRIBUTING.md
 exposure-bridge.json
 LICENSE
 package.json
+public\agentic-ide\.gitignore
+public\agentic-ide\chat\chat-screen.schema.json
+public\agentic-ide\chat\css\chat-lab.css
+public\agentic-ide\chat\index.html
+public\agentic-ide\chat\js\chat-api.js
+public\agentic-ide\chat\js\chat-app.js
+public\agentic-ide\chat\js\chat-catalog.json
+public\agentic-ide\chat\js\chat-render.js
+public\agentic-ide\chat\js\chat-response-validator.js
+public\agentic-ide\chat\js\chat-state.js
+public\agentic-ide\chat\js\chat-telemetry.js
+public\agentic-ide\chat\js\chat-tests.js
+public\agentic-ide\chat\node.tasks.json
+public\agentic-ide\chat\playwright.config.js
+public\agentic-ide\chat\schema.json
+public\agentic-ide\chat\tests\chat-lab.spec.js
+public\agentic-ide\chat\tests\chat-lab.test.js
+public\agentic-ide\chat\tests\chat-surface.test-plan.json
+public\agentic-ide\chat\tests\inference-chat-hello-world.spec.js
+public\agentic-ide\chat\tests\inference-ui-series.spec.js
+public\agentic-ide\code.graph.json
+public\agentic-ide\components\agents\chat-quality-inspector\main.js
+public\agentic-ide\components\agents\chat-quality-inspector\schema.json
+public\agentic-ide\components\agents\chat-quality-inspector\test.js
+public\agentic-ide\components\agents\data_processor_v1\prompt.md
+public\agentic-ide\components\agents\data_processor_v1\schema.json
+public\agentic-ide\components\agents\data_processor_v1\tests\behavior.json
+public\agentic-ide\components\agents\search_agent_v1\prompt.md
+public\agentic-ide\components\agents\search_agent_v1\schema.json
+public\agentic-ide\components\agents\search_agent_v1\tests\behavior.json
+public\agentic-ide\components\inference\engines\duck4i-llama\adapter.js
+public\agentic-ide\components\inference\engines\hyllama\adapter.js
+public\agentic-ide\components\inference\engines\llama-server-openai\adapter.js
+public\agentic-ide\components\inference\engines\llama3pure\adapter.js
+public\agentic-ide\components\inference\engines\llmjs\adapter.js
+public\agentic-ide\components\inference\engines\node-llama-cpp\adapter.js
+public\agentic-ide\components\inference\engines\webllm\adapter.js
+public\agentic-ide\components\inference\main.js
+public\agentic-ide\components\inference\README.md
+public\agentic-ide\components\inference\request-schema.js
+public\agentic-ide\components\inference\schema.json
+public\agentic-ide\components\inference\tests\benchmark.js
+public\agentic-ide\components\inference\tests\coding\coding_cases.json
+public\agentic-ide\components\inference\tests\coding\run-coding-suite.js
+public\agentic-ide\components\inference\tests\index.html
+public\agentic-ide\components\inference\tests\select-best.js
+public\agentic-ide\components\inference\tests\text\hello-world-conformance.js
+public\agentic-ide\components\inference\tests\text\run-validation-suite.js
+public\agentic-ide\components\inference\tests\text\validation_cases.json
+public\agentic-ide\components\runtime\schema.json
+public\agentic-ide\components\subgraphs\format_info_v1\graph.json
+public\agentic-ide\components\subgraphs\format_info_v1\schema.json
+public\agentic-ide\components\subgraphs\format_info_v1\state.js
+public\agentic-ide\components\subgraphs\format_info_v1\tests\snapshot.json
+public\agentic-ide\components\tools\benchmark_result_writer_v1\main.js
+public\agentic-ide\components\tools\benchmark_result_writer_v1\schema.json
+public\agentic-ide\components\tools\benchmark_result_writer_v1\tests\unit.json
+public\agentic-ide\components\tools\folder-graph-scanner\main.js
+public\agentic-ide\components\tools\folder-graph-scanner\schema.json
+public\agentic-ide\components\tools\folder-graph-scanner\ui\main.js
+public\agentic-ide\components\tools\html_parser_v1\main.js
+public\agentic-ide\components\tools\html_parser_v1\schema.json
+public\agentic-ide\components\tools\html_parser_v1\tests\unit.json
+public\agentic-ide\components\tools\README.md
+public\agentic-ide\components\tools\research_benchmark_runner_v1\main.js
+public\agentic-ide\components\tools\research_benchmark_runner_v1\schema.json
+public\agentic-ide\components\tools\result_ranker_v1\main.js
+public\agentic-ide\components\tools\result_ranker_v1\schema.json
+public\agentic-ide\components\tools\result_ranker_v1\tests\unit.json
+public\agentic-ide\components\tools\schema.json
+public\agentic-ide\components\tools\ui_renderer_v1\main.js
+public\agentic-ide\components\tools\ui_renderer_v1\schema.json
+public\agentic-ide\components\tools\ui_renderer_v1\template.html
+public\agentic-ide\components\tools\ui_renderer_v1\tests\snapshot.json
+public\agentic-ide\components\tools\web_search_v1\main.js
+public\agentic-ide\components\tools\web_search_v1\schema.json
+public\agentic-ide\components\tools\web_search_v1\tests\unit.json
+public\agentic-ide\index.html
+public\agentic-ide\js\bridge-server.js
+public\agentic-ide\js\bridge-workspace.js
+public\agentic-ide\js\bridge.js
+public\agentic-ide\js\export.js
+public\agentic-ide\js\main.js
+public\agentic-ide\js\modals.js
+public\agentic-ide\js\README.md
+public\agentic-ide\js\render.js
+public\agentic-ide\js\schema-preview.js
+public\agentic-ide\js\state.js
+public\agentic-ide\js\types.js
+public\agentic-ide\js\utils.js
+public\agentic-ide\node.tasks.json
+public\agentic-ide\PROJECT_SPEC.md
+public\agentic-ide\README.md
+public\agentic-ide\registry.json
+public\agentic-ide\schema\component.schema.json
+public\agentic-ide\schema\unit-case.schema.json
+public\agentic-ide\tests\inference-debug.js
+public\agentic-ide\tests\inference-quality-test.js
+public\agentic-ide\tests\test-inference.ps1
+public\agentic-ide\ui\README.md
+public\agentic-ide\ui\style.css
+public\agentic-ide\workflows\benchmarks\README.md
+public\agentic-ide\workflows\benchmarks\research_benchmark.json
+public\agentic-ide\workflows\benchmarks\research_benchmark_v1\schema.json
+public\agentic-ide\workflows\benchmarks\research_benchmark_v1\state.js
+public\agentic-ide\workflows\benchmarks\research_benchmark_v1\tests\live.json
+public\agentic-ide\workflows\benchmarks\research_benchmark_v1\workflow.json
+public\agentic-ide\workflows\research_workflow_v1\schema.json
+public\agentic-ide\workflows\research_workflow_v1\state.js
+public\agentic-ide\workflows\research_workflow_v1\state.py
+public\agentic-ide\workflows\research_workflow_v1\tests\e2e.json
+public\agentic-ide\workflows\research_workflow_v1\workflow.json
 public\api\README.md
 public\calendar\js\task-ics-export.js
 public\calendar\README.md
@@ -66,6 +250,16 @@ public\calendar\snippets\calendar-dropdown-snippets.html
 public\config\projects-config.js
 public\config\tasks-template-config.js
 public\config\worker-url.js
+public\graph-composer\css\graph-composer.css
+public\graph-composer\css\guide-index.css
+public\graph-composer\css\project-index.css
+public\graph-composer\guide-index.html
+public\graph-composer\index.html
+public\graph-composer\js\composer-app.js
+public\graph-composer\js\composer-defaults.js
+public\graph-composer\js\composer-render.js
+public\graph-composer\js\composer-state.js
+public\graph-composer\project-index.html
 public\graph-display\.gitignore
 public\graph-display\css\components\_accessibility.css
 public\graph-display\css\components\_base.css
@@ -91,15 +285,23 @@ public\graph-display\index.html
 public\graph-display\js\cv-generator.js
 public\graph-display\js\d3.v7.min.js
 public\graph-display\js\graph-data.js
+public\graph-display\js\guide-index.js
 public\graph-display\js\main-graph.js
+public\graph-display\js\project-index.js
 public\graph-display\js\README.md
+public\graph-display\js\shared\graph-design-contract.js
+public\graph-display\js\shared\graph-metric-utils.js
+public\graph-display\js\shared\graph-template-storage.js
 public\graph-display\js\shared\link-types.js
+public\graph-display\js\shared\project-graph-utils.js
 public\graph-display\js\shared\tours.js
 public\graph-display\js\template-loader.js
 public\graph-display\js\utils.js
 public\graph-display\js\walkthrough.js
 public\graph-display\manifest.json
 public\graph-display\README.md
+public\graph-display\schema\graph-template.schema.json
+public\graph-display\schema\graph-ui-config.schema.json
 public\graph-display\sw.js
 public\health\css\health.css
 public\health\index.html
@@ -112,12 +314,26 @@ public\list-display\index.html
 public\list-display\js\list-display-controller.js
 public\list-display\js\README.md
 public\list-display\README.md
+public\local-folder\js\folder-cache.js
 public\local-folder\js\folder-picker-trigger.js
 public\local-folder\js\local-folder-scanner.js
 public\local-folder\README.md
+public\local-folder\task-bridge-modules\taskbridge\package.json
+public\local-folder\task-bridge-modules\taskbridge\public\task-engine\js\app-integration-example.js
+public\local-folder\task-bridge-modules\taskbridge\public\task-engine\js\cache-watchdog.js
+public\local-folder\task-bridge-modules\taskbridge\public\task-engine\js\task-storage-sync.js
+public\local-folder\task-bridge-modules\taskbridge\server.js
+public\local-folder\task-bridge-modules\taskbridge\server\bridge-router.js
+public\local-folder\task-bridge-modules\taskbridge\server\file-editor.js
 public\README.md
 public\styles.css
+public\task-engine\file-editing\edit-cloud\github-worker.strategy.json
+public\task-engine\file-editing\edit-local\local-filesystem.strategy.json
+public\task-engine\js\bridge\cache-watchdog.js
+public\task-engine\js\bridge\task-storage-sync.js
+public\task-engine\js\bridge\taskdb-bridge-integration.js
 public\task-engine\js\task-field-automation.js
+public\task-engine\js\task-schema-clipboard.js
 public\task-engine\js\task-schema-validator.js
 public\task-engine\js\task-storage-sync.js
 public\tasksDB\_examples\career\data.json
@@ -127,7 +343,6 @@ public\tasksDB\_examples\task-management\tour.json
 public\tasksDB\_schema\graph-template.schema.json
 public\tasksDB\_templates\starter_project_template.csv
 public\tasksDB\_templates\starter_project_template.json
-public\tasksDB\_templates\starter_project_template_v2.json
 public\tasksDB\external\ai-career-roadmap\node.tasks.json
 public\tasksDB\external\ai-career-roadmap\README.md
 public\tasksDB\external\ai-career-roadmap\tour\graph-tour.json
@@ -143,6 +358,7 @@ server.js
 tests\e2e\crud-operations.spec.js
 tests\e2e\graph-fullscreen.spec.js
 tests\e2e\live-multi-project-saves.spec.js
+tests\e2e\local-project-editing.spec.js
 tests\e2e\module-navigation.spec.js
 tests\e2e\password-timeline-issues.spec.js
 tests\e2e\smoke.spec.js
@@ -156,12 +372,20 @@ tests\graph-display\server.js
 tests\graph-display\web-e2e-bussines-navigation.spec.js
 tests\playwright.config.js
 tests\run-tests.js
+tests\unit\bridge-workspace.test.js
+tests\unit\folder-cache.test.js
 tests\unit\generate-project-calendars.test.js
 tests\unit\graph-data.test.js
+tests\unit\graph-design-contract.test.js
+tests\unit\graph-schemas.test.js
+tests\unit\graph-template-storage.test.js
+tests\unit\inference-engines.test.js
+tests\unit\inference-request-schema.test.js
 tests\unit\local-folder-scanner.test.js
 tests\unit\projects-config.test.js
 tests\unit\server-api.test.js
 tests\unit\task-field-automation.test.js
+tests\unit\task-schema-clipboard.test.js
 tests\unit\task-schema-validator.test.js
 tests\unit\task-storage-sync.test.js
 tests\unit\tasks-json-format.test.js
@@ -192,9 +416,16 @@ tools\scripts\prepare-public-graph.js
 tools\scripts\regenerate-tasks-csv.js
 tools\scripts\setup.bat
 tools\scripts\setup.js
+tools\scripts\start-agentic-ide-stack.ps1
+tools\scripts\validate-agentic-cells.js
 tools\scripts\validate-commit-format.js
 tools\scripts\validate-tasks-schema.js
 tools\scripts\validate-tasks-workers.js
+tools\task-bridge\package.json
+tools\task-bridge\README.md
+tools\task-bridge\server.js
+tools\task-bridge\server\bridge-router.js
+tools\task-bridge\server\file-editor.js
 
 ---
 
@@ -272,9 +503,7 @@ structure from README.md:
     [heading-1] # Run tests
     [heading-1] # No build step needed (vanilla JS)
     [heading-4] #### Running Locally
-    [heading-1] # Option 1: Open directly in browser
-    [heading-1] # Option 2: Serve with Python
-    [heading-1] # Option 3: Serve with Node (if installed)
+    [heading-1] # From the repository root
     [heading-2] ## How to Use 📖
     [heading-3] ### Creating a New Task
     [heading-3] ### Auto-Populated Fields
@@ -347,7 +576,7 @@ structure from exposure-bridge.json:
     [json-key] project: "web-github-task-manager"
     [json-key] root: "d:/web/web-github-task-manager"
     [json-key] formats: {produce, consume}
-    [json-key] schemas: [5 items]
+    [json-key] schemas: [4 items]
     [json-key] connectors: [1 items]
     [json-key] http_apis: [9 items]
     [json-key] bridge: {projects, shared_formats, bridge_ready, bridge_missing, existing_mappings, +1 more}
@@ -358,7 +587,7 @@ structure from package.json:
     [json-key] version: "1.0.0"
     [json-key] description: "Collaborative task management system integrated with GitHub ..."
     [json-key] main: "public/list-display/js/list-display-controller.js"
-    [json-key] scripts: {start, start:static, test, test:validate, validate:tasks, +26 more}
+    [json-key] scripts: {start, start:static, test, test:validate, validate:tasks, +33 more}
     [json-key] repository: {type, url}
     [json-key] keywords: [4 items]
     [json-key] author: "nlarchive"
@@ -366,18 +595,25 @@ structure from package.json:
     [json-key] bugs: {url}
     [json-key] homepage: "https://nlarchive.github.io/github-task-manager"
     [json-key] devDependencies: {@playwright/test, cross-env, eslint, gh-pages, prettier, +1 more}
-    [json-key] dependencies: {github-task-manager}
+    [json-key] dependencies: {@duck4i/llama, github-task-manager}
 
 structure from server.js:
     [file-summary] Local development server and runtime API bridge for the public TaskDB apps.
+    const ALLOWED_API_ORIGINS  «docstring: none»
     const TASK_FILE_CANDIDATES  «Preferred task filenames searched within a TaskDB project tree.»
     const DISCOVERY_IGNORED_DIRS  «Directories skipped while scanning project modules and derived artifacts.»
+    const PROJECT_TREE_IGNORED_DIRS  «Directories skipped while scanning the broader repository tree for project-index.html.»
+    const TEXT_PREVIEW_MAX_BYTES  «Text preview cap for file-content responses.»
+    const TEXT_PREVIEW_EXTENSIONS  «Extensions that are safe to preview as text without further inspection.»
     function escapeCsvValue(value)  «Escape a scalar value for inclusion in the persisted CSV export.»
     function generatePersistedCSV(tasks = [])  «Build the repo-side flattened CSV companion for a TaskDB task list.»
     function getDuplicateTaskIds(tasks = [])  «Collect duplicate numeric task identifiers before persisting project data.»
     function safeJoin(root, requestPath)  «Resolve a request-relative path within a trusted root, rejecting traversal.»
+    function scanFolderToGraph(folderPath, maxDepth = 5)  «Scan a folder structure and extract relations to build code.graph.json»
     function contentTypeFor(filePath)  «Map a file path extension to the HTTP content type used by static serving.»
     function sendJson(res, status, payload)  «Send a JSON response with no-store caching for API endpoints.»
+    function applyApiCors(req, res)  «Apply CORS headers for API endpoints using a strict allowlist. Requests without Origin (same-origin or CLI) are allowed.»
+    function getProjectETag(projectDir)  «Return ETag for a project's canonical node.tasks.json file.»
     function readBody(req)  «Read the full request body into memory with a conservative size guard.»
     function readJsonFile(filePath)  «Read and parse a JSON file, returning null when it does not exist or fails.»
     function normalizeRelativePath(value)  «Normalize a project-relative path to forward slashes without leading markers.»
@@ -387,6 +623,14 @@ structure from server.js:
     function readDirectoryEntries(dirPath)  «Read directory entries safely, returning an empty list on filesystem errors.»
     function pickPreferredTaskFileName(entries)  «Pick the preferred task source file from a directory listing.»
     function discoverProjectTaskFiles(projectDir)  «Recursively discover TaskDB task files under a project directory.»
+    function getProjectFileExtension(fileName)  «Get a lowercase file extension for project tree summaries.»
+    function shouldSkipProjectTreeEntry(entry)  «Determine whether a repository directory should be skipped from project tree scans.»
+    function countProjectTreeStats(dirPath)  «Recursively count descendant files/directories for a repository folder snapshot.»
+    function buildProjectFileSummary(rootDir, filePath)  «Build a file node summary for the project explorer.»
+    function buildProjectDirectorySummary(rootDir, dirPath)  «Build a folder node summary for the project explorer.»
+    function buildProjectTreeSnapshot(rootDir, relativePath = '')  «Build a one-level directory snapshot with child metadata and descendant counts.»
+    function isTextPreviewFile(filePath, buffer)  «Determine whether a file buffer should be treated as text for preview.»
+    function buildProjectFilePreview(rootDir, relativePath)  «Read a safe text preview payload for a repository file.»
     function getTaskKey(task)  «Resolve the canonical task key used for dependency and flow matching.»
     function getTaskCode(task)  «Extract the short task code prefix from a task key when present.»
     function getTaskPredecessorKeys(task)  «Collect predecessor identifiers from a task dependency list.»
@@ -402,7 +646,7 @@ structure from server.js:
     function maybeBootstrapTasksDb(tasksDbDir, fallbackDir)  «Seed the writable tasks directory from bundled public TaskDB data when needed.»
     function copyDirRecursive(sourceDir, targetDir)  «Recursively copy a directory tree into the writable tasks workspace.»
     function writeStateFiles(tasksDbDir, fullData)  «Regenerate the lightweight status-oriented state files for a project.»
-    function createServer({ publicDir, tasksDbDir, graphDir })  «Create the local HTTP server used by development, tests, and file-backed saves.»
+    function createServer({ publicDir, tasksDbDir, graphDir, repoRoot })  «Create the local HTTP server used by development, tests, and file-backed saves.»
 
 structure from .github/workflows/deploy.yml:
     [file-summary] Deploy GitHub Task Manager
@@ -418,6 +662,22 @@ structure from .github/workflows/validate-taskdb.yml:
     [yaml-key] on:
     [yaml-key] permissions:
     [yaml-key] jobs:
+
+structure from api/README.md:
+    [file-summary] API Reference
+    [heading-1] # API Reference
+    [heading-2] ## Local API Server
+    [heading-3] ### Key endpoints
+    [heading-3] ### Notes
+    [heading-2] ## CLI Support
+
+structure from cli/README.md:
+    [file-summary] CLI Support
+    [heading-1] # CLI Support
+    [heading-2] ## Recommended commands
+    [heading-2] ## Existing CLI/tooling locations
+    [heading-2] ## Local development CLI flow
+    [heading-2] ## Adding a new CLI entrypoint
 
 structure from public/README.md:
     [file-summary] Web GitHub Task Manager — Public Frontend
@@ -527,6 +787,1577 @@ structure from public/styles.css:
     [section] /* Animations */
     [section] /* Responsive */
 
+structure from public/agentic-ide/.gitignore:  (no extractable definitions)
+
+structure from public/agentic-ide/PROJECT_SPEC.md:
+    [file-summary] Project Specification: agentic-ide
+    [heading-1] # Project Specification: agentic-ide
+    [heading-2] ## Folder structure
+    [heading-2] ## File Structures
+    [heading-2] ## Relations structure
+    [heading-2] ## Flow structure
+    [heading-2] ## API endpoints
+
+structure from public/agentic-ide/README.md:
+    [file-summary] Agentic IDE
+    [heading-1] # Agentic IDE
+    [heading-2] ## Start
+    [heading-2] ## Runtime Requirements
+    [heading-2] ## Cell Contract System
+    [heading-2] ## Page Layout
+    [heading-2] ## Trees
+    [heading-3] ### Library
+    [heading-3] ### Graph
+    [heading-2] ## Mobile Behavior
+    [heading-2] ## Header Controls
+    [heading-3] ### Model selector
+    [heading-3] ### Chat
+    [heading-2] ## Bottom Panel Tabs
+    [heading-3] ### JSON
+    [heading-3] ### Code
+    [heading-3] ### Edge
+    [heading-3] ### Meta
+    [heading-3] ### Tasks
+    [heading-3] ### Tests
+    [heading-3] ### Issues
+    [heading-2] ## Inspector
+    [heading-2] ## How To Work With Components
+    [heading-2] ## Benchmark Workflow
+    [heading-2] ## Running The Benchmark
+    [heading-2] ## Project Structure Semantics
+    [heading-2] ## Validation Strategy
+    [heading-2] ## Notes
+
+structure from public/agentic-ide/code.graph.json:  (no extractable definitions)
+
+structure from public/agentic-ide/index.html:
+    [file-summary] Visual IDE for designing agentic workflow graphs — compose typed component nodes, wire data-flow edges, and export to graph-display templates.
+    [title] <title>Agentic Graph Designer</title>
+    [meta] meta[description]  «Visual IDE for designing agentic workflow graphs — compose typed component nodes, wire data-flow edges, and export to gr»
+    [section] <header id="page-header">
+    [heading-1] <h1>Graph Designer</h1>
+    [section] <aside id="sidebar">
+    [section] <aside id="right-panel">
+    [heading-3] <h3>Add Component</h3>
+    [heading-3] <h3>Add Edge</h3>
+    [heading-3] <h3>Import JSON</h3>
+    [heading-3] <h3>Chat with Local LLM</h3>
+    [heading-2] <h2>Agentic workflow IDE with graph canvas, file tree, code viewer, and node inspector</h2>
+
+structure from public/agentic-ide/node.tasks.json:
+    [json-key] project: {name, description, start_date, end_date, status, +2 more}
+    [json-key] categories: [6 items]
+    [json-key] workers: [2 items]
+    [json-key] tasks: [38 items]
+
+structure from public/agentic-ide/registry.json:
+    [json-key] version: 1
+    [json-key] generated_at: "2026-04-28T21:46:46.408Z"
+    [json-key] component_schema: "schema/component.schema.json"
+    [json-key] unit_case_schema: "schema/unit-case.schema.json"
+    [json-key] components: {tools, agents, models, subgraphs, workflows}
+    [json-key] edges: [5 items]
+
+structure from public/agentic-ide/chat/chat-screen.schema.json:
+    [file-summary] Agentic IDE Chat Screen State
+    [json-key] $schema: "https://json-schema.org/draft/2020-12/schema"
+    [json-key] $id: "https://local.agentic-ide/chat-screen.schema.json"
+    [json-key] title: "Agentic IDE Chat Screen State"
+    [json-key] type: "object"
+    [json-key] required: [5 items]
+    [json-key] properties: {generatedAt, modelId, historyCount, config, logs, +1 more}
+    [json-key] additionalProperties: false
+
+structure from public/agentic-ide/chat/index.html:
+    [file-summary] Standalone chat lab with configurable prompts, agents, tools, tests, memory evaluation, and structured telemetry outputs.
+    [title] <title>Agentic IDE Chat Lab</title>
+    [meta] meta[description]  «Standalone chat lab with configurable prompts, agents, tools, tests, memory evaluation, and structured telemetry outputs»
+    [section] <header id="topbar">
+    [heading-1] <h1>Chat Lab</h1>
+    [section] <aside id="config-panel">
+    [section] <section id="cfg-section">
+    [heading-2] <h2>1. Model and Backend</h2>
+    [section] <section id="cfg-section">
+    [heading-2] <h2>2. Generation and Sampling</h2>
+    [section] <section id="cfg-section">
+    [heading-2] <h2>3. Prompt and Behavior</h2>
+    [section] <section id="cfg-section">
+    [heading-2] <h2>4. Memory and History</h2>
+    [section] <section id="cfg-section">
+    [heading-2] <h2>5. Files and RAG</h2>
+    [section] <section id="cfg-section">
+    [heading-2] <h2>6. Tools and Workflows</h2>
+    [section] <section id="cfg-section">
+    [heading-2] <h2>7. Notebook Logic and Editing</h2>
+    [section] <section id="cfg-section">
+    [heading-2] <h2>8. Memory Evaluation</h2>
+    [section] <main id="chat-main">
+
+structure from public/agentic-ide/chat/node.tasks.json:
+    [json-key] project: {name, description, start_date, end_date, status, +1 more}
+    [json-key] categories: [4 items]
+    [json-key] workers: [1 items]
+    [json-key] tasks: [9 items]
+
+structure from public/agentic-ide/chat/playwright.config.js:
+    [file-summary] tests/agentic-ide/playwright.config.js
+    const PORT  «docstring: none»
+
+structure from public/agentic-ide/chat/schema.json:
+    [file-summary] Standalone Chat Lab with 8-section config panel, notebook-style editing, bridge LLM API integration, and quality validation.
+    [json-key] id: "chat-lab"
+    [json-key] type: "tool"
+    [json-key] version: 1
+    [json-key] label: "Chat Lab"
+    [json-key] path: "chat"
+    [json-key] description: "Standalone Chat Lab with 8-section config panel, notebook-st..."
+    [json-key] lifecycle: "draft"
+    [json-key] success_threshold: 0.8
+    [json-key] impl: "index.html"
+    [json-key] inputs: [0 items]
+    [json-key] outputs: [3 items]
+    [json-key] errors: [0 items]
+    [json-key] features: [6 items]
+    [json-key] dependencies: {tools, apis}
+    [json-key] files: [4 items]
+    [json-key] tests: [1 items]
+
+structure from public/agentic-ide/chat/css/chat-lab.css:
+    [css-variable] --bg
+    [css-variable] --panel
+    [css-variable] --panel-2
+    [css-variable] --line
+    [css-variable] --text
+    [css-variable] --sub
+    [css-variable] --accent
+    [css-variable] --ok
+    [css-variable] --bad
+    [selector] #app
+    [selector] .topbar
+    [selector] .topbar h1
+    [selector] .topbar select, .topbar button
+    [selector] .topbar button
+    [selector] .topbar-status
+    [selector] .dot
+    [selector] .dot.ok
+    [selector] .dot.bad
+    [selector] .body
+    [selector] .config-panel
+    [selector] .config-panel.hidden
+    [selector] .cfg-section
+    [selector] .cfg-section h2
+    [selector] .cfg-section label
+    [selector] .cfg-section input[type='file']
+    [selector] .cfg-section textarea
+    [selector] .cfg-section input[type='checkbox']
+    [selector] .help
+    [selector] .chat-main
+    [selector] .thread
+    [selector] .msg
+    [selector] .msg.user
+    [selector] .msg.assistant
+    [selector] .msg-meta
+    [selector] .msg-body
+    [selector] .msg.user .msg-body
+    [selector] .msg-actions
+    [selector] .msg-actions button
+    [selector] .msg-edit
+    [selector] .msg-edit.open
+    [selector] .msg-edit textarea
+    [selector] .composer
+    [selector] .composer textarea
+    [selector] .action-row
+    [selector] .action-row button
+    [selector] .toast
+    [selector] .toast.show
+
+structure from public/agentic-ide/chat/js/chat-api.js:
+    [file-summary] No top-level file docstring detected
+    function fetchCatalog()  «docstring: none»
+    function fetchRegistry(endpointBase)  «docstring: none»
+    function fetchModelInfo(endpointBase)  «docstring: none»
+    function llmComplete(endpointBase, payload)  «docstring: none»
+    function saveArtifact(endpointBase, path, filename, content)  «docstring: none»
+
+structure from public/agentic-ide/chat/js/chat-app.js:
+    [file-summary] No top-level file docstring detected
+    const DEFAULT_ENGINE_OPTIONS  «docstring: none»
+    function sanitizeBackend(backend)  «docstring: none»
+    function renderEngineOptions()  «docstring: none»
+    function toast(message)  «docstring: none»
+    function readConfigFromUi()  «docstring: none»
+    function writeConfigToUi()  «docstring: none»
+    function syncSliderLabels()  «docstring: none»
+    function selectedProfile(group, id, fallback = {})  «docstring: none»
+    function buildContextBlock()  «docstring: none»
+    function buildMessages(userPrompt)  «docstring: none»
+    function toNormalizedTokens(value)  «docstring: none»
+    function extractResponseContent(response)  «docstring: none»
+    function analyzeResponseQuality(prompt, content)  «docstring: none»
+    function render()  «docstring: none»
+    function refreshBridgeStatus()  «docstring: none»
+    function sendMessage()  «docstring: none»
+    function exportJson(filename, value)  «docstring: none»
+    function loadFiles(fileList)  «docstring: none»
+    function applyParameterProfile(profileId)  «docstring: none»
+    function wireEvents()  «docstring: none»
+    function initCatalog()  «docstring: none»
+    function main()  «docstring: none»
+
+structure from public/agentic-ide/chat/js/chat-catalog.json:
+    [json-key] prompts: [3 items]
+    [json-key] agents: [3 items]
+    [json-key] tools: [4 items]
+    [json-key] tests: [4 items]
+    [json-key] parameterProfiles: [3 items]
+
+structure from public/agentic-ide/chat/js/chat-render.js:
+    [file-summary] No top-level file docstring detected
+    function esc(value)  «docstring: none»
+    function renderThread(state, root, handlers)  «docstring: none»
+    function fillSelect(select, items, labelField = 'name')  «docstring: none»
+
+structure from public/agentic-ide/chat/js/chat-response-validator.js:
+    [file-summary] Chat Quality Validator Integration
+    export class ChatResponseValidator  «docstring: none»:
+        constructor(options = {})  «docstring: none»
+        validateResponse(llmResponse)  «Validate incoming LLM response Returns validation result and optionally flags/blocks poor responses»
+        extractValidatedContent(llmResponse)  «Extract content with validation metadata»
+        getValidationLog(count = 10)  «Get validation history»
+        clearLog()  «Clear validation log»
+
+    function initializeValidator(options = {})  «docstring: none»
+    function getValidator()  «docstring: none»
+
+structure from public/agentic-ide/chat/js/chat-state.js:
+    [file-summary] No top-level file docstring detected
+    const STORE_KEY  «docstring: none»
+    function createDefaultState()  «docstring: none»
+    function loadState()  «docstring: none»
+    function saveState(state)  «docstring: none»
+
+structure from public/agentic-ide/chat/js/chat-telemetry.js:
+    [file-summary] No top-level file docstring detected
+    function uid(prefix)  «docstring: none»
+    function logEvent(state, event, details = {}, level = 'info')  «docstring: none»
+    function addTestResult(state, name, passed, details = {})  «docstring: none»
+    function buildArtifactBundle(state)  «docstring: none»
+
+structure from public/agentic-ide/chat/js/chat-tests.js:
+    [file-summary] No top-level file docstring detected
+    function analyzeAssistantTextQuality(text)  «docstring: none»
+    function runChatSurfaceChecks(ui, state)  «docstring: none»
+
+structure from public/agentic-ide/chat/tests/chat-lab.spec.js:
+    [file-summary] No top-level file docstring detected
+    [describe] agentic-ide chat lab  «docstring: none»
+
+structure from public/agentic-ide/chat/tests/chat-lab.test.js:
+    [file-summary] Chat Lab Unit Tests
+    function runChatLabTests()  «Chat Lab Unit Tests»
+
+structure from public/agentic-ide/chat/tests/chat-surface.test-plan.json:
+    [file-summary] chat-surface-test-plan
+    [json-key] name: "chat-surface-test-plan"
+    [json-key] version: 1
+    [json-key] scope: "public/agentic-ide/chat"
+    [json-key] checks: [7 items]
+    [json-key] artifactTargets: {browserExport, bridgeArtifactPath}
+
+structure from public/agentic-ide/chat/tests/inference-chat-hello-world.spec.js:
+    [file-summary] inference-chat-hello-world.spec.js
+    const AGENTIC_IDE_PATH  «docstring: none»
+    const TEST_PROMPT  «docstring: none»
+    const REPLY_TIMEOUT  «docstring: none»
+    function waitForPageReady(page)  «Wait for the page JS to settle (bridge status + model select populated).»
+    function openChat(page)  «Open the Chat modal by clicking the btn-chat button.»
+    function readChatMessages(page)  «Read all messages currently in the chat thread. Returns an array of { role, text } objects.»
+    function waitForAssistantReply(page, prevCount)  «Wait until at least one new assistant message appears in the chat thread after sending (polls until count increases or t»
+    [describe] @live inference chat — hello world conformance  «docstring: none»
+
+structure from public/agentic-ide/chat/tests/inference-ui-series.spec.js:
+    [file-summary] No top-level file docstring detected
+    const CHAT_PATH  «docstring: none»
+    const INFERENCE_DASHBOARD_PATH  «docstring: none»
+    const TEXT_CASES_PATH  «docstring: none»
+    const CODING_CASES_PATH  «docstring: none»
+    const TEXT_CASE_LIMIT  «docstring: none»
+    const CODING_CASE_LIMIT  «docstring: none»
+    const ENGINE_LIMIT  «docstring: none»
+    const MIN_TEXT_ACCURACY  «docstring: none»
+    const MIN_CODING_CODELIKE  «docstring: none»
+    const MIN_LIVE_ENGINES  «docstring: none»
+    function loadCases(filePath, key)  «docstring: none»
+    function canonicalize(value)  «docstring: none»
+    function waitForBridgeStatus(page)  «docstring: none»
+    function getAssistantCount(page)  «docstring: none»
+    function getLatestAssistantMessage(page)  «docstring: none»
+    function sendPrompt(page, prompt)  «docstring: none»
+    [describe] @live inference ui series  «docstring: none»
+
+structure from public/agentic-ide/components/agents/chat-quality-inspector/main.js:
+    [file-summary] Chat Quality Inspector Tool
+    export class ChatQualityInspector  «Chat Quality Inspector Tool»:
+        constructor(options = {})  «docstring: none»
+        inspect(llmResponse)  «Main inspection entry point»
+        _extractContent(response)  «docstring: none»
+        _checkCorruption(content)  «docstring: none»
+        _checkRepetition(content)  «docstring: none»
+        _checkMeaningfulness(content)  «docstring: none»
+        _checkEncoding(content)  «docstring: none»
+
+    function createInspector(options)  «docstring: none»
+    function runInspection(llmResponse, options)  «docstring: none»
+
+structure from public/agentic-ide/components/agents/chat-quality-inspector/schema.json:
+    [file-summary] Validates LLM responses for quality issues: garbled text, character corruption, repetition patterns, non-UTF8 handling
+    [json-key] id: "chat-quality-inspector"
+    [json-key] type: "tool"
+    [json-key] version: 1
+    [json-key] label: "Chat Quality Inspector"
+    [json-key] path: "components/tools/chat-quality-inspector"
+    [json-key] description: "Validates LLM responses for quality issues: garbled text, ch..."
+    [json-key] lifecycle: "draft"
+    [json-key] success_threshold: 0.8
+    [json-key] impl: "main.js"
+    [json-key] inputs: [2 items]
+    [json-key] outputs: [2 items]
+    [json-key] errors: [1 items]
+    [json-key] dependencies: {tools, apis}
+    [json-key] files: [3 items]
+    [json-key] tests: [1 items]
+
+structure from public/agentic-ide/components/agents/chat-quality-inspector/test.js:
+    [file-summary] Unit tests for Chat Quality Inspector
+    function runTests()  «docstring: none»
+
+structure from public/agentic-ide/components/agents/data_processor_v1/prompt.md:
+    [file-summary] Input
+    [heading-2] ## Input
+    [heading-2] ## Instructions
+    [heading-2] ## Output Format
+
+structure from public/agentic-ide/components/agents/data_processor_v1/schema.json:
+    [file-summary] Turns upstream research notes into concise HTML blocks that downstream tools can validate and render
+    [json-key] id: "data_processor"
+    [json-key] type: "agent"
+    [json-key] version: 1
+    [json-key] label: "data_processor"
+    [json-key] path: "components/agents/data_processor_v1"
+    [json-key] description: "Turns upstream research notes into concise HTML blocks that ..."
+    [json-key] lifecycle: "draft"
+    [json-key] success_threshold: 0.8
+    [json-key] model_ref: "gemma_model"
+    [json-key] memory_type: "none"
+    [json-key] planning: "none"
+    [json-key] inputs: [1 items]
+    [json-key] outputs: [1 items]
+    [json-key] errors: [1 items]
+    [json-key] files: [3 items]
+    [json-key] tests: [1 items]
+
+structure from public/agentic-ide/components/agents/data_processor_v1/tests/behavior.json:
+    [file-summary] data_processor behavior tests
+    [json-key] name: "data_processor behavior tests"
+    [json-key] type: "behavior"
+    [json-key] target: "data_processor"
+    [json-key] cases: [1 items]
+
+structure from public/agentic-ide/components/agents/search_agent_v1/prompt.md:
+    [file-summary] Context
+    [heading-2] ## Context
+    [heading-2] ## Available Tools
+    [heading-2] ## Instructions
+    [heading-2] ## Output Format
+
+structure from public/agentic-ide/components/agents/search_agent_v1/schema.json:
+    [file-summary] LLM agent that plans and executes web searches using ReAct strategy
+    [json-key] id: "search_agent"
+    [json-key] type: "agent"
+    [json-key] version: 1
+    [json-key] label: "search_agent"
+    [json-key] path: "components/agents/search_agent_v1"
+    [json-key] description: "LLM agent that plans and executes web searches using ReAct s..."
+    [json-key] lifecycle: "draft"
+    [json-key] success_threshold: 0.8
+    [json-key] model_ref: "gemma_model"
+    [json-key] memory_type: "buffer"
+    [json-key] planning: "react"
+    [json-key] tool_refs: [2 items]
+    [json-key] inputs: [1 items]
+    [json-key] outputs: [2 items]
+    [json-key] errors: [2 items]
+    [json-key] files: [3 items]
+    [json-key] tests: [1 items]
+
+structure from public/agentic-ide/components/agents/search_agent_v1/tests/behavior.json:
+    [file-summary] search_agent behavior tests
+    [json-key] name: "search_agent behavior tests"
+    [json-key] type: "behavior"
+    [json-key] target: "search_agent"
+    [json-key] cases: [1 items]
+
+structure from public/agentic-ide/components/inference/README.md:
+    [file-summary] AI Inference Isolation Layer
+    [heading-1] # AI Inference Isolation Layer
+    [heading-2] ## Engines
+    [heading-2] ## Why this exists
+    [heading-2] ## Current recommendation for the bundled Gemma model
+    [heading-2] ## Programmatic usage
+    [heading-2] ## Live text and coding validation
+    [heading-2] ## Compare multiple inference components
+
+structure from public/agentic-ide/components/inference/main.js:
+    [file-summary] No top-level file docstring detected
+    const DEFAULT_MODEL_PATH  «docstring: none»
+    const DEFAULT_TEST_RESULTS_DIR  «docstring: none»
+    function readJsonIfExists(filePath)  «docstring: none»
+    function getPassingEngineSet(report)  «docstring: none»
+    function resolvePrunedEngineIds()  «docstring: none»
+    function normalizeContext(context = {})  «docstring: none»
+    function buildStaticCompatibilityScore(engineId, context)  «docstring: none»
+    function createInferenceManager()  «docstring: none»
+
+structure from public/agentic-ide/components/inference/request-schema.js:
+    [file-summary] No top-level file docstring detected
+    const DEFAULTS  «docstring: none»
+    function toFiniteNumber(value, fallback)  «docstring: none»
+    function toInteger(value, fallback)  «docstring: none»
+    function clamp(value, min, max)  «docstring: none»
+    function extractTextFromMessageContent(content)  «docstring: none»
+    function normalizeRole(role)  «docstring: none»
+    function normalizeMessages(messages)  «docstring: none»
+    function buildPromptFromMessages(messages)  «docstring: none»
+    function normalizeStop(stop)  «docstring: none»
+    function normalizeInferenceRequest(payload = {})  «docstring: none»
+
+structure from public/agentic-ide/components/inference/schema.json:
+    [file-summary] Agentic IDE Inference Contract
+    [json-key] $schema: "https://json-schema.org/draft/2020-12/schema"
+    [json-key] $id: "https://github-task-manager.local/agentic-ide/inference/sche..."
+    [json-key] title: "Agentic IDE Inference Contract"
+    [json-key] type: "object"
+    [json-key] required: [2 items]
+    [json-key] additionalProperties: false
+    [json-key] properties: {request, response}
+
+structure from public/agentic-ide/components/inference/engines/duck4i-llama/adapter.js:
+    [file-summary] No top-level file docstring detected
+    function resolvePrompt(payload)  «docstring: none»
+    function createDuck4iLlamaEngine()  «docstring: none»
+
+structure from public/agentic-ide/components/inference/engines/hyllama/adapter.js:
+    [file-summary] No top-level file docstring detected
+    function readGgufHeader(modelPath)  «docstring: none»
+    function createHyllamaEngine()  «docstring: none»
+
+structure from public/agentic-ide/components/inference/engines/llama-server-openai/adapter.js:
+    [file-summary] No top-level file docstring detected
+    function normalizeBaseUrl(input)  «docstring: none»
+    function toMessages(payload)  «docstring: none»
+    function ensureSystemMessage(messages, systemPrompt)  «docstring: none»
+    function resolveSlotId(context)  «docstring: none»
+    function buildChatPayload(payload, context, maxTokensFallback = 1024)  «docstring: none»
+    function sanitizeText(text)  «docstring: none»
+    function postJson(url, payload, timeoutMs = 20000)  «docstring: none»
+    function eraseSlot(endpoint, slotId)  «docstring: none»
+    function createLlamaServerOpenAiEngine()  «docstring: none»
+
+structure from public/agentic-ide/components/inference/engines/llama3pure/adapter.js:
+    [file-summary] No top-level file docstring detected
+    function createLlama3PureEngine()  «docstring: none»
+
+structure from public/agentic-ide/components/inference/engines/llmjs/adapter.js:
+    [file-summary] No top-level file docstring detected
+    function createLlmJsEngine()  «docstring: none»
+
+structure from public/agentic-ide/components/inference/engines/node-llama-cpp/adapter.js:
+    [file-summary] No top-level file docstring detected
+    function normalizeBaseUrl(input)  «docstring: none»
+    function sanitizeLlmText(text)  «docstring: none»
+    function sanitizeCompletionPayload(payload)  «docstring: none»
+    function sanitizeText(text)  «docstring: none»
+    function extractMessageText(content)  «docstring: none»
+    function toMessages(payload)  «docstring: none»
+    function ensureSystemMessage(messages, systemPrompt)  «docstring: none»
+    function resolveSlotId(context)  «docstring: none»
+    function toPrompt(messages, context)  «docstring: none»
+    function buildChatPayload(payload, context, maxTokensFallback = 256)  «docstring: none»
+    function postJson(url, payload, timeoutMs = 20000)  «docstring: none»
+    function eraseSlot(endpoint, slotId)  «docstring: none»
+    function createNodeLlamaCppEngine()  «docstring: none»
+
+structure from public/agentic-ide/components/inference/engines/webllm/adapter.js:
+    [file-summary] No top-level file docstring detected
+    function createWebLlmEngine()  «docstring: none»
+
+structure from public/agentic-ide/components/inference/tests/benchmark.js:
+    [file-summary] No top-level file docstring detected
+    function runInferenceBenchmark(options = {})  «docstring: none»
+    function writeBenchmarkReport(report, outPath)  «docstring: none»
+
+structure from public/agentic-ide/components/inference/tests/index.html:
+    [file-summary] Inference Test Dashboard
+    [title] <title>Inference Test Dashboard</title>
+    [section] <main id="wrap">
+    [section] <section id="hero">
+    [heading-1] <h1>Inference Text + Coding Benchmark Dashboard</h1>
+    [section] <section id="summaryCards">
+    [section] <section id="card">
+    [heading-2] <h2>Active vs Removed Engines</h2>
+    [section] <section id="card">
+    [heading-2] <h2>Per-Case Leaderboard (Combined CSV)</h2>
+    [section] <section id="grid">
+    [section] <article id="card">
+    [heading-2] <h2>Text Suite Summary</h2>
+    [section] <article id="card">
+    [heading-2] <h2>Coding Suite Summary</h2>
+
+structure from public/agentic-ide/components/inference/tests/select-best.js:
+    [file-summary] No top-level file docstring detected
+    const RESULTS_DIR  «docstring: none»
+    const KNOWN_ENGINE_IDS  «docstring: none»
+    function pickBestReportPath(resultsDir, suitePrefix)  «docstring: none»
+    function readJson(filePath)  «docstring: none»
+    function csvEscape(value)  «docstring: none»
+    function toCsv(rows, headers)  «docstring: none»
+    function getEngineStatsMap(report)  «docstring: none»
+    function buildCombinedCaseLeaderboard(textReport, codingReport)  «docstring: none»
+    function selectEngines(textReport, codingReport)  «docstring: none»
+    function runSelection()  «docstring: none»
+
+structure from public/agentic-ide/components/inference/tests/coding/coding_cases.json:
+    [file-summary] Sequential JavaScript code-generation benchmark using deterministic execution-based checks inspired by Agentic IDE tool components.
+    [json-key] suite_id: "llm_js_coding_execution_v1"
+    [json-key] description: "Sequential JavaScript code-generation benchmark using determ..."
+    [json-key] model: {name, provider, model_alias, model_path, binary_path}
+    [json-key] input_schema: {system_prompt, max_tokens, temperature}
+    [json-key] cases: [10 items]
+
+structure from public/agentic-ide/components/inference/tests/coding/run-coding-suite.js:
+    [file-summary] No top-level file docstring detected
+    const DEFAULT_SUITE_PATH  «docstring: none»
+    const DEFAULT_RESULTS_DIR  «docstring: none»
+    const DEFAULT_ENDPOINT  «docstring: none»
+    const REQUIRE_LIVE_INFERENCE  «docstring: none»
+    function readJson(filePath)  «docstring: none»
+    function sanitizeText(value)  «docstring: none»
+    function trimToExecutablePrefix(candidate)  «docstring: none»
+    function extractCode(text, functionName)  «docstring: none»
+    function csvEscape(value)  «docstring: none»
+    function toCsv(rows, headers)  «docstring: none»
+    function buildPrompt(caseEntry, suite)  «docstring: none»
+    function deepClone(value)  «docstring: none»
+    function createExecutionContext()  «docstring: none»
+    function loadCandidateFunction(code, functionName)  «docstring: none»
+    function executeTest(context, test)  «docstring: none»
+    function compareResult(actual, expect)  «docstring: none»
+    function summarizeEngine(run)  «docstring: none»
+    function buildTimestamp()  «docstring: none»
+    function buildCaseLeaderboardRows(detailRows)  «docstring: none»
+    function runCase(manager, engineId, context, suite, caseEntry)  «docstring: none»
+    function runSuite(options = {})  «docstring: none»
+    function main()  «docstring: none»
+
+structure from public/agentic-ide/components/inference/tests/text/hello-world-conformance.js:
+    [file-summary] No top-level file docstring detected
+    const LLAMA_ENDPOINT  «docstring: none»
+    const BRIDGE_ENDPOINT  «docstring: none»
+    const TIMEOUT_MS  «docstring: none»
+    const TEST_PROMPT  «docstring: none»
+    const MAX_TOKENS  «docstring: none»
+    const ENGINES  «docstring: none»
+    function sanitize(text)  «docstring: none»
+    function fetchWithTimeout(url, opts)  «docstring: none»
+    function postJson(url, body)  «docstring: none»
+    function pass(text)  «docstring: none»
+    function metrics(text)  «docstring: none»
+    function runEngine(engine)  «docstring: none»
+    function statusLine(result)  «docstring: none»
+    function main()  «docstring: none»
+
+structure from public/agentic-ide/components/inference/tests/text/run-validation-suite.js:
+    [file-summary] No top-level file docstring detected
+    const DEFAULT_SUITE_PATH  «docstring: none»
+    const DEFAULT_RESULTS_DIR  «docstring: none»
+    const DEFAULT_ENDPOINT  «docstring: none»
+    const REQUIRE_LIVE_INFERENCE  «docstring: none»
+    function readJson(filePath)  «docstring: none»
+    function sanitizeText(value)  «docstring: none»
+    function canonicalize(value)  «docstring: none»
+    function csvEscape(value)  «docstring: none»
+    function toCsv(rows, headers)  «docstring: none»
+    function buildPrompt(caseEntry, suite)  «docstring: none»
+    function countWords(text)  «docstring: none»
+    function computePromptTokenOverlap(prompt, answer)  «docstring: none»
+    function runCase(manager, engineId, context, suite, caseEntry)  «docstring: none»
+    function summarizeEngine(run)  «docstring: none»
+    function buildTimestamp()  «docstring: none»
+    function buildCaseLeaderboardRows(detailRows)  «docstring: none»
+    function runSuite(options = {})  «docstring: none»
+    function main()  «docstring: none»
+
+structure from public/agentic-ide/components/inference/tests/text/validation_cases.json:
+    [json-key] suite_id: "llm_unit_parseable_validation_v1"
+    [json-key] model: {name, provider, model_alias, model_path, binary_path}
+    [json-key] input_schema: {message, system_prompt, history, max_tokens}
+    [json-key] output_schema: {text, elapsed_s, output_characters, raw}
+    [json-key] cases: [12 items]
+
+structure from public/agentic-ide/components/runtime/schema.json:  (no extractable definitions)
+
+structure from public/agentic-ide/components/subgraphs/format_info_v1/graph.json:
+    [file-summary] Parse and re-render HTML so downstream reports are structured and inspectable
+    [json-key] id: "format_tool"
+    [json-key] type: "subgraph"
+    [json-key] version: 1
+    [json-key] label: "format_info"
+    [json-key] path: "components/subgraphs/format_info_v1"
+    [json-key] description: "Parse and re-render HTML so downstream reports are structure..."
+    [json-key] lifecycle: "draft"
+    [json-key] success_threshold: 0.8
+    [json-key] entry: "html_parser"
+    [json-key] inputs: [1 items]
+    [json-key] outputs: [1 items]
+    [json-key] nodes: [2 items]
+    [json-key] edges: [1 items]
+    [json-key] files: [3 items]
+    [json-key] tests: [1 items]
+
+structure from public/agentic-ide/components/subgraphs/format_info_v1/schema.json:
+    [file-summary] Subgraph-level contract for formatting pipeline.
+    [json-key] id: "format_tool"
+    [json-key] version: 1
+    [json-key] description: "Subgraph-level contract for formatting pipeline."
+    [json-key] inputs: [1 items]
+    [json-key] outputs: [1 items]
+    [json-key] errors: [1 items]
+
+structure from public/agentic-ide/components/subgraphs/format_info_v1/state.js:
+    [file-summary] state.js — State schema for the format_info subgraph.
+    function createState(initial = {})  «docstring: none»
+
+structure from public/agentic-ide/components/subgraphs/format_info_v1/tests/snapshot.json:
+    [file-summary] format_tool snapshot tests
+    [json-key] name: "format_tool snapshot tests"
+    [json-key] type: "snapshot"
+    [json-key] target: "format_tool"
+    [json-key] cases: [1 items]
+
+structure from public/agentic-ide/components/tools/README.md:  (no extractable definitions)
+
+structure from public/agentic-ide/components/tools/schema.json:  (no extractable definitions)
+
+structure from public/agentic-ide/components/tools/benchmark_result_writer_v1/main.js:
+    [file-summary] No top-level file docstring detected
+    function bridgeBase()  «docstring: none»
+    function slugify(value)  «docstring: none»
+    function toDurationMs(startedAt, fallback)  «docstring: none»
+    function round(value, digits = 2)  «docstring: none»
+    function clamp(value, min = 0, max = 100)  «docstring: none»
+    function safeJsonParse(text, fallback = null)  «docstring: none»
+    function countMatches(text, regex)  «docstring: none»
+    function normalizeTopicTerms(topic)  «docstring: none»
+    function delta(currentValue, previousValue)  «docstring: none»
+    function pctDelta(currentValue, previousValue)  «docstring: none»
+    function shouldSkipHistoryReads()  «docstring: none»
+    function fetchJson(relativePath)  «docstring: none»
+    function persistRecord(relativePath, record)  «docstring: none»
+    function computeComponentScore(component, totalDurationMs)  «docstring: none»
+    function summarizeComponents(steps, executedNodes)  «docstring: none»
+    function computeQualitySignals(htmlReport, topic, runtimeOutput)  «docstring: none»
+    function computeMetrics(meta, htmlReport, steps, components, qualitySignals)  «docstring: none»
+    function computeFeedback(qualitySignals, metrics, htmlReport)  «docstring: none»
+    function computeScorecard(metrics, qualitySignals, feedback)  «docstring: none»
+    function loadPreviousRecord(currentRecord)  «docstring: none»
+    function compareComponents(currentComponents, previousComponents)  «docstring: none»
+    function buildComparison(currentRecord, previousEntry)  «docstring: none»
+    function buildImprovementCandidates(record)  «docstring: none»
+    function run(topic, report, benchmarkName, runLabel, startedAt, benchmarkMeta)  «docstring: none»
+
+structure from public/agentic-ide/components/tools/benchmark_result_writer_v1/schema.json:
+    [file-summary] Persists benchmark outputs and feedback for live local-model workflow runs.
+    [json-key] id: "benchmark_result_writer"
+    [json-key] type: "tool"
+    [json-key] version: 1
+    [json-key] label: "benchmark_result_writer"
+    [json-key] path: "components/tools/benchmark_result_writer_v1"
+    [json-key] description: "Persists benchmark outputs and feedback for live local-model..."
+    [json-key] lifecycle: "draft"
+    [json-key] success_threshold: 1
+    [json-key] impl: "main.js"
+    [json-key] inputs: [6 items]
+    [json-key] outputs: [2 items]
+    [json-key] errors: [1 items]
+    [json-key] files: [3 items]
+    [json-key] tests: [1 items]
+
+structure from public/agentic-ide/components/tools/benchmark_result_writer_v1/tests/unit.json:
+    [file-summary] benchmark_result_writer unit tests
+    [json-key] name: "benchmark_result_writer unit tests"
+    [json-key] type: "unit"
+    [json-key] target: "benchmark_result_writer"
+    [json-key] cases: [1 items]
+
+structure from public/agentic-ide/components/tools/folder-graph-scanner/main.js:
+    [file-summary] Folder Graph Scanner Scans a folder structure and extracts relations to build a code.graph.json
+    const SCANNER_CONFIG  «Configuration for scanner behavior»
+    class FolderNode  «Represents a folder layer in the graph»:
+        constructor(folderPath, parentId = null)  «docstring: none»
+        generateId(folderPath)  «docstring: none»
+
+    class FileNode  «Represents a file/component node in the graph»:
+        constructor(filePath, parentLayerId)  «docstring: none»
+        generateId(filePath)  «docstring: none»
+        detectType(filePath)  «docstring: none»
+
+    class GraphEdge  «Represents an edge/relation between nodes»:
+        constructor(sourceId, targetId, type = 'depends_on', metadata = {})  «docstring: none»
+
+    export class FolderGraphScanner  «Main scanner class»:
+        constructor(rootPath, options = {})  «docstring: none»
+        async scan()  «Main scanning entry point»
+        async scanFolder(folderPath, parentLayerId, currentDepth)  «Recursively scan a folder and its contents»
+        async scanFile(filePath, parentLayerId)  «Process a single file»
+        async processReadme(filePath, parentLayerId)  «Extract README as layer description»
+        async processTasks(filePath, parentLayerId)  «Extract tasks from node.tasks.json»
+        async analyzeFile(filePath, fileNodeId)  «Analyze imports and dependencies in a code file»
+        inferIOPatterns(fileNode)  «Infer input/output patterns from file structure»
+        async analyzeDependencies()  «Analyze dependencies between files and create edges»
+        toCodeGraph()  «Export as code.graph.json format»
+
+    function scanFolderToGraph(folderPath, options = {})  «Helper function to scan a folder and return code.graph.json»
+
+structure from public/agentic-ide/components/tools/folder-graph-scanner/schema.json:
+    [file-summary] Scans a folder structure and extracts node/edge relations to build a code.graph.json. Maps hierarchy to layer nodes, extracts task nodes from node.tasks.json, and analyzes import chains for data-flow 
+    [json-key] id: "folder_graph_scanner"
+    [json-key] type: "tool"
+    [json-key] version: 1
+    [json-key] label: "Folder Graph Scanner"
+    [json-key] path: "components/tools/folder-graph-scanner"
+    [json-key] description: "Scans a folder structure and extracts node/edge relations to..."
+    [json-key] lifecycle: "draft"
+    [json-key] success_threshold: 0.8
+    [json-key] impl: "main.js"
+    [json-key] inputs: [2 items]
+    [json-key] outputs: [4 items]
+    [json-key] errors: [2 items]
+    [json-key] files: [3 items]
+    [json-key] tests: [0 items]
+
+structure from public/agentic-ide/components/tools/folder-graph-scanner/ui/main.js:
+    [file-summary] Folder Graph Scanner UI Integration Provides UI components to integrate the folder scanner into the graph designer
+    function initFolderScannerUI()  «Initialize folder scanner UI»
+    function wireScanner()  «Wire up scanner UI events»
+    function getNodeTypeSummary(graph)  «Get summary of node types in the graph»
+    function applyGraphToEditor(codeGraph)  «Apply discovered graph to the editor state»
+    function showFolderScannerUI()  «Show the scanner panel»
+
+structure from public/agentic-ide/components/tools/html_parser_v1/main.js:
+    [file-summary] main.js — html_parser_v1
+    const STRIP  «main.js — html_parser_v1»
+    strip = (s) =>  «docstring: none»
+    function run(html = '')  «docstring: none»
+
+structure from public/agentic-ide/components/tools/html_parser_v1/schema.json:
+    [file-summary] Parses HTML into a structured document object
+    [json-key] id: "html_parser"
+    [json-key] type: "tool"
+    [json-key] version: 1
+    [json-key] label: "html_parser"
+    [json-key] path: "components/tools/html_parser_v1"
+    [json-key] description: "Parses HTML into a structured document object"
+    [json-key] lifecycle: "draft"
+    [json-key] success_threshold: 0.8
+    [json-key] impl: "main.js"
+    [json-key] inputs: [1 items]
+    [json-key] outputs: [1 items]
+    [json-key] errors: [1 items]
+    [json-key] files: [3 items]
+    [json-key] tests: [1 items]
+
+structure from public/agentic-ide/components/tools/html_parser_v1/tests/unit.json:
+    [file-summary] html_parser unit tests
+    [json-key] name: "html_parser unit tests"
+    [json-key] type: "unit"
+    [json-key] target: "html_parser"
+    [json-key] cases: [1 items]
+
+structure from public/agentic-ide/components/tools/research_benchmark_runner_v1/main.js:
+    [file-summary] No top-level file docstring detected
+    function bridgeBase()  «docstring: none»
+    function normalizeTopic(topic)  «docstring: none»
+    function fetchJson(relativePath, options = {})  «docstring: none»
+    function readModelStatus()  «docstring: none»
+    function run(topic, benchmarkName, runLabel, startedAt)  «docstring: none»
+
+structure from public/agentic-ide/components/tools/research_benchmark_runner_v1/schema.json:
+    [file-summary] Runs the research_workflow through the live bridge to collect real inference latency and output data.
+    [json-key] id: "research_benchmark_runner"
+    [json-key] type: "tool"
+    [json-key] version: 1
+    [json-key] label: "research_benchmark_runner"
+    [json-key] path: "components/tools/research_benchmark_runner_v1"
+    [json-key] description: "Runs the research_workflow through the live bridge to collec..."
+    [json-key] lifecycle: "draft"
+    [json-key] success_threshold: 1
+    [json-key] impl: "main.js"
+    [json-key] inputs: [4 items]
+    [json-key] outputs: [2 items]
+    [json-key] errors: [1 items]
+    [json-key] files: [2 items]
+    [json-key] tests: [0 items]
+
+structure from public/agentic-ide/components/tools/result_ranker_v1/main.js:
+    [file-summary] main.js — result_ranker_v1
+    function score(item)  «docstring: none»
+    function run(results)  «docstring: none»
+
+structure from public/agentic-ide/components/tools/result_ranker_v1/schema.json:
+    [file-summary] Ranks and filters search results by heuristic relevance score
+    [json-key] id: "result_ranker"
+    [json-key] type: "tool"
+    [json-key] version: 1
+    [json-key] label: "result_ranker"
+    [json-key] path: "components/tools/result_ranker_v1"
+    [json-key] description: "Ranks and filters search results by heuristic relevance scor..."
+    [json-key] lifecycle: "draft"
+    [json-key] success_threshold: 0.8
+    [json-key] impl: "main.js"
+    [json-key] inputs: [1 items]
+    [json-key] outputs: [1 items]
+    [json-key] errors: [1 items]
+    [json-key] files: [3 items]
+    [json-key] tests: [1 items]
+
+structure from public/agentic-ide/components/tools/result_ranker_v1/tests/unit.json:
+    [file-summary] result_ranker unit tests
+    [json-key] name: "result_ranker unit tests"
+    [json-key] type: "unit"
+    [json-key] target: "result_ranker"
+    [json-key] cases: [1 items]
+
+structure from public/agentic-ide/components/tools/ui_renderer_v1/main.js:
+    [file-summary] main.js — ui_renderer_v1
+    esc = (s) =>  «main.js — ui_renderer_v1»
+    function run(doc)  «docstring: none»
+
+structure from public/agentic-ide/components/tools/ui_renderer_v1/schema.json:
+    [file-summary] Renders a structured document object as presentable HTML
+    [json-key] id: "ui_renderer"
+    [json-key] type: "tool"
+    [json-key] version: 1
+    [json-key] label: "ui_renderer"
+    [json-key] path: "components/tools/ui_renderer_v1"
+    [json-key] description: "Renders a structured document object as presentable HTML"
+    [json-key] lifecycle: "draft"
+    [json-key] success_threshold: 0.8
+    [json-key] impl: "main.js"
+    [json-key] inputs: [1 items]
+    [json-key] outputs: [1 items]
+    [json-key] errors: [1 items]
+    [json-key] files: [4 items]
+    [json-key] tests: [1 items]
+
+structure from public/agentic-ide/components/tools/ui_renderer_v1/template.html:
+    [file-summary] {{title}}
+    [title] <title>{{title}}</title>
+
+structure from public/agentic-ide/components/tools/ui_renderer_v1/tests/snapshot.json:
+    [file-summary] ui_renderer snapshot tests
+    [json-key] name: "ui_renderer snapshot tests"
+    [json-key] type: "snapshot"
+    [json-key] target: "ui_renderer"
+    [json-key] cases: [1 items]
+
+structure from public/agentic-ide/components/tools/web_search_v1/main.js:
+    [file-summary] main.js — web_search_v1
+    const API_BASE  «main.js — web_search_v1»
+    const API_KEY  «docstring: none»
+    function run(query, top_k = 5)  «Fetch search results for query, returning at most top_k items.»
+
+structure from public/agentic-ide/components/tools/web_search_v1/schema.json:
+    [file-summary] Calls a search API and returns result snippets
+    [json-key] id: "web_search_tool"
+    [json-key] type: "tool"
+    [json-key] version: 1
+    [json-key] label: "web_search_tool"
+    [json-key] path: "components/tools/web_search_v1"
+    [json-key] description: "Calls a search API and returns result snippets"
+    [json-key] lifecycle: "draft"
+    [json-key] success_threshold: 0.8
+    [json-key] impl: "main.js"
+    [json-key] api_endpoint: "https://api.search.io/v1"
+    [json-key] auth: "api_key"
+    [json-key] inputs: [2 items]
+    [json-key] outputs: [1 items]
+    [json-key] errors: [2 items]
+    [json-key] files: [3 items]
+    [json-key] tests: [1 items]
+
+structure from public/agentic-ide/components/tools/web_search_v1/tests/unit.json:
+    [file-summary] web_search_tool unit tests
+    [json-key] name: "web_search_tool unit tests"
+    [json-key] type: "unit"
+    [json-key] target: "web_search_tool"
+    [json-key] cases: [2 items]
+
+structure from public/agentic-ide/js/README.md:  (no extractable definitions)
+
+structure from public/agentic-ide/js/bridge-server.js:
+    [file-summary] No top-level file docstring detected
+    const ENGINE_ID_ALIASES  «docstring: none»
+    const PORT  «HTTP port for the local Agentic IDE bridge server.»
+    const ROOT  «Absolute root folder for bridge file access.»
+    const INFERENCE_RESULTS_DIR  «docstring: none»
+    const LLM_HOST  «Hostname for the local llama.cpp inference endpoint.»
+    const LLM_PORT  «Port for the local llama.cpp inference endpoint.»
+    const INFERENCE_ENGINE  «Preferred isolated inference engine id.»
+    const MIME  «File extension MIME type mapping for allowed static file responses.»
+    function readJsonIfExists(filePath)  «docstring: none»
+    function getActiveInferenceManifest()  «docstring: none»
+    function getAvailableEngineDescriptors()  «docstring: none»
+    function resolveRequestedEngineId(requested, availableIds)  «docstring: none»
+    function resolveInferenceEngine(payload = {}, context = {})  «docstring: none»
+    function safePath(relPath)  «Resolve a relative path under ROOT and block path traversal.»
+    function cors(res)  «Enable permissive CORS headers for bridge responses.»
+    function json(res, code, obj)  «Send a JSON response with the given HTTP status code.»
+    function readBody(req, limit = 5_000_000)  «Read the full request body as text with an optional size limit.»
+    function requestLlmCompletion(payload)  «Forward a completion request to the local LLM endpoint and return parsed JSON.»
+    function getWorkspaceRegistry()  «Discover the Agentic IDE workspace registry from the local root.»
+    function makeEtag(body)  «Generate an ETag string for a response body.»
+    function getModelAssetInfo(model)  «Return full asset path and existence info for a model definition.»
+    function buildInferencePayload()  «docstring: none»
+    function getRegistrySnapshot(force = false)  «Load the latest workspace registry and model status, with caching.»
+    function replyCachedJson(req, res, body, etag)  «Reply with cached JSON and ETag support for HEAD / conditional requests.»
+
+structure from public/agentic-ide/js/bridge-workspace.js:
+    [file-summary] No top-level file docstring detected
+    const RESERVED_NODE_KEYS  «Reserved component metadata keys excluded from extracted node meta.»
+    const NODE_DIMENSIONS  «Default canvas size presets for each node kind.»
+    const TEXT_FILE_DENYLIST  «Binary or non-text file extensions excluded from editor file discovery.»
+    const ROOT_NODE_ID  «Identifier for the workspace root node.»
+    function toPosix(value)  «Normalize a path value to POSIX separators.»
+    function exists(absPath)  «Check whether the given absolute path exists on disk.»
+    function readText(absPath)  «Read a UTF-8 text file from disk.»
+    function sha1(value)  «Compute a SHA-1 fingerprint for a string.»
+    function parseJson(absPath)  «Parse JSON from a file path, returning an empty object if missing.»
+    function stringifyMeta(value)  «Convert metadata values into a normalized string form.»
+    function normalizePorts(items)  «Normalize port definitions into {n,t} objects.»
+    function normalizeStringList(items)  «Normalize a list of values into a cleaned string array.»
+    function normalizeRefList(items)  «Normalize a list of file or component references to POSIX paths.»
+    function inferType(definitionName, relDir, explicitType)  «Infer the component kind from the definition filename or folder.»
+    function isEditableFile(relPath)  «Determine whether a relative file path is safe to edit and display as text.»
+    function walkFiles(absDir, baseDir = absDir, acc = [])  «Recursively collect relative file paths from a directory tree.»
+    function collectEditableFiles(rootDir, relDir)  «List editable files for a component or workflow folder.»
+    function collectTests(doc, files)  «Merge declared and discovered test file references for a component.»
+    function inferLabel(doc, fallbackId)  «Derive a human-friendly label for a node from metadata or fallback ID.»
+    function getNodeSize(type)  «Return the default dimensions for a node type.»
+    function extractMeta(doc, type)  «Extract non-reserved metadata from a component definition.»
+    function createNode({ doc, type, relDir, files, tests })  «Build a workspace node object from a component or workflow definition.»
+    function sortByTypeAndLabel(a, b)  «Sort workspace nodes by type precedence and label.»
+    function walkDefinitions(rootDir)  «Discover component and workflow definition files under the workspace root.»
+    function roleForFile(file)  «Determine a user-facing file role for workspace browsing and editing.»
+    function inferFileType(file)  «Infer a simplified file type from a filename.»
+    function slugForFile(file)  «Create a normalized slug from an arbitrary filename.»
+    function pushSymbol(target, type, name)  «Register a source code symbol in a file node if not already present.»
+    function extractSymbolsForFile(absPath, file)  «Extract top-level symbols from a file for quick navigation.»
+    function createFileNode(rootDir, parentNode, file)  «Create a file node object for a component file inside the workspace graph.»
+    function buildNodeExecutionMeta(ctx, nodeId)  «Build cached execution metadata for a component node.»
+    function collectExecutedNodeMetadata(ctx, steps = [])  «Aggregate execution metadata from runtime steps into node summaries.»
+    function buildRunFingerprint(executedNodes = [])  «Build a stable fingerprint for a run from executed node metadata.»
+    function ensureEdgeRefs(nodes, edge)  «Ensure edge references are stored on source and destination nodes.»
+    function addFileEdges(nodes, edges, parentNode, fileNodeIds, nextIndexRef)  «Create edges between file nodes and their owning component.»
+    function buildWorkspace(rootDir, runtimeOptions = {})  «Build the full Agentic IDE workspace graph from filesystem definitions.»
+    function assignLayout(nodes)  «Assign default canvas positions for nodes in the workspace graph.»
+    function layoutChildren(nodes, parentNode, depth)  «Recursively position child nodes beneath their parent on the canvas.»
+    function escapeTemplateValue(value)  «Escape a prompt variable value for safe injection into templates.»
+    function renderPromptTemplate(template, variables)  «Render a prompt template by replacing {{variables}} with provided values.»
+    function primaryOutputName(node)  «Return the default output port name for a node when only one output exists.»
+    function normalizeExecutionOutput(node, value)  «Normalize a component return value into an output object keyed by port name.»
+    function parseEdgeMapping(mapping)  «Parse simple edge mapping strings like source->target or source→target.»
+    function createMockFetch(mockSpec)  «Create a mock fetch implementation for unit test runtime execution.»
+    function withMockEnv(mockEnv, work)  «Temporarily set environment variables for a test execution block.»
+    function loadRunFunction(absPath, runtimeOptions = {})  «Load and compile a component's main JS module for runtime execution.»
+    function buildNodeInput(node, inputState)  «Build a node input object from provided values matching declared ports.»
+    function extractSingleValue(obj)  «Extract a single value from a single-key object, or return the object unchanged.»
+    function extractLlmText(payload)  «Extract the most likely text field from a model response payload.»
+    function invokeModel(ctx, modelId, prompt, runtimeOptions, logs)  «Invoke the configured model bridge and normalize the returned text.»
+    function runToolComponent(ctx, def, input, runtimeOptions, logs)  «Execute a tool component by loading its main.js entrypoint.»
+    function runAgentComponent(ctx, def, input, runtimeOptions, logs, stack)  «Execute an agent component by rendering its prompt and calling the LLM.»
+    function buildCompositeInput(childNode, initialInput, state, resultsByNode, incomingEdges)  «Construct child node input from upstream state and edge mappings.»
+    function runCompositeComponent(ctx, def, input, runtimeOptions, logs, stack)  «Execute a composite workflow/subgraph node by running its children.»
+    function executeNode(ctx, nodeId, input = {}, runtimeOptions = {}, logs = [], stack = [])  «Execute a workspace node with runtime arguments, logging, and cycle detection.»
+    function assertType(actual, expectedType, label)  «Assert that a runtime value matches an expected type, throwing on mismatch.»
+    function assertExpectation(actual, expected, label)  «Assert that a runtime output satisfies an expected condition or schema.»
+    function createMockLlmResponder(mockSpec, sequenceSpec)  «Create a mock LLM responder for test cases with fixed or sequenced values.»
+    function createRuntimeOptions(baseOptions, testCase)  «Build execution runtime options from base settings and a test case override.»
+    function discoverWorkspace(rootDir)  «Discover workspace metadata and graph structure from a root directory.»
+    function runComponent(rootDir, nodeId, input = {}, runtimeOptions = {})  «Run a single component node in the workspace and return runtime results.»
+    function runComponentTests(rootDir, nodeId, runtimeOptions = {})  «Execute paired tests for a workspace component node and report pass/fail results.»
+
+structure from public/agentic-ide/js/bridge.js:
+    [file-summary] Base URL for the local Agentic IDE bridge API.
+    const BRIDGE_BASE  «Base URL for the local Agentic IDE bridge API.»
+    export class RegistryWatchdog  «Watch the bridge registry for changes and notify UI callbacks.»:
+        constructor(config = {})  «docstring: none»
+        async initialize()  «Initialize the watchdog and load the latest registry snapshot.»
+        async forceRefresh()  «Force a registry refresh and notify listeners.»
+        destroy()  «Stop watching DOM triggers and clean up listeners.»
+        _registerTriggers()  «Register DOM triggers to refresh the registry when the app state changes.»
+        async _check(trigger)  «Poll the bridge and reload registry data when conditions allow.»
+        _setBridgeOnline(online)  «Update online/offline status and notify listeners if changed.»
+
+    function getCacheEntry(key)  «Get the cache entry object for a named bridge resource.»
+    function fetchCachedJson(key, endpoint, { force = false, ttlMs = 2000 } = {})  «Fetch JSON from the bridge with ETag caching and optional TTL overrides.»
+    function getCachedEtag(key)  «Get the current cached ETag for a bridge resource key.»
+    function getRegistry(options = {})  «Get the workspace registry from the bridge, with optional caching controls.»
+    function getModelInfo(options = {})  «Get model asset and status information from the bridge.»
+    function readFile(componentPath, filename)  «Read a component file through the bridge file API.»
+    function writeFile(componentPath, filename, content)  «Write a component file to the bridge file API.»
+    function listFiles(componentPath)  «List files in a component folder using the bridge API.»
+    function llmComplete(prompt, options = {})  «Send a prompt to the bridge LLM completion endpoint and return text.»
+    function runRuntimeNode(nodeId, input = {}, options = {})  «Run a workspace node through the bridge runtime API.»
+    function runRuntimeTests(nodeId, options = {})  «Run tests for a workspace component via the bridge runtime API.»
+    function checkBridge()  «Check whether the bridge and LLM endpoints are reachable.»
+
+structure from public/agentic-ide/js/export.js:
+    [file-summary] Export helper and JSON preview wiring for Agentic IDE.
+    function downloadJSON(json, filename)  «Trigger a browser download for a JSON document.»
+    function wireExport()  «Wire export buttons for JSON preview, Graph Display conversion, and import.»
+
+structure from public/agentic-ide/js/main.js:
+    [file-summary] No top-level file docstring detected
+    const CHAT_PRESETS  «docstring: none»
+    function renderGlobalControls()  «docstring: none»
+    function applyLayoutStyles()  «docstring: none»
+    function setupSplitter(handleId, onMove)  «docstring: none»
+    function setupLayoutSplitters()  «docstring: none»
+    function syncMobileScrim()  «docstring: none»
+    function closeMobilePanels()  «docstring: none»
+    function toggleMobilePanel(id)  «docstring: none»
+    function wireMobilePanels()  «docstring: none»
+    function chatPresetText(preset)  «docstring: none»
+    function selectedChatOwnerNodeId()  «docstring: none»
+    function chatEligibleNodes()  «docstring: none»
+    function defaultChatContextIds(nodeId)  «docstring: none»
+    function syncChatStateFromControls({ persist = true } = {})  «docstring: none»
+    function renderChatConfigurator()  «docstring: none»
+    function latestRuntimeReportFor(nodeIds)  «docstring: none»
+    function summarizeNodeForChat(node)  «docstring: none»
+    function summarizeRuntimeReport(report)  «docstring: none»
+    function sanitizeChatFilename(value)  «docstring: none»
+    function saveLatestChatReply()  «docstring: none»
+    function runChatTargetTests()  «docstring: none»
+    function renderChatThread()  «docstring: none»
+    function openChatModal()  «docstring: none»
+    function closeChatModal()  «docstring: none»
+    function buildChatPrompt(nextPrompt)  «docstring: none»
+    function buildConstrainedPrompt(originalPrompt, qualityIssues = [])  «docstring: none»
+    function sendChatMessage()  «docstring: none»
+    function wireChatModal()  «docstring: none»
+    function refreshBridgeStatus()  «docstring: none»
+    function applyRegistry(registry, { showToast = false, trigger = 'init' } = {})  «docstring: none»
+    function initializeWorkspace()  «docstring: none»
+
+structure from public/agentic-ide/js/modals.js:
+    [file-summary] No top-level file docstring detected
+    function openNodeModal(editId=null)  «docstring: none»
+    function updateNodeModalExtra()  «docstring: none»
+    function openEdgeModal()  «docstring: none»
+    function wireModals()  «docstring: none»
+
+structure from public/agentic-ide/js/render.js:
+    [file-summary] No top-level file docstring detected
+    const _drag  «docstring: none»
+    const _resize  «docstring: none»
+    const _sidebarTab  «docstring: none»
+    const _treeOpen  «docstring: none»
+    const _canvasZoom  «docstring: none»
+    const _canvasRenderQueued  «docstring: none»
+    const _pan  «docstring: none»
+    function requestCanvasRender()  «docstring: none»
+    function wireCanvasInteractions(svg)  «docstring: none»
+    function getTasksIntegrationConfig()  «docstring: none»
+    function resolveTasksUrl(base, relativePath)  «docstring: none»
+    function setSidebarTab(tab)  «Switch sidebar view ('library' = component registry, 'graph' = graph hierarchy).»
+    function svgPtInner(e)  «docstring: none»
+    function setupDragEvents(saveStateFn)  «Wire document-level drag events. Call once from main.js.»
+    function typeRank(type)  «docstring: none»
+    function childNodesOfId(nodeId)  «docstring: none»
+    function buildScopeCrumbs(scopeId)  «docstring: none»
+    function setScope(scopeId)  «docstring: none»
+    function getFileNode(nodeId, file)  «docstring: none»
+    function hasVisibleFiles(node)  «docstring: none»
+    function hasVisibleChildren(node)  «docstring: none»
+    function isTreeOpen(nodeId)  «docstring: none»
+    function ensureTreePathVisible(nodeId)  «docstring: none»
+    function toggleTreeNode(nodeId)  «docstring: none»
+    function libraryEntryRank(kind)  «docstring: none»
+    function createLibraryEntry(id, kind, label, extra = {})  «docstring: none»
+    function ensureLibraryFolder(parent, segment, fullPath)  «docstring: none»
+    function buildFileSymbolEntries(nodeId, file)  «docstring: none»
+    function buildComponentFileTree(node)  «docstring: none»
+    function buildLibraryTree()  «docstring: none»
+    function renderLibraryEntry(entry, depth = 0)  «docstring: none»
+    function renderSidebarNode(node, depth, { showTypeLabel = false, includeChildren = false } = {})  «docstring: none»
+    function renderLibrarySidebar()  «docstring: none»
+    function renderGraphSidebar()  «docstring: none»
+    function editorLanguage(file)  «docstring: none»
+    function highlightEditorLine(line, lang)  «docstring: none»
+    function renderEditorHighlight(text, file)  «docstring: none»
+    function syncEditorHighlight(textarea, highlight, file)  «docstring: none»
+    function renderSidebar()  «docstring: none»
+    function zoomCanvas(factor, cx, cy)  «Zoom the canvas by `factor` around viewport point (cx, cy). When cx/cy are omitted the viewport centre is used.»
+    function centerCanvas()  «docstring: none»
+    function renderCanvas()  «docstring: none»
+    function renderCrumbs()  «docstring: none»
+    function renderInspector()  «docstring: none»
+    function renderNodeInspector(n)  «docstring: none»
+    function renderEdgeInspector(e)  «docstring: none»
+    function renderFileInspector(nodeId, file)  «docstring: none»
+    function saveInspector(nodeId)  «docstring: none»
+    function renderBottom()  «docstring: none»
+    function renderJson(n, metaOnly = false)  «docstring: none»
+    function renderCode(n, file)  «docstring: none»
+    function renderEdgeJson(e)  «docstring: none»
+    function showText(text, lang='json')  «docstring: none»
+    function showLines(lines, lang)  «docstring: none»
+    function selectedRuntimeNode()  «docstring: none»
+    function buildDefaultRuntimeInput(node)  «docstring: none»
+    function reportSummary(report)  «docstring: none»
+    function handleRuntimeRun(nodeId)  «docstring: none»
+    function handleRuntimeTests(nodeId)  «docstring: none»
+    function renderStepsTable(steps)  «docstring: none»
+    function renderCaseRow(tc)  «docstring: none»
+    function renderTestsPanel()  «docstring: none»
+    function collectIssues()  «docstring: none»
+    function renderIssuesPanel()  «docstring: none»
+    function renderFileEditor(nodeId, file)  «Show file content as an editable textarea in the bottom panel.»
+    function renderTasksPanel()  «Render the Tasks integration panel in the bottom panel.»
+    function loadTasksForPanel(entries, projectId, config = {})  «docstring: none»
+    function addTaskNode(td)  «docstring: none»
+    function selectNode(id)  «docstring: none»
+    function selectEdge(id)  «docstring: none»
+    function navigateToNode(id, options = {})  «docstring: none»
+    function openFile(nodeId, file)  «docstring: none»
+    function drillIn(id)  «docstring: none»
+    function renderAll()  «docstring: none»
+    function deleteNode(id)  «docstring: none»
+    function deleteEdge(id)  «docstring: none»
+
+structure from public/agentic-ide/js/schema-preview.js:
+    [file-summary] schema-preview.js — JSON schema preview modal.
+    const _previewFilename  «docstring: none»
+    function openSchemaPreview(title, jsonStr)  «docstring: none»
+    function wireSchemaPreview()  «docstring: none»
+    function _downloadText(text, filename)  «docstring: none»
+    function _toast(msg)  «docstring: none»
+
+structure from public/agentic-ide/js/state.js:
+    [file-summary] No top-level file docstring detected
+    const STORE_KEY  «docstring: none»
+    const S  «docstring: none»
+    function createRootNode()  «docstring: none»
+    function createEmptyGraph()  «docstring: none»
+    function createDefaultChatState()  «docstring: none»
+    function cloneGraph(graph)  «docstring: none»
+    function readPersistedState()  «docstring: none»
+    function buildCrumbs(scopeId, nodes)  «docstring: none»
+    function loadState()  «docstring: none»
+    function saveState()  «docstring: none»
+    function applyRegistryGraph(graph)  «docstring: none»
+    function setBridgeStatus(status)  «docstring: none»
+    function addRuntimeReport(report)  «docstring: none»
+    function clearRuntimeReports()  «docstring: none»
+    function addChatMessage(message)  «docstring: none»
+    function clearChatHistory()  «docstring: none»
+    function clearState(renderAll, forceBlank = false)  «docstring: none»
+
+structure from public/agentic-ide/js/types.js:
+    [file-summary] No top-level file docstring detected
+    const CT  «docstring: none»
+    const TYPE_META  «docstring: none»
+    const DEF_FILES  «docstring: none»
+    const CODE_TPL  «docstring: none»
+
+structure from public/agentic-ide/js/utils.js:
+    [file-summary] No top-level file docstring detected
+    const BRIDGE_BASE  «docstring: none»
+    esc = (s) =>  «docstring: none»
+    ct = (t) =>  «docstring: none»
+    uid = (p) =>  «docstring: none»
+    childrenOf = (scope) =>  «docstring: none»
+    structuredCloneSafe = (value) =>  «docstring: none»
+    edgesInScope = (scope) =>  «docstring: none»
+    function parsePorts(str)  «docstring: none»
+    function toast(msg, dur=2200)  «docstring: none»
+    function mkSvg(tag)  «docstring: none»
+    function svgTxt(p,text,x,y,sz,fill,w,anchor)  «docstring: none»
+    function svgPt(e)  «docstring: none»
+    function loadFileContent(nodePath, filename)  «Fetch file content — tries bridge first (supports write-back), falls back to main dev server static serving. Returns the»
+
+structure from public/agentic-ide/schema/component.schema.json:
+    [file-summary] Agentic IDE Component Contract
+    [json-key] $schema: "https://json-schema.org/draft/2020-12/schema"
+    [json-key] $id: "agentic-ide/component.schema.json"
+    [json-key] title: "Agentic IDE Component Contract"
+    [json-key] type: "object"
+    [json-key] required: [9 items]
+    [json-key] properties: {id, type, version, label, path, +7 more}
+    [json-key] additionalProperties: true
+
+structure from public/agentic-ide/schema/unit-case.schema.json:
+    [file-summary] Agentic IDE Test Case Contract
+    [json-key] $schema: "https://json-schema.org/draft/2020-12/schema"
+    [json-key] $id: "agentic-ide/unit-case.schema.json"
+    [json-key] title: "Agentic IDE Test Case Contract"
+    [json-key] type: "object"
+    [json-key] required: [4 items]
+    [json-key] properties: {name, type, target, cases}
+    [json-key] additionalProperties: true
+
+structure from public/agentic-ide/tests/inference-debug.js:
+    [file-summary] No top-level file docstring detected
+    const LLM_HOST  «docstring: none»
+    const LLM_PORT  «docstring: none»
+    const BRIDGE_HOST  «docstring: none»
+    const BRIDGE_PORT  «docstring: none»
+    function testLlamaConnection()  «Step 1: Test direct connection to llama.cpp»
+    function testLlamaCompletion(prompt)  «Step 2: Send simple completion request to llama.cpp»
+    function testBridgeCompletion(prompt)  «Step 3: Test bridge server completion endpoint»
+    function analyzeCompletion(text)  «Analyze completion for quality issues»
+    function compareResponses(llamaResult, bridgeResult)  «Compare responses from both endpoints»
+    function runDebugger()  «Main debug flow»
+
+structure from public/agentic-ide/tests/inference-quality-test.js:
+    [file-summary] No top-level file docstring detected
+    const BRIDGE_BASE  «docstring: none»
+    const LLM_TIMEOUT  «docstring: none»
+    function extractMathAnswer(response)  «Simple math answer extractor Tries to find numerical answer in the response»
+    function analyzeResponseQuality(response, options = {})  «Analyze response for quality issues (corruption, encoding, etc.)»
+    function runInferenceTest(testName, prompt, expectedAnswer, options = {})  «Run a single inference test with detailed logging»
+    function runAllTests()  «Run full test suite»
+
+structure from public/agentic-ide/tests/test-inference.ps1:  (no extractable definitions)
+
+structure from public/agentic-ide/ui/README.md:  (no extractable definitions)
+
+structure from public/agentic-ide/ui/style.css:
+    [file-summary] Design tokens (warm palette, composer inspired)
+    [section] /* === Design tokens (warm palette, composer-inspired) === */
+    [css-variable] --bg-page
+    [css-variable] --bg-panel
+    [css-variable] --bg-canvas
+    [css-variable] --border
+    [css-variable] --text
+    [css-variable] --muted
+    [css-variable] --sub
+    [css-variable] --accent
+    [css-variable] --accent-hi
+    [css-variable] --danger
+    [css-variable] --shadow
+    [css-variable] --r
+    [css-variable] --r-sm
+    [css-variable] --mono
+    [css-variable] --sans
+    [css-variable] --sidebar-w
+    [css-variable] --inspector-w
+    [css-variable] --bottom-h
+    [section] /* === Header === */
+    [selector] .page-header
+    [selector] .hdr-brand
+    [selector] .eyebrow
+    [selector] .page-header h1
+    [selector] .hdr-actions
+    [selector] .mobile-only
+    [section] /* === Buttons === */
+    [selector] .btn
+    [selector] .btn:hover
+    [selector] .btn-accent
+    [selector] .btn-accent:hover
+    [selector] .btn-danger
+    [selector] .btn-danger:hover
+    [selector] .btn-sm
+    [selector] .btn-icon
+    [selector] .ide-shell
+    [section] /* === Sidebar === */
+    [selector] #sidebar
+    [selector] .panel-hdr
+    [selector] .panel-hdr-actions
+    [selector] #tree
+    [selector] .ti
+    [selector] .ti:hover
+    [selector] .ti.is-sel
+    [selector] .ti-grp
+    [selector] .ti-grp:hover
+    [selector] .ti-node,.ti-file
+    [selector] .ti-folder,.ti-symbol
+    [selector] .ti-label
+    [selector] .ti-toggle
+    [selector] .ti-toggle.is-empty
+    [selector] .ti-file
+    [selector] .dot
+    [selector] .dot-file
+    [selector] .dot-symbol
+    [selector] .splitter
+    [selector] .splitter::before
+    [selector] .splitter.is-active::before
+    [selector] .splitter-v
+    [selector] .splitter-v::before
+    [selector] .splitter-h
+    [selector] .splitter-h::before
+    [section] /* === Center column === */
+    [selector] .center-col
+    [selector] #canvas-toolbar
+    [selector] #crumbs
+    [selector] .runtime-controls
+    [selector] .runtime-label
+    [selector] #global-model-select
+    [selector] .status-badge
+    [selector] .status-badge.is-online
+    [selector] .status-badge.is-offline
+    [selector] .status-badge.is-pending
+    [selector] .crumb
+    [selector] .crumb:hover
+    [selector] .crumb-sep
+    [selector] .crumb-cur
+    [selector] .canvas-actions
+    [selector] #canvas-area
+    [selector] #g
+    [section] /* === Bottom panel === */
+    [selector] #bottom-panel
+    [selector] #bottom-tabs
+    [selector] .btab
+    [selector] .btab.active
+    [selector] #bottom-content
+    [selector] .code-line
+    [selector] .ln
+    [selector] .kw
+    [section] /* === File editor (in bottom panel) === */
+    [selector] .file-editor-wrap
+    [selector] .file-editor-hdr
+    [selector] .file-editor-path
+    [selector] .file-editor-body
+    [selector] .file-editor-ta
+    [selector] .file-editor-hl
+    [selector] .file-editor-ta::placeholder
+    [selector] .file-editor-ta:focus
+    [selector] .file-editor-ta::selection
+    [section] /* === Right panel === */
+    [selector] #right-panel
+    [selector] #inspector
+    [selector] .ifield
+    [selector] .ilabel
+    [selector] .ivalue-mono
+    [selector] .io-edit-row
+    [selector] .flink
+    [selector] .flink:hover
+    [selector] .edge-pill
+    [selector] .iactions
+    [selector] .insp-section
+    [selector] .placeholder
+    [selector] .insp-input
+    [selector] .insp-input:focus
+    [selector] .insp-ta
+    [selector] .badge
+    [selector] .b-workflow
+    [selector] .b-tool
+    [selector] .b-file
+    [selector] .b-prompt
+    [selector] .b-sub
+    [selector] .b-test
+    [section] /* === Modals === */
+    [selector] .modal-back
+    [selector] .modal-back[hidden]
+    [selector] .modal-card
+    [selector] .modal-card h3
+    [selector] .fgrid
+    [selector] .fgrid .full
+    [selector] .fl
+    [selector] .fl label
+    [selector] .fl input,.fl select,.fl textarea
+    [selector] .fl input:focus,.fl select:focus,.fl textarea:focus
+    [selector] .fl textarea
+    [selector] .mfooter
+    [selector] .type-meta-section
+    [selector] .type-meta-section h4
+    [section] /* === Tasks panel (bottom tab) === */
+    [selector] .tasks-panel
+    [selector] .tasks-panel-hdr
+    [selector] .tasks-panel-hdr select
+    [selector] .tasks-list
+    [selector] .task-pill
+    [selector] .task-pill:hover
+    [selector] .task-pill-name
+    [selector] .task-pill-status
+    [selector] .task-pill-add
+    [section] /* === Runtime reports / issues === */
+    [selector] .issues-panel
+    [selector] .report-toolbar
+    [selector] .report-title
+    [selector] .report-sub
+    [selector] .report-actions
+    [selector] .report-meta-row
+    [selector] .report-list
+    [selector] .report-list.compact
+    [selector] .issue-card
+    [selector] .report-card.is-pass
+    [selector] .report-card.is-fail
+    [selector] .report-card-hdr
+    [selector] .report-card-sub
+    [selector] .report-snippet
+    [selector] .report-error
+    [selector] .report-empty
+    [section] /* === Steps / bottleneck table === */
+    [selector] .steps-detail
+    [selector] .steps-detail summary
+    [selector] .steps-table
+    [selector] .steps-table th
+    [selector] .steps-table td
+    [selector] .step-row.is-pass td:first-child
+    [selector] .step-row.is-fail td
+    [selector] .step-ms
+    [selector] .step-bar
+    [selector] .step-err
+    [selector] .issue-list
+    [selector] .issue-card.is-error
+    [selector] .issue-card.is-warn
+    [selector] .issue-title
+    [selector] .issue-detail
+    [section] /* === Toast === */
+    [selector] #toast
+    [selector] #toast.show
+    [section] /* === Sidebar tabs (Library / Graph) === */
+    [selector] #sidebar-tabs
+    [selector] .stab
+    [selector] .stab:hover
+    [selector] .stab.active
+    [section] /* Graph tree type label */
+    [selector] .ti-type-lbl
+    [section] /* === Schema preview modal === */
+    [selector] .sp-card
+    [selector] .sp-hdr
+    [selector] .sp-hdr strong
+    [selector] .sp-pre
+    [selector] .sp-card .mfooter
+    [section] /* === Chat modal === */
+    [selector] .chat-card
+    [selector] .chat-hdr
+    [selector] .chat-model
+    [selector] .chat-config
+    [selector] .chat-config-grid
+    [selector] .chat-config-grid .full
+    [selector] .chat-config select[multiple]
+    [selector] .chat-checks
+    [selector] .chat-checks input
+    [selector] .chat-actions-inline
+    [selector] .chat-inline-buttons
+    [selector] .chat-thread
+    [selector] .chat-msg
+    [selector] .chat-msg.is-user
+    [selector] .chat-msg.is-assistant
+    [selector] .chat-msg-meta
+    [selector] .chat-msg-body
+    [selector] .chat-empty
+    [selector] #chat-input
+    [selector] #chat-system-prompt
+    [section] /* === Mobile panels === */
+    [selector] #mobile-scrim
+    [selector] #mobile-scrim[hidden]
+
+structure from public/agentic-ide/workflows/benchmarks/README.md:  (no extractable definitions)
+
+structure from public/agentic-ide/workflows/benchmarks/research_benchmark.json:
+    [file-summary] Manifest for the live research benchmark workflow and its persisted outputs.
+    [json-key] id: "research_benchmark_manifest"
+    [json-key] type: "benchmark"
+    [json-key] label: "research_benchmark_manifest"
+    [json-key] workflow_ref: "workflows/benchmarks/research_benchmark_v1"
+    [json-key] outputs_path: "workflows/benchmarks/outputs"
+    [json-key] description: "Manifest for the live research benchmark workflow and its pe..."
+
+structure from public/agentic-ide/workflows/benchmarks/research_benchmark_v1/schema.json:
+    [file-summary] Port contract for benchmark workflow cell.
+    [json-key] id: "research_benchmark"
+    [json-key] version: 1
+    [json-key] description: "Port contract for benchmark workflow cell."
+    [json-key] inputs: [4 items]
+    [json-key] outputs: [2 items]
+    [json-key] errors: [1 items]
+
+structure from public/agentic-ide/workflows/benchmarks/research_benchmark_v1/state.js:  (no extractable definitions)
+
+structure from public/agentic-ide/workflows/benchmarks/research_benchmark_v1/workflow.json:
+    [file-summary] Runs research_workflow with live local inference and persists benchmark outputs for later review.
+    [json-key] id: "research_benchmark"
+    [json-key] type: "benchmark"
+    [json-key] version: 1
+    [json-key] label: "research_benchmark"
+    [json-key] path: "workflows/benchmarks/research_benchmark_v1"
+    [json-key] description: "Runs research_workflow with live local inference and persist..."
+    [json-key] lifecycle: "draft"
+    [json-key] success_threshold: 1
+    [json-key] entry: "research_benchmark_runner"
+    [json-key] state_schema: "state.js"
+    [json-key] inputs: [4 items]
+    [json-key] outputs: [2 items]
+    [json-key] nodes: [2 items]
+    [json-key] edges: [2 items]
+    [json-key] files: [3 items]
+    [json-key] tests: [1 items]
+
+structure from public/agentic-ide/workflows/benchmarks/research_benchmark_v1/tests/live.json:
+    [file-summary] research_benchmark live benchmark tests
+    [json-key] name: "research_benchmark live benchmark tests"
+    [json-key] type: "benchmark"
+    [json-key] target: "research_benchmark"
+    [json-key] cases: [1 items]
+
+structure from public/agentic-ide/workflows/research_workflow_v1/schema.json:
+    [file-summary] Port contract for top-level research workflow cell.
+    [json-key] id: "research_workflow"
+    [json-key] version: 1
+    [json-key] description: "Port contract for top-level research workflow cell."
+    [json-key] inputs: [1 items]
+    [json-key] outputs: [1 items]
+    [json-key] errors: [1 items]
+
+structure from public/agentic-ide/workflows/research_workflow_v1/state.js:
+    [file-summary] state.js — State schema for research_workflow_v1.
+    const STEP_ORDER  «docstring: none»
+    function createState(initial = {})  «docstring: none»
+
+structure from public/agentic-ide/workflows/research_workflow_v1/state.py:
+    [file-summary] Python placeholder for workflow state parity. The JS runtime uses state.js. This file exists to keep the workflow's declared file list consistent and support optional Python-side tooling.
+    STATE_SCHEMA = ...  «docstring: none»
+
+structure from public/agentic-ide/workflows/research_workflow_v1/workflow.json:
+    [file-summary] Top-level research pipeline: search, synthesize, validate, and render a report
+    [json-key] id: "research_workflow"
+    [json-key] type: "workflow"
+    [json-key] version: 1
+    [json-key] label: "research_workflow"
+    [json-key] path: "workflows/research_workflow_v1"
+    [json-key] description: "Top-level research pipeline: search, synthesize, validate, a..."
+    [json-key] lifecycle: "draft"
+    [json-key] success_threshold: 0.8
+    [json-key] entry: "search_agent"
+    [json-key] state_schema: "state.js"
+    [json-key] inputs: [1 items]
+    [json-key] outputs: [1 items]
+    [json-key] nodes: [3 items]
+    [json-key] edges: [2 items]
+    [json-key] files: [4 items]
+    [json-key] tests: [1 items]
+
+structure from public/agentic-ide/workflows/research_workflow_v1/tests/e2e.json:
+    [file-summary] research_workflow e2e tests
+    [json-key] name: "research_workflow e2e tests"
+    [json-key] type: "e2e"
+    [json-key] target: "research_workflow"
+    [json-key] cases: [1 items]
+
 structure from public/api/README.md:
     [file-summary] Task Graph API — Automation & Agent Contract
     [heading-1] # Task Graph API — Automation & Agent Contract
@@ -572,22 +2403,348 @@ structure from public/config/worker-url.js:
     [file-summary] Runtime resolver for the Cloudflare worker URL used by secure write flows.
     function __resolveWorkerUrlRuntime()  «Runtime resolver for the Cloudflare worker URL used by secure write flows.»
 
+structure from public/graph-composer/guide-index.html:
+    [file-summary] Interactive guide for the graph-display contract, including nodes, sizes, colors, relations, subgraphs, and critical-path metadata.
+    [title] <title>Graph Display Guide</title>
+    [meta] meta[description]  «Interactive guide for the graph-display contract, including nodes, sizes, colors, relations, subgraphs, and critical-pat»
+    [section] <header id="page-header">
+    [heading-1] <h1>Graph Guide Page</h1>
+    [section] <nav id="header-actions">
+    [section] <main id="page-shell">
+    [section] <section id="hero-panel">
+    [section] <section id="guide-grid">
+    [section] <aside id="panel">
+    [heading-2] <h2>Features</h2>
+    [section] <section id="panel">
+    [heading-2] <h2>Nodes</h2>
+    [section] <aside id="panel">
+    [heading-2] <h2>Contract Snapshot</h2>
+
+structure from public/graph-composer/index.html:
+    [file-summary] Compose, save, and preview metric-driven graph templates for graph-display.
+    [title] <title>Graph Composer</title>
+    [meta] meta[description]  «Compose, save, and preview metric-driven graph templates for graph-display.»
+    [section] <header id="hero">
+    [heading-1] <h1>Compose metric-driven graph templates</h1>
+    [section] <aside id="sidebar">
+    [heading-2] <h2>Template Library</h2>
+    [heading-3] <h3>Measurement Presets</h3>
+    [section] <main id="workspace">
+    [section] <section id="card">
+    [heading-2] <h2>Template Identity</h2>
+    [section] <section id="card">
+    [heading-2] <h2>Visual Variables</h2>
+    [section] <section id="section-grid">
+    [section] <section id="card">
+    [heading-2] <h2>Nodes</h2>
+    [section] <section id="card">
+    [heading-2] <h2>Node Editor</h2>
+    [section] <section id="dual-grid">
+    [section] <section id="card">
+    [heading-2] <h2>Details</h2>
+    [section] <section id="card">
+    [heading-2] <h2>Links</h2>
+    [section] <section id="panel-grid">
+    [section] <section id="card">
+    [heading-2] <h2>Validation</h2>
+    [section] <section id="card">
+    [heading-2] <h2>JSON Snapshot</h2>
+
+structure from public/graph-composer/project-index.html:
+    [file-summary] Browse a repository or chosen folder as a force graph of directories and files, with text previews for clicked files.
+    [title] <title>Project Explorer Graph</title>
+    [meta] meta[description]  «Browse a repository or chosen folder as a force graph of directories and files, with text previews for clicked files.»
+    [section] <header id="page-header">
+    [heading-1] <h1>Project Explorer Graph</h1>
+    [section] <nav id="header-actions">
+    [section] <section id="toolbar">
+    [section] <main id="page-content">
+    [section] <section id="graph-stage">
+    [section] <aside id="inspector-column">
+    [section] <section id="inspector-panel">
+    [heading-2] <h2>Selected Item</h2>
+    [section] <section id="inspector-panel">
+    [heading-2] <h2>Directory Contents</h2>
+    [section] <section id="inspector-panel">
+    [heading-2] <h2>File Preview</h2>
+
+structure from public/graph-composer/css/graph-composer.css:
+    [css-variable] --bg
+    [css-variable] --bg-panel
+    [css-variable] --bg-accent
+    [css-variable] --surface-border
+    [css-variable] --text
+    [css-variable] --muted
+    [css-variable] --accent
+    [css-variable] --accent-strong
+    [css-variable] --accent-warm
+    [css-variable] --danger
+    [css-variable] --shadow
+    [css-variable] --radius
+    [css-variable] --radius-small
+    [css-variable] --mono
+    [css-variable] --sans
+    [selector] .page-shell
+    [selector] .hero
+    [selector] .hero-copy
+    [selector] .eyebrow
+    [selector] .hero h1
+    [selector] .hero p
+    [selector] .hero-links
+    [selector] .preset-chip
+    [selector] .action-button
+    [selector] .preset-chip:hover
+    [selector] .action-button.is-accent
+    [selector] .action-button.is-danger
+    [selector] .layout
+    [selector] .card
+    [selector] .workspace > section
+    [selector] .card h3
+    [selector] .section-note
+    [selector] .stack
+    [selector] .entity-list
+    [selector] .list-row
+    [selector] .list-row strong
+    [selector] .preset-chip span
+    [selector] .list-row.is-active
+    [selector] .preset-grid
+    [selector] .workspace
+    [selector] .form-grid
+    [selector] .section-grid
+    [selector] .dual-grid
+    [selector] .panel-grid
+    [selector] .config-grid
+    [selector] .config-grid.nested-grid
+    [selector] .field-toggle
+    [selector] .form-label
+    [selector] .field-wide
+    [selector] textarea
+    [selector] textarea:focus
+    [selector] .field-help
+    [selector] .field-toggle input
+    [selector] .color-input-row
+    [selector] .color-input-row input[type="color"]
+    [selector] .config-group
+    [selector] .config-group-header h4
+    [selector] .config-group-header p
+    [selector] .top-actions
+    [selector] .status-bar
+    [selector] #status-message[data-tone="success"]
+    [selector] #status-message[data-tone="warning"]
+    [selector] #status-message[data-tone="error"]
+    [selector] .validation-block
+    [selector] .validation-block.has-errors
+    [selector] .validation-block ul
+    [selector] .warning-list
+    [selector] .code-panel
+    [selector] .empty-state
+
+structure from public/graph-composer/css/guide-index.css:
+    [css-variable] --guide-ink
+    [css-variable] --guide-muted
+    [css-variable] --guide-line
+    [css-variable] --guide-panel
+    [css-variable] --guide-background
+    [css-variable] --guide-shadow
+    [selector] button
+    [selector] .page-header
+    [selector] .eyebrow
+    [selector] .page-header h1
+    [selector] .page-header p
+    [selector] .header-actions
+    [selector] .schema-links a
+    [selector] .feature-button.active
+    [selector] .page-shell
+    [selector] .guide-grid > .panel
+    [selector] .hero-panel
+    [selector] .hero-panel p
+    [selector] .guide-grid
+    [selector] .panel
+    [selector] .panel h2
+    [selector] .feature-selector
+    [selector] .feature-copy
+    [selector] .feature-card
+    [selector] .feature-card strong
+    [selector] .schema-links
+    [selector] .demo-panel p
+    [selector] .guide-graph
+    [selector] .guide-graph svg
+    [selector] .guide-graph text
+    [selector] .guide-link
+    [selector] .guide-link-label
+    [selector] .guide-node-label
+    [selector] .guide-node-meta
+    [selector] .guide-legend
+    [selector] .guide-legend-chip
+    [selector] .guide-legend-swatch
+    [selector] .contract-summary
+    [selector] .summary-card
+    [selector] .summary-card strong
+    [selector] .summary-card span
+    [selector] .json-preview
+
+structure from public/graph-composer/css/project-index.css:
+    [css-variable] --page-ink
+    [css-variable] --page-muted
+    [css-variable] --page-line
+    [css-variable] --page-panel
+    [css-variable] --page-panel-strong
+    [css-variable] --page-background
+    [css-variable] --page-shadow
+    [selector] input
+    [selector] .page-header
+    [selector] .eyebrow
+    [selector] .page-header h1
+    [selector] .page-header p
+    [selector] .header-actions
+    [selector] .directory-list button
+    [selector] .breadcrumbs button
+    [selector] .breadcrumbs button:hover
+    [selector] .toolbar
+    [selector] .panel
+    [selector] .toolbar-row
+    [selector] .toolbar-row + .toolbar-row
+    [selector] .toolbar label
+    [selector] .toolbar input
+    [selector] .status-line
+    [selector] .status-line[data-tone="error"]
+    [selector] .status-line[data-tone="success"]
+    [selector] .page-content
+    [selector] .graph-stage
+    [selector] .breadcrumbs
+    [selector] .breadcrumbs button.active
+    [selector] .graph-canvas
+    [selector] .graph-canvas svg
+    [selector] .graph-link
+    [selector] .graph-node
+    [selector] .graph-node text
+    [selector] .graph-node .node-name
+    [selector] .graph-node .node-meta
+    [selector] .graph-node circle
+    [selector] .graph-node.selected circle
+    [selector] .graph-node.root circle
+    [selector] .graph-node:hover circle
+    [selector] .legend
+    [selector] .legend-chip
+    [selector] .legend-swatch
+    [selector] .inspector-column
+    [selector] .inspector-panel
+    [selector] .inspector-panel h2
+    [selector] .selection-card h3
+    [selector] .selection-kind
+    [selector] .selection-path
+    [selector] .stat-grid
+    [selector] .stat-card
+    [selector] .stat-card strong
+    [selector] .stat-card span
+    [selector] .directory-list
+    [selector] .directory-list button.active
+    [selector] .entry-copy
+    [selector] .entry-name
+    [selector] .entry-meta
+    [selector] .directory-list button.active .entry-meta
+    [selector] .file-preview
+    [selector] .file-preview[data-empty="true"]
+
+structure from public/graph-composer/js/composer-app.js:
+    [file-summary] No top-level file docstring detected
+    const KNOWN_META_KEYS  «docstring: none»
+    const KNOWN_NODE_KEYS  «docstring: none»
+    const KNOWN_LINK_KEYS  «docstring: none»
+    function setStatus(message, tone = 'info')  «docstring: none»
+    function refreshStoredTemplates()  «docstring: none»
+    function ensureSelections()  «docstring: none»
+    function loadTemplate(template, activeStorageTemplateId = null)  «docstring: none»
+    function getSelectedNode()  «docstring: none»
+    function getSelectedLink()  «docstring: none»
+    function populateTemplateForm()  «docstring: none»
+    function populateNodeEditor()  «docstring: none»
+    function populateDetailEditor()  «docstring: none»
+    function populateLinkEditor()  «docstring: none»
+    function renderPanels()  «docstring: none»
+    function renderAll()  «docstring: none»
+    function applyMetaExtras(rawJson)  «docstring: none»
+    function readNodeDraft()  «docstring: none»
+    function readLinkDraft()  «docstring: none»
+    function persistCurrentTemplate(openPreview = false)  «docstring: none»
+    function exportCurrentTemplate()  «docstring: none»
+    function bindEvents()  «docstring: none»
+    function cacheDom()  «docstring: none»
+    function init()  «docstring: none»
+
+structure from public/graph-composer/js/composer-defaults.js:
+    [file-summary] No top-level file docstring detected
+    const GRAPH_LINK_TYPE_OPTIONS  «docstring: none»
+    const GRAPH_MEASUREMENT_PRESETS  «docstring: none»
+    function deepClone(value)  «docstring: none»
+    function getMeasurementPresetById(presetId)  «docstring: none»
+    function createBlankNode(index = 1)  «docstring: none»
+    function createBlankNodeDetails(label = 'Node')  «docstring: none»
+    function createBlankLink(nodes = [])  «docstring: none»
+    function createBlankTemplate()  «docstring: none»
+    function createTemplateFromExample()  «docstring: none»
+
+structure from public/graph-composer/js/composer-render.js:
+    [file-summary] No top-level file docstring detected
+    function escapeHtml(value)  «docstring: none»
+    function humanizeKey(key)  «docstring: none»
+    function renderSchemaField(fieldKey, definition, value, path)  «docstring: none»
+    function renderConfigEditor(schema, values)  «docstring: none»
+    function renderSavedTemplateList(templates, activeTemplateId)  «docstring: none»
+    function renderMeasurementPresets(presets)  «docstring: none»
+    function renderNodeList(nodes, selectedNodeId)  «docstring: none»
+    function renderLinkList(links, selectedLinkIndex)  «docstring: none»
+    function renderSelectOptions(options, selectedValue, includeBlank = false)  «docstring: none»
+    function renderValidationSummary(validation)  «docstring: none»
+    function renderJsonPreview(jsonText)  «docstring: none»
+
+structure from public/graph-composer/js/composer-state.js:
+    [file-summary] No top-level file docstring detected
+    function isPlainObject(value)  «docstring: none»
+    function setValueAtPath(target, path, value)  «docstring: none»
+    function normalizeNode(node, index = 0)  «docstring: none»
+    function normalizeLink(link, index = 0)  «docstring: none»
+    function normalizeDetails(template)  «docstring: none»
+    function getAdditionalFields(source, knownKeys)  «docstring: none»
+    function parseJsonText(text, fallback = {})  «docstring: none»
+    function suggestUniqueNodeId(template, baseId = 'node')  «docstring: none»
+    function normalizeTemplate(template)  «docstring: none»
+    function updateTemplateField(template, path, value)  «docstring: none»
+    function applyMeasurementPreset(template, presetId)  «docstring: none»
+    function upsertNode(template, nodeDraft, previousId = null)  «docstring: none»
+    function duplicateNode(template, nodeId)  «docstring: none»
+    function removeNode(template, nodeId)  «docstring: none»
+    function upsertLink(template, linkDraft, linkIndex = -1)  «docstring: none»
+    function removeLink(template, linkIndex)  «docstring: none»
+    function updateNodeDetails(template, nodeId, detailDraft)  «docstring: none»
+    function createNewNodeTemplate(template)  «docstring: none»
+    function createNewLinkTemplate(template)  «docstring: none»
+    function validateTemplate(template)  «docstring: none»
+    function buildExportJson(template)  «docstring: none»
+
 structure from public/graph-display/.gitignore:  (no extractable definitions)
 
 structure from public/graph-display/README.md:
-    [file-summary] Graph Display (Interactive Career Graph Template)
-    [heading-1] # Graph Display (Interactive Career Graph Template)
-    [heading-2] ## Quick start
-    [heading-3] ### Option A: run with a simple Node static server (recommended)
-    [heading-3] ### Option B: run with PHP’s built-in server
-    [heading-2] ## Customize your content
-    [heading-3] ### 1) Choose a template (Career vs Task Management)
-    [heading-3] ### 2) Edit the graph templates
-    [heading-3] ### 3) Adjust Classic CV sections
-    [heading-3] ### 4) Update the profile image
-    [heading-2] ## PWA / Offline caching
-    [heading-3] ### Troubleshooting
-    [heading-2] ## Folder layout
+    [file-summary] Graph Display
+    [heading-1] # Graph Display
+    [heading-2] ## Single Contract
+    [heading-2] ## Core vs Optional
+    [heading-2] ## Quick Start
+    [heading-3] ### Option A: static server
+    [heading-3] ### Option B: local dev server
+    [heading-2] ## Plug Into Another Project
+    [heading-2] ## What To Author
+    [heading-3] ### Nodes
+    [heading-3] ### Node Sizes
+    [heading-3] ### Node Colors
+    [heading-3] ### Edges / Relations
+    [heading-3] ### Subgraphs and Subcomponents
+    [heading-3] ### Critical Path
+    [heading-2] ## Example Direct Template
+    [heading-2] ## TaskDB Authoring Rules
+    [heading-2] ## Files Worth Editing
+    [heading-2] ## PWA / Offline Caching
+    [heading-2] ## Troubleshooting
 
 structure from public/graph-display/index.html:
     [file-summary] Template: interactive graph-based CV/portfolio. Replace the sample graph data with your own career, skills, and outcomes.
@@ -598,7 +2755,8 @@ structure from public/graph-display/index.html:
     [heading-1] <h1>Interactive Career Graph (Template)</h1>
     [section] <aside id="menu-aside">
     [section] <nav id="menu-panel">
-    [section] <section id="popup">
+    [section] <section id="taskNodeModal">
+    [heading-2] <h2>✏️ Edit Task</h2>
     [section] <section id="legend-popup">
     [heading-2] <h2>Graph Legend</h2>
     [heading-3] <h3>Nodes by Layer</h3>
@@ -610,6 +2768,7 @@ structure from public/graph-display/index.html:
     [section] <footer id="seo-content">
     [heading-2] <h2>Interactive Career Graph Template</h2>
     [heading-2] <h2>What to customize</h2>
+    [heading-3] <h3>Edit Task</h3>
 
 structure from public/graph-display/manifest.json:
     [file-summary] Interactive Career Graph (Template) — Template: interactive graph-based CV/portfolio. Replace the sample data with your own.
@@ -1866,6 +4025,7 @@ structure from public/graph-display/css/components/_popups.css:
     [selector] #popup .content .task-node-btn
     [selector] #popup .content .task-node-btn[data-nav-depth]:focus-visible
     [section] /* Buttons without a navigable relation show default cursor */
+    [selector] .popup-action-row
     [selector] #popup .content .task-node-btn .tn-name
     [section] /* Hours badge */
     [selector] #popup .content .task-node-btn .tn-hours
@@ -2179,6 +4339,7 @@ structure from public/graph-display/js/README.md:
     [heading-2] ## Dependency Links (Clickable "Depends on:")
     [heading-2] ## Sub-graph Navigation
     [heading-2] ## Link Types
+    [heading-2] ## Portable Contract
 
 structure from public/graph-display/js/cv-generator.js:
     [file-summary] Generates HTML for a classic CV view based on graph data. Uses CSS classes for color styling based on node properties.
@@ -2218,6 +4379,7 @@ structure from public/graph-display/js/graph-data.js:
     [file-summary] IMPORTANT: Graph definitions (nodes, relationships, details) must come from external JSON templates following the schemas in `tasksDB/_schema/`.
     const TEMPLATE_REGISTRY  «Global template registry keyed by template id for the graph runtime.»
     const INLINE_TASK_ID_PREFIX  «Prefix used to encode inline subtask task ids into synthetic navigation paths.»
+    const CONTEXT_RELATION_GUIDE  «docstring: none»
     const GRAPH_NODES  «Backwards-compatible node export for consumers expecting the Career template payload.»
     const GRAPH_LINKS  «Backwards-compatible link export for consumers expecting the Career template payload.»
     const GRAPH_DETAILS  «Backwards-compatible detail export for consumers expecting the Career template payload.»
@@ -2227,11 +4389,13 @@ structure from public/graph-display/js/graph-data.js:
     function getDependencyLinkType(dep)  «Resolve the graph link type string for a structured task dependency.»
     function buildDependencyLayering(tasks)  «Compute dependency layers for tasks and flag nodes that participate in cycles.»
     function scaleHoursToRadius(hours, minHours, maxHours, minRadius, maxRadius)  «Scale estimated hours into a rendered node radius using eased clamping.»
+    function registerStoredComposerTemplates()  «docstring: none»
     function validateAgainstSchema(obj, schema)  «Perform lightweight shape validation for supported graph template payloads.»
     function resolveProjectIdFromTasksPath(path)  «Extract a project id from a TaskDB node.tasks.json path.»
     function resolveProjectScopedBase(path)  «Return the scoped base path segment for a TaskDB URL. Examples: '/tasksDB/external/first-graph/node.tasks.json' → 'exter»
     function normalizeTaskDbWalkthroughPath(pathValue, scopedBase)  «Normalize a walkthrough asset path for a scoped TaskDB project base.»
     function buildEmbeddedTaskDbTemplate(entry, data, scopedBase, embeddedGraphName)  «Build a graph template from an embedded TaskDB graphTemplate payload.»
+    function normalizeTaskDbFilePath(pathValue)  «Normalize a TaskDB file reference so runtime navigation always targets the canonical node.tasks.json filename.»
     function normalizeProjectRelativeModulePath(modulePath, entryPath)  «Resolve a module path relative to the project entry file inside TaskDB.»
     function normalizeNavigationModules(modules, entryPath)  «Normalize navigation module records and their task id aliases for sidebar use.»
     function buildInlineTaskIdPath(taskId)  «Build a synthetic inline-task navigation path from a numeric task id.»
@@ -2248,6 +4412,12 @@ structure from public/graph-display/js/graph-data.js:
     function formatWorkerLabel(worker)  «Format an assigned worker record into a compact display label.»
     function buildTaskSupplementalDetailItems(task)  «Build supplemental task-detail markup for planning, staffing, links, and notes.»
     function normalizeInlineSubtaskTask(subtask, index, parentTask = {})  «Normalize an inline subtask into a task-like record for graph rendering.»
+    function normalizeProgressRatio(value)  «docstring: none»
+    function isDoneLikeStatus(status)  «docstring: none»
+    function estimateCompletedHours(task)  «docstring: none»
+    function sumInlineSubtaskHours(subtasks, parentTask, selector)  «docstring: none»
+    function buildProjectHoursSummary(tasks = [])  «docstring: none»
+    function formatHoursValue(value)  «docstring: none»
     function buildInlineSubgraphData(sourceData, task)  «Build a task-management payload for a task's inline or child-task subgraph.»
     function buildInlineSubtaskTargets(task, childrenByParentId)  «Build synthetic subtask navigation targets when a task has inline descendants.»
     function normalizeExplicitSubtaskTargets(task)  «Normalize explicit subtask navigation targets declared on a task record.»
@@ -2255,7 +4425,7 @@ structure from public/graph-display/js/graph-data.js:
     function getTaskNarrativeText(task)  «Build a lowercase narrative string used to classify a task's end-state semantics.»
     function resolveProjectEndConfig(project)  «Resolve the configured graph-end metadata from a project payload.»
     function resolveProjectEndMode(project, terminalTasks)  «Infer the semantic end-node mode for a project graph from config and task narratives.»
-    function buildProjectEndDetails(project, terminalTasks, totalProjectHours = 0)  «Build the end-node popup details for a project graph.»
+    function buildProjectEndDetails(project, terminalTasks, projectHours = {})  «Build the end-node popup details for a project graph.»
     function buildProjectTaskTemplate(entry, data, options = {})  «Convert a string-id project_task_template payload into the numeric task template shape.»
     function buildTaskManagementTemplate(entry, data, options = {})  «Build a task-management graph template from TaskDB project data.»
     function isDevMode()  «Detect whether the graph app is running on a local development host.»
@@ -2264,8 +4434,37 @@ structure from public/graph-display/js/graph-data.js:
     function getAvailableTemplates()  «Return lightweight metadata for every registered graph template.»
     function loadTemplate(templateId)  «Load a registered template with safe fallbacks for empty runtime state.»
     function getDefaultTemplateId()  «Return the default template id used when the caller does not specify one.»
+    function clearTemplateCache(templateId)  «Remove a specific template (or all templates) from the in-memory cache so the next render fetches fresh data from the se»
+    function buildTaskContextIndexes(tasks)  «docstring: none»
+    function summarizeContextTask(task, layerById = new Map())  «docstring: none»
+    function collectInlineContextSubtasks(subtasks, parentTask, records, ancestry = [])  «docstring: none»
+    function collectInlineContextRecords(tasks)  «docstring: none»
+    function buildContextTaskPayload(task, indexes)  «docstring: none»
+    function extractNodeContext(templateId, nodeId, depth = 1)  «Extract a slice of the project's task data centred on a specific graph node. Returns the focal task, its immediate prede»
+    function buildCleanGraphPayload(sourceData, nodeId, depth = 1)  «Build a clean, sorted node.tasks.json payload scoped to a graph node or the full graph. The output is a valid node.tasks»
     function buildProjectTaskTemplatePublic(entry, data, options)  «Public wrapper around project task template construction.»
     function buildInlineTaskSubgraphTemplatePublic(entry, data, inlinePath, options)  «Build a graph template for an inline subtask subgraph selected by synthetic path.»
+
+structure from public/graph-display/js/guide-index.js:
+    [file-summary] No top-level file docstring detected
+    const LAYER_COLORS  «docstring: none»
+    const PRIORITY_COLORS  «docstring: none»
+    const RELATION_COLORS  «docstring: none»
+    const GUIDE_NODES  «docstring: none»
+    const GUIDE_LINKS  «docstring: none»
+    const GUIDE_POSITIONS  «docstring: none»
+    const FEATURE_DEFINITIONS  «docstring: none»
+    function cacheDom()  «docstring: none»
+    function activateFeature(featureId)  «docstring: none»
+    function renderFeatureButtons()  «docstring: none»
+    function renderFeatureCopy()  «docstring: none»
+    function renderContractSummary()  «docstring: none»
+    function renderPreview()  «docstring: none»
+    function getFeatureNodeRadius(node)  «docstring: none»
+    function getFeatureNodeFill(node)  «docstring: none»
+    function getFeatureLinkStroke(link)  «docstring: none»
+    function renderGuideLegend()  «docstring: none»
+    function renderGuideGraph()  «docstring: none»
 
 structure from public/graph-display/js/main-graph.js:
     [file-summary] Main script for initializing and managing the Curriculum Graph. Imports data, CV generator, walkthrough, utilities. Uses CSS classes for color and manages accessibility. UPDATED: Touch interaction mir
@@ -2297,6 +4496,9 @@ structure from public/graph-display/js/main-graph.js:
         updateLegendPopup()  «Update legend popup content dynamically using CSS classes»
         showNodeDetails(d)  «Show node details popup using CSS classes for styling»
         displayPopup(popupElement)  «Helper function to display a popup and manage focus»
+        openGraphTaskEditModal(taskId, projectId)  «Open the task edit modal and populate it with the data for the given task.»
+        setupGraphTaskModal()  «Wire up the graph task edit modal (called once after the DOM is ready).»
+        copyNodeContext(d, details, node, triggerBtn)  «Copy a structured JSON task-subgraph schema to the clipboard. - Root node: full task data including all subtasks (deep c»
         clearSelectedNodeState()  «Clear persistent node selection and restore the default graph emphasis state.»
         hideNodeDetails({ clearSelection = false } = {})  «Hide node details popup. Selection persists unless clearSelection is explicitly requested.»
         setupZoom()  «Setup zoom behavior»
@@ -2317,8 +4519,45 @@ structure from public/graph-display/js/main-graph.js:
         setupSearch(inputId)  «Setup search input functionality»
 
     function isEmbeddedMode()  «Detect whether the graph is running in embedded iframe mode.»
+    function hasHostParentWindow()  «docstring: none»
+    function postMessageToHost(type, payload = {})  «docstring: none»
+    function clickHostButton(buttonId)  «docstring: none»
+    function getActiveProjectIdFromTemplate(template = window.graphInstance?.template || null)  «docstring: none»
+    function buildListDisplayUrl(projectId, extraParams = {})  «docstring: none»
+    function getTaskNodeModalElement()  «docstring: none»
+    function getTaskNodeModalContentElement()  «docstring: none»
     function getInitialTemplateId()  «Resolve the initial template id from the URL, storage, or default registry entry.»
     function setSelectedTemplateId(templateId)  «Persist the currently selected template id for future visits.»
+
+structure from public/graph-display/js/project-index.js:
+    [file-summary] No top-level file docstring detected
+    const BROWSER_IGNORED_DIRS  «docstring: none»
+    const PREVIEW_MAX_CHARS  «docstring: none»
+    const ROOT_LABELS  «docstring: none»
+    function cacheDom()  «docstring: none»
+    function bindEvents()  «docstring: none»
+    function normalizePath(value)  «docstring: none»
+    function setStatus(message, tone = 'info')  «docstring: none»
+    function describeDirectory(entry)  «docstring: none»
+    function describeFile(entry)  «docstring: none»
+    function openTypedPath()  «docstring: none»
+    function loadServerDirectory(rootKey, relativePath = '')  «docstring: none»
+    function buildBrowserBreadcrumbs(relativePath)  «docstring: none»
+    function pickBrowserFolder()  «docstring: none»
+    function getBrowserDirectoryStats(directoryHandle, relativePath)  «docstring: none»
+    function buildBrowserFileSummary(fileHandle, relativePath)  «docstring: none»
+    function buildBrowserDirectorySnapshot(directoryHandle, relativePath = '')  «docstring: none»
+    function loadBrowserDirectory(directoryHandle, relativePath = '')  «docstring: none»
+    function renderAll()  «docstring: none»
+    function renderBreadcrumbs()  «docstring: none»
+    function renderLegend()  «docstring: none»
+    function renderSelection()  «docstring: none»
+    function clearPreview()  «docstring: none»
+    function renderDirectoryList()  «docstring: none»
+    function handleEntryAction(entry)  «docstring: none»
+    function readBrowserFilePreview(relativePath)  «docstring: none»
+    function loadFilePreview(entry)  «docstring: none»
+    function renderGraph()  «docstring: none»
 
 structure from public/graph-display/js/template-loader.js:
     [file-summary] Optional template-loader helpers for graph-display template registration.
@@ -2361,6 +4600,60 @@ structure from public/graph-display/js/walkthrough.js:
         end()  «End the walkthrough, clear UI state, and persist the completion flag.»
 
 
+structure from public/graph-display/js/shared/graph-design-contract.js:
+    [file-summary] Reusable design contract for the graph-display component.
+    const ALLOWED_COLOR_MODES  «docstring: none»
+    const ALLOWED_SIZE_MODES  «docstring: none»
+    const ALLOWED_METRIC_SCALES  «docstring: none»
+    const ALLOWED_TONE_DIRECTIONS  «docstring: none»
+    const PRIORITY_LEVELS  «docstring: none»
+    const DEPENDENCY_RELATION_TYPES  «docstring: none»
+    const GRAPH_UI_DEFAULTS  «docstring: none»
+    const GRAPH_UI_CONFIG_SCHEMA  «docstring: none»
+    const GRAPH_RELATION_GUIDE  «docstring: none»
+    const GRAPH_SEMANTICS_GUIDE  «docstring: none»
+    const GRAPH_HOST_FEATURES  «docstring: none»
+    const GRAPH_COMPONENT_INPUT_SCHEMA  «docstring: none»
+    const GRAPH_COMPONENT_EXAMPLES  «docstring: none»
+    const GRAPH_COMPONENT_CONTRACT  «docstring: none»
+    function isPlainObject(value)  «Reusable design contract for the graph-display component.»
+    function cloneValue(value)  «docstring: none»
+    function mergeWithDefaults(defaults, overrides)  «docstring: none»
+    function deepFreeze(value)  «docstring: none»
+    function isFiniteNumber(value)  «docstring: none»
+    function isHexColor(value)  «docstring: none»
+    function collectUnknownKeys(defaults, overrides, path, warnings)  «docstring: none»
+    function validateNumber(value, path, errors, options = {})  «docstring: none»
+    function createGraphUiConfig(overrides = {})  «Create a runtime config object from the documented defaults plus overrides. Invalid types on known keys are ignored so t»
+    function validateGraphUiConfig(overrides = {})  «Validate graph UI overrides before passing them to the renderer.»
+    function validateGraphComponentInputs(payload = {})  «Validate the top-level inputs that another host project passes into the graph UI.»
+    function getGraphComponentContract()  «docstring: none»
+
+structure from public/graph-display/js/shared/graph-metric-utils.js:
+    [file-summary] Shared helpers for resolving custom metric-based node sizing and coloring.
+    function isPlainObject(value)  «Shared helpers for resolving custom metric-based node sizing and coloring.»
+    function toPathSegments(path)  «docstring: none»
+    function getValueAtPath(source, path)  «docstring: none»
+    function resolveMetricRadius(node, metricSizing = {})  «docstring: none»
+    function resolveMetricColor(node, metricColoring = {}, fallbackHex = '#aabbc8')  «docstring: none»
+    function getMetricLegendItems(metricColoring = {}, fallbackHex = '#aabbc8')  «docstring: none»
+
+structure from public/graph-display/js/shared/graph-template-storage.js:
+    [file-summary] Browser-local storage for Graph Composer templates.
+    const STORED_GRAPH_TEMPLATES_KEY  «Browser-local storage for Graph Composer templates.»
+    function isPlainObject(value)  «docstring: none»
+    function cloneValue(value)  «docstring: none»
+    function getStorage(storageOverride)  «docstring: none»
+    function normalizeTemplateId(value)  «docstring: none»
+    function normalizeStoredTemplate(template, index = 0)  «docstring: none»
+    function readStoredTemplates(storageOverride)  «docstring: none»
+    function writeStoredTemplates(templates, storageOverride)  «docstring: none»
+    function buildStoredGraphTemplateId(name, existingIds = [])  «docstring: none»
+    function listStoredGraphTemplates(storageOverride)  «docstring: none»
+    function getStoredGraphTemplate(templateId, storageOverride)  «docstring: none»
+    function saveStoredGraphTemplate(template, storageOverride)  «docstring: none»
+    function deleteStoredGraphTemplate(templateId, storageOverride)  «docstring: none»
+
 structure from public/graph-display/js/shared/link-types.js:
     [file-summary] Shared link-type definitions and helpers.
     const COMMON_LINK_TYPES  «Shared link-type definitions and helpers.»
@@ -2373,11 +4666,53 @@ structure from public/graph-display/js/shared/link-types.js:
     function getForceLinkDistance(linkType, forcesCfg)  «Returns the link distance to use for a link type. Mirrors existing behavior in main-graph.js, but centralized.»
     function getForceLinkStrength(linkType)  «Returns the link force strength to use for a link type. Mirrors existing behavior in main-graph.js, but centralized.»
 
+structure from public/graph-display/js/shared/project-graph-utils.js:
+    [file-summary] No top-level file docstring detected
+    const ROOT_COLOR  «docstring: none»
+    const FOLDER_COLOR  «docstring: none»
+    const FILE_TYPE_COLORS  «docstring: none»
+    const IMAGE_EXTENSIONS  «docstring: none»
+    const TEXT_LIKE_EXTENSIONS  «docstring: none»
+    function clamp(value, min, max)  «docstring: none»
+    function escapeHtml(value)  «docstring: none»
+    function formatBytes(bytes)  «docstring: none»
+    function getFileExtension(name)  «docstring: none»
+    function isTextLikeFileName(name)  «docstring: none»
+    function getFileTypeKey(entryOrName)  «docstring: none»
+    function getLegendLabel(typeKey)  «docstring: none»
+    function getNodeColor(entry)  «docstring: none»
+    function getNodeRadius(entry)  «docstring: none»
+    function truncateLabel(value, maxLength = 18)  «docstring: none»
+    function buildLegendEntries(entries = [])  «docstring: none»
+
 structure from public/graph-display/js/shared/tours.js:
     [file-summary] Generates/returns walkthrough steps for different templates. - If a template provides `meta.walkthroughSteps` (array), use that. - Otherwise generate sensible steps from nodes/details for known templa
     function getStepsForTemplate(templateId, nodes = [], details = {}, meta = {})  «Generates/returns walkthrough steps for different templates. - If a template provides `meta.walkthroughSteps` (array), u»
     function resolveTourUrl(path, basePath)  «Resolve a walkthrough JSON path relative to the graph app base path.»
     function resolveStepsForTemplate(templateId, nodes = [], details = {}, meta = {}, basePath = './')  «Resolve steps for a template. Priority: 1) meta.walkthroughSteps (inline) 2) meta.walkthroughStepsPath (JSON file) 3) Ge»
+
+structure from public/graph-display/schema/graph-template.schema.json:
+    [file-summary] Graph Template — Direct template payload for the reusable graph-display runtime and Graph Composer.
+    [json-key] $schema: "https://json-schema.org/draft/2020-12/schema"
+    [json-key] $id: "./graph-template.schema.json"
+    [json-key] title: "Graph Template"
+    [json-key] description: "Direct template payload for the reusable graph-display runti..."
+    [json-key] type: "object"
+    [json-key] required: [5 items]
+    [json-key] properties: {id, name, description, nodes, links, +5 more}
+    [json-key] additionalProperties: true
+    [json-key] $defs: {priorityLevel, graphNode, graphLink, nodeDetails, templateMeta}
+
+structure from public/graph-display/schema/graph-ui-config.schema.json:
+    [file-summary] Graph UI Config — Config overrides supported by the reusable graph-display runtime.
+    [json-key] $schema: "https://json-schema.org/draft/2020-12/schema"
+    [json-key] $id: "./graph-ui-config.schema.json"
+    [json-key] title: "Graph UI Config"
+    [json-key] description: "Config overrides supported by the reusable graph-display run..."
+    [json-key] type: "object"
+    [json-key] properties: {colorMode, sizeMode, nodeSizes, priorityColorsHex, taskSizing, +15 more}
+    [json-key] additionalProperties: true
+    [json-key] $defs: {hexColor}
 
 structure from public/health/README.md:
     [file-summary] Health Diagnostics App
@@ -2729,6 +5064,39 @@ structure from public/list-display/css/task-manager.css:
     [selector] .timeline-header
     [selector] .timeline-header h3
     [selector] .timeline-header .timeline-actions
+    [selector] .tpp-overlay
+    [selector] .tpp-content
+    [selector] .tpp-overlay.tpp-visible .tpp-content
+    [selector] .tpp-close
+    [selector] .tpp-close:hover
+    [selector] .tpp-badge-row
+    [selector] .tpp-badge
+    [selector] .tpp-badge.priority-low
+    [selector] .tpp-badge.priority-medium
+    [selector] .tpp-badge.priority-high
+    [selector] .tpp-badge.priority-critical
+    [selector] .tpp-badge.status-badge
+    [selector] .tpp-badge.critical-path
+    [selector] .tpp-title
+    [selector] .tpp-meta
+    [selector] .tpp-meta span
+    [selector] .tpp-description
+    [selector] .tpp-details
+    [selector] .tpp-details ul
+    [selector] .tpp-details li
+    [selector] .tpp-section-title
+    [selector] .tpp-tag-list
+    [selector] .tpp-tag
+    [selector] .tpp-dep-btn
+    [selector] .tpp-dep-btn:hover
+    [selector] .tpp-subtask-list
+    [selector] .tpp-subtask-list li
+    [selector] .tpp-subtask-status
+    [selector] .tpp-actions
+    [selector] .tpp-btn-edit
+    [selector] .tpp-btn-edit:hover
+    [selector] .tpp-btn-close
+    [selector] .tpp-btn-close:hover
     [selector] .timeline-scroll
     [selector] .timeline-grid
     [selector] .timeline-row
@@ -2782,6 +5150,8 @@ structure from public/list-display/js/list-display-controller.js:
     [file-summary] List-display runtime controller for the GitHub Task Manager app.
     class TaskManagerApp  «Coordinate the list-display UI, project context, and persistence services.»:
         constructor()  «Create the runtime controller state for this component.»
+        getTaskEditModal()  «Get the task edit modal using the new descriptive id with a legacy fallback.»
+        getTaskEditModalTitle()  «Get the task edit modal title using the new descriptive id with a legacy fallback.»
         getGraphTemplateIdForActiveProject()  «Get graph template id for active project.»
         getStoredFolderProjects()  «Get stored folder projects.»
         registerFolderProjectOption(projectRecord)  «Register folder project option.»
@@ -2789,6 +5159,7 @@ structure from public/list-display/js/list-display-controller.js:
         buildGraphIframeSrc()  «Build graph iframe src.»
         async ensureGraphIframeLoaded()  «Ensure graph iframe loaded.»
         async initialize()  «Initialize initialize.»
+        maybeOpenAddTaskFromQuery()  «Open the add-task modal once when requested through the URL.»
         loadConfig()  «Load config.»
         setupProjectSelector()  «Set up project selector.»
         async setActiveProject(projectId)  «Set active project.»
@@ -2856,6 +5227,7 @@ structure from public/list-display/js/list-display-controller.js:
         async showTaskManager()  «Show task manager.»
         async loadTasks()  «Load tasks.»
         async saveTasks()  «Save tasks.»
+        async copyTaskSchema()  «Copy the reusable node.tasks.json authoring template to the clipboard.»
         openHistoryModal()  «Open history modal.»
         closeHistoryModal()  «Close history modal.»
         setHistoryStatus(message, type = 'info')  «Set history status.»
@@ -2894,10 +5266,12 @@ structure from public/list-display/js/list-display-controller.js:
         _showAddTaskModal()  «Show add task modal.»
         editTask(taskId)  «Edit task.»
         openTaskDetail(taskIndex)  «Open the detail view for a task by its rendered index.»
+        _showTaskPreviewPopup(task)  «Show a graph-style preview popup for a task. Clicking "Edit Task" inside the popup proceeds to the taskEditModal.»
         _openReadOnlyTask(task)  «Open read only task.»
         _injectReadOnlyDepLinks(task)  «In read-only task detail: hide the deps textarea and show clickable dep-link buttons. Each button navigates to the prede»
         navigateToDependency(predecessorId)  «Close the current modal and open the task detail for the specified predecessor task ID. Works across root tasks and the »
         _editTask(taskId)  «Edit task.»
+        async _applyTaskUpdateFromGraph(taskId, taskData)  «Apply a task update received via postMessage from the graph-display modal. Merges the changed fields into the in-memory »
         setTaskModalReadOnly(readOnly = false)  «Set task modal read only.»
         populateFormWithDefaults()  «Populate form with defaults.»
         populateFormWithTask(task)  «Populate form with task.»
@@ -2946,11 +5320,105 @@ structure from public/local-folder/README.md:
     [heading-1] # Local Folder Integration Module
     [heading-2] ## Files
 
+structure from public/local-folder/js/folder-cache.js:
+    [file-summary] FolderCache — IndexedDB-backed cache for local-folder TaskDB projects.
+
 structure from public/local-folder/js/folder-picker-trigger.js:
     [file-summary] UI binding layer for launching the local-folder picker from browser surfaces.
 
 structure from public/local-folder/js/local-folder-scanner.js:
     [file-summary] Browser-side local-folder scanner and TaskDB project registry.
+
+structure from public/local-folder/task-bridge-modules/taskbridge/package.json:
+    [file-summary] task-bridge — Local bridge server for task file editing via GitHub Pages UI
+    [json-key] name: "task-bridge"
+    [json-key] version: "1.0.0"
+    [json-key] description: "Local bridge server for task file editing via GitHub Pages U..."
+    [json-key] type: "module"
+    [json-key] scripts: {start, dev}
+    [json-key] engines: {node}
+
+structure from public/local-folder/task-bridge-modules/taskbridge/server.js:
+    [file-summary] server.js — Local bridge server ───────────────────────────────── Run once: node server.js That's it. Browser opens automatically.
+    const __dirname  «docstring: none»
+    const PORT  «docstring: none»
+    const TASKS_FILE  «docstring: none»
+    const PUBLIC_DIR  «docstring: none»
+    const MIME  «docstring: none»
+    function openBrowser(url)  «docstring: none»
+
+structure from public/local-folder/task-bridge-modules/taskbridge/public/task-engine/js/app-integration-example.js:
+    [file-summary] app-integration-example.js ────────────────────────── Shows exactly how to wire CacheWatchdog + TaskStorageSync into your existing TaskManagerApp / list-display-controller.js
+    function initApp()  «docstring: none»
+    function saveTasks()  «docstring: none»
+    function editTask(id, changes)  «docstring: none»
+    function deleteTask(id)  «docstring: none»
+
+structure from public/local-folder/task-bridge-modules/taskbridge/public/task-engine/js/cache-watchdog.js:
+    [file-summary] cache-watchdog.js — Client-side event-driven cache manager
+    export class CacheWatchdog  «cache-watchdog.js — Client-side event-driven cache manager»:
+        constructor(config = {})  «docstring: none»
+        async initialize()  «Load initial data from the bridge and register all event triggers. Call this once during app startup.»
+        acknowledge(etag)  «Call this immediately after your app finishes writing to the bridge. Stores the ETag from the save response so the watch»
+        beginSave()  «Mark that a save operation is starting. Prevents the watchdog from triggering a reload while save is in flight.»
+        endSave()  «Mark that a save operation is done (call in finally block).»
+        async forceRefresh()  «Force a full reload regardless of ETag. Use for "Refresh" buttons or after coming back online.»
+        destroy()  «Remove all event listeners. Call when tearing down the app.»
+        _registerTriggers()  «docstring: none»
+        async _check(trigger)  «docstring: none»
+        async _fetchFull(trigger)  «docstring: none»
+        _setBridgeOnline(online)  «docstring: none»
+
+
+structure from public/local-folder/task-bridge-modules/taskbridge/public/task-engine/js/task-storage-sync.js:
+    [file-summary] task-storage-sync.js — Client-side task CRUD + sync layer
+    export class TaskStorageSync  «task-storage-sync.js — Client-side task CRUD + sync layer»:
+        constructor(config = {})  «docstring: none»
+        setWatchdog(watchdog)  «Wire in the CacheWatchdog so saves automatically call acknowledge().»
+        async isOnline()  «Returns true if the bridge server is reachable. Safe to call before initialize() to show/hide the "run server.js" prompt»
+        async loadAll(knownEtag = null)  «Load all tasks from the bridge. Returns { tasks, etag, fromCache } — fromCache=true means 304, data unchanged.»
+        async saveAll(tasks)  «Replace the entire task list on disk. Signals the watchdog before + after so it doesn't trigger a phantom reload.»
+        async updateOne(id, patch)  «Patch a single task by id. Only sends changed fields — server merges with existing record.»
+        async deleteOne(id)  «Delete a single task by id.»
+        _fetch(url, options = {})  «Fetch with timeout. Throws on network error or timeout.»
+
+
+structure from public/local-folder/task-bridge-modules/taskbridge/server/bridge-router.js:
+    [file-summary] bridge-router.js — HTTP request router for the local bridge server Drop this into your existing server.js createServer() handler.
+    function createBridgeRouter(config = {})  «docstring: none»
+
+structure from public/local-folder/task-bridge-modules/taskbridge/server/file-editor.js:
+    [file-summary] file-editor.js — Server-side atomic file read/write module Zero dependencies. Uses only Node.js built-ins.
+    function getETag(filePath)  «Returns a quoted ETag string based on the file's last-modified timestamp. Returns '"0"' if the file does not exist yet.»
+    function etagMatches(filePath, clientEtag)  «Returns true if the ETag the client sent matches the file's current ETag. Use this to short-circuit GET and send 304 Not»
+    function readJSON(filePath, fallback = null)  «Read a JSON file. Returns parsed object, or `fallback` if the file doesn't exist. Throws on malformed JSON so bugs surfa»
+    function readText(filePath, fallback = '')  «Read a raw text file. Returns string, or `fallback` if not found.»
+    function writeAtomic(filePath, content, options = {})  «Atomically write content to filePath.»
+    function writeJSON(filePath, data, options = {})  «Atomically write a JS value as pretty-printed JSON.»
+    function writeBatch(entries, options = {})  «Write multiple files in parallel, all atomically. Each entry: { path: string, content: string | object } If content is a»
+    function safePath(rootDir, userPath)  «Resolve `userPath` relative to `rootDir` and verify the result stays inside `rootDir`. Returns the absolute path or thro»
+    function fileExists(filePath)  «Returns true if a file exists and is readable.»
+    function listFiles(dirPath)  «List all files in a directory (non-recursive, sorted). Returns [] if directory doesn't exist.»
+
+structure from public/task-engine/file-editing/edit-cloud/github-worker.strategy.json:
+    [json-key] id: "edit-cloud-github-worker"
+    [json-key] scope: "cloud"
+    [json-key] priority: 1
+    [json-key] writeTargets: [2 items]
+    [json-key] preconditions: [3 items]
+    [json-key] steps: [5 items]
+    [json-key] fallbacks: [1 items]
+    [json-key] successSignals: [3 items]
+
+structure from public/task-engine/file-editing/edit-local/local-filesystem.strategy.json:
+    [json-key] id: "edit-local-filesystem"
+    [json-key] scope: "local"
+    [json-key] priority: 1
+    [json-key] writeTargets: [3 items]
+    [json-key] preconditions: [3 items]
+    [json-key] steps: [4 items]
+    [json-key] fallbacks: [2 items]
+    [json-key] successSignals: [3 items]
 
 structure from public/task-engine/js/task-field-automation.js:
     [file-summary] Task field automation rules for project and task authoring.
@@ -2967,6 +5435,8 @@ structure from public/task-engine/js/task-field-automation.js:
         validateAndFix(task, template = null)  «Repair common task issues and return the fixes that were applied.»
         generateProjectSummary(template)  «Build a derived summary block from the current template task list.»
 
+
+structure from public/task-engine/js/task-schema-clipboard.js:  (no extractable definitions)
 
 structure from public/task-engine/js/task-schema-validator.js:
     [file-summary] TaskDB schema validation rules for tasks, projects, workers, and templates.
@@ -2997,8 +5467,10 @@ structure from public/task-engine/js/task-storage-sync.js:
         async appendHistoryNdjsonViaWorkerFallback({ projectId, workerUrl, accessPassword, tasksFile, message, actor, commitSha, beforeTasks, afterTasks })  «Append history events through the worker when server-side history writes are unavailable.»
         resolveActor()  «Resolve the actor name used for saves and task history.»
         isLocalDevHost()  «Detect whether the app is running on a local development host.»
+        getBridgeIntegration()  «Resolve and memoize the optional local bridge integration adapter.»
         buildFullData(tasks = this.tasks)  «Build the full persisted TaskDB payload for the current task collection.»
         generateStateFiles(tasks = this.tasks)  «Generate state summary files grouped by task status.»
+        async saveTasksToLocalFolder(message = 'Update tasks')  «Write edited tasks back to the original local folder file via FolderProjectService. Uses the FS Access API writeback if »
         async saveTasksLocalDisk(message = 'Update tasks')  «Persist the current project through the local disk development API.»
         async initialize()  «Load tasks and templates needed to initialize the active project database.»
         async loadTasks()  «Load tasks from the best available source for the active project context.»
@@ -3023,10 +5495,43 @@ structure from public/task-engine/js/task-storage-sync.js:
         getStatistics()  «Compute aggregate statistics for the current task collection.»
 
     function inferProjectIdFromTasksFile(tasksFile)  «Infer a project id from a configured TaskDB tasks file path.»
+    function normalizeTaskFilePath(pathValue, fallback = 'node.tasks.json')  «Normalize a TaskDB file path so authored modules always use node.tasks.json.»
     function resolveTemplateConfig()  «Resolve the shared template configuration object from browser or test globals.»
     function hasValidGitHubToken()  «Determine whether a usable GitHub token is configured for direct saves.»
     function resolveActiveProjectId()  «Resolve the active project id from config hints or the configured tasks file path.»
     function getProjectScopedStorageKey()  «Build the localStorage key scoped to the currently active project.»
+
+structure from public/task-engine/js/bridge/cache-watchdog.js:
+    [file-summary] No top-level file docstring detected
+    class CacheWatchdog  «docstring: none»:
+        constructor(config = {})  «docstring: none»
+        setApiUrl(apiUrl)  «docstring: none»
+        async initialize()  «docstring: none»
+        acknowledge(etag)  «docstring: none»
+        beginSave()  «docstring: none»
+        endSave()  «docstring: none»
+        async forceRefresh()  «docstring: none»
+        destroy()  «docstring: none»
+        _registerTriggers()  «docstring: none»
+        async _check(trigger)  «docstring: none»
+        async _fetchFull(trigger)  «docstring: none»
+        _setBridgeOnline(online)  «docstring: none»
+
+
+structure from public/task-engine/js/bridge/task-storage-sync.js:
+    [file-summary] No top-level file docstring detected
+    class TaskStorageSync  «docstring: none»:
+        constructor(config = {})  «docstring: none»
+        setWatchdog(watchdog)  «docstring: none»
+        setProjectId(projectId)  «docstring: none»
+        async isOnline()  «docstring: none»
+        async loadPayload(knownEtag = null)  «docstring: none»
+        async savePayload(payload)  «docstring: none»
+        _rebuildUrls()  «docstring: none»
+        _fetch(url, options = {})  «docstring: none»
+
+
+structure from public/task-engine/js/bridge/taskdb-bridge-integration.js:  (no extractable definitions)
 
 structure from public/tasksDB/README.md:
     [file-summary] TasksDB — Project Graph Data Format
@@ -3094,18 +5599,6 @@ structure from public/tasksDB/_templates/starter_project_template.csv:
     [csv-column] [col 20] attachments
 
 structure from public/tasksDB/_templates/starter_project_template.json:
-    [file-summary] A professional project template for a new web application, focusing on clear dependencies, priority, and critical path tracking. This is a template; edit fields as needed.
-    [json-key] template_type: "project_task_template"
-    [json-key] version: "1.2"
-    [json-key] description: "A professional project template for a new web application, f..."
-    [json-key] project: {name, description, start_date, end_date, status, +1 more}
-    [json-key] categories: [4 items]
-    [json-key] workers: [2 items]
-    [json-key] tasks: [7 items]
-    [json-key] required_fields: [10 items]
-    [json-key] optional_fields: [16 items]
-
-structure from public/tasksDB/_templates/starter_project_template_v2.json:
     [file-summary] Agentic project task template for TaskManager. Designed for AI agent readability: flat, consistent, enum-validated, minimal redundancy.
     [json-key] $schema: "https://json-schema.org/draft/2020-12/schema"
     [json-key] template_type: "project_task_template"
@@ -3173,7 +5666,7 @@ structure from public/tasksDB/external/github-task-manager/node.tasks.json:
     [json-key] project: {name, description, start_date, end_date, status, +2 more}
     [json-key] categories: [19 items]
     [json-key] workers: [4 items]
-    [json-key] tasks: [33 items]
+    [json-key] tasks: [36 items]
 
 structure from public/tasksDB/external/github-task-manager/tour/graph-tour.json:
     [json-array] [8 items]
@@ -3223,6 +5716,12 @@ structure from tests/e2e/live-multi-project-saves.spec.js:
     function editFirstTask(page, newName = 'Edited Task ' + Math.random().toString(36).slice(2,8))  «Edit the first visible task through the live UI and return the updated name.»
     function waitForSaveToast(page, expectedText, timeout = 10000)  «Wait for the save toast to appear, assert its text, and wait for dismissal.»
     [describe] @live Live Site - Multi-Project GitHub Saves  «Validate live-site save behavior across multiple password-protected projects.»
+
+structure from tests/e2e/local-project-editing.spec.js:
+    [file-summary] Realistic local-project regression: context rendering + local CRUD flow.
+    const TIMEOUT  «docstring: none»
+    function waitForAppReady(page)  «docstring: none»
+    [describe] local project editing parity  «docstring: none»
 
 structure from tests/e2e/module-navigation.spec.js:
     [file-summary] End-to-end validation for synchronized module navigation between list and graph views.
@@ -3296,6 +5795,16 @@ structure from tests/graph-display/web-e2e-bussines-navigation.spec.js:
     function waitForNodeCount(page, minimum)  «Wait until the graph contains more than the requested number of nodes.»
     [describe] web-e2e-bussines graph navigation  «Validate graph navigation and sidebar drilling for the web-e2e-bussines template.»
 
+structure from tests/unit/bridge-workspace.test.js:
+    [file-summary] No top-level file docstring detected
+    const ROOT  «docstring: none»
+    [describe] agentic bridge workspace  «docstring: none»
+
+structure from tests/unit/folder-cache.test.js:
+    [file-summary] Unit tests for the FolderCache IndexedDB-backed cache engine.
+    function loadFolderCache()  «Load folder-cache.js into a Node test harness with a stubbed IndexedDB.»
+    [describe] FolderCache  «Validate FolderCache save, load, and hash-based change detection.»
+
 structure from tests/unit/generate-project-calendars.test.js:
     [file-summary] Unit coverage for TaskDB-to-calendar generation and project descriptor discovery.
     [describe] Calendar Parser  «Validate calendar state generation and descriptor discovery from TaskDB data.»
@@ -3304,6 +5813,29 @@ structure from tests/unit/graph-data.test.js:
     [file-summary] Basic sanity test for `public/graph-display/js/graph-data.js` to ensure it parses without syntax errors in the Node test environment.
     function loadGraphDataModule(windowMock = { location: { pathname: '/public/graph-display/index.html', hostname: '127.0.0.1', search: '' } }, fetchMock = async () => ({ ok: false, status: 404, json: async () => ({}) })  «Load the browser graph-data module into a Node test harness with mocked globals.»
     [describe] Graph Data Module  «Validate that the graph-data module parses and builds task graph templates correctly.»
+
+structure from tests/unit/graph-design-contract.test.js:
+    [file-summary] Unit tests for the reusable graph-display contract surface.
+    function loadGraphDesignContractModule()  «docstring: none»
+    [describe] Graph Design Contract  «docstring: none»
+
+structure from tests/unit/graph-schemas.test.js:
+    [file-summary] Unit tests for the machine-readable graph schema snapshots.
+    [describe] Graph JSON Schemas  «docstring: none»
+
+structure from tests/unit/graph-template-storage.test.js:
+    [file-summary] Unit tests for browser-local Graph Composer template storage.
+    function loadGraphTemplateStorageModule()  «docstring: none»
+    function createMockStorage()  «docstring: none»
+    [describe] Graph Template Storage  «docstring: none»
+
+structure from tests/unit/inference-engines.test.js:
+    [file-summary] Inference Engine Isolation Tests Validates engine registration, ranking, and GGUF header parsing behavior.
+    [describe] Inference Manager  «docstring: none»
+
+structure from tests/unit/inference-request-schema.test.js:
+    [file-summary] No top-level file docstring detected
+    [describe] Inference Request Schema  «docstring: none»
 
 structure from tests/unit/local-folder-scanner.test.js:
     [file-summary] Unit coverage for browser-side local-folder TaskDB discovery and registration.
@@ -3333,6 +5865,10 @@ structure from tests/unit/task-field-automation.test.js:
     [describe] v3 Agentic Field Auto-Population  «Validate v3 agentic field auto-population including effort, complexity, and risk fields.»
     [describe] v3 Project Auto-Population  «Validate v3 project-level field auto-population including budget and health scores.»
     [describe] validateAndFix v3 Support  «Validate that validateAndFix correctly handles v3 schema fields.»
+
+structure from tests/unit/task-schema-clipboard.test.js:
+    [file-summary] No top-level file docstring detected
+    [describe] TaskSchemaClipboard  «docstring: none»
 
 structure from tests/unit/task-schema-validator.test.js:
     [file-summary] Template Validator Tests Tests for validation logic
@@ -3637,6 +6173,9 @@ structure from tools/docs/GITHUB_PAGES_SETUP.md:
 structure from tools/docs/PLAYWRIGHT_TEST_REPORT.md:
     [file-summary] Playwright Test Report — GitHub Task Manager
     [heading-1] # Playwright Test Report — GitHub Task Manager
+    [heading-2] ## 2026-04 Update
+    [heading-3] ### Verified Improvements
+    [heading-3] ### Open Risks
     [heading-2] ## Executive Summary
     [heading-2] ## How to Reproduce Locally
     [heading-2] ## Quick Results
@@ -3792,6 +6331,26 @@ structure from tools/scripts/setup.js:
     function exec(cmd, options = {})  «Execute a shell command for the repository setup workflow.»
     function main()  «Run the interactive repository bootstrap and publishing flow.»
 
+structure from tools/scripts/start-agentic-ide-stack.ps1:  (no extractable definitions)
+
+structure from tools/scripts/validate-agentic-cells.js:
+    [file-summary] No top-level file docstring detected
+    const SUPPORTED_CELL_TYPES  «docstring: none»
+    function toPosix(p)  «docstring: none»
+    function readJson(filePath)  «docstring: none»
+    function listFilesRecursive(rootDir)  «docstring: none»
+    function parseArgs(argv)  «docstring: none»
+    function expectedKindFromPath(relPath)  «docstring: none»
+    function normalizeType(rawType, relPath, warnings, where)  «docstring: none»
+    function normalizePortArray(raw, fallbackName)  «docstring: none»
+    function getDocInputs(doc)  «docstring: none»
+    function getDocOutputs(doc)  «docstring: none»
+    function getDocFiles(doc)  «docstring: none»
+    function getDocTests(doc)  «docstring: none»
+    function validatePortArray(kind, ports, where, errors)  «docstring: none»
+    function validateContractFile(schemaPath, strictSchemas, warnings, errors)  «docstring: none»
+    function main()  «docstring: none»
+
 structure from tools/scripts/validate-commit-format.js:
     [file-summary] TaskDB Commit Format Validator
     function parseArgs(argv)  «Parse CLI arguments for this validation or export script.»
@@ -3823,6 +6382,49 @@ structure from tools/scripts/validate-tasks-workers.js:
     function validate(projectId, tasksJson, { strict })  «Validate tasks and workers metadata for a TaskDB project.»
     function main(argv = process.argv)  «Run the script entrypoint for this file.»
 
+structure from tools/task-bridge/README.md:
+    [file-summary] Task Bridge Module
+    [heading-1] # Task Bridge Module
+    [heading-2] ## Goals
+    [heading-2] ## Structure
+    [heading-2] ## API
+    [heading-2] ## Project Integration
+
+structure from tools/task-bridge/package.json:
+    [file-summary] task-bridge — Reusable local bridge server for multi-file TaskDB edits
+    [json-key] name: "task-bridge"
+    [json-key] version: "1.0.0"
+    [json-key] description: "Reusable local bridge server for multi-file TaskDB edits"
+    [json-key] type: "module"
+    [json-key] scripts: {start, dev}
+    [json-key] engines: {node}
+
+structure from tools/task-bridge/server.js:
+    [file-summary] No top-level file docstring detected
+    const __dirname  «docstring: none»
+    const PORT  «docstring: none»
+    const TASKS_FILE  «docstring: none»
+    const PUBLIC_DIR  «docstring: none»
+    const MIME  «docstring: none»
+    function openBrowser(url)  «docstring: none»
+
+structure from tools/task-bridge/server/bridge-router.js:
+    [file-summary] No top-level file docstring detected
+    function createBridgeRouter(config = {})  «docstring: none»
+
+structure from tools/task-bridge/server/file-editor.js:
+    [file-summary] No top-level file docstring detected
+    function getETag(filePath)  «docstring: none»
+    function etagMatches(filePath, clientEtag)  «docstring: none»
+    function readJSON(filePath, fallback = null)  «docstring: none»
+    function readText(filePath, fallback = '')  «docstring: none»
+    function writeAtomic(filePath, content, options = {})  «docstring: none»
+    function writeJSON(filePath, data, options = {})  «docstring: none»
+    function writeBatch(entries, options = {})  «docstring: none»
+    function safePath(rootDir, userPath)  «docstring: none»
+    function fileExists(filePath)  «docstring: none»
+    function listFiles(dirPath)  «docstring: none»
+
 ---
 
 ## Relations structure
@@ -3833,14 +6435,188 @@ relations from server.js:
     [require] path
     [require] url
 
+relations from public/agentic-ide/index.html:
+    [asset] ui/style.css
+    [asset] js/main.js
+
+relations from public/agentic-ide/chat/index.html:
+    [asset] ./css/chat-lab.css
+    [asset] ./js/chat-app.js
+
+relations from public/agentic-ide/chat/playwright.config.js:
+    [import] @playwright/test
+
+relations from public/agentic-ide/chat/js/chat-app.js:
+    [import] ./chat-state.js
+    [import] ./chat-api.js
+    [import] ./chat-render.js
+    [import] ./chat-telemetry.js
+    [import] ./chat-tests.js
+    [import] ../../components/agents/chat-quality-inspector/main.js
+
+relations from public/agentic-ide/chat/js/chat-response-validator.js:
+    [import] ../components/tools/chat-quality-inspector/main.js
+
+relations from public/agentic-ide/chat/tests/chat-lab.spec.js:
+    [import] @playwright/test
+
+relations from public/agentic-ide/chat/tests/inference-chat-hello-world.spec.js:
+    [import] @playwright/test
+
+relations from public/agentic-ide/chat/tests/inference-ui-series.spec.js:
+    [import] @playwright/test
+    [import] fs
+    [import] path
+
+relations from public/agentic-ide/components/agents/chat-quality-inspector/test.js:
+    [import] ./main.js
+
+relations from public/agentic-ide/components/inference/main.js:
+    [require] fs
+    [require] path
+    [require] ./engines/node-llama-cpp/adapter
+    [require] ./engines/llama-server-openai/adapter
+    [require] ./engines/duck4i-llama/adapter
+    [require] ./engines/llmjs/adapter
+    [require] ./engines/webllm/adapter
+    [require] ./engines/llama3pure/adapter
+    [require] ./engines/hyllama/adapter
+
+relations from public/agentic-ide/components/inference/engines/duck4i-llama/adapter.js:
+    [require] fs
+
+relations from public/agentic-ide/components/inference/engines/hyllama/adapter.js:
+    [require] fs
+
+relations from public/agentic-ide/components/inference/tests/benchmark.js:
+    [require] fs
+    [require] path
+    [require] ./text/run-validation-suite
+    [require] ./coding/run-coding-suite
+    [require] ./select-best
+
+relations from public/agentic-ide/components/inference/tests/select-best.js:
+    [require] fs
+    [require] path
+
+relations from public/agentic-ide/components/inference/tests/coding/run-coding-suite.js:
+    [require] fs
+    [require] path
+    [require] util
+    [require] vm
+    [require] ../../main
+
+relations from public/agentic-ide/components/inference/tests/text/hello-world-conformance.js:
+    [require] fs
+    [require] path
+
+relations from public/agentic-ide/components/inference/tests/text/run-validation-suite.js:
+    [require] fs
+    [require] path
+    [require] ../../main
+
+relations from public/agentic-ide/components/tools/folder-graph-scanner/main.js:
+    [import] fs
+    [import] path
+
+relations from public/agentic-ide/js/bridge-server.js:
+    [require] http
+    [require] crypto
+    [require] fs
+    [require] path
+    [require] url
+    [require] ./bridge-workspace
+    [require] ../components/inference/main
+    [require] ../components/inference/request-schema
+
+relations from public/agentic-ide/js/bridge-workspace.js:
+    [require] crypto
+    [require] fs
+    [require] path
+
+relations from public/agentic-ide/js/export.js:
+    [import] ./state.js
+    [import] ./utils.js
+    [import] ./render.js
+
+relations from public/agentic-ide/js/main.js:
+    [import] ./state.js
+    [import] ./render.js
+    [import] ./modals.js
+    [import] ./export.js
+    [import] ./schema-preview.js
+    [import] ./utils.js
+    [import] ./bridge.js
+    [import] ../components/agents/chat-quality-inspector/main.js
+
+relations from public/agentic-ide/js/modals.js:
+    [import] ./types.js
+    [import] ./state.js
+    [import] ./utils.js
+    [import] ./render.js
+
+relations from public/agentic-ide/js/render.js:
+    [import] ./types.js
+    [import] ./state.js
+    [import] ./utils.js
+    [import] ./bridge.js
+
+relations from public/agentic-ide/js/schema-preview.js:
+    [import] ./bridge.js
+
+relations from public/agentic-ide/js/state.js:
+    [import] ./utils.js
+
+relations from public/agentic-ide/js/utils.js:
+    [import] ./types.js
+    [import] ./state.js
+
+relations from public/agentic-ide/tests/inference-debug.js:
+    [require] http
+
+relations from public/graph-composer/guide-index.html:
+    [asset] images/favicon.svg
+    [asset] images/favicon.png
+    [asset] css/guide-index.css
+    [asset] js/d3.v7.min.js
+    [asset] js/guide-index.js
+
+relations from public/graph-composer/index.html:
+    [asset] css/graph-composer.css
+    [asset] js/composer-app.js
+
+relations from public/graph-composer/project-index.html:
+    [asset] images/favicon.svg
+    [asset] images/favicon.png
+    [asset] css/project-index.css
+    [asset] js/d3.v7.min.js
+    [asset] js/project-index.js
+
+relations from public/graph-composer/js/composer-app.js:
+    [import] ../../graph-display/js/shared/graph-design-contract.js
+    [import] ../../graph-display/js/shared/graph-template-storage.js
+    [import] ./composer-defaults.js
+    [import] ./composer-state.js
+    [import] ./composer-render.js
+
+relations from public/graph-composer/js/composer-defaults.js:
+    [import] ../../graph-display/js/shared/link-types.js
+    [import] ../../graph-display/js/shared/graph-design-contract.js
+
+relations from public/graph-composer/js/composer-state.js:
+    [import] ../../graph-display/js/shared/graph-design-contract.js
+    [import] ./composer-defaults.js
+
 relations from public/graph-display/index.html:
     [asset] images/favicon.svg
     [asset] images/favicon.png
     [asset] manifest.json
     [asset] css/styles-new.css
     [asset] js/d3.v7.min.js
+    [asset] ../local-folder/js/folder-cache.js
     [asset] ../local-folder/js/local-folder-scanner.js
     [asset] ../local-folder/js/folder-picker-trigger.js
+    [asset] ../task-engine/js/task-schema-clipboard.js
     [asset] ../calendar/js/task-ics-export.js
     [asset] js/utils.js
     [asset] js/main-graph.js
@@ -3863,6 +6639,10 @@ relations from public/graph-display/css/styles-new.css:
 
 relations from public/graph-display/js/graph-data.js:
     [import] ./template-loader.js
+    [import] ./shared/graph-template-storage.js
+
+relations from public/graph-display/js/guide-index.js:
+    [import] ./shared/project-graph-utils.js
 
 relations from public/graph-display/js/main-graph.js:
     [import] ./graph-data.js
@@ -3890,13 +6670,41 @@ relations from public/list-display/index.html:
     [asset] ../config/worker-url.js
     [asset] ../config/projects-config.js
     [asset] ../config/tasks-template-config.js
+    [asset] ../local-folder/js/folder-cache.js
     [asset] ../local-folder/js/local-folder-scanner.js
     [asset] ../local-folder/js/folder-picker-trigger.js
+    [asset] ../task-engine/js/task-schema-clipboard.js
     [asset] ../task-engine/js/task-schema-validator.js
     [asset] ../task-engine/js/task-field-automation.js
+    [asset] ../task-engine/js/bridge/cache-watchdog.js
+    [asset] ../task-engine/js/bridge/task-storage-sync.js
+    [asset] ../task-engine/js/bridge/taskdb-bridge-integration.js
     [asset] ../task-engine/js/task-storage-sync.js
     [asset] ../calendar/js/task-ics-export.js
     [asset] ./js/list-display-controller.js
+
+relations from public/local-folder/task-bridge-modules/taskbridge/server.js:
+    [import] http
+    [import] path
+    [import] fs/promises
+    [import] child_process
+    [import] url
+    [import] ./server/bridge-router.js
+    [import] ./server/file-editor.js
+
+relations from public/local-folder/task-bridge-modules/taskbridge/public/task-engine/js/app-integration-example.js:
+    [import] ./task-storage-sync.js
+    [import] ./cache-watchdog.js
+
+relations from public/local-folder/task-bridge-modules/taskbridge/server/bridge-router.js:
+    [import] ./file-editor.js
+    [import] path
+    [import] os
+
+relations from public/local-folder/task-bridge-modules/taskbridge/server/file-editor.js:
+    [import] fs/promises
+    [import] path
+    [import] os
 
 relations from tests/playwright.config.js:
     [import] @playwright/test
@@ -3913,6 +6721,9 @@ relations from tests/e2e/graph-fullscreen.spec.js:
     [import] @playwright/test
 
 relations from tests/e2e/live-multi-project-saves.spec.js:
+    [import] @playwright/test
+
+relations from tests/e2e/local-project-editing.spec.js:
     [import] @playwright/test
 
 relations from tests/e2e/module-navigation.spec.js:
@@ -3951,6 +6762,14 @@ relations from tests/graph-display/server.js:
 relations from tests/graph-display/web-e2e-bussines-navigation.spec.js:
     [import] @playwright/test
 
+relations from tests/unit/bridge-workspace.test.js:
+    [require] path
+    [require] ../../public/agentic-ide/js/bridge-workspace
+
+relations from tests/unit/folder-cache.test.js:
+    [require] fs
+    [require] path
+
 relations from tests/unit/generate-project-calendars.test.js:
     [require] ../../tools/calendar/generate-project-calendars.js
     [require] ../../tools/calendar/calendar-constants.js
@@ -3959,6 +6778,27 @@ relations from tests/unit/generate-project-calendars.test.js:
 relations from tests/unit/graph-data.test.js:
     [require] fs
     [require] path
+
+relations from tests/unit/graph-design-contract.test.js:
+    [require] fs
+    [require] path
+
+relations from tests/unit/graph-schemas.test.js:
+    [require] fs
+    [require] path
+
+relations from tests/unit/graph-template-storage.test.js:
+    [require] fs
+    [require] path
+
+relations from tests/unit/inference-engines.test.js:
+    [require] fs
+    [require] path
+    [require] ../../public/agentic-ide/components/inference/main
+    [require] ../../public/agentic-ide/components/inference/engines/hyllama/adapter
+
+relations from tests/unit/inference-request-schema.test.js:
+    [require] ../../public/agentic-ide/components/inference/request-schema
 
 relations from tests/unit/local-folder-scanner.test.js:
     [require] fs
@@ -3976,6 +6816,9 @@ relations from tests/unit/server-api.test.js:
 
 relations from tests/unit/task-field-automation.test.js:
     [require] fs
+    [require] path
+
+relations from tests/unit/task-schema-clipboard.test.js:
     [require] path
 
 relations from tests/unit/task-schema-validator.test.js:
@@ -4037,6 +6880,10 @@ relations from tools/scripts/setup.js:
     [require] path
     [require] readline
 
+relations from tools/scripts/validate-agentic-cells.js:
+    [require] fs
+    [require] path
+
 relations from tools/scripts/validate-commit-format.js:
     [require] child_process
 
@@ -4048,20 +6895,236 @@ relations from tools/scripts/validate-tasks-workers.js:
     [require] fs
     [require] path
 
+relations from tools/task-bridge/server.js:
+    [import] http
+    [import] path
+    [import] fs/promises
+    [import] child_process
+    [import] url
+    [import] ./server/bridge-router.js
+
+relations from tools/task-bridge/server/bridge-router.js:
+    [import] os
+    [import] ./file-editor.js
+
+relations from tools/task-bridge/server/file-editor.js:
+    [import] fs/promises
+    [import] path
+    [import] os
+
 ---
 
 ## Flow structure
 
 flow from server.js:
     input -> transform -> state -> output
-    [input] readBody, readJsonFile, readDirectoryEntries, discoverProjectTaskFiles
+    [input] scanFolderToGraph, readBody, readJsonFile, readDirectoryEntries
     [transform] generatePersistedCSV, normalizeRelativePath, inferModuleDepartment, inferModuleType
     [state] generatePersistedCSV, writeProjectPayload, writeStateFiles
     [output] sendJson, createServer
 
+flow from public/agentic-ide/chat/js/chat-api.js:
+    input -> state
+    [input] fetchCatalog, fetchRegistry, fetchModelInfo
+    [state] saveArtifact
+
+flow from public/agentic-ide/chat/js/chat-app.js:
+    input -> transform -> state -> output
+    [input] readConfigFromUi, loadFiles
+    [transform] buildContextBlock, buildMessages, toNormalizedTokens, extractResponseContent
+    [state] writeConfigToUi, syncSliderLabels
+    [output] renderEngineOptions, render, sendMessage, exportJson
+
+flow from public/agentic-ide/chat/js/chat-render.js:
+    input -> output
+    [input] renderThread
+    [output] renderThread
+
+flow from public/agentic-ide/chat/js/chat-response-validator.js:
+    transform
+    [transform] validateResponse, extractValidatedContent
+
+flow from public/agentic-ide/chat/js/chat-state.js:
+    input -> state
+    [input] loadState
+    [state] saveState
+
+flow from public/agentic-ide/chat/js/chat-telemetry.js:
+    transform
+    [transform] buildArtifactBundle
+
+flow from public/agentic-ide/chat/tests/inference-chat-hello-world.spec.js:
+    input
+    [input] waitForPageReady, openChat, readChatMessages
+
+flow from public/agentic-ide/chat/tests/inference-ui-series.spec.js:
+    input -> output
+    [input] loadCases
+    [output] sendPrompt
+
+flow from public/agentic-ide/components/agents/chat-quality-inspector/main.js:
+    transform
+    [transform] _extractContent
+
+flow from public/agentic-ide/components/inference/main.js:
+    input -> transform -> state
+    [input] readJsonIfExists
+    [transform] resolvePrunedEngineIds, normalizeContext, buildStaticCompatibilityScore, createInferenceManager
+    [state] getPassingEngineSet
+
+flow from public/agentic-ide/components/inference/request-schema.js:
+    transform
+    [transform] extractTextFromMessageContent, normalizeRole, normalizeMessages, buildPromptFromMessages
+
+flow from public/agentic-ide/components/inference/engines/duck4i-llama/adapter.js:
+    transform
+    [transform] resolvePrompt
+
+flow from public/agentic-ide/components/inference/engines/hyllama/adapter.js:
+    input
+    [input] readGgufHeader
+
+flow from public/agentic-ide/components/inference/engines/llama-server-openai/adapter.js:
+    input -> transform -> output
+    [input] buildChatPayload, createLlamaServerOpenAiEngine
+    [transform] normalizeBaseUrl, resolveSlotId, buildChatPayload
+    [output] createLlamaServerOpenAiEngine
+
+flow from public/agentic-ide/components/inference/engines/node-llama-cpp/adapter.js:
+    input -> transform
+    [input] sanitizeCompletionPayload, buildChatPayload
+    [transform] normalizeBaseUrl, extractMessageText, resolveSlotId, buildChatPayload
+
+flow from public/agentic-ide/components/inference/tests/benchmark.js:
+    transform -> state
+    [transform] runInferenceBenchmark
+    [state] writeBenchmarkReport
+
+flow from public/agentic-ide/components/inference/tests/select-best.js:
+    input -> transform
+    [input] readJson
+    [transform] buildCombinedCaseLeaderboard
+
+flow from public/agentic-ide/components/inference/tests/coding/run-coding-suite.js:
+    input -> transform
+    [input] readJson, loadCandidateFunction
+    [transform] extractCode, buildPrompt, summarizeEngine, buildTimestamp
+
+flow from public/agentic-ide/components/inference/tests/text/hello-world-conformance.js:
+    input
+    [input] fetchWithTimeout
+
+flow from public/agentic-ide/components/inference/tests/text/run-validation-suite.js:
+    input -> transform
+    [input] readJson
+    [transform] buildPrompt, computePromptTokenOverlap, summarizeEngine, buildTimestamp
+
+flow from public/agentic-ide/components/tools/benchmark_result_writer_v1/main.js:
+    input -> transform -> state
+    [input] shouldSkipHistoryReads, fetchJson, loadPreviousRecord
+    [transform] safeJsonParse, normalizeTopicTerms, computeComponentScore, summarizeComponents
+    [state] persistRecord
+
+flow from public/agentic-ide/components/tools/folder-graph-scanner/main.js:
+    input -> transform
+    [input] FolderGraphScanner, scan, scanFolder, scanFile
+    [transform] generateId, inferIOPatterns
+
+flow from public/agentic-ide/components/tools/folder-graph-scanner/ui/main.js:
+    input -> transform
+    [input] initFolderScannerUI, wireScanner, showFolderScannerUI
+    [transform] getNodeTypeSummary
+
+flow from public/agentic-ide/components/tools/research_benchmark_runner_v1/main.js:
+    input -> transform
+    [input] fetchJson, readModelStatus
+    [transform] normalizeTopic
+
+flow from public/agentic-ide/js/bridge-server.js:
+    input -> transform -> state
+    [input] readJsonIfExists, readBody, buildInferencePayload
+    [transform] getActiveInferenceManifest, resolveRequestedEngineId, resolveInferenceEngine, buildInferencePayload
+    [state] getModelAssetInfo, replyCachedJson
+
+flow from public/agentic-ide/js/bridge-workspace.js:
+    input -> transform -> output
+    [input] readText, createMockFetch, loadRunFunction, discoverWorkspace
+    [transform] parseJson, normalizePorts, normalizeStringList, normalizeRefList
+    [output] renderPromptTemplate
+
+flow from public/agentic-ide/js/bridge.js:
+    input -> state
+    [input] fetchCachedJson, readFile
+    [state] getCacheEntry, fetchCachedJson, getCachedEtag, writeFile
+
+flow from public/agentic-ide/js/export.js:
+    input -> output
+    [input] downloadJSON
+    [output] wireExport
+
+flow from public/agentic-ide/js/main.js:
+    input -> transform -> state -> output
+    [input] renderChatThread, openChatModal
+    [transform] summarizeNodeForChat, summarizeRuntimeReport, buildChatPrompt, buildConstrainedPrompt
+    [state] setupSplitter, setupLayoutSplitters, syncMobileScrim, chatPresetText
+    [output] renderGlobalControls, renderChatConfigurator, renderChatThread, sendChatMessage
+
+flow from public/agentic-ide/js/modals.js:
+    input -> state
+    [input] openNodeModal, openEdgeModal
+    [state] updateNodeModalExtra
+
+flow from public/agentic-ide/js/render.js:
+    input -> transform -> state -> output
+    [input] isTreeOpen, loadTasksForPanel, openFile
+    [transform] resolveTasksUrl, buildScopeCrumbs, buildFileSymbolEntries, buildComponentFileTree
+    [state] setSidebarTab, setupDragEvents, setScope, syncEditorHighlight
+    [output] requestCanvasRender, renderLibraryEntry, renderSidebarNode, renderLibrarySidebar
+
+flow from public/agentic-ide/js/schema-preview.js:
+    input
+    [input] openSchemaPreview, _downloadText
+
+flow from public/agentic-ide/js/state.js:
+    input -> transform -> state
+    [input] readPersistedState, loadState
+    [transform] buildCrumbs
+    [state] readPersistedState, saveState, setBridgeStatus
+
+flow from public/agentic-ide/js/utils.js:
+    input -> transform
+    [input] loadFileContent
+    [transform] parsePorts
+
+flow from public/agentic-ide/tests/inference-quality-test.js:
+    transform
+    [transform] extractMathAnswer, runInferenceTest
+
 flow from public/config/worker-url.js:
     transform
     [transform] __resolveWorkerUrlRuntime
+
+flow from public/graph-composer/js/composer-app.js:
+    input -> state -> output
+    [input] loadTemplate, readNodeDraft, readLinkDraft
+    [state] setStatus, refreshStoredTemplates, persistCurrentTemplate, cacheDom
+    [output] renderPanels, renderAll, exportCurrentTemplate
+
+flow from public/graph-composer/js/composer-defaults.js:
+    state
+    [state] getMeasurementPresetById
+
+flow from public/graph-composer/js/composer-render.js:
+    transform -> state -> output
+    [transform] renderValidationSummary
+    [state] renderSavedTemplateList, renderMeasurementPresets
+    [output] renderSchemaField, renderConfigEditor, renderSavedTemplateList, renderMeasurementPresets
+
+flow from public/graph-composer/js/composer-state.js:
+    transform -> state -> output
+    [transform] normalizeNode, normalizeLink, normalizeDetails, parseJsonText
+    [state] setValueAtPath, updateTemplateField, applyMeasurementPreset, updateNodeDetails
+    [output] buildExportJson
 
 flow from public/graph-display/sw.js:
     state
@@ -4076,16 +7139,30 @@ flow from public/graph-display/js/d3.v7.min.js:
     [state] InternSet
 
 flow from public/graph-display/js/graph-data.js:
-    input -> transform
-    [input] loadTemplate
+    input -> transform -> state
+    [input] loadTemplate, buildContextTaskPayload, buildCleanGraphPayload
     [transform] normalizePriority, buildDependencyLayering, validateAgainstSchema, resolveProjectIdFromTasksPath
+    [state] registerStoredComposerTemplates, clearTemplateCache
+
+flow from public/graph-display/js/guide-index.js:
+    transform -> state -> output
+    [transform] renderContractSummary
+    [state] cacheDom
+    [output] renderFeatureButtons, renderFeatureCopy, renderContractSummary, renderPreview
 
 flow from public/graph-display/js/main-graph.js:
     input -> transform -> state -> output
-    [input] downloadCalendar, _openNodeDetails, openNodeModal
-    [transform] _extractCalendarTasks
+    [input] openGraphTaskEditModal, downloadCalendar, _openNodeDetails, openNodeModal
+    [transform] buildListDisplayUrl, _extractCalendarTasks
     [state] setSelectedTemplateId, setProfileButtonImage, setupNodeInteractions, setupTooltip
-    [output] renderError, displayPopup
+    [output] buildListDisplayUrl, renderError, displayPopup
+
+flow from public/graph-display/js/project-index.js:
+    input -> transform -> state -> output
+    [input] openTypedPath, loadServerDirectory, buildBrowserBreadcrumbs, loadBrowserDirectory
+    [transform] normalizePath, buildBrowserBreadcrumbs, buildBrowserFileSummary, buildBrowserDirectorySnapshot
+    [state] cacheDom, setStatus
+    [output] loadServerDirectory, renderAll, renderBreadcrumbs, renderLegend
 
 flow from public/graph-display/js/template-loader.js:
     transform -> state
@@ -4100,16 +7177,57 @@ flow from public/graph-display/js/walkthrough.js:
     state
     [state] setSteps, setGraph, updateTooltipContent
 
+flow from public/graph-display/js/shared/graph-design-contract.js:
+    transform
+    [transform] collectUnknownKeys, validateNumber, validateGraphUiConfig, validateGraphComponentInputs
+
+flow from public/graph-display/js/shared/graph-metric-utils.js:
+    transform
+    [transform] resolveMetricRadius, resolveMetricColor
+
+flow from public/graph-display/js/shared/graph-template-storage.js:
+    input -> transform -> state
+    [input] readStoredTemplates
+    [transform] normalizeTemplateId, normalizeStoredTemplate, buildStoredGraphTemplateId
+    [state] normalizeStoredTemplate, readStoredTemplates, writeStoredTemplates, buildStoredGraphTemplateId
+
+flow from public/graph-display/js/shared/project-graph-utils.js:
+    transform
+    [transform] formatBytes, buildLegendEntries
+
 flow from public/graph-display/js/shared/tours.js:
     transform
     [transform] resolveTourUrl, resolveStepsForTemplate
 
 flow from public/list-display/js/list-display-controller.js:
     input -> transform -> state -> output
-    [input] ensureGraphIframeLoaded, loadConfig, getModuleFetchCandidates, fetchModuleData
+    [input] ensureGraphIframeLoaded, maybeOpenAddTaskFromQuery, loadConfig, getModuleFetchCandidates
     [transform] buildGraphIframeSrc, normalizeModulePath, normalizeModuleEntry, buildTaskFlowSummary
     [state] getStoredFolderProjects, setupProjectSelector, setActiveProject, updateTaskAuthoringAvailability
     [output] formatDisplayDate, renderProjectNavigation, renderHistory, renderTasks
+
+flow from public/local-folder/task-bridge-modules/taskbridge/server.js:
+    input
+    [input] openBrowser
+
+flow from public/local-folder/task-bridge-modules/taskbridge/public/task-engine/js/app-integration-example.js:
+    state
+    [state] saveTasks
+
+flow from public/local-folder/task-bridge-modules/taskbridge/public/task-engine/js/cache-watchdog.js:
+    input -> state
+    [input] _fetchFull
+    [state] CacheWatchdog, beginSave, endSave, _setBridgeOnline
+
+flow from public/local-folder/task-bridge-modules/taskbridge/public/task-engine/js/task-storage-sync.js:
+    input -> state
+    [input] loadAll, _fetch
+    [state] TaskStorageSync, setWatchdog, saveAll, updateOne
+
+flow from public/local-folder/task-bridge-modules/taskbridge/server/file-editor.js:
+    input -> state
+    [input] readJSON, readText
+    [state] writeAtomic, writeJSON, writeBatch
 
 flow from public/task-engine/js/task-field-automation.js:
     transform
@@ -4122,9 +7240,20 @@ flow from public/task-engine/js/task-schema-validator.js:
 flow from public/task-engine/js/task-storage-sync.js:
     input -> transform -> state -> output
     [input] resetLoadedMetadata, applyLoadedPayload, loadTasks, loadTemplates
-    [transform] inferProjectIdFromTasksFile, resolveTemplateConfig, resolveActiveProjectId, summarizeHistoryChanges
-    [state] resetLoadedMetadata, saveTasksLocalDisk, generatePersistedCSV, saveTasksLocal
+    [transform] inferProjectIdFromTasksFile, normalizeTaskFilePath, resolveTemplateConfig, resolveActiveProjectId
+    [state] resetLoadedMetadata, saveTasksToLocalFolder, saveTasksLocalDisk, generatePersistedCSV
     [output] exportToCSV
+
+flow from public/task-engine/js/bridge/cache-watchdog.js:
+    input -> state
+    [input] _fetchFull
+    [state] CacheWatchdog, setApiUrl, beginSave, endSave
+
+flow from public/task-engine/js/bridge/task-storage-sync.js:
+    input -> transform -> state
+    [input] loadPayload, savePayload, _fetch
+    [transform] _rebuildUrls
+    [state] TaskStorageSync, setWatchdog, setProjectId, savePayload
 
 flow from tests/e2e/crud-operations.spec.js:
     input
@@ -4138,6 +7267,10 @@ flow from tests/e2e/live-multi-project-saves.spec.js:
     input -> state
     [input] waitForAppReady
     [state] waitForSaveToast
+
+flow from tests/e2e/local-project-editing.spec.js:
+    input
+    [input] waitForAppReady
 
 flow from tests/e2e/module-navigation.spec.js:
     input
@@ -4167,9 +7300,22 @@ flow from tests/graph-display/graph-display.spec.js:
     [transform] parseTranslate
     [state] parseTranslate
 
+flow from tests/unit/folder-cache.test.js:
+    input -> state
+    [input] loadFolderCache
+    [state] loadFolderCache
+
 flow from tests/unit/graph-data.test.js:
     input
     [input] loadGraphDataModule
+
+flow from tests/unit/graph-design-contract.test.js:
+    input
+    [input] loadGraphDesignContractModule
+
+flow from tests/unit/graph-template-storage.test.js:
+    input
+    [input] loadGraphTemplateStorageModule
 
 flow from tests/unit/local-folder-scanner.test.js:
     input
@@ -4218,6 +7364,11 @@ flow from tools/scripts/prepare-public-graph.js:
     output
     [output] copyGraphDisplayIntoPublic
 
+flow from tools/scripts/validate-agentic-cells.js:
+    input -> transform
+    [input] readJson
+    [transform] parseArgs, normalizeType, normalizePortArray, validatePortArray
+
 flow from tools/scripts/validate-commit-format.js:
     input -> transform
     [input] extractTaskDbPayload
@@ -4233,6 +7384,15 @@ flow from tools/scripts/validate-tasks-workers.js:
     [input] loadProjectTasks
     [transform] parseArgs, validate
 
+flow from tools/task-bridge/server.js:
+    input
+    [input] openBrowser
+
+flow from tools/task-bridge/server/file-editor.js:
+    input -> state
+    [input] readJSON, readText
+    [state] writeAtomic, writeJSON, writeBatch
+
 ---
 
 ## API endpoints
@@ -4241,25 +7401,26 @@ api posture:
     [gap] public/api/ is documentation-only; no runtime endpoint provider was detected under public/
     [runtime-provider] runtime endpoints currently live in server.js, tools/cloudflare-worker/worker.js
     [gap] /api/tasks uses a full-payload GET/PUT model; no item-level POST/PATCH/DELETE task endpoints were detected
-    [gap] no registry endpoint provider was detected; registry management appears file-based
     [gap] no machine-readable API contract (OpenAPI/JSON) was detected under public/api/
 
 cli entry points:
+    [cli] public/agentic-ide/components/tools/folder-graph-scanner/main.js — process.argv CLI
     [cli] tools/calendar/generate-project-calendars.js — process.argv CLI
     [cli] tools/scripts/enrich-tasks-workers.js — process.argv CLI
     [cli] tools/scripts/generate-state-files.js — process.argv CLI
     [cli] tools/scripts/regenerate-tasks-csv.js — process.argv CLI
+    [cli] tools/scripts/validate-agentic-cells.js — process.argv CLI
     [cli] tools/scripts/validate-commit-format.js — process.argv CLI
     [cli] tools/scripts/validate-tasks-schema.js — process.argv CLI
     [cli] tools/scripts/validate-tasks-workers.js — process.argv CLI
 
 core surface candidates for API/MCP exposure:
-    [candidate] public/graph-display/js/main-graph.js: isEmbeddedMode, getInitialTemplateId, setSelectedTemplateId, CurriculumGraph, constructor (+3 more)
-    [candidate] public/list-display/js/list-display-controller.js: TaskManagerApp, constructor, getGraphTemplateIdForActiveProject, getStoredFolderProjects, registerFolderProjectOption (+3 more)
-    [candidate] public/task-engine/js/task-storage-sync.js: inferProjectIdFromTasksFile, resolveTemplateConfig, hasValidGitHubToken, resolveActiveProjectId, getProjectScopedStorageKey (+3 more)
-    [candidate] tools/calendar/generate-project-calendars.js: isPlainObject, toFlatArray, uniqueStrings, normalizeProjectId, normalizeTaskScope (+3 more)
-    [candidate] tools/scripts/enrich-tasks-workers.js: isNonEmptyString, uniq, loadJson, saveJson, buildTasksById (+3 more)
-    [candidate] public/graph-display/js/graph-data.js: convertCypherToGraph, normalizePriority, getTaskPredecessorIds, getDependencyLinkType, buildDependencyLayering (+3 more)
+    [candidate] public/agentic-ide/js/render.js: requestCanvasRender, wireCanvasInteractions, getTasksIntegrationConfig, resolveTasksUrl, setSidebarTab (+3 more)
+    [candidate] public/agentic-ide/js/state.js: createRootNode, createEmptyGraph, createDefaultChatState, cloneGraph, readPersistedState (+3 more)
+    [candidate] public/agentic-ide/js/utils.js: esc, ct, uid, childrenOf, structuredCloneSafe (+3 more)
+    [candidate] public/graph-composer/js/composer-app.js: setStatus, refreshStoredTemplates, ensureSelections, loadTemplate, getSelectedNode (+3 more)
+    [candidate] public/graph-composer/js/composer-render.js: escapeHtml, humanizeKey, renderSchemaField, renderConfigEditor, renderSavedTemplateList (+3 more)
+    [candidate] public/graph-composer/js/composer-state.js: isPlainObject, setValueAtPath, normalizeNode, normalizeLink, normalizeDetails (+3 more)
 
 automation suggestions:
     [suggest-mcp] wrap core functions with MCP SDK tool decorators for agent integration
@@ -4269,9 +7430,27 @@ api from server.js:
     [route] GET /api/health
     [route] GET /api/projects
     [route] GET /api/module
+    [route] GET /api/project-tree
+    [route] GET /api/file-content
     [route] GET /api/scan-path
+    [route] POST /api/create-project
+    [route] POST /api/scanner/scan
+    [route] PATCH /api/task
+    [route] POST /api/create-mcp
+    [route] OPTIONS /api/task
+    [route] OPTIONS /api/create-mcp
+    [route] HEAD /api/tasks
     [route] GET /api/tasks
     [route] PUT /api/tasks
+
+api from public/agentic-ide/js/bridge-server.js:
+    [route] GET /api/file
+    [route] GET /api/list
+    [route] GET /api/model
+    [route] GET /api/registry
+    [route] GET /api/runtime/run
+    [route] GET /api/runtime/test
+    [route] GET /api/llm/complete
 
 api from tools/cloudflare-worker/worker.js:
     [route] GET /health
@@ -4279,4 +7458,4 @@ api from tools/cloudflare-worker/worker.js:
     [route] PUT /api/tasks
 
 ---
-*144 files indexed · generated by extract_project_spec.py*
+*305 files indexed · generated by extract_project_spec.py*

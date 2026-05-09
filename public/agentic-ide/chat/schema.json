@@ -1,0 +1,55 @@
+{
+  "id": "chat-lab",
+  "type": "tool",
+  "version": 1,
+  "label": "Chat Lab",
+  "path": "chat",
+  "description": "Standalone Chat Lab with 8-section config panel, notebook-style editing, bridge LLM API integration, and quality validation.",
+  "lifecycle": "draft",
+  "success_threshold": 0.8,
+  "impl": "index.html",
+  "inputs": [],
+  "outputs": [
+    {
+      "name": "messages",
+      "type": "array",
+      "description": "Chat message history"
+    },
+    {
+      "name": "config",
+      "type": "object",
+      "description": "Current chat configuration"
+    },
+    {
+      "name": "state",
+      "type": "object",
+      "description": "Persisted chat state"
+    }
+  ],
+  "errors": [],
+  "features": [
+    "8-section config panel",
+    "Notebook-style message editing",
+    "Bridge LLM API integration",
+    "localStorage state persistence",
+    "Import/export (JSON + Markdown)",
+    "Quality validation of LLM responses"
+  ],
+  "dependencies": {
+    "tools": [
+      "chat-quality-inspector"
+    ],
+    "apis": [
+      "bridge-server:llm/complete"
+    ]
+  },
+  "files": [
+    "schema.json",
+    "index.html",
+    "node.tasks.json",
+    "tests/chat-lab.test.js"
+  ],
+  "tests": [
+    "tests/chat-lab.test.js"
+  ]
+}

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Explorer Graph</title>
+    <meta name="description" content="Browse a repository or chosen folder as a force graph of directories and files, with text previews for clicked files.">
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+    <link rel="alternate icon" href="images/favicon.png" type="image/png">
+    <link rel="stylesheet" href="css/project-index.css">
+    <script src="js/d3.v7.min.js"></script>
+    <script type="module" src="js/project-index.js"></script>
+</head>
+<body>
+    <header class="page-header">
+        <div>
+            <p class="eyebrow">Graph Display Companion</p>
+            <h1>Project Explorer Graph</h1>
+            <p>Scan the repo root through the local server, or pick a browser folder and browse each directory as its own graph. Folder nodes scale by descendant count, file nodes are colored by file type, and clicked files open as text previews.</p>
+        </div>
+        <nav class="header-actions" aria-label="Project explorer navigation">
+            <a href="./index.html">Main Graph</a>
+            <a href="./guide-index.html">Guide Page</a>
+            <a href="../graph-composer/index.html">Graph Composer</a>
+        </nav>
+    </header>
+
+    <section class="toolbar panel" aria-label="Explorer controls">
+        <div class="toolbar-row">
+            <button id="load-repo-root" type="button">Load Repo Root</button>
+            <button id="load-public-root" type="button">Load Public/</button>
+            <button id="load-graph-root" type="button">Load Graph Display/</button>
+            <button id="pick-browser-folder" type="button">Pick Browser Folder</button>
+        </div>
+        <div class="toolbar-row">
+            <label for="path-input">Relative path
+                <input id="path-input" type="text" placeholder="src/apps/PRIVATE or public/graph-display">
+            </label>
+            <button id="open-path-button" class="open-path-button" type="button">Open Path</button>
+        </div>
+        <div id="status-line" class="status-line" aria-live="polite">Waiting for the first scan.</div>
+    </section>
+
+    <main class="page-content">
+        <section class="graph-stage panel">
+            <div id="breadcrumbs" class="breadcrumbs" aria-label="Directory breadcrumbs"></div>
+            <div id="graph-canvas" class="graph-canvas" aria-label="Project graph canvas"></div>
+            <div id="graph-legend" class="legend" aria-label="File type legend"></div>
+        </section>
+
+        <aside class="inspector-column">
+            <section class="inspector-panel panel">
+                <h2>Selected Item</h2>
+                <div id="selection-summary"></div>
+            </section>
+
+            <section class="inspector-panel panel">
+                <h2>Directory Contents</h2>
+                <div id="directory-list" class="directory-list"></div>
+            </section>
+
+            <section class="inspector-panel panel">
+                <h2>File Preview</h2>
+                <pre id="file-preview" class="file-preview" data-empty="true">Select a file node to load a text preview.</pre>
+            </section>
+        </aside>
+    </main>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "name": "html_parser unit tests",
+  "type": "unit",
+  "target": "html_parser",
+  "cases": [
+    {
+      "name": "Parses title, headings, paragraphs, and links",
+      "input": {
+        "html": "<html><head><title>Example</title></head><body><h1>Overview</h1><p>Alpha</p><a href=\"https://example.com\">Source</a></body></html>"
+      },
+      "expect": {
+        "doc": {
+          "title": {
+            "contains": "Example"
+          },
+          "headings": {
+            "type": "list",
+            "min_length": 1
+          },
+          "paragraphs": {
+            "type": "list",
+            "min_length": 1
+          },
+          "links": {
+            "type": "list",
+            "min_length": 1
+          }
+        }
+      }
+    }
+  ]
+}

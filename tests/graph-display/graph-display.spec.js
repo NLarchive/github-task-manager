@@ -99,10 +99,10 @@ test.describe('graph-display task-management template', () => {
       el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
     });
 
-    const popup = page.locator('#popup');
+    const popup = page.locator('#taskNodeModal');
     await expect(popup).toHaveClass(/visible/);
 
-    const depButton = page.locator(`#popup .task-node-btn[data-node-id="${candidate.targetId}"]`).first();
+    const depButton = page.locator(`#taskNodeModal .task-node-btn[data-node-id="${candidate.targetId}"]`).first();
     await expect(depButton).toBeVisible();
     await depButton.evaluate((el) => {
       el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
@@ -115,7 +115,7 @@ test.describe('graph-display task-management template', () => {
     await expect(targetNode).toHaveClass(/details-shown-for/, { timeout: 10000 });
     await expect(popup).toHaveClass(/visible/);
 
-    await page.locator('#popup .close-button').click();
+    await page.locator('#taskNodeModal .close-button').click();
     await expect(popup).not.toHaveClass(/visible/);
     await expect(targetNode).toHaveClass(/details-shown-for/);
 
@@ -237,7 +237,7 @@ test.describe('graph-display task-management template', () => {
       el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
     });
 
-    const popup = page.locator('#popup');
+    const popup = page.locator('#taskNodeModal');
     await expect(popup).toHaveClass(/visible/);
     await expect(popup).toContainText('Terminal tasks captured here');
     await expect(popup).toContainText('What happens next');

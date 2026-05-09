@@ -1,0 +1,41 @@
+{
+  "id": "ui_renderer",
+  "type": "tool",
+  "version": 1,
+  "label": "ui_renderer",
+  "path": "components/tools/ui_renderer_v1",
+  "description": "Renders a structured document object as presentable HTML",
+  "lifecycle": "draft",
+  "success_threshold": 0.8,
+  "impl": "main.js",
+  "inputs": [
+    {
+      "name": "doc",
+      "type": "object",
+      "required": true,
+      "description": "Structured document"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "html",
+      "type": "string",
+      "description": "Rendered html"
+    }
+  ],
+  "errors": [
+    {
+      "code": "RENDER_TEMPLATE_ERROR",
+      "description": "Document could not be rendered"
+    }
+  ],
+  "files": [
+    "schema.json",
+    "main.js",
+    "template.html",
+    "tests/snapshot.json"
+  ],
+  "tests": [
+    "tests/snapshot.json"
+  ]
+}

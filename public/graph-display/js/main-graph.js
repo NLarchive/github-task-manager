@@ -6,7 +6,7 @@
  */
 
 // Assuming graph-data.js, cv-generator.js, walkthrough.js are in the same 'js' directory
-import { initTemplates, ensureDynamicTaskTemplate, getAvailableTemplates, getDefaultTemplateId, loadTemplate, buildInlineTaskSubgraphTemplatePublic, buildProjectTaskTemplatePublic } from './graph-data.js';
+import { initTemplates, ensureDynamicTaskTemplate, getAvailableTemplates, getDefaultTemplateId, loadTemplate, buildInlineTaskSubgraphTemplatePublic, buildProjectTaskTemplatePublic, buildCleanGraphPayload, extractNodeContext } from './graph-data.js';
 import { generateClassicCV } from './cv-generator.js';
 import Walkthrough from './walkthrough.js';
 import { resolveStepsForTemplate } from './shared/tours.js';
@@ -110,6 +110,58 @@ function isEmbeddedMode() {
     } catch {
         return false;
     }
+}
+
+function hasHostParentWindow() {
+    return typeof window !== 'undefined' && window.parent && window.parent !== window;
+}
+
+function postMessageToHost(type, payload = {}) {
+    if (!hasHostParentWindow()) return false;
+    try {
+        window.parent.postMessage({ type, ...payload }, '*');
+        return true;
+    } catch (error) {
+        console.warn(`Unable to postMessage ${type} to parent`, error);
+        return false;
+    }
+}
+
+function clickHostButton(buttonId) {
+    if (!hasHostParentWindow()) return false;
+    try {
+        const hostButton = window.parent.document?.getElementById(buttonId);
+        if (hostButton && typeof hostButton.click === 'function') {
+            hostButton.click();
+            return true;
+        }
+    } catch (error) {
+        console.warn(`Unable to invoke host control ${buttonId}`, error);
+    }
+    return false;
+}
+
+function getActiveProjectIdFromTemplate(template = window.graphInstance?.template || null) {
+    const templateId = String(template?.id || new URLSearchParams(window.location.search).get('template') || '').trim();
+    return templateId.endsWith('-tasks') ? templateId.slice(0, -'-tasks'.length) : templateId;
+}
+
+function buildListDisplayUrl(projectId, extraParams = {}) {
+    const url = new URL('../list-display/index.html', window.location.href);
+    if (projectId) url.searchParams.set('project', projectId);
+    Object.entries(extraParams).forEach(([key, value]) => {
+        if (value === null || value === undefined || value === '') return;
+        url.searchParams.set(key, String(value));
+    });
+    return url.toString();
+}
+
+function getTaskNodeModalElement() {
+    return document.getElementById('taskNodeModal') || document.getElementById('popup');
+}
+
+function getTaskNodeModalContentElement() {
+    return document.getElementById('taskNodeModalContent') || document.getElementById('popup-content');
 }
 
 /**
@@ -371,7 +423,6 @@ class CurriculumGraph {
             this.container.dataset.colorMode = this.config.colorMode;
             this.setProfileButtonImage();
             this.calculateParentTargetX();
-            this._prePositionNodes(); // Seed x/y so _tryOpenNodeModal succeeds immediately
             this.createSvg();
             this.initializeForces();
             this.createVisualElements(); // Creates elements, CSS handles initial text visibility
@@ -392,19 +443,6 @@ class CurriculumGraph {
             console.error("Critical error during init():", err);
             this.renderError(`Error initializing graph: ${err.message}`);
         }
-    }
-
-    /**
-     * Pre-seed each node's x/y from its target layout band so that
-     * _tryOpenNodeModal can pan to an accurate position immediately after
-     * init() — without waiting for the simulation to stabilise.
-     * Existing finite coordinates (e.g. from a previous render) are preserved.
-     */
-    _prePositionNodes() {
-        this.data.nodes.forEach(node => {
-            if (!Number.isFinite(node.x)) node.x = this.getNodeTargetX(node);
-            if (!Number.isFinite(node.y)) node.y = this.getBandY(node);
-        });
     }
 
     /** Renders an error message in the container */
@@ -1129,7 +1167,7 @@ class CurriculumGraph {
         const legendPopup = document.getElementById("legend-popup");
         const legendCloseBtn = legendPopup?.querySelector(".close-button");
         const legendBtnInside = document.getElementById("legend-button-inside");
-        const nodePopup = document.getElementById("popup");
+        const nodePopup = getTaskNodeModalElement();
         const nodePopupCloseBtn = nodePopup?.querySelector(".close-button");
 
         if (!profileBtn || !menuPanel || !legendPopup || !legendCloseBtn || !legendBtnInside || !nodePopup || !nodePopupCloseBtn) {
@@ -1345,8 +1383,8 @@ class CurriculumGraph {
 
     /** Show node details popup using CSS classes for styling */
     showNodeDetails(d) {
-        const contentDiv = document.getElementById("popup-content");
-        const popup = document.getElementById("popup");
+        const contentDiv = getTaskNodeModalContentElement();
+        const popup = getTaskNodeModalElement();
         if (!contentDiv || !popup || !d?.id) {
              console.error("Cannot show details - missing elements or node ID.", d); return;
         }
@@ -1412,7 +1450,17 @@ class CurriculumGraph {
                 successorBtns = `<div style="margin-top:8px"><strong>Next tasks in parent graph:</strong>${sibHtml}</div>`;
             }
 
-              contentHtml = `<h2 class="${titleClasses}"${titleStyle}>${details.title || node.label || node.id}</h2>${photoHtml}${itemsHtml}${parentNavBtn}${subtaskBtn}${successorBtns}`;
+            // Edit button (task nodes only) and copy-context button
+            let editBtn = '';
+            if (node.taskId && typeof node.taskId === 'number') {
+                editBtn = `<button class="popup-edit-btn" data-edit-task-id="${node.taskId}" title="Edit task details">✏️ Edit</button>`;
+            }
+            let copyContextBtn = '';
+            if (node.templateType === 'task') {
+                copyContextBtn = `<button class="popup-copy-ctx-btn" title="Copy node context to clipboard">📋 Copy Context</button>`;
+            }
+
+              contentHtml = `<h2 class="${titleClasses}"${titleStyle}>${details.title || node.label || node.id}</h2>${photoHtml}${itemsHtml}${parentNavBtn}${subtaskBtn}${editBtn}${copyContextBtn}${successorBtns}`;
         }
 
         contentDiv.innerHTML = contentHtml;
@@ -1474,6 +1522,23 @@ class CurriculumGraph {
             });
         });
 
+        // Wire edit button
+        contentDiv.querySelectorAll('.popup-edit-btn[data-edit-task-id]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const taskId = parseInt(btn.getAttribute('data-edit-task-id'), 10);
+                if (Number.isFinite(taskId)) this.openGraphTaskEditModal(taskId, currentProjectId);
+            });
+        });
+
+        // Wire copy-context button
+        contentDiv.querySelectorAll('.popup-copy-ctx-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.copyNodeContext(d, details, node, btn);
+            });
+        });
+
         this.displayPopup(popup);
     }
 
@@ -1488,6 +1553,179 @@ class CurriculumGraph {
          });
     }
 
+
+    /**
+     * Open the task edit modal and populate it with the data for the given task.
+     * @param {number} taskId
+     * @param {string} projectId
+     */
+    openGraphTaskEditModal(taskId, projectId) {
+        if (hasHostParentWindow()) {
+            this.hideNodeDetails();
+            postMessageToHost('openEditTaskModal', { taskId, projectId });
+            return;
+        }
+
+        const modal = document.getElementById('graph-task-modal');
+        if (!modal) return;
+        const sourceData = window.graphInstance?.template?.sourceData;
+        const task = sourceData?.tasks?.find(t => t && t.task_id === taskId) || {};
+
+        document.getElementById('gt-task-id').value = String(taskId);
+        document.getElementById('gt-task-name').value = task.task_name || '';
+        document.getElementById('gt-description').value = task.description || '';
+        document.getElementById('gt-status').value = task.status || 'Not Started';
+        document.getElementById('gt-priority').value = task.priority || 'Medium';
+        document.getElementById('gt-start-date').value = task.start_date ? String(task.start_date).slice(0, 10) : '';
+        document.getElementById('gt-end-date').value = task.end_date ? String(task.end_date).slice(0, 10) : '';
+        document.getElementById('gt-est-hours').value = task.estimated_hours != null ? String(task.estimated_hours) : '';
+        document.getElementById('gt-progress').value = task.progress_percentage != null ? String(task.progress_percentage) : '';
+        document.getElementById('gt-tags').value = Array.isArray(task.tags) ? task.tags.join(', ') : (task.tags || '');
+        document.getElementById('gt-critical-path').checked = Boolean(task.is_critical_path);
+
+        modal.dataset.projectId = projectId || '';
+        const fb = document.getElementById('gt-save-feedback');
+        if (fb) { fb.hidden = true; fb.textContent = ''; fb.className = 'gt-feedback'; }
+        modal.removeAttribute('hidden');
+        document.getElementById('gt-task-name')?.focus();
+    }
+
+    /**
+     * Wire up the graph task edit modal (called once after the DOM is ready).
+     */
+    setupGraphTaskModal() {
+        const modal = document.getElementById('graph-task-modal');
+        if (!modal) return;
+        const closeModal = () => modal.setAttribute('hidden', '');
+        modal.querySelector('.graph-task-modal-close')?.addEventListener('click', closeModal);
+        modal.querySelector('.graph-task-modal-cancel')?.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+        const form = document.getElementById('graph-task-form');
+        if (!form) return;
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const taskId = parseInt(document.getElementById('gt-task-id').value, 10);
+            const projectId = modal.dataset.projectId || '';
+            const fb = document.getElementById('gt-save-feedback');
+            const btn = form.querySelector('button[type=submit]');
+
+            const tagsRaw = (document.getElementById('gt-tags').value || '').trim();
+            const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+            const estHoursRaw = parseFloat(document.getElementById('gt-est-hours').value);
+            const progressRaw = parseInt(document.getElementById('gt-progress').value, 10);
+            const updates = {
+                task_name: document.getElementById('gt-task-name').value.trim(),
+                description: document.getElementById('gt-description').value.trim(),
+                status: document.getElementById('gt-status').value,
+                priority: document.getElementById('gt-priority').value,
+                start_date: document.getElementById('gt-start-date').value || null,
+                end_date: document.getElementById('gt-end-date').value || null,
+                estimated_hours: Number.isFinite(estHoursRaw) ? estHoursRaw : null,
+                progress_percentage: Number.isFinite(progressRaw) ? progressRaw : 0,
+                tags,
+                is_critical_path: document.getElementById('gt-critical-path').checked
+            };
+
+            if (btn) btn.disabled = true;
+            try {
+                const sourceData = window.graphInstance?.template?.sourceData;
+                const nextTasks = Array.isArray(sourceData?.tasks)
+                    ? sourceData.tasks.map((task) => (task && task.task_id === taskId ? { ...task, ...updates } : task))
+                    : null;
+
+                const isStandaloneFolderProject = projectId.startsWith('folder-')
+                    && window.FolderProjectService
+                    && typeof window.FolderProjectService.writeModuleToDisk === 'function';
+
+                if (isStandaloneFolderProject) {
+                    const rootModuleRelative = String(sourceData?.navigation?.rootModule || 'node.tasks.json').trim() || 'node.tasks.json';
+                    const writeResult = await window.FolderProjectService.writeModuleToDisk(
+                        projectId,
+                        rootModuleRelative,
+                        { ...(sourceData || {}), tasks: nextTasks || [] }
+                    );
+
+                    if (!writeResult || !writeResult.success) {
+                        throw new Error(writeResult?.error || 'Unable to save folder project changes');
+                    }
+                } else {
+                    // Try current origin; if 405 (e.g. Live Server), retry against local Node server
+                    const apiUrl = `/api/task?project=${encodeURIComponent(projectId)}&task_id=${taskId}`;
+                    const fetchOpts = { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updates) };
+                    let res = await fetch(apiUrl, fetchOpts);
+                    if (res.status === 405) {
+                        const nodeServerUrl = `http://localhost:3000${apiUrl}`;
+                        res = await fetch(nodeServerUrl, fetchOpts);
+                    }
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok || !data.ok) throw new Error(data.error || `Server responded ${res.status}`);
+                }
+
+                // Update in-memory task data so the popup reflects the change on next open
+                if (sourceData?.tasks && Array.isArray(nextTasks)) {
+                    sourceData.tasks = nextTasks;
+                }
+                if (fb) { fb.textContent = '✅ Saved successfully!'; fb.className = 'gt-feedback success'; fb.hidden = false; }
+                setTimeout(() => closeModal(), 1400);
+            } catch (err) {
+                if (fb) { fb.textContent = `❌ ${err.message}`; fb.className = 'gt-feedback error'; fb.hidden = false; }
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        });
+    }
+
+    /**
+     * Copy a structured JSON task-subgraph schema to the clipboard.
+     * - Root node: full task data including all subtasks (deep context)
+     * - Related nodes: parents, children, siblings, deps, dependents — shallow (no subtasks)
+     * @param {object} d  - d3 datum
+     * @param {object} details - popup details object
+     * @param {object} node - nodeMap entry
+     * @param {HTMLElement} triggerBtn
+     */
+    copyNodeContext(d, details, node, triggerBtn) {
+        const template = window.graphInstance?.template || null;
+        const templateId = String(template?.id || '').trim();
+        const graphNodeId = String(d?.id || node?.id || '').trim() || null;
+        const sourceData = template?.sourceData || null;
+        const relatedGraph = templateId ? extractNodeContext(templateId, graphNodeId, 1) : null;
+        const loadablePayload = sourceData ? buildCleanGraphPayload(sourceData, graphNodeId, 1) : null;
+
+        const text = JSON.stringify({
+            schema_version: '2.0',
+            generated_at: new Date().toISOString(),
+            context_type: relatedGraph?._context_type || (graphNodeId === 'project-start' || graphNodeId === 'project-end' ? 'full_graph_context' : 'node_context'),
+            selected_node: {
+                node_id: graphNodeId,
+                label: details?.title || node?.label || d?.label || d?.id || null,
+                type: node?.templateType || node?.type || null,
+                task_id: Number.isFinite(node?.taskId) ? node.taskId : null,
+                template_id: templateId || null
+            },
+            related_graph: relatedGraph ? {
+                template_type: relatedGraph.template_type || null,
+                project: relatedGraph.project || null,
+                module: relatedGraph.module || null,
+                navigation: relatedGraph.navigation || null,
+                graph_summary: relatedGraph._graph_summary || null,
+                relation_guide: relatedGraph._relation_guide || null,
+                focal_task: relatedGraph.focal_task || null,
+                tasks: Array.isArray(relatedGraph.tasks) ? relatedGraph.tasks : [],
+                subgraph_tasks: Array.isArray(relatedGraph.subgraph_tasks) ? relatedGraph.subgraph_tasks : []
+            } : null,
+            node_tasks_json: loadablePayload
+        }, null, 2);
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(() => {
+                if (triggerBtn) {
+                    triggerBtn.textContent = '✅ Copied!';
+                    setTimeout(() => { triggerBtn.textContent = '📋 Copy Context'; }, 2200);
+                }
+            }).catch(() => {});
+        }
+    }
 
     /**
      * Clear persistent node selection and restore the default graph emphasis state.
@@ -1512,7 +1750,7 @@ class CurriculumGraph {
 
     /** Hide node details popup. Selection persists unless clearSelection is explicitly requested. */
     hideNodeDetails({ clearSelection = false } = {}) {
-        const popup = document.getElementById("popup");
+        const popup = getTaskNodeModalElement();
         const isVisible = Boolean(popup && popup.classList.contains('visible'));
         if (clearSelection) this.clearSelectedNodeState();
         if (!popup || !isVisible) return;
@@ -1573,6 +1811,7 @@ class CurriculumGraph {
         const profileBtn = getBtn("focus-profile");
         const cvBtn = getBtn("classic-cv-button");
         const guideBtn = getBtn("graph-guide-button");
+        const addTaskBtn = getBtn("addTaskBtn");
 
         if (resetBtn) resetBtn.addEventListener("click", () => this.resetViewAndSearch());
         if (coreBtn) coreBtn.addEventListener("click", () => this.coreNodeId && this.focusOnNode(this.coreNodeId));
@@ -1585,7 +1824,7 @@ class CurriculumGraph {
                      generateClassicCV(this.data.nodes, this.data.links, this.details, {}); // Pass preprocessed nodes
                  } else {
                      console.error("Cannot generate CV. Function or data missing.");
-                     const pCont = document.getElementById("popup-content"); const p = document.getElementById("popup");
+                     const pCont = getTaskNodeModalContentElement(); const p = getTaskNodeModalElement();
                      if(pCont && p) {
                          pCont.innerHTML = "<h2 class='text-dark cv-error'>Error</h2><p class='cv-error'>Could not generate the CV data.</p>";
                          this.displayPopup(p);
@@ -1596,6 +1835,11 @@ class CurriculumGraph {
 
         if (tourBtn) {
              tourBtn.addEventListener("click", () => {
+                 const hasSteps = Boolean(window.walkthroughInstance && Array.isArray(window.walkthroughInstance.steps) && window.walkthroughInstance.steps.length > 0);
+                 if (!hasSteps) {
+                     console.log("No walkthrough steps available for this template.");
+                     return;
+                 }
                  console.log("Reset Tour clicked.");
                  this.menuOpenedManually = true;
                  localStorage.removeItem('walkthroughCompleted');
@@ -1612,6 +1856,15 @@ class CurriculumGraph {
                  this.toggleGraphGuide();
              });
         } else console.warn("Graph Guide button (#graph-guide-button) not found.");
+
+        if (addTaskBtn) {
+            addTaskBtn.addEventListener("click", () => {
+                const projectId = getActiveProjectIdFromTemplate(this.template);
+                if (clickHostButton('addTaskBtn')) return;
+                if (postMessageToHost('openAddTaskModal')) return;
+                window.location.href = buildListDisplayUrl(projectId, { openAddTask: '1' });
+            });
+        } else console.warn("Add Task button (#addTaskBtn) not found.");
 
         // Setup guide panel close button
         const guideCloseBtn = document.querySelector(".guide-close-button");
@@ -1902,29 +2155,6 @@ class CurriculumGraph {
         this.hideTooltip();
     }
 
-    _tryOpenNodeModal(nodeData, nodeId) {
-        if (!nodeData || !Number.isFinite(nodeData.x) || !Number.isFinite(nodeData.y)) {
-            return false;
-        }
-
-        const targetNodeSelection = this.node?.filter((d) => d.id === nodeId);
-        if (!targetNodeSelection || targetNodeSelection.empty() || !this.svg || !this.zoom) {
-            return false;
-        }
-
-        const scale = this.config.animation.focusScale;
-        const x = this.width / 2 - nodeData.x * scale;
-        const y = this.height / 2 - nodeData.y * scale;
-        const transform = d3.zoomIdentity.translate(x, y).scale(scale);
-
-        targetNodeSelection.raise();
-        this.svg.transition().duration(this.config.animation.duration)
-            .call(this.zoom.transform, transform)
-            .on('end', () => this._openNodeDetails(nodeData));
-
-        return true;
-    }
-
     /**
      * Pan & zoom to a node by ID, then open its detail modal and keep it selected
      * with a permanent blink. Used by dep-link buttons and the sidebar tree view.
@@ -1934,17 +2164,24 @@ class CurriculumGraph {
         const nodeData = this.nodeMap.get(nodeId);
         if (!nodeData) { console.warn(`openNodeModal: node not found: ${nodeId}`); return; }
 
-        if (this._tryOpenNodeModal(nodeData, nodeId)) {
-            return;
-        }
-
         this.onStable(() => {
-            if (this._tryOpenNodeModal(nodeData, nodeId)) {
-                return;
+            if (nodeData.x === undefined || isNaN(nodeData.x)) return;
+
+            const scale = this.config.animation.focusScale;
+            const x = this.width / 2 - nodeData.x * scale;
+            const y = this.height / 2 - nodeData.y * scale;
+            const transform = d3.zoomIdentity.translate(x, y).scale(scale);
+            const targetNodeSelection = this.node?.filter(d => d.id === nodeId);
+
+            if (targetNodeSelection && !targetNodeSelection.empty() && this.svg && this.zoom) {
+                targetNodeSelection.raise();
+                this.svg.transition().duration(this.config.animation.duration)
+                    .call(this.zoom.transform, transform)
+                    .on('end', () => this._openNodeDetails(nodeData));
+            } else {
+                // Fallback: just open details without panning
+                this._openNodeDetails(nodeData);
             }
-            // Fallback: ensure the node is centered before opening details.
-            this.focusOnNode(nodeId);
-            this._openNodeDetails(nodeData);
         });
     }
 
@@ -1997,7 +2234,7 @@ class CurriculumGraph {
 
          document.addEventListener("keydown", (e) => {
              if (e.key === "Escape") {
-                 const nodeP = document.getElementById("popup");
+                const nodeP = getTaskNodeModalElement();
                  const legendP = document.getElementById("legend-popup");
                  const menuP = document.getElementById("menu-panel");
 
@@ -2315,7 +2552,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 result: folderPathResult,
                 idleLabel: '📂 Browse Folder',
                 loadingLabel: 'Opening...',
-                successMessage: (projectRecord) => `Loaded <strong>${projectRecord.label || projectRecord.id}</strong> (${projectRecord.fileCount || 0} task file${projectRecord.fileCount === 1 ? '' : 's'})`,
+                successMessage: (projectRecord) => `Loaded <strong>${projectRecord.label || projectRecord.id}</strong> (${projectRecord.fileCount || 0} node.tasks.json file${projectRecord.fileCount === 1 ? '' : 's'}, ${projectRecord.indexedPathCount || 0} indexed path${projectRecord.indexedPathCount === 1 ? '' : 's'})`,
                 onProjectLoaded: async (projectRecord) => {
                     await ensureDynamicTaskTemplate(projectRecord.templateId);
                     setSelectedTemplateId(projectRecord.templateId);
@@ -2336,6 +2573,50 @@ document.addEventListener("DOMContentLoaded", async () => {
                     nextUrl.searchParams.delete('module');
                     nextUrl.searchParams.delete('moduleProject');
                     window.location.href = nextUrl.toString();
+                }
+            });
+        }
+
+        const folderProjectNewBtn = document.getElementById('folderProjectNewBtn');
+        if (folderProjectNewBtn && !folderProjectNewBtn.dataset.graphSharedBound) {
+            folderProjectNewBtn.dataset.graphSharedBound = 'true';
+            folderProjectNewBtn.addEventListener('click', async () => {
+                if (clickHostButton('folderProjectNewBtn')) return;
+
+                if (!window.FolderProjectService || typeof window.FolderProjectService.createLocalProject !== 'function') {
+                    console.warn('FolderProjectService.createLocalProject is not available in this graph context.');
+                    return;
+                }
+
+                const projectName = (window.prompt && window.prompt('Enter a name for the new project:') || '').trim();
+                if (!projectName) return;
+
+                folderProjectNewBtn.disabled = true;
+                folderProjectNewBtn.textContent = 'Creating…';
+
+                try {
+                    const result = await window.FolderProjectService.createLocalProject(projectName);
+                    if (!result) return;
+
+                    await ensureDynamicTaskTemplate(result.templateId);
+                    setSelectedTemplateId(result.templateId);
+
+                    const nextUrl = new URL(window.location.href);
+                    nextUrl.searchParams.set('template', result.templateId);
+                    nextUrl.searchParams.delete('module');
+                    nextUrl.searchParams.delete('moduleProject');
+                    window.location.href = nextUrl.toString();
+                } catch (error) {
+                    const message = String(error && error.message ? error.message : error);
+                    if (folderPathResult) {
+                        folderPathResult.hidden = false;
+                        folderPathResult.dataset.status = 'error';
+                        folderPathResult.innerHTML = `Error creating project: ${message}`;
+                    } else {
+                        console.error('Error creating project:', message);
+                    }
+                    folderProjectNewBtn.disabled = false;
+                    folderProjectNewBtn.textContent = '➕ New Project';
                 }
             });
         }
@@ -2391,6 +2672,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         );
         window.graphInstance = graphInstance; // Make global if needed
+        graphInstance.setupGraphTaskModal(); // Wire task edit modal once DOM is ready
 
         // If an exit button exists in the graph menu, notify parent when clicked so the parent can exit fullscreen
         (function wireExitToParent(){
@@ -2435,6 +2717,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                         : './';
                     const steps = await resolveStepsForTemplate(template.id, nodes, details, template.meta || {}, basePath);
                     walkthroughInstance.setSteps(steps);
+                    if (Array.isArray(steps) && steps.length === 0) {
+                        const tourBtn = document.getElementById('reset-tour');
+                        if (tourBtn) tourBtn.style.display = 'none';
+                    }
                 } catch (e) {
                     console.warn('Failed to generate walkthrough steps for template:', template.id, e && e.message);
                 }
@@ -2927,9 +3213,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const targetDepth = subtaskStack.length - 2;
             navigateToDepth(targetDepth);
             if (targetNodeId && window.graphInstance) {
-                // Nodes are pre-positioned during init(), so _tryOpenNodeModal
-                // can centre immediately — one rAF ensures the SVG has painted.
-                requestAnimationFrame(() => {
+                window.graphInstance.onStable(() => {
                     window.graphInstance.openNodeModal(targetNodeId);
                 });
             }
@@ -3009,8 +3293,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                     if (!tasks.length) {
                         console.warn('Module file has no tasks:', modulePath);
                         renderBreadcrumbs();
-                        const contentDiv = document.getElementById('popup-content');
-                        const popup = document.getElementById('popup');
+                        const contentDiv = getTaskNodeModalContentElement();
+                        const popup = getTaskNodeModalElement();
                         if (contentDiv && popup) {
                             contentDiv.innerHTML = `<h2>${nodeLabel || 'Module'}</h2><p>No tasks found in this module.</p>`;
                             popup.style.display = 'flex';
@@ -3080,10 +3364,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                     parentSuccessors
                 });
                 restoreGraphState(subtaskStack[subtaskStack.length - 1]);
-                // Nodes are pre-positioned during init(), so _tryOpenNodeModal
-                // can centre immediately — one rAF ensures the SVG has painted.
                 if (resolvedTargetNodeId && window.graphInstance) {
-                    requestAnimationFrame(() => {
+                    window.graphInstance.onStable(() => {
                         window.graphInstance.openNodeModal(resolvedTargetNodeId);
                     });
                 }

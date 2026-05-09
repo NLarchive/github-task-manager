@@ -1,0 +1,67 @@
+{
+  "id": "benchmark_result_writer",
+  "type": "tool",
+  "version": 1,
+  "label": "benchmark_result_writer",
+  "path": "components/tools/benchmark_result_writer_v1",
+  "description": "Persists benchmark outputs and feedback for live local-model workflow runs.",
+  "lifecycle": "draft",
+  "success_threshold": 1,
+  "impl": "main.js",
+  "inputs": [
+    {
+      "name": "topic",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "report",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "benchmark_name",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "run_label",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "started_at",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "benchmark_meta",
+      "type": "object",
+      "required": true
+    }
+  ],
+  "outputs": [
+    {
+      "name": "benchmark_record",
+      "type": "object"
+    },
+    {
+      "name": "output_path",
+      "type": "string"
+    }
+  ],
+  "errors": [
+    {
+      "code": "BENCHMARK_WRITE_FAILED",
+      "description": "Result file could not be written"
+    }
+  ],
+  "files": [
+    "schema.json",
+    "main.js",
+    "tests/unit.json"
+  ],
+  "tests": [
+    "tests/unit.json"
+  ]
+}

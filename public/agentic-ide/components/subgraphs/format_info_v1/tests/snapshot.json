@@ -1,0 +1,18 @@
+{
+  "name": "format_tool snapshot tests",
+  "type": "snapshot",
+  "target": "format_tool",
+  "cases": [
+    {
+      "name": "Subgraph normalizes HTML into a report block",
+      "input": {
+        "html": "<html><head><title>Summary</title></head><body><h2>Summary</h2><p>LangGraph makes orchestration explicit.</p></body></html>"
+      },
+      "expect": {
+        "formatted": {
+          "contains": "<h2>Summary</h2>"
+        }
+      }
+    }
+  ]
+}

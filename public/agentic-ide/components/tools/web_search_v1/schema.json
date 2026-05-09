@@ -1,0 +1,53 @@
+{
+  "id": "web_search_tool",
+  "type": "tool",
+  "version": 1,
+  "label": "web_search_tool",
+  "path": "components/tools/web_search_v1",
+  "description": "Calls a search API and returns result snippets",
+  "lifecycle": "draft",
+  "success_threshold": 0.8,
+  "impl": "main.js",
+  "api_endpoint": "https://api.search.io/v1",
+  "auth": "api_key",
+  "inputs": [
+    {
+      "name": "query",
+      "type": "string",
+      "required": true,
+      "description": "Search query"
+    },
+    {
+      "name": "top_k",
+      "type": "number",
+      "required": false,
+      "default": 5,
+      "description": "Max results"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "results",
+      "type": "array",
+      "description": "List of {title, url, snippet}"
+    }
+  ],
+  "errors": [
+    {
+      "code": "SEARCH_TIMEOUT",
+      "description": "API did not respond within 10 s"
+    },
+    {
+      "code": "SEARCH_AUTH_FAILED",
+      "description": "Invalid or missing API key"
+    }
+  ],
+  "files": [
+    "schema.json",
+    "main.js",
+    "tests/unit.json"
+  ],
+  "tests": [
+    "tests/unit.json"
+  ]
+}

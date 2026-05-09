@@ -104,6 +104,11 @@ global.expect = (actual) => ({
       if (e.message === 'Expected function to throw') throw e;
     }
   },
+  toBeUndefined: () => {
+    if (actual !== undefined) {
+      throw new Error(`Expected undefined but got ${JSON.stringify(actual)}`);
+    }
+  },
   not: {
     toBe: (expected) => {
       if (actual === expected) {
@@ -113,6 +118,11 @@ global.expect = (actual) => ({
     toContain: (expected) => {
       if (actual.includes(expected)) {
         throw new Error(`Expected ${JSON.stringify(actual)} not to contain ${JSON.stringify(expected)}`);
+      }
+    },
+    toBeUndefined: () => {
+      if (actual === undefined) {
+        throw new Error(`Expected value not to be undefined`);
       }
     }
   }
@@ -136,7 +146,10 @@ async function main() {
     'task-field-automation.test.js',
     'task-storage-sync.test.js',
     'server-api.test.js',
-    'tasks-json-format.test.js'
+    'task-schema-clipboard.test.js',
+    'tasks-json-format.test.js',
+    'inference-engines.test.js',
+    'inference-request-schema.test.js'
   ];
 
   testFiles.forEach((fileEntry) => {

@@ -238,8 +238,8 @@ function generateSkillsSectionInternal(sectionConfig, allLinks, nodeMap, details
  */
 export function generateClassicCV(nodes, links, details, userConfig) {
     console.log("[CV DEBUG] --- generateClassicCV called (w/ CSS Classes) ---");
-    const popupContent = document.getElementById("popup-content");
-    const popup = document.getElementById("popup");
+    const popupContent = document.getElementById("taskNodeModalContent") || document.getElementById("popup-content");
+    const popup = document.getElementById("taskNodeModal") || document.getElementById("popup");
     if (!popupContent || !popup || !nodes || !links || !details) {
         console.error("[CV DEBUG] Cannot generate CV: Missing elements or data.", { nodes, links, details });
         if (popupContent) popupContent.innerHTML = "<p class='cv-error'>Error generating CV data.</p>";

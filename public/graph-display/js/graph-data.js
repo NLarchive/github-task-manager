@@ -7,6 +7,7 @@
  */
 
 import { CAREER_TEMPLATE_ID, TASK_MGMT_TEMPLATE_ID } from './template-loader.js';
+import { listStoredGraphTemplates } from './shared/graph-template-storage.js';
 
 // NOTE: For optional synchronous template registration, use `template-loader.js`'s
 // `syncBuiltInTemplates(registry, convertFn, helpers)` when running in test/Node environments.
@@ -247,6 +248,22 @@ function scaleHoursToRadius(hours, minHours, maxHours, minRadius, maxRadius) {
 /** Global template registry keyed by template id for the graph runtime. */
 const TEMPLATE_REGISTRY = new Map();
 
+function registerStoredComposerTemplates() {
+    const storedTemplates = listStoredGraphTemplates();
+    storedTemplates.forEach((template) => {
+        TEMPLATE_REGISTRY.set(template.id, {
+            id: template.id,
+            name: template.name,
+            description: template.description || 'Saved in Graph Composer',
+            nodes: Array.isArray(template.nodes) ? template.nodes : [],
+            links: Array.isArray(template.links) ? template.links : [],
+            details: (template.details && typeof template.details === 'object') ? template.details : {},
+            meta: (template.meta && typeof template.meta === 'object') ? template.meta : {},
+            configOverrides: (template.configOverrides && typeof template.configOverrides === 'object') ? template.configOverrides : {}
+        });
+    });
+}
+
 // Lightweight schema validation (no external dependency)
 /**
  * Perform lightweight shape validation for supported graph template payloads.
@@ -362,6 +379,24 @@ function buildEmbeddedTaskDbTemplate(entry, data, scopedBase, embeddedGraphName)
 }
 
 /**
+ * Normalize a TaskDB file reference so runtime navigation always targets the
+ * canonical node.tasks.json filename.
+ *
+ * @param {string} pathValue
+ * @returns {string}
+ */
+function normalizeTaskDbFilePath(pathValue) {
+    const normalized = String(pathValue || '').trim().replace(/\\/g, '/').replace(/^\.\//, '').replace(/^\/+/, '');
+    if (!normalized) return '';
+    if (!/\.json$/i.test(normalized)) return normalized;
+
+    const lastSlash = normalized.lastIndexOf('/');
+    return lastSlash >= 0
+        ? `${normalized.slice(0, lastSlash)}/node.tasks.json`
+        : 'node.tasks.json';
+}
+
+/**
  * Resolve a module path relative to the project entry file inside TaskDB.
  *
  * @param {string} modulePath
@@ -369,7 +404,7 @@ function buildEmbeddedTaskDbTemplate(entry, data, scopedBase, embeddedGraphName)
  * @returns {string}
  */
 function normalizeProjectRelativeModulePath(modulePath, entryPath) {
-    const raw = String(modulePath || '').trim().replace(/\\/g, '/').replace(/^\.\//, '').replace(/^\/+/, '');
+    const raw = normalizeTaskDbFilePath(modulePath);
     if (!raw) return '';
     if (raw.startsWith('src/')) return raw;
 
@@ -732,6 +767,64 @@ function normalizeInlineSubtaskTask(subtask, index, parentTask = {}) {
     };
 }
 
+function normalizeProgressRatio(value) {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric) || numeric <= 0) return 0;
+    if (numeric <= 1) return Math.min(numeric, 1);
+    return Math.min(numeric / 100, 1);
+}
+
+function isDoneLikeStatus(status) {
+    const normalized = String(status || '').trim().toLowerCase();
+    return normalized === 'done' || normalized === 'completed' || normalized === 'achieved';
+}
+
+function estimateCompletedHours(task) {
+    if (!task || typeof task !== 'object') return 0;
+
+    const actualHours = toFiniteNumber(task.actual_hours);
+    if (actualHours > 0) return actualHours;
+
+    const estimatedHours = toFiniteNumber(task.estimated_hours);
+    if (estimatedHours <= 0) return 0;
+
+    if (isDoneLikeStatus(task.status)) return estimatedHours;
+    return estimatedHours * normalizeProgressRatio(task.progress_percentage);
+}
+
+function sumInlineSubtaskHours(subtasks, parentTask, selector) {
+    const inlineTasks = Array.isArray(subtasks) ? subtasks.filter(Boolean) : [];
+    return inlineTasks.reduce((sum, subtask, index) => {
+        const normalized = normalizeInlineSubtaskTask(subtask, index, parentTask);
+        if (!normalized) return sum;
+
+        return sum
+            + selector(normalized)
+            + sumInlineSubtaskHours(subtask.subtasks, normalized, selector);
+    }, 0);
+}
+
+function buildProjectHoursSummary(tasks = []) {
+    const taskList = Array.isArray(tasks) ? tasks.filter(Boolean) : [];
+    return taskList.reduce((summary, task) => {
+        const taskEstimatedHours = toFiniteNumber(task.estimated_hours);
+        const inlineEstimatedHours = sumInlineSubtaskHours(task.subtasks, task, (subtask) => toFiniteNumber(subtask.estimated_hours));
+        const taskCompletedHours = estimateCompletedHours(task);
+        const inlineCompletedHours = sumInlineSubtaskHours(task.subtasks, task, estimateCompletedHours);
+
+        summary.estimated += taskEstimatedHours + inlineEstimatedHours;
+        summary.completed += taskCompletedHours + inlineCompletedHours;
+        summary.taskCount += 1;
+        return summary;
+    }, { estimated: 0, completed: 0, taskCount: 0 });
+}
+
+function formatHoursValue(value) {
+    const numeric = Math.round(toFiniteNumber(value) * 100) / 100;
+    if (Number.isInteger(numeric)) return String(numeric);
+    return String(numeric).replace(/(?:\.0+|(\.\d+?)0+)$/, '$1');
+}
+
 /**
  * Build a task-management payload for a task's inline or child-task subgraph.
  *
@@ -886,12 +979,15 @@ function resolveProjectEndMode(project, terminalTasks) {
  *
  * @param {object} project
  * @param {object[]} terminalTasks
- * @param {number} [totalProjectHours=0]
+ * @param {{ estimated?: number, completed?: number, taskCount?: number }} [projectHours={}]
  * @returns {{title: string, items: string[]}}
  */
-function buildProjectEndDetails(project, terminalTasks, totalProjectHours = 0) {
+function buildProjectEndDetails(project, terminalTasks, projectHours = {}) {
     const endConfig = resolveProjectEndConfig(project);
     const endMode = resolveProjectEndMode(project, terminalTasks);
+    const totalProjectHours = toFiniteNumber(projectHours.estimated);
+    const totalProjectDoneHours = toFiniteNumber(projectHours.completed);
+    const hasTrackedHours = Number(projectHours.taskCount) > 0 || totalProjectHours > 0 || totalProjectDoneHours > 0;
     const terminalNames = terminalTasks
         .map(task => String(task?.task_name || '').trim())
         .filter(Boolean);
@@ -935,7 +1031,8 @@ function buildProjectEndDetails(project, terminalTasks, totalProjectHours = 0) {
         title: `End: ${project.name}`,
         items: [
             terminalSummary,
-            totalProjectHours > 0 ? `<strong>Total estimated hours:</strong> ${totalProjectHours}h` : null,
+            totalProjectHours > 0 ? `<strong>Total estimated hours:</strong> ${formatHoursValue(totalProjectHours)}h` : null,
+            hasTrackedHours ? `<strong>Total done hours:</strong> ${formatHoursValue(totalProjectDoneHours)}h` : null,
             `<strong>End node type:</strong> ${endTypeLabel}`,
             `<strong>Delivery meaning:</strong> ${endConfig.summary || generatedMeaning}`,
             `<strong>What happens next:</strong> ${endConfig.next_step || generatedNextStep}`,
@@ -1076,14 +1173,9 @@ function buildTaskManagementTemplate(entry, data, options = {}) {
     ];
 
     const links = [];
-    // Dynamic total hours: sum task own hours + inline subtask hours across all tasks
-    const totalProjectHours = tasks.reduce((sum, t) => {
-        const own = Number(t.estimated_hours) || 0;
-        const sub = Array.isArray(t.subtasks)
-            ? t.subtasks.reduce((s, st) => s + (Number(st?.estimated_hours) || 0), 0)
-            : 0;
-        return sum + own + sub;
-    }, 0);
+    const projectHours = buildProjectHoursSummary(tasks);
+    const totalProjectHours = projectHours.estimated;
+    const totalProjectDoneHours = projectHours.completed;
 
     const details = {
         [projectStartNodeId]: {
@@ -1091,7 +1183,8 @@ function buildTaskManagementTemplate(entry, data, options = {}) {
             items: [
                 project.description || '',
                 `<strong>Tasks:</strong> ${tasks.length} | <strong>Status:</strong> ${project.status || 'Not Started'}`,
-                totalProjectHours > 0 ? `<strong>Total estimated hours:</strong> ${totalProjectHours}h` : null,
+                totalProjectHours > 0 ? `<strong>Total estimated hours:</strong> ${formatHoursValue(totalProjectHours)}h` : null,
+                `<strong>Total done hours:</strong> ${formatHoursValue(totalProjectDoneHours)}h`,
                 project.start_date ? `<strong>Timeline:</strong> ${project.start_date}${project.end_date ? ' → ' + project.end_date : ''}` : null,
                 project.budget ? `<strong>Budget:</strong> ${project.budget}` : null
             ].filter(Boolean)
@@ -1116,7 +1209,7 @@ function buildTaskManagementTemplate(entry, data, options = {}) {
         const successors = successorsByTaskId.get(taskId);
         return !successors || successors.size === 0;
     });
-    details[projectEndNodeId] = buildProjectEndDetails(project, terminalTasks, totalProjectHours);
+    details[projectEndNodeId] = buildProjectEndDetails(project, terminalTasks, projectHours);
 
     for (const task of tasks) {
         const taskId = task?.task_id;
@@ -1141,7 +1234,8 @@ function buildTaskManagementTemplate(entry, data, options = {}) {
             estimatedHours: Number(task.estimated_hours) || 0,
             status: task.status || 'Not Started',
             subtasksPath: effectiveSubtasksPath,
-            subtasksTargets: primarySubtaskTarget ? [primarySubtaskTarget] : []
+            subtasksTargets: primarySubtaskTarget ? [primarySubtaskTarget] : [],
+            taskId  // numeric task_id for inline editing from popup
         });
 
         if (!predIds.length) links.push({ source: projectStartNodeId, target: taskNodeId, type: 'HAS_TASK' });
@@ -1155,6 +1249,28 @@ function buildTaskManagementTemplate(entry, data, options = {}) {
             .filter(Boolean);
         const predecessorNames = predecessorPairs.map(p => p.name);
         const cycleNote = cycleNodes.has(taskId) ? '<strong>Warning:</strong> dependency cycle detected.' : null;
+        const parentTask = typeof task.parent_task_id === 'number' ? taskById.get(task.parent_task_id) : null;
+        const parentTaskHtml = parentTask
+            ? (() => {
+                const parentPriority = normalizePriority(parentTask.priority);
+                const parentStatus = (parentTask.status || 'Not Started').toLowerCase().replace(/\s+/g, '-');
+                const parentHours = Number(parentTask.estimated_hours) || 0;
+                const parentHoursLabel = parentHours ? ` <span class="tn-hours">${parentHours}h</span>` : '';
+                const parentLabel = escapeHtml(parentTask.task_name || `Task ${parentTask.task_id}`);
+                return `<strong>Parent task:</strong> <button class="task-node-btn" data-node-id="${idToNodeId(parentTask.task_id)}" data-priority="${parentPriority}" data-status="${parentStatus}" data-hours="${parentHours}" title="Go to: ${parentTask.task_name || parentTask.task_id} (${parentPriority}, ${parentHours}h)"><span class="tn-name">${parentLabel}</span>${parentHoursLabel}</button>`;
+            })()
+            : null;
+        const childTasks = Array.from(childrenByParentId.get(taskId) || []);
+        const childTasksHtml = childTasks.length > 0
+            ? `<strong>Child tasks:</strong> ${childTasks.map((childTask) => {
+                const childPriority = normalizePriority(childTask.priority);
+                const childStatus = (childTask.status || 'Not Started').toLowerCase().replace(/\s+/g, '-');
+                const childHours = Number(childTask.estimated_hours) || 0;
+                const childHoursLabel = childHours ? ` <span class="tn-hours">${childHours}h</span>` : '';
+                const childName = escapeHtml(childTask.task_name || String(childTask.task_id));
+                return `<button class="task-node-btn" data-node-id="${idToNodeId(childTask.task_id)}" data-priority="${childPriority}" data-status="${childStatus}" data-hours="${childHours}" title="Go to: ${childTask.task_name || childTask.task_id} (${childPriority}, ${childHours}h)"><span class="tn-name">${childName}</span>${childHoursLabel}</button>`;
+            }).join(' ')}`
+            : null;
 
         // Render dependency names as clickable task-node-btn buttons
         const depsHtml = predecessorPairs.length
@@ -1237,6 +1353,8 @@ function buildTaskManagementTemplate(entry, data, options = {}) {
                 task.category_name ? `<strong>Category:</strong> ${task.category_name}` : null,
                 ...supplementalDetailItems,
                 task.description ? `<strong>Description:</strong> ${task.description}` : null,
+                parentTaskHtml,
+                childTasksHtml,
                 depsHtml,
                 leadsToHtml,
                 cycleNote,
@@ -1392,11 +1510,25 @@ export async function ensureDynamicTaskTemplate(requestedTemplateId, options = {
         const projectId = requested.slice(0, -'-tasks'.length);
         if (!projectId) return false;
 
+        console.info('[graph-data] ensureDynamicTaskTemplate:start', {
+            requestedTemplateId: requested,
+            projectId,
+            basePath,
+            siteRoot
+        });
+
         const folderProjectService = typeof window !== 'undefined' ? window.FolderProjectService : null;
         const localFolderProject = folderProjectService && typeof folderProjectService.getProjectRecord === 'function'
             ? folderProjectService.getProjectRecord(requested)
             : null;
         if (localFolderProject && localFolderProject.payload) {
+            console.info('[graph-data] ensureDynamicTaskTemplate:using-local-folder-project', {
+                projectId: localFolderProject.id,
+                templateId: requested,
+                rootModuleRelative: localFolderProject.rootModuleRelative,
+                fileCount: localFolderProject.fileCount || 0,
+                discoveredFiles: Array.isArray(localFolderProject.discoveredFiles) ? localFolderProject.discoveredFiles : []
+            });
             const localData = localFolderProject.payload;
             const localEntry = {
                 id: requested,
@@ -1412,8 +1544,18 @@ export async function ensureDynamicTaskTemplate(requestedTemplateId, options = {
 
             if (!localTemplate) return false;
             TEMPLATE_REGISTRY.set(localEntry.id, localTemplate);
+            console.info('[graph-data] ensureDynamicTaskTemplate:local-folder-success', {
+                templateId: localEntry.id,
+                nodeCount: Array.isArray(localTemplate.nodes) ? localTemplate.nodes.length : 0,
+                linkCount: Array.isArray(localTemplate.links) ? localTemplate.links.length : 0
+            });
             return true;
         }
+
+        console.warn('[graph-data] ensureDynamicTaskTemplate:no-local-folder-project-found', {
+            requestedTemplateId: requested,
+            hasFolderProjectService: Boolean(folderProjectService)
+        });
 
         // Support direct URL override (e.g. from folder path scan)
         const customTasksUrl = options.customTasksUrl || null;
@@ -1431,12 +1573,23 @@ export async function ensureDynamicTaskTemplate(requestedTemplateId, options = {
         for (const url of candidates) {
             try {
                 const res = await fetch(url, { cache: 'no-store' });
+                console.info('[graph-data] ensureDynamicTaskTemplate:fetch-candidate', {
+                    requestedTemplateId: requested,
+                    url,
+                    ok: Boolean(res && res.ok),
+                    status: res && typeof res.status !== 'undefined' ? res.status : 'unknown'
+                });
                 if (res.ok) {
                     data = await res.json();
                     resolvedUrl = url;
                     break;
                 }
-            } catch {
+            } catch (error) {
+                console.warn('[graph-data] ensureDynamicTaskTemplate:fetch-candidate-error', {
+                    requestedTemplateId: requested,
+                    url,
+                    message: error && error.message ? error.message : String(error)
+                });
                 // Try next candidate.
             }
         }
@@ -1451,19 +1604,20 @@ export async function ensureDynamicTaskTemplate(requestedTemplateId, options = {
         let buildEntry = entry;
         if (data.navigation && data.navigation.rootModule) {
             try {
-                const rootModulePath = String(data.navigation.rootModule).replace(/\\/g, '/').replace(/^\/+/, '');
-                const base = resolvedUrl.replace(/\/tasks\.json$/, '');
+                const rootModulePath = normalizeTaskDbFilePath(data.navigation.rootModule);
+                // Strip the JSON filename to get the directory base
+                const base = resolvedUrl.replace(/\/[^\/]+\.json$/, '');
                 const rootModuleUrl = `${base}/${rootModulePath}`;
-                const rootRes = await fetch(rootModuleUrl, { cache: 'no-store' });
+                let rootRes = await fetch(rootModuleUrl, { cache: 'no-store' });
                 if (rootRes.ok) {
                     const rootData = await rootRes.json();
                     const navigationModules = Array.isArray(data.navigation.modules) ? data.navigation.modules : [];
                     buildData = { ...rootData };
                     if (navigationModules.length) {
                         if (!buildData.navigation) buildData.navigation = {};
-                        buildData.navigation.modules = navigationModules;
+                        buildData.navigation.modules = normalizeNavigationModules(navigationModules, rootModuleUrl);
                     }
-                    buildEntry = { ...entry, path: rootModuleUrl };
+                    buildEntry = { ...entry, path: rootRes.url || rootModuleUrl };
                 }
             } catch {
                 // Fall back to node.tasks.json payload.
@@ -1478,6 +1632,12 @@ export async function ensureDynamicTaskTemplate(requestedTemplateId, options = {
 
         if (!template) return false;
         TEMPLATE_REGISTRY.set(entry.id, template);
+        console.info('[graph-data] ensureDynamicTaskTemplate:remote-success', {
+            templateId: entry.id,
+            resolvedUrl,
+            nodeCount: Array.isArray(template.nodes) ? template.nodes.length : 0,
+            linkCount: Array.isArray(template.links) ? template.links.length : 0
+        });
         return true;
     } catch (error) {
         console.warn('ensureDynamicTaskTemplate failed:', requestedTemplateId, error && error.message);
@@ -1559,6 +1719,7 @@ export async function initTemplates() {
         // If the app is asked for a <projectId>-tasks template that isn't in registry.json,
         // try to fetch it directly from /tasksDB/<scope>/<projectId>/node.tasks.json.
         await ensureDynamicTaskTemplate(null, { basePath, siteRoot, siteRootRaw });
+        registerStoredComposerTemplates();
     } catch (e) {
         console.warn('initTemplates failed (fallback to built-in):', e && e.message);
 
@@ -1573,6 +1734,7 @@ export async function initTemplates() {
         } catch {
             // ignore
         }
+        registerStoredComposerTemplates();
     }
 }
 
@@ -1638,6 +1800,288 @@ export function getDefaultTemplateId() {
     if (TEMPLATE_REGISTRY.has(CAREER_TEMPLATE_ID)) return CAREER_TEMPLATE_ID;
     if (TEMPLATE_REGISTRY.size > 0) return TEMPLATE_REGISTRY.keys().next().value;
     return CAREER_TEMPLATE_ID;
+}
+
+/**
+ * Remove a specific template (or all templates) from the in-memory cache so
+ * the next render fetches fresh data from the server.
+ *
+ * @param {string|null} [templateId] - Pass a template id to evict only that
+ *   entry, or omit / pass null to clear the entire registry.
+ * @returns {void}
+ */
+export function clearTemplateCache(templateId) {
+    if (templateId) {
+        TEMPLATE_REGISTRY.delete(String(templateId));
+    } else {
+        TEMPLATE_REGISTRY.clear();
+    }
+}
+
+const CONTEXT_RELATION_GUIDE = Object.freeze({
+    depends_on: 'Directly authored in dependencies[]. These are the upstream tasks required before the current task can start or finish.',
+    leads_to: 'Derived automatically from reverse dependency lookup. Author downstream dependencies instead of writing this relation directly.',
+    parent_task: 'A full graph-node parent task linked through parent_task_id.',
+    child_tasks: 'Full graph-node children linked through parent_task_id. Use these when work needs its own task lifecycle and dependencies.',
+    inline_subtasks: 'Nested popup/subgraph work defined under subtasks[]. Use these for scoped work that stays inside the parent task context.'
+});
+
+function buildTaskContextIndexes(tasks) {
+    const taskById = new Map(tasks.filter(task => task && typeof task.task_id === 'number').map(task => [task.task_id, task]));
+    const validTaskIds = new Set(taskById.keys());
+    const successorsByTaskId = new Map();
+    const childrenByParentId = buildChildrenByParentTaskId(tasks);
+    const { layerById } = buildDependencyLayering(tasks);
+
+    for (const task of tasks) {
+        const taskId = task?.task_id;
+        if (typeof taskId !== 'number') continue;
+        for (const predecessorId of getTaskPredecessorIds(task, validTaskIds)) {
+            if (!successorsByTaskId.has(predecessorId)) successorsByTaskId.set(predecessorId, new Set());
+            successorsByTaskId.get(predecessorId).add(taskId);
+        }
+    }
+
+    return { taskById, validTaskIds, successorsByTaskId, childrenByParentId, layerById };
+}
+
+function summarizeContextTask(task, layerById = new Map()) {
+    if (!task || typeof task !== 'object') return null;
+    return {
+        task_id: typeof task.task_id === 'number' ? task.task_id : null,
+        node_id: typeof task.task_id === 'number' ? `task-${task.task_id}` : null,
+        task_name: task.task_name || task.name || task.title || '',
+        status: task.status || 'Not Started',
+        priority: task.priority || 'Medium',
+        estimated_hours: Number(task.estimated_hours) || 0,
+        parent_task_id: typeof task.parent_task_id === 'number' ? task.parent_task_id : null,
+        layer: typeof task.task_id === 'number' ? (layerById.get(task.task_id) ?? null) : null
+    };
+}
+
+function collectInlineContextSubtasks(subtasks, parentTask, records, ancestry = []) {
+    const inlineTasks = Array.isArray(subtasks) ? subtasks.filter(Boolean) : [];
+    inlineTasks.forEach((subtask, index) => {
+        const normalized = normalizeInlineSubtaskTask(subtask, index, parentTask);
+        if (!normalized) return;
+
+        const lineage = ancestry.concat(index + 1);
+        records.push({
+            ...normalized,
+            _parent_task_id: typeof parentTask?.task_id === 'number' ? parentTask.task_id : null,
+            _parent_task_name: parentTask?.task_name || parentTask?.name || '',
+            _subtask_index: index + 1,
+            _subtask_path: lineage.join('.'),
+            _subgraph_depth: lineage.length
+        });
+
+        if (Array.isArray(subtask.subtasks) && subtask.subtasks.some(Boolean)) {
+            collectInlineContextSubtasks(subtask.subtasks, normalized, records, lineage);
+        }
+    });
+}
+
+function collectInlineContextRecords(tasks) {
+    const records = [];
+    tasks.forEach((task) => {
+        if (!task || typeof task !== 'object') return;
+        collectInlineContextSubtasks(task.subtasks, task, records, typeof task.task_id === 'number' ? [task.task_id] : []);
+    });
+    return records;
+}
+
+function buildContextTaskPayload(task, indexes) {
+    const predecessors = getTaskPredecessorIds(task, indexes.validTaskIds)
+        .map((taskId) => summarizeContextTask(indexes.taskById.get(taskId), indexes.layerById))
+        .filter(Boolean);
+    const successors = Array.from(indexes.successorsByTaskId.get(task.task_id) || [])
+        .map((taskId) => summarizeContextTask(indexes.taskById.get(taskId), indexes.layerById))
+        .filter(Boolean);
+    const parentTask = typeof task.parent_task_id === 'number'
+        ? summarizeContextTask(indexes.taskById.get(task.parent_task_id), indexes.layerById)
+        : null;
+    const childTasks = Array.from(indexes.childrenByParentId.get(task.task_id) || [])
+        .map((childTask) => summarizeContextTask(childTask, indexes.layerById))
+        .filter(Boolean);
+
+    return {
+        ...task,
+        _graph_node_id: `task-${task.task_id}`,
+        _layer_hint: indexes.layerById.get(task.task_id) ?? null,
+        _relations: {
+            depends_on: predecessors,
+            leads_to: successors,
+            parent_task: parentTask,
+            child_tasks: childTasks,
+            inline_subtasks: collectInlineContextRecords([task]),
+            is_terminal: successors.length === 0
+        }
+    };
+}
+
+/**
+ * Extract a slice of the project's task data centred on a specific graph node.
+ * Returns the focal task, its immediate predecessors and successors up to
+ * `depth` hops away, plus the project metadata.
+ *
+ * @param {string} templateId - Registered template id.
+ * @param {string|null} nodeId - Graph node id (e.g. "task-42") or null for
+ *   the full project.
+ * @param {number} [depth=1] - How many hops of predecessors/successors to include.
+ * @returns {object|null}
+ */
+export function extractNodeContext(templateId, nodeId, depth = 1) {
+    const tpl = TEMPLATE_REGISTRY.get(String(templateId || ''));
+    if (!tpl) return null;
+    const sourceData = tpl.sourceData || null;
+    if (!sourceData) return null;
+    const tasks = Array.isArray(sourceData.tasks) ? sourceData.tasks : [];
+    const indexes = buildTaskContextIndexes(tasks);
+    const enrichedTasks = tasks.map((task) => buildContextTaskPayload(task, indexes));
+    const inlineContextTasks = collectInlineContextRecords(tasks);
+    const graphSummary = {
+        task_count: tasks.length,
+        inline_subtask_count: inlineContextTasks.length,
+        root_task_count: tasks.filter((task) => typeof task?.parent_task_id !== 'number').length,
+        terminal_task_count: tasks.filter((task) => !indexes.successorsByTaskId.has(task?.task_id)).length
+    };
+    const baseContext = {
+        template_type: sourceData.template_type || null,
+        project: sourceData.project || null,
+        module: sourceData.module || null,
+        navigation: sourceData.navigation || null,
+        description: sourceData.description || '',
+        _graph_summary: graphSummary,
+        _relation_guide: CONTEXT_RELATION_GUIDE,
+        _extracted_at: new Date().toISOString()
+    };
+
+    if (!nodeId || nodeId === 'project-start' || nodeId === 'project-end') {
+        return {
+            ...baseContext,
+            _context_type: 'full_graph_context',
+            _focal_node_id: nodeId || null,
+            tasks: enrichedTasks,
+            subgraph_tasks: inlineContextTasks
+        };
+    }
+
+    const taskIdMatch = String(nodeId).match(/^task-(\d+)$/);
+    if (!taskIdMatch) return null;
+    const taskId = Number(taskIdMatch[1]);
+    const taskById = indexes.taskById;
+    const targetTask = taskById.get(taskId);
+    if (!targetTask) return null;
+
+    const collected = new Set([taskId]);
+
+    const addPredecessors = (tid, remaining) => {
+        if (remaining <= 0) return;
+        const t = taskById.get(tid);
+        if (!t) return;
+        for (const pid of getTaskPredecessorIds(t, indexes.validTaskIds)) {
+            collected.add(pid);
+            addPredecessors(pid, remaining - 1);
+        }
+    };
+
+    const addSuccessors = (tid, remaining) => {
+        if (remaining <= 0) return;
+        for (const sid of (indexes.successorsByTaskId.get(tid) || [])) {
+            collected.add(sid);
+            addSuccessors(sid, remaining - 1);
+        }
+    };
+
+    addPredecessors(taskId, depth);
+    addSuccessors(taskId, depth);
+
+    const contextTasks = enrichedTasks.filter((task) => collected.has(task.task_id));
+
+    return {
+        ...baseContext,
+        _context_type: 'node_context',
+        _focal_task_id: taskId,
+        _focal_task_name: targetTask.task_name,
+        _depth: depth,
+        focal_task: contextTasks.find((task) => task.task_id === taskId) || null,
+        tasks: contextTasks,
+        subgraph_tasks: collectInlineContextRecords(contextTasks)
+    };
+}
+
+/**
+ * Build a clean, sorted node.tasks.json payload scoped to a graph node or the full graph.
+ * The output is a valid node.tasks.json structure that the task system can read directly —
+ * no debug fields, tasks sorted by task_id ascending.
+ *
+ * @param {object} sourceData - Template sourceData (contains project, categories, workers, tasks).
+ * @param {string|null} nodeId - Graph node id (e.g. "task-42"), or null / "project-start" / "project-end" for the full graph.
+ * @param {number} [depth=1] - Hops of related tasks to include for a node-context extraction.
+ * @returns {object|null}
+ */
+export function buildCleanGraphPayload(sourceData, nodeId, depth = 1) {
+    if (!sourceData) return null;
+    const tasks = Array.isArray(sourceData.tasks) ? sourceData.tasks : [];
+    let contextTasks;
+
+    if (!nodeId || nodeId === 'project-start' || nodeId === 'project-end') {
+        contextTasks = tasks;
+    } else {
+        const taskIdMatch = String(nodeId).match(/^task-(\d+)$/);
+        if (!taskIdMatch) return null;
+        const taskId = Number(taskIdMatch[1]);
+        const indexes = buildTaskContextIndexes(tasks);
+        if (!indexes.taskById.has(taskId)) return null;
+        const collected = new Set([taskId]);
+
+        const addPredecessors = (tid, remaining) => {
+            if (remaining <= 0) return;
+            const t = indexes.taskById.get(tid);
+            if (!t) return;
+            for (const pid of getTaskPredecessorIds(t, indexes.validTaskIds)) {
+                if (!collected.has(pid)) { collected.add(pid); addPredecessors(pid, remaining - 1); }
+            }
+        };
+
+        const addSuccessors = (tid, remaining) => {
+            if (remaining <= 0) return;
+            for (const sid of (indexes.successorsByTaskId.get(tid) || [])) {
+                if (!collected.has(sid)) { collected.add(sid); addSuccessors(sid, remaining - 1); }
+            }
+        };
+
+        addPredecessors(taskId, depth);
+        addSuccessors(taskId, depth);
+        contextTasks = tasks.filter(t => collected.has(t.task_id));
+    }
+
+    // Sort by task_id ascending; tasks without numeric ids come last
+    const sortedTasks = [...contextTasks].sort((a, b) => {
+        const aId = typeof a.task_id === 'number' ? a.task_id : Infinity;
+        const bId = typeof b.task_id === 'number' ? b.task_id : Infinity;
+        return aId - bId;
+    });
+
+    const payload = {};
+    ['$schema', 'template_type', 'version', 'description'].forEach((key) => {
+        if (sourceData[key] !== undefined && sourceData[key] !== null && sourceData[key] !== '') {
+            payload[key] = sourceData[key];
+        }
+    });
+
+    if (sourceData.enums && typeof sourceData.enums === 'object') payload.enums = sourceData.enums;
+
+    payload.project = sourceData.project || null;
+    payload.categories = Array.isArray(sourceData.categories) ? sourceData.categories : [];
+    payload.workers = Array.isArray(sourceData.workers) ? sourceData.workers : [];
+    payload.tasks = sortedTasks;
+
+    if (Array.isArray(sourceData.required_fields)) payload.required_fields = sourceData.required_fields;
+    if (Array.isArray(sourceData.optional_fields)) payload.optional_fields = sourceData.optional_fields;
+    if (sourceData.navigation && typeof sourceData.navigation === 'object') payload.navigation = sourceData.navigation;
+
+    return payload;
 }
 
 // Backwards-compatible exports (default to the Career template when available in the runtime registry)

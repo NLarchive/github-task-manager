@@ -1,0 +1,55 @@
+{
+  "id": "chat-quality-inspector",
+  "type": "tool",
+  "version": 1,
+  "label": "Chat Quality Inspector",
+  "path": "components/tools/chat-quality-inspector",
+  "description": "Validates LLM responses for quality issues: garbled text, character corruption, repetition patterns, non-UTF8 handling",
+  "lifecycle": "draft",
+  "success_threshold": 0.8,
+  "impl": "main.js",
+  "inputs": [
+    {
+      "name": "llmResponse",
+      "type": "object",
+      "required": true,
+      "description": "Raw model response payload"
+    },
+    {
+      "name": "options",
+      "type": "object",
+      "required": false,
+      "description": "Validation tuning options"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "ok",
+      "type": "boolean",
+      "description": "True if response passes quality gate"
+    },
+    {
+      "name": "quality",
+      "type": "object",
+      "description": "Detailed quality report with score and issues list"
+    }
+  ],
+  "errors": [
+    {
+      "code": "QUALITY_CHECK_FAILED",
+      "description": "Quality scan raised runtime error"
+    }
+  ],
+  "dependencies": {
+    "tools": [],
+    "apis": []
+  },
+  "files": [
+    "schema.json",
+    "main.js",
+    "test.js"
+  ],
+  "tests": [
+    "test.js"
+  ]
+}

@@ -40,8 +40,12 @@ class Walkthrough {
             console.warn('Walkthrough.setSteps called with non-array value. Ignoring.');
             return;
         }
-        this.steps = steps.length ? steps.slice() : [{ title: 'Empty Tour', content: 'No steps available.' }];
+        this.steps = steps.slice();
         this.currentStep = 0; // Reset to start
+        if (!this.steps.length) {
+            if (this.tooltip) this.tooltip.innerHTML = '';
+            return;
+        }
         this.updateTooltipContent();
     }
 
@@ -133,6 +137,11 @@ class Walkthrough {
             return;
         }
 
+        if (!Array.isArray(this.steps) || this.steps.length === 0) {
+            console.log("Walkthrough has no steps. Skipping start.");
+            return;
+        }
+
         // Check if tour should be skipped
         const urlParams = new URLSearchParams(window.location.search);
         const skipTourParam = urlParams.get('skipTour') === 'true';
@@ -179,6 +188,7 @@ class Walkthrough {
      * @returns {void}
      */
     startTour() {
+        if (!Array.isArray(this.steps) || this.steps.length === 0) return;
         // Move from step 0 (Welcome) to step 1 (Profile node)
         if (this.currentStep === 0) {
             this.currentStep = 1;
@@ -296,7 +306,7 @@ class Walkthrough {
      */
     updateTooltipContent() {
         const step = this.steps[this.currentStep];
-        if (!this.tooltip) return;
+        if (!this.tooltip || !step) return;
 
         const isFirstStep = this.currentStep === 0;
         const isLastStep = this.currentStep === this.steps.length - 1;
@@ -527,7 +537,7 @@ class Walkthrough {
                  // Longer delay, then auto-close popup
                  this.clickSimulationTimeout = setTimeout(() => {
                      if (!this.isActive) return; // Check active state
-                     const popup = document.getElementById("popup");
+                     const popup = document.getElementById("taskNodeModal") || document.getElementById("popup");
                      // Only close if it's still visible (user might have closed it)
                      if (popup?.classList.contains("visible")) {
                          this.graph.hideNodeDetails();

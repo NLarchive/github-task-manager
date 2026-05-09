@@ -79,7 +79,6 @@ D:\web\web-github-task-manager\public\tasksDB\_schema
 D:\web\web-github-task-manager\public\tasksDB\_schema\graph-template.schema.json
 D:\web\web-github-task-manager\public\tasksDB\_templates
 D:\web\web-github-task-manager\public\tasksDB\_templates\starter_project_template.json
-D:\web\web-github-task-manager\public\tasksDB\_templates\starter_project_template_v2.json
 D:\web\web-github-task-manager\public\tasksDB\_templates\starter_project_template.csv
 D:\web\web-github-task-manager\public\tasksDB\external
 D:\web\web-github-task-manager\public\tasksDB\external\ai-career-roadmap

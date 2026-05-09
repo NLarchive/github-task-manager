@@ -1,0 +1,18 @@
+{
+  "id": "research_benchmark",
+  "version": 1,
+  "description": "Port contract for benchmark workflow cell.",
+  "inputs": [
+    { "name": "topic", "type": "string", "required": true },
+    { "name": "benchmark_name", "type": "string", "required": true },
+    { "name": "run_label", "type": "string", "required": true },
+    { "name": "started_at", "type": "string", "required": true }
+  ],
+  "outputs": [
+    { "name": "benchmark_record", "type": "object" },
+    { "name": "output_path", "type": "string" }
+  ],
+  "errors": [
+    { "code": "BENCHMARK_WORKFLOW_FAILED", "description": "Benchmark workflow execution failed" }
+  ]
+}

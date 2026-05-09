@@ -1,0 +1,21 @@
+{
+  "name": "data_processor behavior tests",
+  "type": "behavior",
+  "target": "data_processor",
+  "cases": [
+    {
+      "name": "Data processor returns HTML markup",
+      "mock_llm": {
+        "text": "<article><h2>LangGraph Findings</h2><p>LangGraph coordinates agents and tools through a directed graph runtime.</p></article>"
+      },
+      "input": {
+        "raw": "LangGraph coordinates agents and tools through a directed graph runtime."
+      },
+      "expect": {
+        "html": {
+          "contains": "<article>"
+        }
+      }
+    }
+  ]
+}

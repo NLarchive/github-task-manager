@@ -1,0 +1,40 @@
+{
+  "id": "html_parser",
+  "type": "tool",
+  "version": 1,
+  "label": "html_parser",
+  "path": "components/tools/html_parser_v1",
+  "description": "Parses HTML into a structured document object",
+  "lifecycle": "draft",
+  "success_threshold": 0.8,
+  "impl": "main.js",
+  "inputs": [
+    {
+      "name": "html",
+      "type": "string",
+      "required": true,
+      "description": "Raw html document"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "doc",
+      "type": "object",
+      "description": "Structured document object"
+    }
+  ],
+  "errors": [
+    {
+      "code": "HTML_PARSE_ERROR",
+      "description": "Input html could not be parsed"
+    }
+  ],
+  "files": [
+    "schema.json",
+    "main.js",
+    "tests/unit.json"
+  ],
+  "tests": [
+    "tests/unit.json"
+  ]
+}

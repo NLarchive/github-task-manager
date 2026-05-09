@@ -17,13 +17,13 @@ function loadGraphDataModule(windowMock = {
   let src = fs.readFileSync(filePath, 'utf8');
   src = src.replace(/^import\s.+$/mg, '');
   src = src.replace(/^export\s+/mg, '');
-  src = `const CAREER_TEMPLATE_ID = 'career';\nconst TASK_MGMT_TEMPLATE_ID = 'task-management';\n${src}`;
+  src = `const CAREER_TEMPLATE_ID = 'career';\nconst TASK_MGMT_TEMPLATE_ID = 'task-management';\nconst listStoredGraphTemplates = (s) => [];\n${src}`;
 
   const fn = new Function(
     'window',
     'fetch',
     'console',
-    src + '\nreturn { initTemplates: typeof initTemplates, getAvailableTemplates: typeof getAvailableTemplates, loadTemplate: typeof loadTemplate, buildProjectTaskTemplatePublic: typeof buildProjectTaskTemplatePublic === "function" ? buildProjectTaskTemplatePublic : null, buildInlineTaskSubgraphTemplatePublic: typeof buildInlineTaskSubgraphTemplatePublic === "function" ? buildInlineTaskSubgraphTemplatePublic : null };'
+    src + '\nreturn { initTemplates: typeof initTemplates, getAvailableTemplates: typeof getAvailableTemplates, loadTemplate: typeof loadTemplate, buildProjectTaskTemplatePublic: typeof buildProjectTaskTemplatePublic === "function" ? buildProjectTaskTemplatePublic : null, buildInlineTaskSubgraphTemplatePublic: typeof buildInlineTaskSubgraphTemplatePublic === "function" ? buildInlineTaskSubgraphTemplatePublic : null, buildCleanGraphPayload: typeof buildCleanGraphPayload === "function" ? buildCleanGraphPayload : null };'
   );
 
   return fn(windowMock, fetchMock, console);
@@ -56,7 +56,7 @@ describe('Graph Data Module', () => {
     // Remove ES module import lines and export keywords so we can evaluate in Node test runner
     src = src.replace(/^import\s.+$/mg, '');
     src = src.replace(/^export\s+/mg, '');
-    src = `const CAREER_TEMPLATE_ID = 'career';\nconst TASK_MGMT_TEMPLATE_ID = 'task-management';\n${src}`;
+    src = `const CAREER_TEMPLATE_ID = 'career';\nconst TASK_MGMT_TEMPLATE_ID = 'task-management';\nconst listStoredGraphTemplates = (s) => [];\n${src}`;
 
     const requested = [];
     const mockFetch = async (url) => {
@@ -139,7 +139,7 @@ describe('Graph Data Module', () => {
     let src = fs.readFileSync(filePath, 'utf8');
     src = src.replace(/^import\s.+$/mg, '');
     src = src.replace(/^export\s+/mg, '');
-    src = `const CAREER_TEMPLATE_ID = 'career';\nconst TASK_MGMT_TEMPLATE_ID = 'task-management';\n${src}`;
+    src = `const CAREER_TEMPLATE_ID = 'career';\nconst TASK_MGMT_TEMPLATE_ID = 'task-management';\nconst listStoredGraphTemplates = (s) => [];\n${src}`;
 
     const requested = [];
     const mockFetch = async (url) => {
@@ -239,6 +239,76 @@ describe('Graph Data Module', () => {
     expect(joined).toContain('Terminal tasks captured here');
     expect(joined).toContain('real completion point');
     expect(joined).toContain('What happens next');
+  });
+
+  it('includes total done hours on project start and end nodes', () => {
+    const mod = loadGraphDataModule();
+
+    const tpl = mod.buildProjectTaskTemplatePublic(
+      { id: 'hours-project', name: 'Hours Project', path: '/tasksDB/external/hours-project/node.tasks.json' },
+      {
+        project: { name: 'Hours Project', status: 'In Progress' },
+        tasks: [
+          {
+            task_name: 'Ship backend',
+            estimated_hours: 8,
+            actual_hours: 6,
+            status: 'Done',
+            priority: 'High',
+            subtasks: [
+              { name: 'Release checklist', estimated_hours: 2, status: 'Done' }
+            ]
+          },
+          {
+            task_name: 'Frontend polish',
+            estimated_hours: 8,
+            progress_percentage: 50,
+            status: 'In Progress',
+            priority: 'Medium',
+            dependencies: [{ predecessor_task_name: 'Ship backend', type: 'FS' }]
+          }
+        ]
+      }
+    );
+
+    const startJoined = tpl.details['project-start'].items.join(' ');
+    const endJoined = tpl.details['project-end'].items.join(' ');
+
+    expect(startJoined).toContain('Total estimated hours:</strong> 18h');
+    expect(startJoined).toContain('Total done hours:</strong> 12h');
+    expect(endJoined).toContain('Total done hours:</strong> 12h');
+  });
+
+  it('builds a clean graph payload that preserves TaskDB schema metadata', () => {
+    const mod = loadGraphDataModule();
+
+    const payload = mod.buildCleanGraphPayload({
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      template_type: 'project_task_template',
+      version: '3.0',
+      description: 'Payload demo',
+      enums: { status: ['Done', 'In Progress'] },
+      required_fields: ['project.name'],
+      optional_fields: ['tasks[].description'],
+      project: { name: 'Payload demo' },
+      categories: [{ name: 'General' }],
+      workers: [{ name: 'Alice Example' }],
+      navigation: { modules: [{ path: 'src/node.tasks.json', label: 'Root Module' }] },
+      tasks: [
+        { task_id: 1, task_name: 'Setup', status: 'Done', priority: 'High' },
+        { task_id: 2, task_name: 'Ship', status: 'In Progress', priority: 'Medium', dependencies: [{ predecessor_task_id: 1, type: 'FS' }] }
+      ]
+    }, 'task-2', 1);
+
+    expect(payload.$schema).toBe('https://json-schema.org/draft/2020-12/schema');
+    expect(payload.template_type).toBe('project_task_template');
+    expect(payload.version).toBe('3.0');
+    expect(payload.description).toBe('Payload demo');
+    expect(payload.enums.status).toEqual(['Done', 'In Progress']);
+    expect(payload.required_fields).toEqual(['project.name']);
+    expect(payload.optional_fields).toEqual(['tasks[].description']);
+    expect(payload.navigation.modules[0].path).toBe('src/node.tasks.json');
+    expect(payload.tasks.map((task) => task.task_id)).toEqual([1, 2]);
   });
 
   it('keeps navigation modules in sidebar metadata without turning inferred module matches into popup drill-down targets', () => {

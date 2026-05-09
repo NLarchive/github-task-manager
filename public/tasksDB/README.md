@@ -12,8 +12,7 @@ tasksDB/
   _schema/
     graph-template.schema.json   ← JSON Schema for node.tasks.json validation
   _templates/
-    starter_project_template.json       ← minimal starter template
-    starter_project_template_v2.json    ← full-featured starter
+    starter_project_template.json       ← starter template
     starter_project_template.csv        ← CSV import format
   _examples/
     career/                      ← example career graph

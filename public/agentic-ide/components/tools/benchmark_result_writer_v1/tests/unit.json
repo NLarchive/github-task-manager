@@ -1,0 +1,90 @@
+{
+  "name": "benchmark_result_writer unit tests",
+  "type": "unit",
+  "target": "benchmark_result_writer",
+  "cases": [
+    {
+      "name": "Produces a structured benchmark record without writing to disk",
+      "mock_env": {
+        "AGENTIC_IDE_BENCHMARK_NO_WRITE": "1"
+      },
+      "input": {
+        "topic": "LangGraph multi-agent patterns",
+        "report": "<article><h2>LangGraph</h2><p>Directed graph orchestration.</p></article>",
+        "benchmark_name": "research_benchmark",
+        "run_label": "unit-check",
+        "started_at": "2026-04-27T10:00:00.000Z",
+        "benchmark_meta": {
+          "workflow_id": "research_workflow",
+          "duration_ms": 1234,
+          "runtime_output": {
+            "report": "<article><h2>LangGraph</h2><p>Directed graph orchestration.</p></article>"
+          },
+          "steps": [
+            {
+              "nodeId": "search_agent",
+              "label": "search_agent",
+              "type": "agent",
+              "durationMs": 321,
+              "status": "pass",
+              "inputSnippet": {
+                "topic": "LangGraph multi-agent patterns"
+              },
+              "outputSnippet": {
+                "notes": "ok"
+              }
+            }
+          ],
+          "executed_nodes": [
+            {
+              "nodeId": "search_agent",
+              "label": "search_agent",
+              "type": "agent",
+              "path": "components/agents/search_agent_v1",
+              "version": 1,
+              "success_threshold": 0.8,
+              "runtime_signature": "abc123",
+              "component_signature": "def456",
+              "file_hashes": []
+            }
+          ],
+          "logs": [
+            "run ok"
+          ]
+        }
+      },
+      "expect": {
+        "benchmark_record": {
+          "type": "object",
+          "metrics": {
+            "duration_ms": {
+              "equals": 1234
+            },
+            "step_count": {
+              "equals": 1
+            },
+            "unique_component_count": {
+              "equals": 1
+            }
+          },
+          "scorecard": {
+            "overall_score": {
+              "type": "number"
+            }
+          },
+          "component_summary": {
+            "type": "array",
+            "min_length": 1
+          },
+          "improvement_candidates": {
+            "type": "array",
+            "min_length": 1
+          }
+        },
+        "output_path": {
+          "contains": "workflows/benchmarks/outputs/"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "id": "format_tool",
+  "version": 1,
+  "description": "Subgraph-level contract for formatting pipeline.",
+  "inputs": [
+    { "name": "html", "type": "string", "required": true, "description": "Incoming html document" }
+  ],
+  "outputs": [
+    { "name": "formatted", "type": "string", "description": "Formatted render output" }
+  ],
+  "errors": [
+    { "code": "SUBGRAPH_STAGE_FAILURE", "description": "One or more child node calls failed" }
+  ]
+}

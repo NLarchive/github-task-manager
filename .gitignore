@@ -88,3 +88,6 @@ tools/**/.wrangler/
 
 PROJECT_DOCS.md
 memories/
+llama-b8920-win-cuda12.4/
+gemma4-26b-a4b-q4kxl/
+results/
